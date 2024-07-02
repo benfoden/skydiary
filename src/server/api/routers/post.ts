@@ -18,7 +18,7 @@ export const postRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(z.object({ content: z.string() }))
+    .input(z.object({ content: z.string().max(25000) }))
     .mutation(async ({ ctx, input }) => {
       return ctx.db.post.create({
         data: {
@@ -52,7 +52,7 @@ export const postRouter = createTRPCRouter({
     .input(
       z.object({
         postId: z.string(),
-        content: z.string().optional(),
+        content: z.string().max(25000).optional(),
         summary: z.string().optional(),
       }),
     )
