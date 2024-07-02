@@ -1,6 +1,7 @@
 "use client";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import { api } from "~/trpc/react";
@@ -11,27 +12,38 @@ export default function Upgrade() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [checkoutStatus, setCheckoutStatus] = useState("");
+  const [checkoutStatus, setCheckoutStatus] = useState("success");
 
-  useEffect(() => {
-    const checkoutSuccess = searchParams.get("checkoutSuccess");
-    const checkoutCanceled = searchParams.get("checkoutCanceled");
+  // useEffect(() => {
+  //   const checkoutSuccess = searchParams.get("checkoutSuccess");
+  //   const checkoutCanceled = searchParams.get("checkoutCanceled");
 
-    if (checkoutSuccess) {
-      setCheckoutStatus("success");
-    } else if (checkoutCanceled) {
-      setCheckoutStatus("canceled");
-    }
-  }, [searchParams]);
+  //   if (checkoutSuccess) {
+  //     setCheckoutStatus("success");
+  //   } else if (checkoutCanceled) {
+  //     setCheckoutStatus("canceled");
+  //   }
+  // }, [searchParams]);
   return (
     <div className="relative flex h-full w-full overflow-hidden">
       <div className="z-20 flex h-dvh w-full items-center justify-center">
         {checkoutStatus === "success" && (
-          <div className="flex w-80 flex-col items-center justify-center text-xl">
-            <h2 className="mb-8 text-xl font-light">
-              thank you for upgrading.
+          <div className="flex w-80 flex-col items-center justify-center gap-8 text-xl">
+            <h2 className="text-xl font-light">
+              thank you for activating skydiary
             </h2>
-            <p>you can now access all features of skydiary.</p>
+            <Card variant="form">
+              <p className="font-light">you now have access to all features:</p>
+              <ul className="ml-4 list-disc font-light">
+                <li>make unlimited custom personas</li>
+                <li>get unlimited comments</li>
+                <li>get longer comments</li>
+                <li>give personas long-term memory</li>
+              </ul>
+              <Link href="/today">
+                <Button variant="primary">{`try it on today's entry`}</Button>
+              </Link>
+            </Card>
           </div>
         )}
         {checkoutStatus !== "sucesss" && (
