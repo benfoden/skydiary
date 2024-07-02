@@ -4,6 +4,7 @@ import { useFormStatus } from "react-dom";
 export default function Button({
   variant = "primary",
   children,
+  isSpecial,
   ...props
 }: {
   variant?:
@@ -19,6 +20,7 @@ export default function Button({
   isServerSideForm?: boolean;
   children: React.ReactNode;
   disabled?: boolean;
+  isSpecial?: boolean;
 } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   let isDisabled = props.disabled;
   const { pending }: { pending: boolean } = useFormStatus();
@@ -75,6 +77,11 @@ export default function Button({
 
   if (isDisabled) {
     buttonClass += " animate-pulse opacity-50 transition cursor-not-allowed";
+  }
+
+  if (isSpecial) {
+    buttonClass +=
+      " bg-blue-500 hover:bg-blue-600 dark:bg-blue-400 dark:hover:bg-blue-500";
   }
 
   return (
