@@ -81,7 +81,7 @@ export default function Button({
 
   if (isSpecial) {
     buttonClass +=
-      " bg-blue-500 hover:bg-blue-600 dark:bg-blue-400 dark:hover:bg-blue-500";
+      " bg-blue-500 hover:bg-blue-600 dark:bg-blue-400 dark:hover:bg-blue-500 ";
   }
 
   return (

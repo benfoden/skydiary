@@ -64,13 +64,13 @@ export const stripeRouter = createTRPCRouter({
     });
 
     if (!customerId) {
-      throw new Error("Could not create customer");
+      throw new Error("Could not find or create customer");
     }
 
     const stripeBillingPortalSession =
       await stripe.billingPortal.sessions.create({
         customer: customerId,
-        return_url: `${baseURL()}/dashboard`,
+        return_url: `${baseURL()}/settings`,
       });
 
     if (!stripeBillingPortalSession) {

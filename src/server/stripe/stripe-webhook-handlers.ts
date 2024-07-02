@@ -30,9 +30,9 @@ export const getOrCreateStripeCustomerIdForUser = async ({
     email: user.email ?? undefined,
     name: user.name ?? undefined,
     // use metadata to link this Stripe customer to internal user id
-    metadata: {
-      userId,
-    },
+    // metadata: {
+    //   userId,
+    // },
   });
 
   // update with new customer id
@@ -50,34 +50,6 @@ export const getOrCreateStripeCustomerIdForUser = async ({
   }
 };
 
-// export const handleInvoicePaid = async ({
-//   event,
-//   stripe,
-//   db,
-// }: {
-//   event: Stripe.Event;
-//   stripe: Stripe;
-//   db: PrismaClient;
-// }) => {
-//   const invoice = event.data.object as Stripe.Invoice;
-//   const subscriptionId = invoice.subscription;
-//   const subscription = await stripe.subscriptions.retrieve(
-//     subscriptionId as string,
-//   );
-//   const userId = subscription.metadata.userId;
-
-//   // update user with subscription data
-//   await db.user.update({
-//     where: {
-//       id: userId,
-//     },
-//     data: {
-//       stripeSubscriptionId: subscription.id,
-//       stripeSubscriptionStatus: subscription.status,
-//     },
-//   });
-// };
-
 export const handleSubscriptionCreatedOrUpdated = async ({
   event,
   db,
@@ -85,13 +57,18 @@ export const handleSubscriptionCreatedOrUpdated = async ({
   event: Stripe.Event;
   db: PrismaClient;
 }) => {
+  const session = await getServerAuthSession();
+
+  if (!session?.user) throw new Error("User not found");
+
+  const { user } = session;
+
   const subscription = event.data.object as Stripe.Subscription;
-  const userId = subscription.metadata.userId;
 
   // update user with subscription data
   await db.user.update({
     where: {
-      id: userId,
+      id: user.id,
     },
     data: {
       stripeSubscriptionId: subscription.id,
@@ -99,14 +76,12 @@ export const handleSubscriptionCreatedOrUpdated = async ({
     },
   });
 
-  event.data.object;
   await db.subscription.update({
     where: {
       id: subscription.id,
     },
     data: {
       status: subscription.status,
-      metadata: JSON.stringify(subscription.metadata),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       currentPeriodStart: new Date(subscription.current_period_start * 1000),
       currentPeriodEnd: new Date(subscription.current_period_end * 1000),
@@ -137,16 +112,19 @@ export const handleSubscriptionCanceled = async ({
   db: PrismaClient;
 }) => {
   const subscription = event.data.object as Stripe.Subscription;
-  const userId = subscription.metadata.userId;
+  const session = await getServerAuthSession();
 
+  if (!session?.user) throw new Error("User not found");
+
+  const { user } = session;
   // remove subscription data from user
   await db.user.update({
     where: {
-      id: userId,
+      id: user.id,
     },
     data: {
       stripeSubscriptionId: null,
-      stripeSubscriptionStatus: null,
+      stripeSubscriptionStatus: subscription.status,
     },
   });
 };
