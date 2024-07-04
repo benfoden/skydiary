@@ -31,6 +31,7 @@ export default function UpgradeBody({ isSession }: { isSession: boolean }) {
       setCheckoutStatus("canceled");
     }
   }, [searchParams]);
+
   return (
     <main className="flex min-h-screen w-full flex-col items-center justify-start">
       <div className="container flex flex-col items-center justify-start gap-12 px-4 py-16 ">
@@ -52,8 +53,10 @@ export default function UpgradeBody({ isSession }: { isSession: boolean }) {
                 onClick={() => setIsYearly(true)}
                 variant="cta"
               >
-                <div className="text-sm">
-                  <span className="pr-2">🌞 {t("yearly")}:</span>
+                <div className="flex flex-row items-start text-sm">
+                  <span className="theme-icon-dark pr-1">🌜</span>
+                  <span className="theme-icon-light pr-1">🌞</span>
+                  <span className="pr-1">{t("yearly")}:</span>
                   <span>{t("yearlyPriceDetail0")}</span>
                 </div>
               </Button>
