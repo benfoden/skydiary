@@ -33,7 +33,7 @@ export default async function RootLayout({
         <ThemeScript />
       </head>
       <body
-        className={`font-sans ${inter.variable} bg-gradient-to-b from-[#cce3f1] to-[#f3f6f6] dark:from-[#101015] dark:to-[#0b0f10]`}
+        className={`font-sans ${inter.variable} bg-gradient-to-b from-[#cce3f1] to-[#f3f6f6] dark:from-[#0b0f10] dark:to-[#20202c]`}
       >
         <NextIntlClientProvider messages={messages}>
           <TRPCReactProvider>

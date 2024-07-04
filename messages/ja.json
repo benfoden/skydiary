@@ -183,5 +183,38 @@
   "theme": {
     "light": "ライトモード",
     "dark": "ダークモード"
+  },
+  "pricing": {
+    "title": "プライスリーリングとプラン",
+    "yearly": "年間",
+    "monthly": "月間",
+    "signIn": "ログインまたは登録",
+    "createAccountToStart": "アカウントを作成して開始する",
+    "subscribe": "今すぐ登録",
+    "details": "自動的に更新されます。いつでもキャンセルできます。",
+    "monthlyPrice": "$5",
+    "perMonth": "月あたり",
+    "yearlyPrice": "$4",
+    "premium": {
+      "title": "プレミアム",
+      "entries": "日常のエントリにコメントを受け取るためのパーソナを作成",
+      "personas": "自分でコントロールできるパーソナを作成",
+      "comments": "日常のエントリにコメントを受け取るためのパーソナを作成",
+      "commentLength": "1000文字までの長いコメント",
+      "featureAccess": "新機能へのアクセスを早期に",
+      "memory": "長期のパーソナメモリ"
+    },
+    "lite": {
+      "title": "ライト",
+      "entries": "日常のエントリにコメントを受け取るためのパーソナを作成",
+      "personas": "自分でコントロールできるパーソナを作成",
+      "comments": "日常のエントリにコメントを受け取るためのパーソナを作成",
+      "commentLength": "100文字までのコメント",
+      "featureAccess": "デフォルトの機能へのアクセス",
+      "memory": "短期のパーソナメモリ"
+    },
+    "thankYou": "プレミアムへようこそ",
+    "thankYouDetails": "これらの機能を試してみましょう。さらに、その他の機能を試してみましょう:",
+    "tryItNow": "プレミアムを試してみましょう"
   }
 }

@@ -38,7 +38,7 @@ export default function Button({
     " bg-blue-400 hover:bg-blue-300 dark:bg-blue-800 dark:hover:bg-blue-700 ";
 
   if (isDisabled) {
-    buttonClass += " animate-pulse opacity-50 transition cursor-not-allowed";
+    buttonClass += " animate-pulse opacity-40 transition cursor-not-allowed";
   }
 
   switch (variant) {

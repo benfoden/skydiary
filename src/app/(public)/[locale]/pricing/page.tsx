@@ -35,8 +35,9 @@ export default function UpgradeBody({ isSession }: { isSession: boolean }) {
   return (
     <main className="flex min-h-screen w-full flex-col items-center justify-start">
       <div className="container flex flex-col items-center justify-start gap-12 px-4 py-16 ">
+        <h1 className="text-xl">{t("title")}</h1>
         {checkoutStatus !== "sucesss" && (
-          <div className="flex flex-col items-center justify-center gap-8 text-xl">
+          <div className="flex w-full flex-col items-center justify-center gap-8">
             <div className="flex w-full flex-row items-center justify-center gap-4">
               <Button
                 id="monthly"
@@ -44,7 +45,7 @@ export default function UpgradeBody({ isSession }: { isSession: boolean }) {
                 onClick={() => setIsYearly(false)}
                 variant="cta"
               >
-                <span className="text-sm"> {t("monthly")}</span>
+                <span className="text-sm">🌜 {t("monthly")}</span>
               </Button>
 
               <Button
@@ -53,92 +54,49 @@ export default function UpgradeBody({ isSession }: { isSession: boolean }) {
                 onClick={() => setIsYearly(true)}
                 variant="cta"
               >
-                <div className="flex flex-row items-start text-sm">
-                  <span className="theme-icon-dark pr-1">🌜</span>
-                  <span className="theme-icon-light pr-1">🌞</span>
-                  <span className="pr-1">{t("yearly")}:</span>
+                <div className="flex flex-row items-center text-sm">
+                  <span className="pr-1">
+                    <span className="text-base">🌞</span> {t("yearly")}:
+                  </span>
                   <span>{t("yearlyPriceDetail0")}</span>
                 </div>
               </Button>
             </div>
-            <Card isButton={true} variant="form">
-              <div className="flex w-full flex-col items-center gap-8 pb-2">
-                <h1 className="text-xl">{t("title")}</h1>
-                <form
-                  className="w-full"
-                  onSubmit={async () => {
-                    try {
-                      if (!isSession) {
-                        return;
-                      }
-                      setIsLoading(true);
-                      let period: "monthly" | "yearly" | undefined;
-                      if (!isYearly) {
-                        period = "monthly";
-                      } else {
-                        period = "yearly";
-                      }
-                      if (!period) {
-                        console.error("Payment period is not defined");
-                        throw new Error("Payment period is not defined");
-                      }
-
-                      const { checkoutUrl } = await createCheckoutSession({
-                        period,
-                      });
-
-                      if (checkoutUrl) {
-                        void router.push(checkoutUrl);
-                      }
-                    } catch (error) {
-                      console.error(error);
-                    }
-                    setIsLoading(false);
-                  }}
-                >
-                  <div className="flex w-full flex-row items-end justify-center gap-2 pb-2">
-                    <span className="text-5xl font-medium">
-                      {isYearly ? t("yearlyPrice") : t("monthlyPrice")}
-                    </span>
-                    <div className="flex flex-col items-start pb-1">
-                      {isYearly && (
-                        <div className="flex flex-col text-xs opacity-70">
-                          <span>{t("yearlyPriceDetail1")}</span>
-                          <span>{t("yearlyPriceDetail2")}</span>
-                        </div>
-                      )}
-                      <span className="mt-[-0.25rem] pt-0 text-base font-medium">
-                        {t("perMonth")}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex w-full flex-col gap-4">
-                    {isSession ? (
-                      <>
-                        <FormButton
-                          variant="submit"
-                          isSpecial={true}
-                          isDisabled={isLoading}
-                        >
-                          <div className="flex items-center gap-2 font-semibold">
-                            {!isLoading ? (
-                              <>
-                                {t("subscribe")}
-                                <ArrowRightIcon className="h-3 w-3 animate-ping" />
-                              </>
-                            ) : (
-                              <>
-                                <ButtonSpinner /> checking out...
-                              </>
-                            )}
-                          </div>
-                        </FormButton>
-                      </>
-                    ) : (
+            <div className="flex w-full flex-row items-start justify-center gap-8">
+              <div className="flex w-80 flex-col items-center justify-center gap-8 text-xl">
+                <Card isButton={false}>
+                  <div className="flex flex-col items-start gap-8 pb-4 text-xl">
+                    <h2 className="text-lg">{t("lite.title")}</h2>
+                    <ul className="flex flex-col gap-4 text-sm">
+                      <li className="flex items-start gap-2">
+                        <CheckCircledIcon className="h-5 w-5" />
+                        {t("lite.entries")}
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircledIcon className="h-5 w-5" />
+                        {t("lite.personas")}
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircledIcon className="h-5 w-5" />{" "}
+                        {t("lite.comments")}
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircledIcon className="h-5 w-5" />
+                        {t("lite.commentLength")}
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircledIcon className="h-5 w-5" />{" "}
+                        {t("lite.featureAccess")}
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircledIcon className="h-5 w-5" />{" "}
+                        {t("lite.memory")}
+                      </li>
+                    </ul>
+                    {!isSession && (
                       <div className="flex w-full flex-col items-center justify-center gap-8 text-xl">
                         <h2 className="text-sm font-light">
-                          log in or sign up to get started
+                          {t("createAccountToStart")}
                         </h2>
                         <Link href="/auth/signin">
                           <Button variant="cta">{t("signIn")}</Button>
@@ -146,48 +104,150 @@ export default function UpgradeBody({ isSession }: { isSession: boolean }) {
                       </div>
                     )}
                   </div>
-                </form>
-                <ul className="flex flex-col gap-4 text-sm">
-                  <li className="flex items-start gap-2">
-                    <CheckCircledIcon className="h-5 w-5" /> create unlimited
-                    personas
-                  </li>
-                  <li className="flex gap-2">
-                    <CheckCircledIcon className="h-5 w-5" /> get up to 10
-                    comments per day
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircledIcon className="h-5 w-5" /> get long comments
-                    with 1000+ words
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircledIcon className="h-5 w-5" />
-                    early access to new features
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircledIcon className="h-5 w-5" /> long-term memory
-                    for all personas
-                  </li>
-                </ul>
+                </Card>
               </div>
-            </Card>
+              <div className="flex w-80 flex-col items-center justify-center gap-8 text-xl">
+                <Card variant="form">
+                  <div className="flex w-full flex-col items-start gap-8 pb-4">
+                    <h2 className="text-lg">{t("premium.title")}</h2>
+                    <form
+                      className="w-full"
+                      onSubmit={async () => {
+                        try {
+                          if (!isSession) {
+                            return;
+                          }
+                          setIsLoading(true);
+                          let period: "monthly" | "yearly" | undefined;
+                          if (!isYearly) {
+                            period = "monthly";
+                          } else {
+                            period = "yearly";
+                          }
+                          if (!period) {
+                            console.error("Payment period is not defined");
+                            throw new Error("Payment period is not defined");
+                          }
+
+                          const { checkoutUrl } = await createCheckoutSession({
+                            period,
+                          });
+
+                          if (checkoutUrl) {
+                            void router.push(checkoutUrl);
+                          }
+                        } catch (error) {
+                          console.error(error);
+                        }
+                        setIsLoading(false);
+                      }}
+                    >
+                      <div className="flex w-full flex-row items-end justify-start gap-2 pb-2">
+                        <span className="text-5xl font-medium">
+                          {isYearly ? t("yearlyPrice") : t("monthlyPrice")}
+                        </span>
+                        <div className="flex flex-col items-start pb-1">
+                          {isYearly && (
+                            <div className="flex flex-col text-xs opacity-70">
+                              <span>{t("yearlyPriceDetail1")}</span>
+                              <span>{t("yearlyPriceDetail2")}</span>
+                            </div>
+                          )}
+                          <span className="mt-[-0.25rem] pt-0 text-base font-medium">
+                            {t("perMonth")}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex w-full flex-col gap-4">
+                        {isSession && (
+                          <>
+                            <FormButton
+                              variant="submit"
+                              isSpecial={true}
+                              isDisabled={isLoading}
+                            >
+                              <div className="flex items-center gap-2 text-lg font-light">
+                                {!isLoading ? (
+                                  <>
+                                    {t("subscribe")}
+                                    <ArrowRightIcon className="h-3 w-3 animate-ping" />
+                                  </>
+                                ) : (
+                                  <>
+                                    <ButtonSpinner /> checking out...
+                                  </>
+                                )}
+                              </div>
+                            </FormButton>
+                          </>
+                        )}
+                      </div>
+                    </form>
+                    <ul className="flex flex-col gap-4 text-sm">
+                      <li className="flex items-start gap-2">
+                        <CheckCircledIcon className="h-5 w-5" />
+                        {t("premium.entries")}
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircledIcon className="h-5 w-5" />{" "}
+                        {t("premium.personas")}
+                      </li>
+                      <li className="flex gap-2">
+                        <CheckCircledIcon className="h-5 w-5" />{" "}
+                        {t("premium.comments")}
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircledIcon className="h-5 w-5" />{" "}
+                        {t("premium.commentLength")}
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircledIcon className="h-5 w-5" />
+                        {t("premium.featureAccess")}
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircledIcon className="h-5 w-5" />{" "}
+                        {t("premium.memory")}
+                      </li>
+                    </ul>
+                  </div>
+                </Card>
+              </div>
+            </div>
           </div>
         )}
         {checkoutStatus === "success" && (
           <div className="flex w-80 flex-col items-center justify-center gap-8 text-xl">
-            <h2 className="text-xl font-light">
-              thank you for activating skydiary
-            </h2>
+            <h2 className="text-xl font-light">{t("thankYou")}</h2>
             <Card variant="form">
-              <p className="font-light">you now have access to all features:</p>
-              <ul className="ml-4 list-disc font-light">
-                <li>make unlimited custom personas</li>
-                <li>get unlimited comments</li>
-                <li>get longer comments</li>
-                <li>give personas long-term memory</li>
+              <p className="font-light">{t("thankYouDetails")}</p>
+              <ul className="flex flex-col gap-4 text-sm">
+                <li className="flex items-start gap-2">
+                  <CheckCircledIcon className="h-5 w-5" />
+                  {t("premium.entries")}
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircledIcon className="h-5 w-5" />{" "}
+                  {t("premium.personas")}
+                </li>
+                <li className="flex gap-2">
+                  <CheckCircledIcon className="h-5 w-5" />{" "}
+                  {t("premium.comments")}
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircledIcon className="h-5 w-5" />{" "}
+                  {t("premium.commentLength")}
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircledIcon className="h-5 w-5" />
+                  {t("premium.featureAccess")}
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircledIcon className="h-5 w-5" /> {t("premium.memory")}
+                </li>
               </ul>
               <Link href="/today">
-                <Button variant="primary">{`try it on today's entry`}</Button>
+                <Button variant="primary">{t("tryItNow")}</Button>
               </Link>
             </Card>
           </div>

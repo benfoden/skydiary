@@ -16,7 +16,7 @@ export default async function Upgrade() {
           <div className="flex items-center gap-2">
             <NavChevronLeft targetPathname={"/home"} label={t("nav.home")} />
           </div>
-          <h1>{t("nav.pricing")}</h1>
+
           <DropDownUser />
         </SessionNav>
       ) : (

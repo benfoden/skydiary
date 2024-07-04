@@ -186,10 +186,11 @@
     "dark": "dark mode"
   },
   "pricing": {
-    "title": "premium plan",
+    "title": "pricing & plans",
     "yearly": "yearly",
     "monthly": "monthly",
     "signIn": "log in or sign up",
+    "createAccountToStart": "create an account to get started",
     "subscribe": "subscribe now",
     "details": "renews automatically. cancel any time.",
     "monthlyPrice": "$5",
@@ -197,6 +198,29 @@
     "yearlyPrice": "$4",
     "yearlyPriceDetail0": "get 2+ months free",
     "yearlyPriceDetail1": "2+ months free",
-    "yearlyPriceDetail2": "billed yearly $48"
+    "yearlyPriceDetail2": "billed yearly $48",
+    "tba": "to be announced",
+    "comingSoon": "coming soon",
+    "premium": {
+      "title": "premium",
+      "entries": "unlimited daily entries",
+      "personas": "unlimited custom personas",
+      "comments": "unlimited comments",
+      "commentLength": "long comments up to 1000 words",
+      "featureAccess": "early access to new features",
+      "memory": "long-term persona memory"
+    },
+    "lite": {
+      "title": "lite",
+      "entries": "unlimited daily entries",
+      "personas": "one custom persona",
+      "comments": "one comment per day",
+      "commentLength": "long comments up to 1000 words",
+      "featureAccess": "default access to new features",
+      "memory": "short-term persona memory"
+    },
+    "thankYou": "welcome to skydiary premium",
+    "thankYouDetails": "now you can try out these features, and more:",
+    "tryItNow": "start using premium now"
   }
 }
