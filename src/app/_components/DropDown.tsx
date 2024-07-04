@@ -44,13 +44,13 @@ const DropDownMenu = ({
   return (
     <div
       ref={dropdownRef}
-      className={`relative flex flex-col items-end ${open ? "open" : ""}`}
+      className={`relative flex flex-col items-end ${open ? "open" : ""} ${isUserMenu && "mr-4"}`}
     >
       <Button variant="dropdownToggle" onClick={toggleDropdown}>
         {isUserMenu && <AvatarIcon className="h-6 w-6" />}
-        {isEntryMenu && <DotsHorizontalIcon className="h-5 w-5" />}
+        {isEntryMenu && <DotsHorizontalIcon className="h-6 w-6" />}
         {!isUserMenu && !isEntryMenu && (
-          <DotsVerticalIcon className="h-5 w-5" />
+          <DotsVerticalIcon className="h-6 w-6" />
         )}
       </Button>
       {open && (

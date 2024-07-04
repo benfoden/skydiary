@@ -30,9 +30,16 @@ export default function Button({
 
   let buttonClass = "";
   const defaults =
-    "flex items-center justify-between px-4 py-2 gap-4 rounded-full text-decoration-none transition ";
+    " flex items-center justify-between px-4 py-2 gap-4 rounded-full text-decoration-none transition ";
   const sharedColors =
     " bg-white/40 dark:bg-white/[.12] hover:bg-white/80 hover:dark:bg-white/[.24] ";
+
+  const specialColors =
+    " bg-blue-500 hover:bg-blue-600 dark:bg-blue-400 dark:hover:bg-blue-500 ";
+
+  if (isDisabled) {
+    buttonClass += " animate-pulse opacity-50 transition cursor-not-allowed";
+  }
 
   switch (variant) {
     case "primary":
@@ -43,45 +50,56 @@ export default function Button({
       break;
     case "menuElement":
       buttonClass +=
-        " flex px-6 py-3 sm:px-4 sm:py-2 items-center justify-between gap-4 w-full rounded text-decoration-none transition hover:dark:bg-white/[.24] hover:bg-white/80";
+        " flex px-6 py-3 sm:px-4 sm:py-2 items-center justify-between gap-4 w-full rounded text-decoration-none transition " +
+        (isSpecial
+          ? specialColors
+          : " hover:dark:bg-white/[.24] hover:bg-white/80 ");
       break;
     case "cta":
       buttonClass +=
-        " flex px-6 py-3 sm:px-4 sm:py-2 items-center justify-between gap-4 rounded-full text-decoration-none  transition bg-white/80 hover:bg-white dark:bg-white/[.18] dark:hover:bg-white/[.36]";
+        " flex px-6 py-3 sm:px-4 sm:py-2 items-center justify-between gap-4 rounded-full text-decoration-none transition " +
+        (isSpecial
+          ? specialColors
+          : " bg-white/80 hover:bg-white dark:bg-white/[.18] dark:hover:bg-white/[.36] ");
       break;
     case "chip":
       buttonClass +=
-        " flex px-2 py-1 w-fit items-center justify-between gap-4 rounded-full text-decoration-none transition text-xs font-medium bg-white/30 dark:bg-white/[.08] hover:bg-white/60 dark:hover:bg-white/[.16]";
+        " flex px-2 py-1 w-fit items-center justify-between gap-4 rounded-full text-decoration-none transition text-xs font-medium " +
+        (isSpecial
+          ? " bg-blue-500 hover:bg-blue-600 dark:bg-blue-400 dark:hover:bg-blue-500 "
+          : " bg-white/30 dark:bg-white/[.08] hover:bg-white/60 dark:hover:bg-white/[.16] ");
       break;
     case "submit":
       buttonClass +=
-        " mt-2 flex h-12 w-full text-base items-center justify-center space-x-2 rounded-lg bg-white/80 px-4 transition text-decoration-none hover:bg-white/90 active:bg-white dark:bg-white/[.16] dark:hover:bg-white/[.32] dark:active:bg-white/[.35]";
+        " mt-2 flex h-12 w-full text-base items-center justify-center space-x-2 rounded-lg px-4 transition text-decoration-none " +
+        (isSpecial
+          ? " bg-blue-500 hover:bg-blue-600 dark:bg-blue-400 dark:hover:bg-blue-500 "
+          : " bg-white/80 hover:bg-white dark:bg-white/[.16] dark:hover:bg-white/[.32] dark:active:bg-white/[.35] ");
       break;
     case "nav":
       buttonClass +=
-        " flex px-6 py-3 sm:px-4 sm:py-2 items-center justify-between gap-2 rounded-full text-decoration-none transition hover:bg-white/60 dark:hover:bg-white/[.16]";
+        " flex px-6 py-3 sm:px-4 sm:py-2 items-center justify-between gap-1 rounded-full text-decoration-none transition " +
+        (isSpecial
+          ? " bg-blue-500 hover:bg-blue-600 dark:bg-blue-400 dark:hover:bg-blue-500 "
+          : " hover:bg-white/60 dark:hover:bg-white/[.16] ");
       break;
     case "dropdownToggle":
       buttonClass +=
-        " flex p-2 w-fit items-center justify-between rounded-full text-decoration-none transition text-xs hover:bg-white/80 hover:dark:bg-white/[.24] ";
+        " flex p-2 w-fit items-center justify-between rounded-full text-decoration-none transition text-xs " +
+        (isSpecial
+          ? " bg-blue-500 hover:bg-blue-600 dark:bg-blue-400 dark:hover:bg-blue-500 "
+          : " hover:bg-white/80 hover:dark:bg-white/[.24] ");
       break;
     case "listItem":
       buttonClass +=
-        sharedColors +
-        " flex py-2 px-4 w-48 gap-2 flex-row wrap:no-wrap items-center justify-start rounded-lg text-sm";
+        " flex py-2 px-4 w-48 gap-2 flex-row wrap:no-wrap items-center justify-start rounded-lg text-sm " +
+        (isSpecial
+          ? " bg-blue-500 hover:bg-blue-600 dark:bg-blue-400 dark:hover:bg-blue-500 "
+          : " bg-white/30 dark:bg-white/[.08] hover:bg-white/60 dark:hover:bg-white/[.16] ");
       break;
     default:
       buttonClass += defaults + sharedColors;
       break;
-  }
-
-  if (isDisabled) {
-    buttonClass += " animate-pulse opacity-50 transition cursor-not-allowed";
-  }
-
-  if (isSpecial) {
-    buttonClass +=
-      " bg-blue-500 hover:bg-blue-600 dark:bg-blue-400 dark:hover:bg-blue-500 ";
   }
 
   return (

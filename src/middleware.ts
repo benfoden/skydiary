@@ -14,7 +14,6 @@ export default function middleware(request: NextRequest) {
     "/auth",
     "/api/auth",
     "/sd-admin",
-    "/upgrade",
   ];
 
   const unTranslatedAPIRoutes = ["/api/cron", "/api/stripe/checkout-session"];

@@ -34,6 +34,7 @@
   "nav": {
     "home": "home",
     "about": "about",
+    "pricing": "pricing",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "contact": "contact",
@@ -183,5 +184,11 @@
   "theme": {
     "light": "light mode",
     "dark": "dark mode"
+  },
+  "pricing": {
+    "title": "premium",
+    "description": "you can upgrade to a yearly subscription for $50 per year or a monthly subscription for $5 per month.",
+    "yearly": "yearly",
+    "monthly": "monthly"
   }
 }

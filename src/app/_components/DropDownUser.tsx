@@ -16,7 +16,7 @@ export default async function DropDownUser() {
   const t = await getTranslations();
   return (
     <DropDownMenu isUserMenu>
-      <Link href={"/upgrade"}>
+      <Link href={"/pricing"}>
         <Button variant="menuElement" isSpecial>
           {t("nav.upgrade")} <PlusIcon className="h-4 w-4" />
         </Button>
