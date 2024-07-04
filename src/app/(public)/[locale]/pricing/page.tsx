@@ -16,6 +16,7 @@ export default function UpgradeBody({ isSession }: { isSession: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations("pricing");
+  const SUCCESS = "success";
 
   const [checkoutStatus, setCheckoutStatus] = useState("");
   const [isYearly, setIsYearly] = useState(true);
@@ -26,9 +27,9 @@ export default function UpgradeBody({ isSession }: { isSession: boolean }) {
     const checkoutCanceled = searchParams.get("checkoutCanceled");
 
     if (checkoutSuccess) {
-      setCheckoutStatus("success");
+      setCheckoutStatus(SUCCESS);
     } else if (checkoutCanceled) {
-      setCheckoutStatus("canceled");
+      setCheckoutStatus("");
     }
   }, [searchParams]);
 
@@ -36,7 +37,14 @@ export default function UpgradeBody({ isSession }: { isSession: boolean }) {
     <main className="flex min-h-screen w-full flex-col items-center justify-start">
       <div className="container flex flex-col items-center justify-start gap-12 px-4 py-16 ">
         <h1 className="text-xl">{t("title")}</h1>
-        {checkoutStatus !== "sucesss" && (
+        {checkoutStatus === SUCCESS && (
+          <div className="flex flex-col items-center gap-6">
+            <h2 className="text-4xl">{t("welcome")}</h2>
+            <p className="text-4xl">{t("thankYou")}</p>
+            <p>{t("emailWithDetails")}</p>
+          </div>
+        )}
+        {checkoutStatus !== SUCCESS && (
           <div className="flex w-full flex-col items-center justify-center gap-8">
             <div className="flex w-full flex-row items-center justify-center gap-4">
               <Button
@@ -67,6 +75,11 @@ export default function UpgradeBody({ isSession }: { isSession: boolean }) {
                 <Card isButton={false}>
                   <div className="flex flex-col items-start gap-8 pb-4 text-xl">
                     <h2 className="text-lg">{t("lite.title")}</h2>
+                    {!isSession && (
+                      <p className="text-base font-bold">
+                        {t("createAccountToStart")}
+                      </p>
+                    )}
                     <ul className="flex flex-col gap-4 text-sm">
                       <li className="flex items-start gap-2">
                         <CheckCircledIcon className="h-5 w-5" />
@@ -94,12 +107,11 @@ export default function UpgradeBody({ isSession }: { isSession: boolean }) {
                       </li>
                     </ul>
                     {!isSession && (
-                      <div className="flex w-full flex-col items-center justify-center gap-8 text-xl">
-                        <h2 className="text-sm font-light">
-                          {t("createAccountToStart")}
-                        </h2>
+                      <div className="flex w-full flex-col items-center justify-center gap-2">
                         <Link href="/auth/signin">
-                          <Button variant="cta">{t("signIn")}</Button>
+                          <Button variant="submit" isSpecial={true}>
+                            {t("signIn")}
+                          </Button>
                         </Link>
                       </div>
                     )}
@@ -216,9 +228,8 @@ export default function UpgradeBody({ isSession }: { isSession: boolean }) {
             </div>
           </div>
         )}
-        {checkoutStatus === "success" && (
-          <div className="flex w-80 flex-col items-center justify-center gap-8 text-xl">
-            <h2 className="text-xl font-light">{t("thankYou")}</h2>
+        {checkoutStatus === SUCCESS && (
+          <div className="flex w-80 flex-col items-center justify-center gap-8">
             <Card variant="form">
               <p className="font-light">{t("thankYouDetails")}</p>
               <ul className="flex flex-col gap-4 text-sm">
@@ -247,7 +258,9 @@ export default function UpgradeBody({ isSession }: { isSession: boolean }) {
                 </li>
               </ul>
               <Link href="/today">
-                <Button variant="primary">{t("tryItNow")}</Button>
+                <Button variant="submit" isSpecial={true}>
+                  {t("tryItNow")}
+                </Button>
               </Link>
             </Card>
           </div>

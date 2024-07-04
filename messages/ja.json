@@ -216,8 +216,10 @@
       "featureAccess": "新機能へのデフォルトアクセス",
       "memory": "短期のパーソナメモリ"
     },
-    "thankYou": "プレミアムへようこそ",
-    "thankYouDetails": "これらの機能を試してみましょう。さらに、その他の機能を試してみましょう:",
-    "tryItNow": "プレミアムを試してみましょう"
+    "welcome": "skydiaryプレミアムへようこそ",
+    "thankYou": "ありがとうございます",
+    "emailWithDetails": "登録されたメールアドレスに、領収証が送信されました。",
+    "thankYouDetails": "機能をすべて使用できます:",
+    "tryItNow": "プレミアムを使ってみましょう"
   }
 }

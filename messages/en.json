@@ -190,7 +190,7 @@
     "yearly": "yearly",
     "monthly": "monthly",
     "signIn": "log in or sign up",
-    "createAccountToStart": "create an account to get started",
+    "createAccountToStart": "create an account for free",
     "subscribe": "subscribe now",
     "details": "renews automatically. cancel any time.",
     "monthlyPrice": "$5",
@@ -219,8 +219,10 @@
       "featureAccess": "default access to new features",
       "memory": "short-term persona memory"
     },
-    "thankYou": "welcome to skydiary premium",
-    "thankYouDetails": "now you can try out these features, and more:",
+    "welcome": "welcome to skydiary premium",
+    "thankYou": "thank you",
+    "emailWithDetails": "a receipt has been sent to your registered email address",
+    "thankYouDetails": "now you can use all features:",
     "tryItNow": "start using premium now"
   }
 }
