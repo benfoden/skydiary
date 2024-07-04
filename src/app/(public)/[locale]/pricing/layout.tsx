@@ -4,12 +4,9 @@ import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { SessionNav } from "~/app/_components/SessionNav";
 import { getServerAuthSession } from "~/server/auth";
 import { PublicNav } from "../(landing)/PublicNav";
+import UpgradeBody from "./page";
 
-export default async function Upgrade({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function Upgrade() {
   const t = await getTranslations();
   const session = await getServerAuthSession();
   return (
@@ -26,7 +23,7 @@ export default async function Upgrade({
         <PublicNav />
       )}
 
-      {children}
+      <UpgradeBody isSession={!!session} />
     </>
   );
 }

@@ -24,8 +24,8 @@
     "send a new code": "send a new code",
     "verify and continue": "verify and continue",
     "verifying": "verifying...",
-    "signing in": "signing in...",
-    "sign in": "sign in",
+    "signing in": "logging in...",
+    "sign in": "log in / sign up",
     "back to home": "back to home",
     "signing out": "signing out...",
     "sign out": "sign out",
@@ -48,7 +48,7 @@
     "copy all text": "copy text",
     "back": "back",
     "today": "today",
-    "upgrade": "upgrade now"
+    "upgrade": "upgrade"
   },
   "new-user": {
     "title": "welcome to skydiary",
@@ -186,9 +186,17 @@
     "dark": "dark mode"
   },
   "pricing": {
-    "title": "premium",
-    "description": "you can upgrade to a yearly subscription for $50 per year or a monthly subscription for $5 per month.",
+    "title": "premium plan",
     "yearly": "yearly",
-    "monthly": "monthly"
+    "monthly": "monthly",
+    "signIn": "log in or sign up",
+    "subscribe": "subscribe now",
+    "details": "renews automatically. cancel any time.",
+    "monthlyPrice": "$5",
+    "perMonth": "per month",
+    "yearlyPrice": "$4",
+    "yearlyPriceDetail0": "get 2+ months free",
+    "yearlyPriceDetail1": "2+ months free",
+    "yearlyPriceDetail2": "billed yearly $48"
   }
 }

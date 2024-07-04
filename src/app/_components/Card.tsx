@@ -1,5 +1,5 @@
 export const cardColors = (variant?: "default" | "narrow" | "wide" | "form") =>
-  ` bg-white/30 dark:bg-white/[.04] ${variant === "form" && "shadow-lg dark:shadow-black/20"}`;
+  ` bg-white/30 dark:bg-white/[.08] ${variant === "form" && "shadow-lg dark:shadow-black/20"}`;
 export function Card({
   children,
   isButton = true,

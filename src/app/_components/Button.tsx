@@ -35,7 +35,7 @@ export default function Button({
     " bg-white/40 dark:bg-white/[.12] hover:bg-white/80 hover:dark:bg-white/[.24] ";
 
   const specialColors =
-    " bg-blue-500 hover:bg-blue-600 dark:bg-blue-400 dark:hover:bg-blue-500 ";
+    " bg-blue-400 hover:bg-blue-300 dark:bg-blue-800 dark:hover:bg-blue-700 ";
 
   if (isDisabled) {
     buttonClass += " animate-pulse opacity-50 transition cursor-not-allowed";
@@ -66,35 +66,35 @@ export default function Button({
       buttonClass +=
         " flex px-2 py-1 w-fit items-center justify-between gap-4 rounded-full text-decoration-none transition text-xs font-medium " +
         (isSpecial
-          ? " bg-blue-500 hover:bg-blue-600 dark:bg-blue-400 dark:hover:bg-blue-500 "
+          ? specialColors
           : " bg-white/30 dark:bg-white/[.08] hover:bg-white/60 dark:hover:bg-white/[.16] ");
       break;
     case "submit":
       buttonClass +=
         " mt-2 flex h-12 w-full text-base items-center justify-center space-x-2 rounded-lg px-4 transition text-decoration-none " +
         (isSpecial
-          ? " bg-blue-500 hover:bg-blue-600 dark:bg-blue-400 dark:hover:bg-blue-500 "
+          ? specialColors
           : " bg-white/80 hover:bg-white dark:bg-white/[.16] dark:hover:bg-white/[.32] dark:active:bg-white/[.35] ");
       break;
     case "nav":
       buttonClass +=
         " flex px-6 py-3 sm:px-4 sm:py-2 items-center justify-between gap-1 rounded-full text-decoration-none transition " +
         (isSpecial
-          ? " bg-blue-500 hover:bg-blue-600 dark:bg-blue-400 dark:hover:bg-blue-500 "
+          ? specialColors
           : " hover:bg-white/60 dark:hover:bg-white/[.16] ");
       break;
     case "dropdownToggle":
       buttonClass +=
         " flex p-2 w-fit items-center justify-between rounded-full text-decoration-none transition text-xs " +
         (isSpecial
-          ? " bg-blue-500 hover:bg-blue-600 dark:bg-blue-400 dark:hover:bg-blue-500 "
+          ? specialColors
           : " hover:bg-white/80 hover:dark:bg-white/[.24] ");
       break;
     case "listItem":
       buttonClass +=
         " flex py-2 px-4 w-48 gap-2 flex-row wrap:no-wrap items-center justify-start rounded-lg text-sm " +
         (isSpecial
-          ? " bg-blue-500 hover:bg-blue-600 dark:bg-blue-400 dark:hover:bg-blue-500 "
+          ? specialColors
           : " bg-white/30 dark:bg-white/[.08] hover:bg-white/60 dark:hover:bg-white/[.16] ");
       break;
     default:
