@@ -5,8 +5,8 @@ import { db } from "~/server/db";
 import { stripe } from "~/server/stripe/client";
 import {
   handleInvoicePaid,
-  handleSubscriptionCanceled,
   handleSubscriptionCreatedOrUpdated,
+  handleSubscriptionDeleted,
 } from "~/server/stripe/stripe-webhook-handlers";
 
 // Stripe requires the raw body to construct the event.
@@ -63,10 +63,11 @@ export default async function handler(
           //todo: send email to customer
 
           break;
+
         case "customer.subscription.deleted":
           // handle subscription cancelled automatically based
           // upon your subscription settings.
-          await handleSubscriptionCanceled({
+          await handleSubscriptionDeleted({
             event,
             db,
           });

@@ -9,6 +9,7 @@ import FormButton from "~/app/_components/FormButton";
 import Input from "~/app/_components/Input";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { SessionNav } from "~/app/_components/SessionNav";
+import { type Locale } from "~/config";
 import { setUserLocale } from "~/i18n";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
@@ -20,7 +21,7 @@ export default async function Settings() {
   const t = await getTranslations();
 
   const subscription = await api.stripe.getUserSubDetails();
-  const locale = await getLocale();
+  const locale: Locale = (await getLocale()) as Locale;
 
   return (
     <>
@@ -108,7 +109,7 @@ export default async function Settings() {
               <FormButton variant="submit">{t("form.save")}</FormButton>
             </form>
           </Card>
-          {session?.user?.isSubscriber && (
+          {subscription && session?.user?.isSubscriber && (
             <Card variant="form">
               <h2>{t("settings.billing")}</h2>
               <p>
@@ -120,6 +121,15 @@ export default async function Settings() {
 
               {/* todo: add active link when not in local dev, confirm email and everything works */}
               <ManageBillingButton locale={locale} />
+              <form
+                action={async () => {
+                  await api.stripe.cancelSubscription({
+                    subId: subscription.id,
+                  });
+                }}
+              >
+                <FormButton>Cancel your subscription</FormButton>
+              </form>
             </Card>
           )}
 

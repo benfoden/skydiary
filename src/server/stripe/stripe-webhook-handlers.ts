@@ -105,7 +105,7 @@ export const handleSubscriptionCreatedOrUpdated = async ({
   });
 };
 
-export const handleSubscriptionCanceled = async ({
+export const handleSubscriptionDeleted = async ({
   event,
   db,
 }: {
@@ -126,7 +126,7 @@ export const handleSubscriptionCanceled = async ({
     data: {
       stripeSubscriptionId: null,
       stripeSubscriptionStatus: subscription.status,
-      isSubscriber: ACTIVESTATUSES.includes(subscription.status),
+      isSubscriber: false,
     },
   });
 

@@ -1,26 +1,21 @@
-"use client";
-import { useRouter } from "next/router";
+import { redirect } from "next/navigation";
+import { type Locale } from "~/config";
 import { api } from "~/trpc/server";
+import FormButton from "./FormButton";
 
-export default function ManageBillingButton({ locale }: { locale: string }) {
-  const createBillingPortalSession =
-    api.stripe.createBillingPortalSession.useMutation();
-  const { push } = useRouter();
-
+export default function ManageBillingButton({ locale }: { locale: Locale }) {
   return (
-    <button
-      className="w-fit cursor-pointer rounded-md bg-blue-500 px-5 py-2 text-lg font-semibold text-white shadow-sm duration-150 hover:bg-blue-600"
-      onClick={async () => {
-        const { billingPortalUrl } =
-          await createBillingPortalSession.mutateAsync({
+    <form
+      action={async () => {
+        "use server";
+        const { billingPortalUrl }: { billingPortalUrl: string } =
+          await api.stripe.createBillingPortalSession({
             locale,
           });
-        if (billingPortalUrl) {
-          void push(billingPortalUrl as string);
-        }
+        void redirect(billingPortalUrl);
       }}
     >
-      Manage subscription and billing
-    </button>
+      <FormButton>update your billing details</FormButton>
+    </form>
   );
 }

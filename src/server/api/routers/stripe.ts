@@ -152,4 +152,75 @@ export const stripeRouter = createTRPCRouter({
       }
       return subscription;
     }),
+
+  cancelSubscription: protectedProcedure
+    .input(
+      z.object({
+        subId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { stripe, session, db } = ctx;
+
+      const subscription = await stripe.subscriptions.retrieve(input.subId);
+
+      if (!subscription) {
+        console.error("Could not find subscription with id", input.subId);
+        return null;
+      }
+
+      const customerId = await getOrCreateStripeCustomerIdForUser({
+        db,
+        stripe,
+        userId: session.user?.id,
+      });
+
+      if (!customerId) {
+        console.error("Could not find or create customer");
+        throw new Error("Could not find or create customer");
+      }
+
+      const stripeSubscription = await stripe.subscriptions.update(
+        subscription.id,
+        {
+          cancel_at_period_end: true,
+        },
+      );
+
+      if (!stripeSubscription) {
+        console.error("Could not update subscription");
+        throw new Error("Could not update subscription");
+      }
+
+      await db.subscription.update({
+        where: {
+          id: subscription.id,
+        },
+        data: {
+          status: stripeSubscription.status,
+          cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
+          currentPeriodStart: new Date(
+            stripeSubscription.current_period_start * 1000,
+          ),
+          currentPeriodEnd: new Date(
+            stripeSubscription.current_period_end * 1000,
+          ),
+          endedAt: stripeSubscription.ended_at
+            ? new Date(stripeSubscription.ended_at * 1000)
+            : null,
+          cancelAt: stripeSubscription.cancel_at
+            ? new Date(stripeSubscription.cancel_at * 1000)
+            : null,
+          canceledAt: stripeSubscription.canceled_at
+            ? new Date(stripeSubscription.canceled_at * 1000)
+            : null,
+          trialStart: stripeSubscription.trial_start
+            ? new Date(stripeSubscription.trial_start * 1000)
+            : null,
+          trialEnd: stripeSubscription.trial_end
+            ? new Date(stripeSubscription.trial_end * 1000)
+            : null,
+        },
+      });
+    }),
 });
