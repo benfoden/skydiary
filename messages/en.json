@@ -204,6 +204,8 @@
     "yearlyPriceDetail2": "billed yearly $48",
     "tba": "to be announced",
     "comingSoon": "coming soon",
+    "checkingOut": "checking out...",
+    "yourPlan": "subscribed",
     "premium": {
       "title": "premium",
       "entries": "unlimited daily entries",

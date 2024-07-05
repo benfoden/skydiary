@@ -1,5 +1,6 @@
 "use client";
 import { ArrowRightIcon, CheckCircledIcon } from "@radix-ui/react-icons";
+import { type Session } from "next-auth";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -12,7 +13,7 @@ import StarsBackground from "~/app/_components/StarsBackground";
 import { type Locale } from "~/config";
 import { api } from "~/trpc/react";
 
-export default function UpgradeBody({ isSession }: { isSession: boolean }) {
+export default function UpgradeBody({ user }: { user?: Session["user"] }) {
   const { mutateAsync: createCheckoutSession } =
     api.stripe.createCheckoutSession.useMutation();
   const router = useRouter();
@@ -31,7 +32,7 @@ export default function UpgradeBody({ isSession }: { isSession: boolean }) {
     event.preventDefault();
     try {
       setIsLoading(true);
-      if (!isSession) {
+      if (!user) {
         return;
       }
       const period = isYearly ? "yearly" : "monthly";
@@ -111,7 +112,7 @@ export default function UpgradeBody({ isSession }: { isSession: boolean }) {
                   <Card isButton={false}>
                     <div className="flex flex-col items-start gap-8 pb-4 text-xl">
                       <h2 className="text-lg">{t("lite.title")}</h2>
-                      {!isSession && (
+                      {!user && (
                         <p className="text-base font-bold">
                           {t("createAccountToStart")}
                         </p>
@@ -142,7 +143,7 @@ export default function UpgradeBody({ isSession }: { isSession: boolean }) {
                           {t("lite.memory")}
                         </li>
                       </ul>
-                      {!isSession && (
+                      {!user && (
                         <div className="flex w-full flex-col items-center justify-center gap-2">
                           <Link href="/auth/signin">
                             <Button variant="submit" isSpecial={true}>
@@ -177,22 +178,28 @@ export default function UpgradeBody({ isSession }: { isSession: boolean }) {
                         </div>
 
                         <div className="flex w-full flex-col gap-4">
-                          {isSession && (
+                          {user && (
                             <>
                               <FormButton
                                 variant="submit"
                                 isSpecial={true}
-                                isDisabled={isLoading}
+                                isDisabled={isLoading || user?.isSubscriber}
                               >
                                 <div className="flex items-center gap-2 text-lg font-light">
                                   {!isLoading ? (
                                     <>
-                                      {t("subscribe")}
-                                      <ArrowRightIcon className="h-3 w-3 animate-ping" />
+                                      {!user?.isSubscriber ? (
+                                        <>
+                                          {t("subscribe")}
+                                          <ArrowRightIcon className="h-3 w-3 animate-ping" />
+                                        </>
+                                      ) : (
+                                        <>{t("yourPlan")}</>
+                                      )}
                                     </>
                                   ) : (
                                     <>
-                                      <ButtonSpinner /> checking out...
+                                      <ButtonSpinner /> {t("checkingOut")}
                                     </>
                                   )}
                                 </div>

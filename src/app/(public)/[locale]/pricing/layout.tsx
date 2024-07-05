@@ -23,7 +23,7 @@ export default async function Upgrade() {
         <PublicNav />
       )}
 
-      <UpgradeBody isSession={!!session} />
+      <UpgradeBody user={session?.user ?? undefined} />
     </>
   );
 }

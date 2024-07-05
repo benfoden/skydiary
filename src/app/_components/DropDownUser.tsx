@@ -18,9 +18,13 @@ export default async function DropDownUser() {
   return (
     <DropDownMenu isUserMenu>
       {session?.user?.isSubscriber ? (
-        <div className="flex flex-row px-4 py-2 text-blue-600 dark:text-blue-400">
-          skydiary {t("nav.premium")}
-        </div>
+        <Link href={"/pricing"}>
+          <Button variant="menuElement">
+            <span className="text-blue-600 dark:text-blue-400">
+              skydiary {t("nav.premium")}
+            </span>
+          </Button>
+        </Link>
       ) : (
         <Link href={"/pricing"}>
           <Button variant="menuElement" isSpecial>
