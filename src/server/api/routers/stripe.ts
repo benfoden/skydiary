@@ -41,13 +41,13 @@ export const stripeRouter = createTRPCRouter({
           ja: "jpy",
           en: "usd",
         };
-        const currency = localeToCurrency[input.locale];
 
         const checkoutSession = await stripe.checkout.sessions.create({
           customer: customerId,
           client_reference_id: session.user?.id,
           payment_method_types: ["card"],
-          currency,
+          currency: localeToCurrency[input.locale],
+          locale: input.locale,
           mode: "subscription",
           line_items: [
             {
@@ -75,31 +75,38 @@ export const stripeRouter = createTRPCRouter({
         throw new Error("Failed to create checkout session");
       }
     }),
-  createBillingPortalSession: protectedProcedure.mutation(async ({ ctx }) => {
-    const { stripe, session, db } = ctx;
+  createBillingPortalSession: protectedProcedure
+    .input(
+      z.object({
+        locale: z.enum(["en", "ja"]),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { stripe, session, db } = ctx;
 
-    const customerId = await getOrCreateStripeCustomerIdForUser({
-      db,
-      stripe,
-      userId: session.user?.id,
-    });
-
-    if (!customerId) {
-      throw new Error("Could not find or create customer");
-    }
-
-    const stripeBillingPortalSession =
-      await stripe.billingPortal.sessions.create({
-        customer: customerId,
-        return_url: `${baseURL()}/settings`,
+      const customerId = await getOrCreateStripeCustomerIdForUser({
+        db,
+        stripe,
+        userId: session.user?.id,
       });
 
-    if (!stripeBillingPortalSession) {
-      throw new Error("Could not create billing portal session");
-    }
+      if (!customerId) {
+        throw new Error("Could not find or create customer");
+      }
 
-    return { billingPortalUrl: stripeBillingPortalSession.url };
-  }),
+      const stripeBillingPortalSession =
+        await stripe.billingPortal.sessions.create({
+          customer: customerId,
+          return_url: `${baseURL()}/settings`,
+          locale: input.locale,
+        });
+
+      if (!stripeBillingPortalSession) {
+        throw new Error("Could not create billing portal session");
+      }
+
+      return { billingPortalUrl: stripeBillingPortalSession.url };
+    }),
 
   getUserSubDetails: protectedProcedure.query(async ({ ctx }) => {
     const { session } = ctx;

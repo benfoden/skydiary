@@ -1,7 +1,8 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import Button from "~/app/_components/Button";
+import ManageBillingButton from "~/app/_components/ButtonBilling";
 import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
 import FormButton from "~/app/_components/FormButton";
@@ -19,6 +20,7 @@ export default async function Settings() {
   const t = await getTranslations();
 
   const subscription = await api.stripe.getUserSubDetails();
+  const locale = await getLocale();
 
   return (
     <>
@@ -117,9 +119,7 @@ export default async function Settings() {
               </p>
 
               {/* todo: add active link when not in local dev, confirm email and everything works */}
-              <Link href="https://billing.stripe.com/p/login/test_aEUcNY6BIbp0fo43cc">
-                <Button variant="primary">{t("settings.editBilling")}</Button>
-              </Link>
+              <ManageBillingButton locale={locale} />
             </Card>
           )}
 
