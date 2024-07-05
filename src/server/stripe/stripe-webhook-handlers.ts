@@ -30,10 +30,9 @@ export const getOrCreateStripeCustomerIdForUser = async ({
   const customer = await stripe.customers.create({
     email: user.email ?? undefined,
     name: user.name ?? undefined,
-    // use metadata to link this Stripe customer to internal user id
-    // metadata: {
-    //   userId,
-    // },
+    metadata: {
+      userId,
+    },
   });
 
   // update with new customer id
