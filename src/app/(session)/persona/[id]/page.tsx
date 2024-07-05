@@ -33,7 +33,7 @@ export default async function Persona({ params }: { params: { id: string } }) {
       </SessionNav>
 
       <main className="flex min-h-screen w-full flex-col items-center justify-start">
-        <div className="container flex flex-col items-center justify-start gap-12 px-4 py-16 ">
+        <div className="container flex flex-col items-center justify-start gap-12 px-2 pb-12 ">
           <Card variant="form">
             <form
               className="flex w-full max-w-lg flex-col items-center justify-center gap-4"

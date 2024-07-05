@@ -29,7 +29,7 @@ export default async function Settings() {
       </SessionNav>
 
       <main className="flex min-h-screen w-full flex-col items-center justify-start">
-        <div className="container flex flex-col items-center justify-start gap-12 sm:w-96">
+        <div className="container flex flex-col items-center justify-start gap-12 px-2 sm:w-96">
           {session?.user.email === "ben.foden@gmail.com" && (
             <Link href={"/sd-admin"}>
               <Button>webmaster zone</Button>

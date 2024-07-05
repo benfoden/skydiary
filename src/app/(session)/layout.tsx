@@ -11,5 +11,5 @@ export default async function SessionLayout({ children }: Props) {
   if (!session) {
     redirect("/auth/signin");
   }
-  return children;
+  return <div className="container mx-auto min-h-screen">{children}</div>;
 }

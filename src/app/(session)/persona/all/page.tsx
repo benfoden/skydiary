@@ -31,7 +31,7 @@ export default async function Persona() {
       </SessionNav>
 
       <main className="flex min-h-screen w-full flex-col items-center justify-start">
-        <div className="container flex flex-col items-center justify-start gap-12 px-4 py-16 ">
+        <div className="container flex flex-col items-center justify-start gap-12 px-2 pb-12 ">
           <div className="flex w-full flex-col items-center justify-center gap-4 border-zinc-900 md:flex-row md:items-start md:px-32">
             <div className="mb-4 flex flex-col items-start justify-center gap-4">
               <a href="#newPersona" className="flex items-center gap-2">
