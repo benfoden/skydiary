@@ -12,18 +12,20 @@ function generateRandomPixels(pixelCount: number) {
     const backgroundColor = isWhite
       ? "white"
       : pastelColors[Math.floor(Math.random() * pastelColors.length)];
+    const size = i % 117 === 0 ? "3px" : i % 42 === 0 ? "2px" : "1px"; // Set 1 in every 117 pixels to 3px and 1 in every 42 pixels to 2px
 
     pixels.push(
       <div
         key={i}
         style={{
           position: "absolute",
-          width: "1px",
-          height: "1px",
+          width: size,
+          height: size,
           backgroundColor: backgroundColor,
           opacity: opacity,
           left: xPadding,
           top: yPadding,
+          transform: "rotate(42deg)",
         }}
       />,
     );
