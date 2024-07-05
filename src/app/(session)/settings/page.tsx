@@ -106,27 +106,20 @@ export default async function Settings() {
               <FormButton variant="submit">{t("form.save")}</FormButton>
             </form>
           </Card>
-          {session?.user?.isSubscriber && subscription && (
+          {session?.user?.isSubscriber && (
             <Card variant="form">
               <h2>{t("settings.billing")}</h2>
               <p>
-                your subscription is {JSON.stringify(subscription, null, 2)}
+                your billing status is:{" "}
+                {subscription
+                  ? JSON.stringify(subscription, null, 2)
+                  : "not active"}
               </p>
 
-              <form
-                action={async (formData) => {
-                  "use server";
-                  console.log(formData);
-                  // const locale: string = formData.get("data-locale") as string;
-                  // await setUserLocale(locale);
-                  // redirect("/settings");
-                }}
-                className="flex flex-row gap-2"
-              >
-                <FormButton variant="submit">
-                  {t("settings.editBilling")}
-                </FormButton>
-              </form>
+              {/* todo: add active link when not in local dev, confirm email and everything works */}
+              <Link href="https://billing.stripe.com/p/login/test_aEUcNY6BIbp0fo43cc">
+                <Button variant="primary">{t("settings.editBilling")}</Button>
+              </Link>
             </Card>
           )}
 
