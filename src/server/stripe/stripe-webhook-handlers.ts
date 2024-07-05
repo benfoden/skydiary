@@ -2,6 +2,7 @@
 import { type PrismaClient } from "@prisma/client";
 import type Stripe from "stripe";
 import { getServerAuthSession } from "~/server/auth";
+import { ACTIVESTATUSES } from "~/utils/constants";
 
 // retrieves a Stripe customer id for a given user if it exists or creates a new one
 export const getOrCreateStripeCustomerIdForUser = async ({
@@ -73,7 +74,7 @@ export const handleSubscriptionCreatedOrUpdated = async ({
     data: {
       stripeSubscriptionId: subscription.id,
       stripeSubscriptionStatus: subscription.status,
-      isSubscriber: subscription.status === "active",
+      isSubscriber: ACTIVESTATUSES.includes(subscription.status),
     },
   });
 
@@ -126,6 +127,34 @@ export const handleSubscriptionCanceled = async ({
     data: {
       stripeSubscriptionId: null,
       stripeSubscriptionStatus: subscription.status,
+      isSubscriber: ACTIVESTATUSES.includes(subscription.status),
+    },
+  });
+
+  await db.subscription.update({
+    where: {
+      id: subscription.id,
+    },
+    data: {
+      status: subscription.status,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      currentPeriodStart: new Date(subscription.current_period_start * 1000),
+      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      endedAt: subscription.ended_at
+        ? new Date(subscription.ended_at * 1000)
+        : null,
+      cancelAt: subscription.cancel_at
+        ? new Date(subscription.cancel_at * 1000)
+        : null,
+      canceledAt: subscription.canceled_at
+        ? new Date(subscription.canceled_at * 1000)
+        : null,
+      trialStart: subscription.trial_start
+        ? new Date(subscription.trial_start * 1000)
+        : null,
+      trialEnd: subscription.trial_end
+        ? new Date(subscription.trial_end * 1000)
+        : null,
     },
   });
 };
@@ -154,7 +183,7 @@ export const handleInvoicePaid = async ({
     data: {
       stripeSubscriptionId: subscription.id,
       stripeSubscriptionStatus: subscription.status,
-      isSubscriber: subscription.status === "active",
+      isSubscriber: ACTIVESTATUSES.includes(subscription.status),
     },
   });
 

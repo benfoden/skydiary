@@ -1,3 +1,5 @@
+import type Stripe from "stripe";
+
 export function pathHelper(pathname: string): string {
   switch (pathname) {
     case "/":
@@ -60,3 +62,9 @@ export const NEWPERSONAUSER = {
   relationship: "",
   traits: "",
 };
+
+export const ACTIVESTATUSES: Stripe.Subscription.Status[] = [
+  "trialing",
+  "active",
+  "past_due",
+];

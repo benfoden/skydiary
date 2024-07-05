@@ -6,7 +6,12 @@ import { baseURL } from "~/utils/constants";
 
 export const stripeRouter = createTRPCRouter({
   createCheckoutSession: protectedProcedure
-    .input(z.object({ period: z.enum(["monthly", "yearly"]) }))
+    .input(
+      z.object({
+        period: z.enum(["monthly", "yearly"]),
+        locale: z.enum(["en", "ja"]),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const { stripe, session, db } = ctx;
 
@@ -32,10 +37,17 @@ export const stripeRouter = createTRPCRouter({
           throw new Error("Invalid period or productId");
         }
 
+        const localeToCurrency: Record<string, string> = {
+          ja: "jpy",
+          en: "usd",
+        };
+        const currency = localeToCurrency[input.locale];
+
         const checkoutSession = await stripe.checkout.sessions.create({
           customer: customerId,
           client_reference_id: session.user?.id,
           payment_method_types: ["card"],
+          currency,
           mode: "subscription",
           line_items: [
             {

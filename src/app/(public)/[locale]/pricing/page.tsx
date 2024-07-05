@@ -1,14 +1,15 @@
 "use client";
 import { ArrowRightIcon, CheckCircledIcon } from "@radix-ui/react-icons";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Button from "~/app/_components/Button";
 import ButtonSpinner from "~/app/_components/ButtonSpinner";
 import { Card } from "~/app/_components/Card";
 import FormButton from "~/app/_components/FormButton";
 import StarsBackground from "~/app/_components/StarsBackground";
+import { type Locale } from "~/config";
 import { api } from "~/trpc/react";
 
 export default function UpgradeBody({ isSession }: { isSession: boolean }) {
@@ -22,6 +23,36 @@ export default function UpgradeBody({ isSession }: { isSession: boolean }) {
   const [checkoutStatus, setCheckoutStatus] = useState("");
   const [isYearly, setIsYearly] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [locale, setLocale] = useState<Locale>("en");
+
+  const gotLocale: Locale = useLocale() as Locale;
+
+  const checkoutHandler = async (event: FormEvent) => {
+    event.preventDefault();
+    try {
+      setIsLoading(true);
+      if (!isSession) {
+        return;
+      }
+      const period = isYearly ? "yearly" : "monthly";
+
+      const { checkoutUrl } = await createCheckoutSession({
+        period,
+        locale,
+      });
+
+      if (checkoutUrl) {
+        void router.push(checkoutUrl);
+      }
+    } catch (error) {
+      console.error("submit checkout session error:", error);
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    setLocale(gotLocale);
+  }, [gotLocale]);
 
   useEffect(() => {
     const checkoutSuccess = searchParams.get("checkoutSuccess");
@@ -127,35 +158,7 @@ export default function UpgradeBody({ isSession }: { isSession: boolean }) {
                   <Card variant="form">
                     <div className="flex w-full flex-col items-start gap-8 pb-4">
                       <h2 className="text-lg">{t("premium.title")}</h2>
-                      <form
-                        className="w-full"
-                        onSubmit={async (event) => {
-                          event.preventDefault();
-                          try {
-                            setIsLoading(true);
-                            if (!isSession) {
-                              return;
-                            }
-                            const period = isYearly ? "yearly" : "monthly";
-
-                            const { checkoutUrl } = await createCheckoutSession(
-                              {
-                                period,
-                              },
-                            );
-
-                            if (checkoutUrl) {
-                              void router.push(checkoutUrl);
-                            }
-                          } catch (error) {
-                            console.error(
-                              "submit checkout session error:",
-                              error,
-                            );
-                          }
-                          setIsLoading(false);
-                        }}
-                      >
+                      <form className="w-full" onSubmit={checkoutHandler}>
                         <div className="flex w-full flex-row items-end justify-start gap-2 pb-2">
                           <span className="text-5xl font-medium">
                             {isYearly ? t("yearlyPrice") : t("monthlyPrice")}
