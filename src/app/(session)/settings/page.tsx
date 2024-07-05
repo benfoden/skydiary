@@ -13,6 +13,7 @@ import { type Locale } from "~/config";
 import { setUserLocale } from "~/i18n";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
+import { ACTIVESTATUSES } from "~/utils/constants";
 
 export default async function Settings() {
   const session = await getServerAuthSession();
@@ -109,7 +110,7 @@ export default async function Settings() {
               <FormButton variant="submit">{t("form.save")}</FormButton>
             </form>
           </Card>
-          {subscription && session?.user?.isSubscriber && (
+          {session?.user?.isSubscriber && (
             <Card variant="form">
               <h2>{t("settings.billing")}</h2>
               <p>
@@ -121,15 +122,19 @@ export default async function Settings() {
 
               {/* todo: add active link when not in local dev, confirm email and everything works */}
               <ManageBillingButton locale={locale} />
-              <form
-                action={async () => {
-                  await api.stripe.cancelSubscription({
-                    subId: subscription.id,
-                  });
-                }}
-              >
-                <FormButton>Cancel your subscription</FormButton>
-              </form>
+              {subscription &&
+                ACTIVESTATUSES.includes(subscription?.status) && (
+                  <form
+                    action={async () => {
+                      "use server";
+                      await api.stripe.cancelSubscription({
+                        subId: subscription?.id,
+                      });
+                    }}
+                  >
+                    <FormButton>Cancel your subscription</FormButton>
+                  </form>
+                )}
             </Card>
           )}
 
