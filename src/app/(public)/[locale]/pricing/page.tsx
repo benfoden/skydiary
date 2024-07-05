@@ -124,22 +124,14 @@ export default function UpgradeBody({ isSession }: { isSession: boolean }) {
                     <h2 className="text-lg">{t("premium.title")}</h2>
                     <form
                       className="w-full"
-                      onSubmit={async () => {
+                      onSubmit={async (event) => {
+                        event.preventDefault();
                         try {
+                          setIsLoading(true);
                           if (!isSession) {
                             return;
                           }
-                          setIsLoading(true);
-                          let period: "monthly" | "yearly" | undefined;
-                          if (!isYearly) {
-                            period = "monthly";
-                          } else {
-                            period = "yearly";
-                          }
-                          if (!period) {
-                            console.error("Payment period is not defined");
-                            throw new Error("Payment period is not defined");
-                          }
+                          const period = isYearly ? "yearly" : "monthly";
 
                           const { checkoutUrl } = await createCheckoutSession({
                             period,
@@ -149,7 +141,10 @@ export default function UpgradeBody({ isSession }: { isSession: boolean }) {
                             void router.push(checkoutUrl);
                           }
                         } catch (error) {
-                          console.error(error);
+                          console.error(
+                            "submit checkout session error:",
+                            error,
+                          );
                         }
                         setIsLoading(false);
                       }}

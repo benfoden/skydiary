@@ -16,7 +16,11 @@ export default function middleware(request: NextRequest) {
     "/sd-admin",
   ];
 
-  const unTranslatedAPIRoutes = ["/api/cron", "/api/stripe/checkout-session"];
+  const unTranslatedAPIRoutes = [
+    "/api/cron",
+    "/api/trpc",
+    "/api/stripe/checkout-session",
+  ];
 
   const isUntranslatedAPIRoute = unTranslatedAPIRoutes.some((route) =>
     pathname.startsWith(route),
