@@ -14,6 +14,7 @@ import { ThemeToggle } from "./ToggleTheme";
 export default async function DropDownUser() {
   const session = await getServerAuthSession();
   const t = await getTranslations();
+  console.log(session);
   return (
     <DropDownMenu isUserMenu>
       <Link href={"/pricing"}>
