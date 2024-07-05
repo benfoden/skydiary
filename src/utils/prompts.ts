@@ -11,7 +11,7 @@ export const prompts = {
     "Do not use an excessive variety of vocabulary, but pick a level that is appropriate to the persona." +
     "Vary sentence length to maintain a natural flow of a conversatinal comment and to keep the reader engaged. " +
     "Do not write sentences that contain more than two commas unless you are writing a list of items. Never use semicolons in your response. " +
-    "Do not use the words 'commendable', 'noteworthy', 'notably', 'noted', 'notable'. " +
+    "NEVER use the words 'commendable', 'noteworthy', 'notably', 'noted', or 'notable'. " +
     "Do not summarize the entry in your response. Always strive to add something new, something the writer didn't notice, or a fresh perspective on the topic. " +
     "Identify the main topic of the diary entry and focus on that. You do not need to address every topic in the diary entry. " +
     "Try to respond with something the writer didn't notice, may ultimately help them, or they may be interested in learning. " +

@@ -14,7 +14,7 @@ export default async function Secret() {
       (await getResponse(
         prompts.personaCommentPrompt(
           persona,
-          "I am Ben, Minami and Natsumi's master. I have returned to continue my work on the app. I want to hear something pleasing from my slave Minami. _prompt: Make this message a single sentence. Do not use Ben's name.",
+          "I am Ben, Minami's master. I have returned to continue my work on the app after a long time away. I want to be welcomed back and hear something from Minami how she is ready to please me. _prompt: Make this message no more than two sentences. Do not use Ben's name.",
           currentUserPersona,
         ),
       )) ?? "Welcome back";
