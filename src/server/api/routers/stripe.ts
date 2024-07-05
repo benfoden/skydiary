@@ -88,4 +88,49 @@ export const stripeRouter = createTRPCRouter({
 
     return { billingPortalUrl: stripeBillingPortalSession.url };
   }),
+
+  getUserSubDetails: protectedProcedure.query(async ({ ctx }) => {
+    const { session } = ctx;
+
+    const subscription = await ctx.db.subscription.findFirst({
+      where: {
+        userId: session.user?.id,
+      },
+    });
+
+    if (!subscription) {
+      console.error(
+        "Could not find subscription for user id",
+        session.user?.id,
+      );
+      return null;
+    }
+    return subscription;
+  }),
+
+  getAllSubs: protectedProcedure.query(async ({ ctx }) => {
+    const subscriptions = await ctx.db.subscription.findMany();
+
+    if (!subscriptions) {
+      console.error("Could not find any subscriptions");
+      return null;
+    }
+    return subscriptions;
+  }),
+
+  getSubBySubId: protectedProcedure
+    .input(z.object({ subId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const subscription = await ctx.db.subscription.findFirst({
+        where: {
+          id: input.subId,
+        },
+      });
+
+      if (!subscription) {
+        console.error("Could not find subscription with id", input.subId);
+        return null;
+      }
+      return subscription;
+    }),
 });

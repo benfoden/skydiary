@@ -31,11 +31,15 @@ declare module "next-auth" {
       stripeSubscriptionId: string;
       stripeSubscriptionStatus: string;
       isSubscriber: boolean;
+      isAdmin: boolean;
     } & DefaultSession["user"];
   }
   interface User {
     stripeCustomerId: string;
+    stripeSubscriptionId: string;
+    stripeSubscriptionStatus: string;
     isSubscriber: boolean;
+    isAdmin: boolean;
   }
 }
 

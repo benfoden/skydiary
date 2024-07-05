@@ -73,6 +73,7 @@ export const handleSubscriptionCreatedOrUpdated = async ({
     data: {
       stripeSubscriptionId: subscription.id,
       stripeSubscriptionStatus: subscription.status,
+      isSubscriber: subscription.status === "active",
     },
   });
 
@@ -125,6 +126,62 @@ export const handleSubscriptionCanceled = async ({
     data: {
       stripeSubscriptionId: null,
       stripeSubscriptionStatus: subscription.status,
+    },
+  });
+};
+
+export const handleInvoicePaid = async ({
+  event,
+  stripe,
+  db,
+}: {
+  event: Stripe.Event;
+  stripe: Stripe;
+  db: PrismaClient;
+}) => {
+  const invoice = event.data.object as Stripe.Invoice;
+  const subscriptionId = invoice.subscription;
+  const subscription = await stripe.subscriptions.retrieve(
+    subscriptionId as string,
+  );
+  const userId = subscription.metadata.userId;
+
+  // update user with subscription data
+  await db.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      stripeSubscriptionId: subscription.id,
+      stripeSubscriptionStatus: subscription.status,
+      isSubscriber: subscription.status === "active",
+    },
+  });
+
+  await db.subscription.update({
+    where: {
+      id: subscription.id,
+    },
+    data: {
+      status: subscription.status,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      currentPeriodStart: new Date(subscription.current_period_start * 1000),
+      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      endedAt: subscription.ended_at
+        ? new Date(subscription.ended_at * 1000)
+        : null,
+      cancelAt: subscription.cancel_at
+        ? new Date(subscription.cancel_at * 1000)
+        : null,
+      canceledAt: subscription.canceled_at
+        ? new Date(subscription.canceled_at * 1000)
+        : null,
+      trialStart: subscription.trial_start
+        ? new Date(subscription.trial_start * 1000)
+        : null,
+      trialEnd: subscription.trial_end
+        ? new Date(subscription.trial_end * 1000)
+        : null,
     },
   });
 };

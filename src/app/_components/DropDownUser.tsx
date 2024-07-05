@@ -14,14 +14,20 @@ import { ThemeToggle } from "./ToggleTheme";
 export default async function DropDownUser() {
   const session = await getServerAuthSession();
   const t = await getTranslations();
-  console.log(session);
+
   return (
     <DropDownMenu isUserMenu>
-      <Link href={"/pricing"}>
-        <Button variant="menuElement" isSpecial>
-          {t("nav.upgrade")} <PlusIcon className="h-4 w-4" />
-        </Button>
-      </Link>
+      {session?.user?.isSubscriber ? (
+        <div className="flex flex-row px-4 py-2 text-blue-600 dark:text-blue-400">
+          skydiary {t("nav.premium")}
+        </div>
+      ) : (
+        <Link href={"/pricing"}>
+          <Button variant="menuElement" isSpecial>
+            {t("nav.upgrade")} <PlusIcon className="h-4 w-4" />
+          </Button>
+        </Link>
+      )}
       <Link href={"/settings"}>
         <Button variant="menuElement">
           {t("nav.settings")} <GearIcon className="h-4 w-4" />

@@ -4,6 +4,7 @@ import { env } from "~/env";
 import { db } from "~/server/db";
 import { stripe } from "~/server/stripe/client";
 import {
+  handleInvoicePaid,
   handleSubscriptionCanceled,
   handleSubscriptionCreatedOrUpdated,
 } from "~/server/stripe/stripe-webhook-handlers";
@@ -35,24 +36,18 @@ export default async function handler(
 
       // Handle the event
       switch (event.type) {
-        // case "invoice.paid":
-        //   // Used to provision services after the trial has ended.
-        //   // The status of the invoice will show up as paid. Store the status in your database to reference when a user accesses your service to avoid hitting rate limits.
-        //   await handleInvoicePaid({
-        //     event,
-        //     stripe,
-        //     db,
-        //   });
-        //   break;
-        case "customer.subscription.created":
-          // Used to provision services as they are added to a subscription.
-          await handleSubscriptionCreatedOrUpdated({
+        case "invoice.paid":
+          // Used to provision services after the trial has ended.
+          // The status of the invoice will show up as paid. Store the status in your database to reference when a user accesses your service to avoid hitting rate limits.
+          await handleInvoicePaid({
             event,
+            stripe,
             db,
           });
           break;
+        case "customer.subscription.created":
         case "customer.subscription.updated":
-          // Used to provision services as they are updated.
+          // Used to provision services as they are added to or updated in a subscription.
           await handleSubscriptionCreatedOrUpdated({
             event,
             db,

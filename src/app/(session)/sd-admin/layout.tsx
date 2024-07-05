@@ -27,10 +27,11 @@ export default async function AdminLayout({
       <div className="flex min-h-screen w-full flex-col items-center justify-start">
         <div className="container flex flex-col items-start justify-start gap-12 px-8  py-16 ">
           <div className="flex flex-row gap-4">
-            <Link href={"/sd-admin/memory"}>memory</Link>
+            <Link href={"/sd-admin/user"}>user</Link>
             <Link href={"/sd-admin/tags"}>tags</Link>
             <Link href={"/sd-admin/prompts"}>prompts</Link>
             <Link href={"/sd-admin/sandbox"}>sandbox</Link>
+            <Link href={"/sd-admin/subscriptions"}>subs</Link>
           </div>
           {children}
         </div>

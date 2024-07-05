@@ -48,7 +48,8 @@
     "copy all text": "copy text",
     "back": "back",
     "today": "today",
-    "upgrade": "upgrade"
+    "upgrade": "upgrade",
+    "premium": "premium"
   },
   "new-user": {
     "title": "welcome to skydiary",
@@ -126,7 +127,9 @@
     "your identities": "your identities",
     "placeholder identities": "woman, daughter, mother, etc.",
     "en": "English",
-    "ja": "日本語 (Japanese)"
+    "ja": "日本語 (Japanese)",
+    "billing": "billing",
+    "editBilling": "edit billing"
   },
   "form": {
     "save": "save",

@@ -18,6 +18,8 @@ export default async function Settings() {
   const userPersona = await api.persona.getUserPersona();
   const t = await getTranslations();
 
+  const subscription = await api.stripe.getUserSubDetails();
+
   return (
     <>
       <SessionNav>
@@ -104,6 +106,29 @@ export default async function Settings() {
               <FormButton variant="submit">{t("form.save")}</FormButton>
             </form>
           </Card>
+          {session?.user?.isSubscriber && subscription && (
+            <Card variant="form">
+              <h2>{t("settings.billing")}</h2>
+              <p>
+                your subscription is {JSON.stringify(subscription, null, 2)}
+              </p>
+
+              <form
+                action={async (formData) => {
+                  "use server";
+                  console.log(formData);
+                  // const locale: string = formData.get("data-locale") as string;
+                  // await setUserLocale(locale);
+                  // redirect("/settings");
+                }}
+                className="flex flex-row gap-2"
+              >
+                <FormButton variant="submit">
+                  {t("settings.editBilling")}
+                </FormButton>
+              </form>
+            </Card>
+          )}
 
           <Card variant="form">
             <h2>{t("settings.language")}</h2>

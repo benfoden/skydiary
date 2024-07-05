@@ -14,7 +14,7 @@ export default async function Secret() {
     <>
       <Card variant="form">
         <div className="flex w-full flex-col items-center gap-4 sm:w-[512px]">
-          <h2>Current persona</h2>
+          <h2>{userPersona?.name}</h2>
           <form
             className="flex w-full flex-col gap-4"
             action={async (formData) => {
@@ -126,6 +126,17 @@ export default async function Secret() {
             <FormButton variant="submit">{t("form.save")}</FormButton>
           </form>
         </div>
+        <form
+          action={async () => {
+            "use server";
+            await api.user.updateUser({
+              isSubscriber: true,
+            });
+          }}
+        >
+          <FormButton variant="submit">Activate subscription</FormButton>
+        </form>
+        <div className="w-80">{JSON.stringify(session?.user, null, 2)}</div>
       </Card>
     </>
   );
