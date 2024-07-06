@@ -105,7 +105,18 @@ export default async function Entry({
                     if (searchParams.s === "1") {
                       return;
                     }
+
                     try {
+                      if (
+                        session?.user?.maxCommentsPerDay >
+                        comments.filter(
+                          (comment) =>
+                            comment.createdAt.toDateString() ===
+                            new Date().toDateString(),
+                        ).length
+                      ) {
+                        return;
+                      }
                       const latestPost = await api.post.getByPostId({
                         postId: params.id,
                       });
@@ -117,14 +128,15 @@ export default async function Entry({
                         await api.persona.getUserPersona();
 
                       const commentType = randomizedCoachVariant;
-                      const response = await getResponse(
-                        commentPromptString({
+                      const response = await getResponse({
+                        messageContent: commentPromptString({
                           commentType,
                           authorDetails: currentUserPersona!,
                           diaryEntry: latestPost?.content ?? "",
                           maxLength: session?.user?.maxCommentLength ?? 140,
                         }),
-                      );
+                        isSubscriber: session?.user?.isSubscriber,
+                      });
                       if (response) {
                         await api.comment.create({
                           content: response,
@@ -157,85 +169,85 @@ export default async function Entry({
                     </Button>
                   </Link>
                 )}
-                {personas?.map((persona: Persona) => (
-                  <form
-                    key={persona.id}
-                    action={async () => {
-                      "use server";
-                      if (searchParams.s === "1") {
-                        return;
-                      }
-                      try {
-                        // if (
-                        //   comments.some(
-                        //     (comment) =>
-                        //       comment.createdAt.toDateString() ===
-                        //       new Date().toDateString(),
-                        //   ) &&
-                        //   !session?.user?.isSubscriber
-                        // ) {
-                        //   return;
-                        // }
-                        const latestPost = await api.post.getByPostId({
-                          postId: params.id,
-                        });
-
-                        const currentUserPersona =
-                          await api.persona.getUserPersona();
-                        //todo: measure tokens and limit based on plan
-                        const prompt = prompts.personaCommentPrompt(
-                          persona,
-                          latestPost?.content ?? "",
-                          currentUserPersona!,
-                        );
-
-                        const response = await getResponse(
-                          prompt,
-                          session?.user?.isSubscriber
-                            ? "gpt-4o"
-                            : "gpt-3.5-turbo",
-                        );
-                        if (response) {
-                          await api.comment.create({
-                            content: response,
-                            postId: params?.id,
-                            createdByPersonaId: persona.id,
-                            coachVariant: persona.name,
-                          });
-                          revalidatePath(`/entry/${params.id}`);
-                        } else {
-                          console.error(
-                            "Failed to get a response for the comment.",
-                          );
+                {personas
+                  ?.slice(0, session?.user?.maxPersonas ?? personas.length)
+                  .map((persona: Persona) => (
+                    <form
+                      key={persona.id}
+                      action={async () => {
+                        "use server";
+                        if (searchParams.s === "1") {
+                          return;
                         }
-                      } catch (error) {
-                        console.error("Error creating comment:", error);
-                      }
-                    }}
-                  >
-                    <FormButton isDisabled={searchParams.s === "1"}>
-                      <div className="flex flex-row items-center gap-2 font-medium">
-                        {persona.image ? (
-                          <>
-                            <Image
-                              alt={persona.name}
-                              src={persona.image}
-                              width="16"
-                              height="16"
-                              className="rounded-full"
-                            />
-                            <span className="text-xs">{persona.name}</span>
-                          </>
-                        ) : (
-                          <>
-                            <PersonIcon className="h-4 w-4" />
-                            <span className="text-xs">{persona.name}</span>
-                          </>
-                        )}
-                      </div>
-                    </FormButton>
-                  </form>
-                ))}
+                        try {
+                          // if (
+                          //   comments.some(
+                          //     (comment) =>
+                          //       comment.createdAt.toDateString() ===
+                          //       new Date().toDateString(),
+                          //   ) &&
+                          //   !session?.user?.isSubscriber
+                          // ) {
+                          //   return;
+                          // }
+                          const latestPost = await api.post.getByPostId({
+                            postId: params.id,
+                          });
+
+                          const currentUserPersona =
+                            await api.persona.getUserPersona();
+                          //todo: measure tokens and limit based on plan
+                          const prompt = prompts.personaCommentPrompt(
+                            persona,
+                            latestPost?.content ?? "",
+                            currentUserPersona!,
+                          );
+
+                          const response = await getResponse({
+                            messageContent: prompt,
+                            isSubscriber: session?.user?.isSubscriber,
+                          });
+                          if (response) {
+                            await api.comment.create({
+                              content: response,
+                              postId: params?.id,
+                              createdByPersonaId: persona.id,
+                              coachVariant: persona.name,
+                            });
+                            revalidatePath(`/entry/${params.id}`);
+                          } else {
+                            console.error(
+                              "Failed to get a response for the comment.",
+                            );
+                          }
+                        } catch (error) {
+                          console.error("Error creating comment:", error);
+                        }
+                      }}
+                    >
+                      <FormButton isDisabled={searchParams.s === "1"}>
+                        <div className="flex flex-row items-center gap-2 font-medium">
+                          {persona.image ? (
+                            <>
+                              <Image
+                                alt={persona.name}
+                                src={persona.image}
+                                width="16"
+                                height="16"
+                                className="rounded-full"
+                              />
+                              <span className="text-xs">{persona.name}</span>
+                            </>
+                          ) : (
+                            <>
+                              <PersonIcon className="h-4 w-4" />
+                              <span className="text-xs">{persona.name}</span>
+                            </>
+                          )}
+                        </div>
+                      </FormButton>
+                    </form>
+                  ))}
               </ul>
             </div>
 

@@ -1,21 +1,24 @@
 import OpenAI from "openai";
 import { env } from "~/env";
-import { type OPENAIMODELS } from "~/utils/constants";
 
 const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
 
-export async function getResponse(
-  inputText: string,
-  model: OPENAIMODELS[number] = "gpt-3.5-turbo",
-  systemMessage = "",
-) {
+export async function getResponse({
+  messageContent,
+  systemMessageContent = "",
+  isSubscriber = false,
+}: {
+  messageContent: string;
+  systemMessageContent?: string;
+  isSubscriber?: boolean;
+}) {
   const completion = await openai.chat.completions.create({
     messages: [
-      { role: "system", content: systemMessage },
-      { role: "user", content: inputText },
+      { role: "system", content: systemMessageContent },
+      { role: "user", content: messageContent },
     ],
     max_tokens: 1000,
-    model,
+    model: isSubscriber ? "gpt-4o" : "gpt-3.5-turbo",
   });
 
   console.log("the usage!", completion.usage);
