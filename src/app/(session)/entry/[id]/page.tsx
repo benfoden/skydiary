@@ -18,6 +18,7 @@ import { PersonaIcon } from "~/app/_components/PersonaIcon";
 import { SessionNav } from "~/app/_components/SessionNav";
 import { getUserLocale } from "~/i18n";
 import { getResponse } from "~/server/api/ai";
+import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { prompts } from "~/utils/prompts";
 import { formattedTimeStampToDate } from "~/utils/text";
@@ -30,6 +31,7 @@ export default async function Entry({
   params: { id: string };
   searchParams: { s: string };
 }) {
+  const session = await getServerAuthSession();
   const [t, locale, post, comments, tags, personas] = await Promise.all([
     getTranslations(),
     getUserLocale(),
@@ -167,13 +169,18 @@ export default async function Entry({
 
                         const currentUserPersona =
                           await api.persona.getUserPersona();
+                        //todo: measure tokens and limit based on plan
+                        const prompt = prompts.personaCommentPrompt(
+                          persona,
+                          latestPost?.content ?? "",
+                          currentUserPersona!,
+                        );
 
                         const response = await getResponse(
-                          prompts.personaCommentPrompt(
-                            persona,
-                            latestPost?.content ?? "",
-                            currentUserPersona!,
-                          ),
+                          prompt,
+                          session?.user?.isSubscriber
+                            ? "gpt-4o"
+                            : "gpt-3.5-turbo",
                         );
                         if (response) {
                           await api.comment.create({
