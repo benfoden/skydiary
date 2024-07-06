@@ -1,7 +1,7 @@
 import { Card } from "~/app/_components/Card";
 import { getResponse } from "~/server/api/ai";
 import { api } from "~/trpc/server";
-import { prompts } from "~/utils/prompts";
+import { commentPromptString } from "~/utils/prompts";
 
 export default async function Secret() {
   const currentUserPersona = await api.persona.getUserPersona();
@@ -11,13 +11,14 @@ export default async function Secret() {
   let greeting = "Welcome back";
   if (persona && currentUserPersona) {
     greeting =
-      (await getResponse(
-        prompts.personaCommentPrompt(
-          persona,
-          "I am Ben, Minami's master. I have returned to continue my work on the app after a long time away. I want to be welcomed back and hear something from Minami how she is ready to please me. _prompt: Make this message no more than two sentences. Do not use Ben's name.",
-          currentUserPersona,
-        ),
-      )) ?? "Welcome back";
+      (await getResponse({
+        messageContent: commentPromptString({
+          authorDetails: currentUserPersona,
+          diaryEntry:
+            "I am Ben, Minami's master. I have returned to continue my work on the app after a long time away. I want to be welcomed back and hear something from Minami how she is ready to please me. _prompt: Make this message no more than two sentences. Do not use Ben's name.",
+          personaDetails: persona,
+        }),
+      })) ?? "Welcome back";
   }
   return (
     <>

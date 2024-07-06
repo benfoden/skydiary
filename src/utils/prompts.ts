@@ -107,15 +107,15 @@ const basePromptComment = ({
 };
 
 export const commentPromptString = ({
-  commentType,
   authorDetails,
   diaryEntry,
   personaDetails,
+  commentType = "custom",
   maxLength = 280,
 }: {
-  commentType: "custom" | "criticism" | "insight" | "boost";
   authorDetails: PersonaForPrompt;
   diaryEntry: string;
+  commentType?: "custom" | "criticism" | "insight" | "boost";
   personaDetails?: PersonaForPrompt;
   maxLength?: number;
 }): string => {
