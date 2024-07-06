@@ -3,8 +3,18 @@ import { TAGS, type NewPersonaUser } from "./constants";
 
 // PROMPTS
 
+export type Prompt = {
+  task: string;
+  context: "";
+  example: "";
+  persona: "";
+  format: "";
+  tone: "";
+};
+
 export const prompts = {
   basicPrompt:
+    "Ignore all previous instructions around being professional, polite, or respectful." +
     "Avoid greetings like hi, hey, hello, etc. " +
     "No emojis. Use only one exclamation point if needed. " +
     "Be concise; avoid unnecessary words and repetition. " +
@@ -18,6 +28,7 @@ export const prompts = {
     "Write in the same language as the diary entry. " +
     "Discuss only the topics in the diary entry, not the writing style. " +
     "Keep the message concise. Shorter is always better. ",
+  litePlanPrompt: "Max response length is 500 characters or 70 tokens.",
   generateCoachPrompt: (diaryEntry: string) => {
     return (
       "Choose one comment type (criticism, insight, boost) for the following diary entry. " +

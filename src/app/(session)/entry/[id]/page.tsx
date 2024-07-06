@@ -163,6 +163,16 @@ export default async function Entry({
                         return;
                       }
                       try {
+                        // if (
+                        //   comments.some(
+                        //     (comment) =>
+                        //       comment.createdAt.toDateString() ===
+                        //       new Date().toDateString(),
+                        //   ) &&
+                        //   !session?.user?.isSubscriber
+                        // ) {
+                        //   return;
+                        // }
                         const latestPost = await api.post.getByPostId({
                           postId: params.id,
                         });

@@ -63,20 +63,38 @@ export const NEWPERSONAUSER = {
 
 export const ACTIVESTATUSES: string[] = ["trialing", "active", "past_due"];
 
-export const LITEPLAN = {
-  activePersonas: 1,
-  commentsDaily: 1,
-  contextChunks: 10,
-  inputTokensDaily: 1250,
-  outputTokensDaily: 35,
+export type UserPlans = {
+  lite: {
+    activePersonas: number;
+    commentsDaily: number;
+    memories: number;
+    inputTokensDaily: number;
+    outputTokensDaily: number;
+  };
+  premium: {
+    activePersonas: number;
+    commentsDaily: number;
+    memories: number;
+    inputTokensDaily: number;
+    outputTokensDaily: number;
+  };
 };
 
-export const PREMIUMPLAN = {
-  activePersonas: 999,
-  commentsDaily: 10,
-  contextChunks: 30,
-  inputTokensDaily: 50000,
-  outputTokensDaily: 5000,
+export const userPlans: UserPlans = {
+  lite: {
+    activePersonas: 1,
+    commentsDaily: 1,
+    memories: 10,
+    inputTokensDaily: 1250,
+    outputTokensDaily: 35,
+  },
+  premium: {
+    activePersonas: 999,
+    commentsDaily: 10,
+    memories: 60,
+    inputTokensDaily: 50000,
+    outputTokensDaily: 5000,
+  },
 };
 
 export type OPENAIMODELS = ["gpt-4o", "gpt-3.5-turbo"];
