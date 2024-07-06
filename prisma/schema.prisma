@@ -86,6 +86,10 @@ model User {
   stripeSubscriptionId String?
   stripeSubscriptionStatus String?
   stripeCustomerId String? @unique
+  maxPersonas       Int?
+  maxCommentsPerDay Int?
+  maxCommentLength  Int?
+  maxHistoryLength  Int?
   accounts      Account[]
   personas      Persona[]
   posts         Post[]

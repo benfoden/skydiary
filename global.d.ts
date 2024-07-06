@@ -20,3 +20,17 @@ declare global {
 //   //   isSubscriber: boolean;
 //   // }
 // }
+
+export type Prompt = {
+  task: string;
+  context: string;
+  exemplars: string;
+  persona: string;
+  format: string;
+  tone: string;
+};
+
+export type PersonaForPrompt = Omit<
+  Persona,
+  "id" | "image" | "createdAt" | "updatedAt" | "createdById" | "isUser"
+>;

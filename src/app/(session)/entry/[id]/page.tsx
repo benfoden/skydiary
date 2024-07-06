@@ -20,7 +20,11 @@ import { getUserLocale } from "~/i18n";
 import { getResponse } from "~/server/api/ai";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
-import { prompts } from "~/utils/prompts";
+import {
+  commentPromptString,
+  prompts,
+  randomizedCoachVariant,
+} from "~/utils/prompts";
 import { formattedTimeStampToDate } from "~/utils/text";
 import EntryBody from "./EntryBody";
 
@@ -112,21 +116,20 @@ export default async function Entry({
                       const currentUserPersona =
                         await api.persona.getUserPersona();
 
-                      const coachVariant = await getResponse(
-                        prompts.generateCoachPrompt(latestPost?.content),
+                      const commentType = randomizedCoachVariant;
+                      const response = await getResponse(
+                        commentPromptString({
+                          commentType,
+                          authorDetails: currentUserPersona!,
+                          diaryEntry: latestPost?.content ?? "",
+                          maxLength: session?.user?.isSubscriber ? 280 : 140,
+                        }),
                       );
-                      const prompt = prompts.skyCommentPrompt(
-                        coachVariant!,
-                        latestPost?.content,
-                        currentUserPersona!,
-                      );
-
-                      const response = await getResponse(prompt);
                       if (response) {
                         await api.comment.create({
                           content: response,
                           postId: params?.id,
-                          coachVariant: coachVariant!,
+                          coachVariant: commentType,
                         });
                         revalidatePath(`/entry/${params.id}`);
                       } else {
