@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import { type User as PrismaUser } from "@prisma/client";
 import { randomBytes, randomInt, randomUUID } from "crypto";
 import {
   getServerSession,
@@ -25,21 +26,10 @@ import { type EmailDetails } from "~/utils/types";
  */
 declare module "next-auth" {
   interface Session extends DefaultSession {
-    user: {
-      id: string;
-      stripeCustomerId: string;
-      stripeSubscriptionId: string;
-      stripeSubscriptionStatus: string;
-      isSubscriber: boolean;
-      isAdmin: boolean;
-    } & DefaultSession["user"];
+    user: PrismaUser;
   }
-  interface User {
-    stripeCustomerId: string;
-    stripeSubscriptionId: string;
-    stripeSubscriptionStatus: string;
-    isSubscriber: boolean;
-    isAdmin: boolean;
+  interface User extends PrismaUser {
+    isFuntime: boolean;
   }
 }
 

@@ -122,7 +122,7 @@ export default async function Entry({
                           commentType,
                           authorDetails: currentUserPersona!,
                           diaryEntry: latestPost?.content ?? "",
-                          maxLength: session?.user?.isSubscriber ? 280 : 140,
+                          maxLength: session?.user?.maxCommentLength ?? 140,
                         }),
                       );
                       if (response) {
