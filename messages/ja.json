@@ -202,17 +202,17 @@
       "title": "プレミアム",
       "entries": "無制限の日常エントリ",
       "personas": "無制限のカスタムパーソナ",
-      "comments": "無制限のコメント",
-      "commentLength": "1000語までの長いコメント",
+      "comments": "1日に無制限のコメント",
+      "commentLength": "2500文字までのコメント",
       "featureAccess": "新機能への早期アクセス",
       "memory": "長期のパーソナメモリ"
     },
     "lite": {
       "title": "ライト",
-      "entries": "毎日のエントリー数は無制限",
+      "entries": "無制限の日常エントリ",
       "personas": "カスタムパーソナは1つ",
       "comments": "1日につき1つのコメント",
-      "commentLength": "長いコメントは最大1000単語まで",
+      "commentLength": "250文字までのコメント",
       "featureAccess": "新機能へのデフォルトアクセス",
       "memory": "短期のパーソナメモリ"
     },

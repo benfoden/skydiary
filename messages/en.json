@@ -210,8 +210,8 @@
       "title": "premium",
       "entries": "unlimited daily entries",
       "personas": "unlimited custom personas",
-      "comments": "unlimited comments",
-      "commentLength": "long comments up to 1000 words",
+      "comments": "unlimited comments per day",
+      "commentLength": "comments up to 5000 characters",
       "featureAccess": "early access to new features",
       "memory": "long-term persona memory"
     },
@@ -220,7 +220,7 @@
       "entries": "unlimited daily entries",
       "personas": "one custom persona",
       "comments": "one comment per day",
-      "commentLength": "long comments up to 1000 words",
+      "commentLength": "comments up to 500 characters",
       "featureAccess": "default access to new features",
       "memory": "short-term persona memory"
     },

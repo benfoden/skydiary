@@ -62,3 +62,21 @@ export const NEWPERSONAUSER = {
 };
 
 export const ACTIVESTATUSES: string[] = ["trialing", "active", "past_due"];
+
+export const LITEPLAN = {
+  activePersonas: 1,
+  commentsDaily: 1,
+  contextChunks: 10,
+  inputTokensDaily: 1250,
+  outputTokensDaily: 35,
+};
+
+export const PREMIUMPLAN = {
+  activePersonas: 999,
+  commentsDaily: 10,
+  contextChunks: 30,
+  inputTokensDaily: 50000,
+  outputTokensDaily: 5000,
+};
+
+export type OPENAIMODELS = ["gpt-4o", "gpt-3.5-turbo"];
