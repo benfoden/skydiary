@@ -8,11 +8,16 @@ export default function Input({
 }: {
   type?: "text" | "textarea" | "number" | "email" | "password" | "checkbox";
   label: string;
-} & React.InputHTMLAttributes<HTMLInputElement>) {
+} & React.InputHTMLAttributes<
+  | HTMLInputElement
+  | HTMLTextAreaElement
+  | (HTMLInputElement & { type: "checkbox" })
+>) {
   const { id, value, defaultValue } = props;
   const ref = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
   const [isActive, setIsActive] = useState(false);
   const [isValueLength, setIsValueLength] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
 
   const handleFocus = () => {
     setIsActive(true);
@@ -21,7 +26,11 @@ export default function Input({
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    setIsValueLength(event.target.value.length > 0);
+    if (type === "checkbox") {
+      setIsChecked((event.target as HTMLInputElement).checked);
+    } else {
+      setIsValueLength(event.target.value.trim().length > 0);
+    }
   };
 
   useEffect(() => {
@@ -44,14 +53,19 @@ export default function Input({
   }, [value]);
 
   useEffect(() => {
-    if (typeof defaultValue === "string" || Array.isArray(defaultValue)) {
+    if (type === "checkbox") {
+      setIsValueLength(!!defaultValue);
+    } else if (
+      typeof defaultValue === "string" ||
+      Array.isArray(defaultValue)
+    ) {
       setIsValueLength(defaultValue.length > 0);
     } else if (typeof defaultValue === "number") {
       setIsValueLength(defaultValue > 0);
     } else {
       setIsValueLength(false);
     }
-  }, [defaultValue]);
+  }, [defaultValue, type]);
 
   return (
     <div className={`relative flex w-full flex-col items-start`}>
@@ -61,7 +75,7 @@ export default function Input({
       >
         {label}
       </label>
-      {type !== "textarea" ? (
+      {type !== "textarea" && type !== "checkbox" && (
         <input
           type={type ?? "text"}
           {...props}
@@ -76,7 +90,8 @@ export default function Input({
             handleChange(e);
           }}
         />
-      ) : (
+      )}
+      {type === "textarea" && (
         <textarea
           {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
           className={`w-full rounded-md py-4 pl-5 pr-10 outline-none transition placeholder:text-sm placeholder:font-light ${isActive && "bg-white/80 dark:bg-white/[.18]"} bg-primary`}
@@ -84,6 +99,22 @@ export default function Input({
           onFocus={handleFocus}
           onChange={handleChange}
           rows={7}
+        />
+      )}
+      {type === "checkbox" && (
+        <input
+          type={type ?? "checkbox"}
+          {...props}
+          checked={isChecked}
+          className={`mb-4 ml-5 mt-1`}
+          ref={ref as React.RefObject<HTMLInputElement>}
+          onFocus={handleFocus}
+          onChange={(e) => {
+            if (props.onChange) {
+              props.onChange(e);
+            }
+            handleChange(e);
+          }}
         />
       )}
     </div>

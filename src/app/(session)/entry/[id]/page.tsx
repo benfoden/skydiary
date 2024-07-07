@@ -194,7 +194,6 @@ export default async function Entry({
 
                           const currentUserPersona =
                             await api.persona.getUserPersona();
-                          //todo: measure tokens and limit based on plan
                           const prompt = commentPromptString({
                             authorDetails: currentUserPersona!,
                             diaryEntry: latestPost?.content ?? "",
