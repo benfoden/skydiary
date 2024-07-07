@@ -44,11 +44,12 @@ export const userRouter = createTRPCRouter({
       ? now.getTime() >= lastResetAt.getTime() + 24 * 60 * 60 * 1000
       : true;
 
-    return shouldReset
-      ? ctx.db.user.update({
-          where: { id: userId },
-          data: { commentsUsed: 0, resetAt: now },
-        })
-      : null;
+    return (
+      shouldReset &&
+      ctx.db.user.update({
+        where: { id: userId },
+        data: { commentsUsed: 0, resetAt: now },
+      })
+    );
   }),
 });
