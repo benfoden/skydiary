@@ -136,6 +136,8 @@ export default async function Secret() {
           <FormButton variant="submit">Activate subscription</FormButton>
         </form>
         <div className="w-80">{JSON.stringify(session?.user, null, 2)}</div>
+
+        <div className="w-80">comments used: {session.user.commentsUsed}</div>
       </Card>
     </>
   );

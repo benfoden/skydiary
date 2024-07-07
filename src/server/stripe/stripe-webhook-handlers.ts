@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { type PrismaClient } from "@prisma/client";
 import type Stripe from "stripe";
+import { env } from "~/env";
 import { getServerAuthSession } from "~/server/auth";
 import { ACTIVESTATUSES } from "~/utils/constants";
 
@@ -73,7 +74,11 @@ export const handleSubscriptionCreatedOrUpdated = async ({
     data: {
       stripeSubscriptionId: subscription.id,
       stripeSubscriptionStatus: subscription.status,
-      isSubscriber: ACTIVESTATUSES.includes(subscription.status),
+      stripeProductId:
+        ACTIVESTATUSES.includes(subscription.status) &&
+        subscription.items?.data?.[0]?.price?.product
+          ? (subscription.items?.data?.[0]?.price?.product as string)
+          : env.PRODUCT_ID_LITE,
     },
   });
 
@@ -126,7 +131,7 @@ export const handleSubscriptionDeleted = async ({
     data: {
       stripeSubscriptionId: null,
       stripeSubscriptionStatus: subscription.status,
-      isSubscriber: false,
+      stripeProductId: env.PRODUCT_ID_LITE,
     },
   });
 
@@ -182,7 +187,11 @@ export const handleInvoicePaid = async ({
     data: {
       stripeSubscriptionId: subscription.id,
       stripeSubscriptionStatus: subscription.status,
-      isSubscriber: ACTIVESTATUSES.includes(subscription.status),
+      stripeProductId:
+        ACTIVESTATUSES.includes(subscription.status) &&
+        subscription.items?.data?.[0]?.price?.product
+          ? (subscription.items?.data?.[0]?.price?.product as string)
+          : env.PRODUCT_ID_LITE,
     },
   });
 

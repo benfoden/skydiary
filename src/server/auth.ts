@@ -52,6 +52,15 @@ export const authOptions = (emailDetails: EmailDetails): NextAuthOptions => {
           ...session.user,
           id: user.id,
           stripeCustomerId: user.stripeCustomerId,
+          stripeProductId: user.stripeProductId,
+          stripeSubscriptionId: user.stripeSubscriptionId,
+          stripeSubscriptionStatus: user.stripeSubscriptionStatus,
+          commentsUsed: user.commentsUsed,
+          personasUsed: user.personasUsed,
+          memoryUsed: user.memoryUsed,
+          resetAt: user.resetAt,
+          isAdmin: user.isAdmin,
+          isSpecial: user.isSpecial,
         },
         generateSessionToken: () => {
           return randomUUID?.() ?? randomBytes(32).toString("hex");
