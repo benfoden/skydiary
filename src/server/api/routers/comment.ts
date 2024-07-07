@@ -17,6 +17,11 @@ export const commentRouter = createTRPCRouter({
         throw new Error("Content cannot be empty.");
       }
 
+      await ctx.db.user.update({
+        where: { id: ctx.session.user.id },
+        data: { commentsUsed: { increment: 1 } },
+      });
+
       return ctx.db.comment.create({
         data: {
           content: input.content,

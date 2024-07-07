@@ -24,6 +24,10 @@ export const personaRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await ctx.db.user.update({
+        where: { id: ctx.session.user.id },
+        data: { personasUsed: { increment: 1 } },
+      });
       return ctx.db.persona.create({
         data: {
           name: input.name,
@@ -104,6 +108,10 @@ export const personaRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ personaId: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      await ctx.db.user.update({
+        where: { id: ctx.session.user.id },
+        data: { personasUsed: { decrement: 1 } },
+      });
       return ctx.db.persona.delete({
         where: { id: input.personaId, isUser: false },
       });

@@ -1,8 +1,8 @@
 
 // To update the DB, run:
 bun prisma migrate dev --name <name_here>
-bun prisma generate
 bun prisma migrate deploy <name_here>
+bun prisma generate
 turso db shell skydiary < ./prisma/migrations/20240514025841_addcols/migration.sql
 
 
