@@ -4,6 +4,7 @@ import { type Session } from "next-auth";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { env } from "process";
 import { useEffect, useState, type FormEvent } from "react";
 import Button from "~/app/_components/Button";
 import ButtonSpinner from "~/app/_components/ButtonSpinner";
@@ -12,6 +13,7 @@ import FormButton from "~/app/_components/FormButton";
 import StarsBackground from "~/app/_components/StarsBackground";
 import { type Locale } from "~/config";
 import { api } from "~/trpc/react";
+import { planFromId } from "~/utils/constants";
 
 export default function UpgradeBody({ user }: { user?: Session["user"] }) {
   const { mutateAsync: createCheckoutSession } =
@@ -76,7 +78,11 @@ export default function UpgradeBody({ user }: { user?: Session["user"] }) {
           )}
           {checkoutStatus === SUCCESS && (
             <div className="flex flex-col items-start gap-6 sm:items-center">
-              <h2 className="text-4xl">{t("welcome")}</h2>
+              <h2 className="text-4xl">
+                {planFromId(user?.stripeProductId) === "plus"
+                  ? t("plus.welcome")
+                  : t("premium.welcome")}
+              </h2>
               <p className="text-4xl font-light">{t("thankYou")}</p>
               <p>{t("emailWithDetails")}</p>
             </div>
@@ -158,20 +164,22 @@ export default function UpgradeBody({ user }: { user?: Session["user"] }) {
                 <div className="flex w-80 flex-col items-center justify-center gap-8 text-xl">
                   <Card variant="form">
                     <div className="flex w-full flex-col items-start gap-8 pb-4">
-                      <h2 className="text-lg">{t("premium.title")}</h2>
+                      <h2 className="text-lg">{t("plus.title")}</h2>
                       <form className="w-full" onSubmit={checkoutHandler}>
                         <div className="flex w-full flex-row items-end justify-start gap-2 pb-2">
                           <span className="text-5xl font-medium">
-                            {isYearly ? t("yearlyPrice") : t("monthlyPrice")}
+                            {isYearly
+                              ? t("plus.yearlyPrice")
+                              : t("plus.monthlyPrice")}
                           </span>
                           <div className="flex flex-col items-start pb-1">
                             {isYearly && (
                               <div className="flex flex-col text-xs opacity-70">
-                                <span>{t("yearlyPriceDetail1")}</span>
-                                <span>{t("yearlyPriceDetail2")}</span>
+                                <span>{t("plus.yearlyPriceDetail1")}</span>
+                                <span>{t("plus.yearlyPriceDetail2")}</span>
                               </div>
                             )}
-                            <span className="mt-[-0.25rem] pt-0 text-base font-medium">
+                            <span className="mt-[-0.25rem] pt-0 text-base font-bold">
                               {t("perMonth")}
                             </span>
                           </div>
@@ -183,12 +191,19 @@ export default function UpgradeBody({ user }: { user?: Session["user"] }) {
                               <FormButton
                                 variant="submit"
                                 isSpecial={true}
-                                isDisabled={isLoading || user?.isSubscriber}
+                                isDisabled={
+                                  isLoading ||
+                                  user?.stripeProductId ===
+                                    env.PRODUCT_ID_PLUS ||
+                                  user?.stripeProductId ===
+                                    env.PRODUCT_ID_PLUS_TEST
+                                }
                               >
                                 <div className="flex items-center gap-2 text-lg font-light">
                                   {!isLoading ? (
                                     <>
-                                      {!user?.isSubscriber ? (
+                                      {planFromId(user?.stripeProductId) !==
+                                      "plus" ? (
                                         <>
                                           {t("subscribe")}
                                           <ArrowRightIcon className="h-3 w-3 animate-ping" />
@@ -203,6 +218,69 @@ export default function UpgradeBody({ user }: { user?: Session["user"] }) {
                                     </>
                                   )}
                                 </div>
+                              </FormButton>
+                            </>
+                          )}
+                        </div>
+                      </form>
+                      <ul className="flex flex-col gap-4 text-sm">
+                        <li className="flex items-start gap-2">
+                          <CheckCircledIcon className="h-5 w-5" />
+                          {t("plus.entries")}
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircledIcon className="h-5 w-5" />{" "}
+                          {t("plus.personas")}
+                        </li>
+                        <li className="flex gap-2">
+                          <CheckCircledIcon className="h-5 w-5" />{" "}
+                          {t("plus.comments")}
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircledIcon className="h-5 w-5" />{" "}
+                          {t("plus.commentLength")}
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircledIcon className="h-5 w-5" />
+                          {t("plus.featureAccess")}
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircledIcon className="h-5 w-5" />{" "}
+                          {t("plus.memory")}
+                        </li>
+                      </ul>
+                    </div>
+                  </Card>
+                </div>
+                <div className="flex w-80 flex-col items-center justify-center gap-8 text-xl">
+                  <Card variant="form">
+                    <div className="flex w-full flex-col items-start gap-8 pb-4">
+                      <h2 className="text-lg">{t("premium.title")}</h2>
+                      <form className="w-full">
+                        <div className="flex w-full flex-row items-end justify-start gap-2 pb-2">
+                          <span className="text-5xl font-medium">
+                            {isYearly
+                              ? t("premium.yearlyPrice")
+                              : t("premium.monthlyPrice")}
+                          </span>
+                          <div className="flex flex-col items-start pb-1">
+                            {isYearly && (
+                              <div className="flex flex-col text-xs opacity-70">
+                                <span>{t("premium.yearlyPriceDetail1")}</span>
+                                <span>{t("premium.yearlyPriceDetail2")}</span>
+                              </div>
+                            )}
+                            <span className="mt-[-0.25rem] pt-0 text-base font-bold">
+                              {t("perMonth")}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex w-full flex-col gap-4">
+                          {user && (
+                            <>
+                              <FormButton variant="submit" isDisabled={true}>
+                                {t("comingSoon")}
                               </FormButton>
                             </>
                           )}
@@ -252,27 +330,26 @@ export default function UpgradeBody({ user }: { user?: Session["user"] }) {
                 <ul className="flex flex-col gap-4 text-sm">
                   <li className="flex items-start gap-2">
                     <CheckCircledIcon className="h-5 w-5" />
-                    {t("premium.entries")}
+                    {t("plus.entries")}
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircledIcon className="h-5 w-5" />{" "}
-                    {t("premium.personas")}
+                    {t("plus.personas")}
                   </li>
                   <li className="flex gap-2">
                     <CheckCircledIcon className="h-5 w-5" />{" "}
-                    {t("premium.comments")}
+                    {t("plus.comments")}
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircledIcon className="h-5 w-5" />{" "}
-                    {t("premium.commentLength")}
+                    {t("plus.commentLength")}
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircledIcon className="h-5 w-5" />
-                    {t("premium.featureAccess")}
+                    {t("plus.featureAccess")}
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircledIcon className="h-5 w-5" />{" "}
-                    {t("premium.memory")}
+                    <CheckCircledIcon className="h-5 w-5" /> {t("plus.memory")}
                   </li>
                 </ul>
               </Card>

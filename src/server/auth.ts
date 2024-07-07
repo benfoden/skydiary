@@ -8,6 +8,7 @@ import {
   getServerSession,
   type DefaultSession,
   type NextAuthOptions,
+  type Session,
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
 import EmailProvider from "next-auth/providers/email";
@@ -28,8 +29,11 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: PrismaUser;
   }
+  //who cares
   interface User extends PrismaUser {
-    isFuntime: boolean;
+    stripeCustomerId?: string;
+    stripeSubscriptionId?: string;
+    stripeProductId?: string;
   }
 }
 
@@ -48,7 +52,6 @@ export const authOptions = (emailDetails: EmailDetails): NextAuthOptions => {
           ...session.user,
           id: user.id,
           stripeCustomerId: user.stripeCustomerId,
-          isSubscriber: user.isSubscriber,
         },
         generateSessionToken: () => {
           return randomUUID?.() ?? randomBytes(32).toString("hex");
@@ -153,5 +156,7 @@ export const authOptions = (emailDetails: EmailDetails): NextAuthOptions => {
  *
  * @see https://next-auth.js.org/configuration/nextjs
  */
-export const getServerAuthSession = () =>
-  getServerSession(authOptions(null as unknown as EmailDetails));
+export const getServerAuthSession = async (): Promise<Session> =>
+  getServerSession(
+    authOptions(null as unknown as EmailDetails),
+  ) as Promise<Session>;

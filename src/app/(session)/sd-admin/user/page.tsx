@@ -122,7 +122,6 @@ export default async function Secret() {
               label={t("personas.communication sample")}
               defaultValue={userPersona?.communicationSample ?? ""}
             />
-
             <FormButton variant="submit">{t("form.save")}</FormButton>
           </form>
         </div>
@@ -130,7 +129,7 @@ export default async function Secret() {
           action={async () => {
             "use server";
             await api.user.updateUser({
-              isSubscriber: true,
+              name: "ben",
             });
           }}
         >

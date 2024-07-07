@@ -6,11 +6,11 @@ const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
 export async function getResponse({
   messageContent,
   systemMessageContent = "",
-  isSubscriber = false,
+  model = "gpt-3.5-turbo",
 }: {
   messageContent: string;
   systemMessageContent?: string;
-  isSubscriber?: boolean;
+  model?: string;
 }) {
   const completion = await openai.chat.completions.create({
     messages: [
@@ -18,7 +18,7 @@ export async function getResponse({
       { role: "user", content: messageContent },
     ],
     max_tokens: 1000,
-    model: isSubscriber ? "gpt-4o" : "gpt-3.5-turbo",
+    model,
   });
 
   console.log("the usage!", completion.usage);

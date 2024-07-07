@@ -20,6 +20,7 @@ import { getUserLocale } from "~/i18n";
 import { getResponse } from "~/server/api/ai";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
+import { productPlan } from "~/utils/constants";
 import {
   commentPromptString,
   prompts,
@@ -36,6 +37,7 @@ export default async function Entry({
   searchParams: { s: string };
 }) {
   const session = await getServerAuthSession();
+  const { user } = session;
   const [t, locale, post, comments, tags, personas] = await Promise.all([
     getTranslations(),
     getUserLocale(),
@@ -108,7 +110,7 @@ export default async function Entry({
 
                     try {
                       if (
-                        session?.user?.maxCommentsPerDay >
+                        productPlan(user?.stripeProductId)?.comments >
                         comments.filter(
                           (comment) =>
                             comment.createdAt.toDateString() ===
@@ -133,9 +135,9 @@ export default async function Entry({
                           commentType,
                           authorDetails: currentUserPersona!,
                           diaryEntry: latestPost?.content ?? "",
-                          maxLength: session?.user?.maxCommentLength ?? 140,
+                          characters: productPlan(user?.stripeProductId)
+                            ?.characters,
                         }),
-                        isSubscriber: session?.user?.isSubscriber,
                       });
                       if (response) {
                         await api.comment.create({
@@ -170,7 +172,7 @@ export default async function Entry({
                   </Link>
                 )}
                 {personas
-                  ?.slice(0, session?.user?.maxPersonas ?? personas.length)
+                  ?.slice(0, productPlan(user?.stripeProductId)?.personas)
                   .map((persona: Persona) => (
                     <form
                       key={persona.id}
@@ -186,7 +188,7 @@ export default async function Entry({
                           //       comment.createdAt.toDateString() ===
                           //       new Date().toDateString(),
                           //   ) &&
-                          //   !session?.user?.isSubscriber
+                          //   !user?.isSubscriber
                           // ) {
                           //   return;
                           // }
@@ -205,7 +207,7 @@ export default async function Entry({
 
                           const response = await getResponse({
                             messageContent: prompt,
-                            isSubscriber: session?.user?.isSubscriber,
+                            model: productPlan(user?.stripeProductId)?.model,
                           });
                           if (response) {
                             await api.comment.create({

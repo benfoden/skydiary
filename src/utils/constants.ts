@@ -1,3 +1,5 @@
+import { env } from "process";
+
 export function pathHelper(pathname: string): string {
   switch (pathname) {
     case "/":
@@ -63,38 +65,67 @@ export const NEWPERSONAUSER = {
 
 export const ACTIVESTATUSES: string[] = ["trialing", "active", "past_due"];
 
-export type UserPlans = {
-  lite: {
-    activePersonas: number;
-    commentsDaily: number;
-    memories: number;
-    inputTokensDaily: number;
-    outputTokensDaily: number;
-  };
-  premium: {
-    activePersonas: number;
-    commentsDaily: number;
-    memories: number;
-    inputTokensDaily: number;
-    outputTokensDaily: number;
-  };
+export type UserPlanLimit = {
+  personas: number;
+  comments: number;
+  memories: number;
+  characters: number;
+  model: "gpt-3.5-turbo" | "gpt-4o";
 };
 
-export const userPlans: UserPlans = {
-  lite: {
-    activePersonas: 1,
-    commentsDaily: 1,
+export const userPlanLimits: Record<string, UserPlanLimit> = {
+  [env.PRODUCT_ID_LITE!]: {
+    personas: 1,
+    comments: 1,
     memories: 10,
-    inputTokensDaily: 1250,
-    outputTokensDaily: 35,
+    characters: 140,
+    model: "gpt-3.5-turbo",
   },
-  premium: {
-    activePersonas: 999,
-    commentsDaily: 10,
+  [env.PRODUCT_ID_PLUS_TEST! ?? env.PRODUCT_ID_PLUS!]: {
+    personas: 10,
+    comments: 10,
     memories: 60,
-    inputTokensDaily: 50000,
-    outputTokensDaily: 5000,
+    characters: 2000,
+    model: "gpt-4o",
+  },
+  [env.PRODUCT_ID_PREMIUM_TEST! ?? env.PRODUCT_ID_PREMIUM!]: {
+    personas: 100,
+    comments: 100,
+    memories: 1000,
+    characters: 10000,
+    model: "gpt-4o",
   },
 };
 
-export type OPENAIMODELS = ["gpt-4o", "gpt-3.5-turbo"];
+export const productPlan = (stripeProductId?: string | null): UserPlanLimit => {
+  "server only";
+  return userPlanLimits[stripeProductId ?? env.PRODUCT_ID_LITE!]!;
+};
+
+export type OpenAIModels = ["gpt-4o", "gpt-3.5-turbo"];
+
+export type PlanNames = "lite" | "plus" | "premium";
+
+export const planFromId = (
+  stripeProductId?: string | null | undefined,
+): string => {
+  if (!stripeProductId) {
+    return "lite";
+  }
+  switch (stripeProductId) {
+    case "lite":
+      return stripeProductId === env.PRODUCT_ID_LITE ? "lite" : "lite";
+    case "plus":
+      return stripeProductId === env.PRODUCT_ID_PLUS_TEST ||
+        stripeProductId === env.PRODUCT_ID_PLUS
+        ? "plus"
+        : "lite";
+    case "premium":
+      return stripeProductId === env.PRODUCT_ID_PREMIUM_TEST ||
+        stripeProductId === env.PRODUCT_ID_PREMIUM
+        ? "premium"
+        : "lite";
+    default:
+      return "lite";
+  }
+};

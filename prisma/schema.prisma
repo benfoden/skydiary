@@ -82,14 +82,10 @@ model User {
   image         String?
   isAdmin       Boolean   @default(false)
   isSpecial     Boolean   @default(false)
-  isSubscriber  Boolean   @default(false)
+  stripeProductId   String?
   stripeSubscriptionId String?
   stripeSubscriptionStatus String?
   stripeCustomerId String? @unique
-  maxPersonas       Int?
-  maxCommentsPerDay Int?
-  maxCommentLength  Int?
-  maxHistoryLength  Int?
   accounts      Account[]
   personas      Persona[]
   posts         Post[]

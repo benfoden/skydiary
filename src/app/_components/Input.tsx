@@ -6,7 +6,7 @@ export default function Input({
   label,
   ...props
 }: {
-  type?: "text" | "textarea" | "number" | "email" | "password";
+  type?: "text" | "textarea" | "number" | "email" | "password" | "checkbox";
   label: string;
 } & React.InputHTMLAttributes<HTMLInputElement>) {
   const { id, value, defaultValue } = props;
