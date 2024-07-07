@@ -21,11 +21,7 @@ import { getResponse } from "~/server/api/ai";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { productPlan } from "~/utils/constants";
-import {
-  commentPromptString,
-  prompts,
-  randomizedCoachVariant,
-} from "~/utils/prompts";
+import { commentPromptString, randomizedCoachVariant } from "~/utils/prompts";
 import { formattedTimeStampToDate } from "~/utils/text";
 import EntryBody from "./EntryBody";
 
@@ -182,16 +178,16 @@ export default async function Entry({
                           return;
                         }
                         try {
-                          // if (
-                          //   comments.some(
-                          //     (comment) =>
-                          //       comment.createdAt.toDateString() ===
-                          //       new Date().toDateString(),
-                          //   ) &&
-                          //   !user?.isSubscriber
-                          // ) {
-                          //   return;
-                          // }
+                          if (
+                            productPlan(user?.stripeProductId)?.comments >
+                            comments.filter(
+                              (comment) =>
+                                comment.createdAt.toDateString() ===
+                                new Date().toDateString(),
+                            ).length
+                          ) {
+                            return;
+                          }
                           const latestPost = await api.post.getByPostId({
                             postId: params.id,
                           });
@@ -199,11 +195,12 @@ export default async function Entry({
                           const currentUserPersona =
                             await api.persona.getUserPersona();
                           //todo: measure tokens and limit based on plan
-                          const prompt = prompts.personaCommentPrompt(
-                            persona,
-                            latestPost?.content ?? "",
-                            currentUserPersona!,
-                          );
+                          const prompt = commentPromptString({
+                            authorDetails: currentUserPersona!,
+                            diaryEntry: latestPost?.content ?? "",
+                            characters: productPlan(user?.stripeProductId)
+                              ?.characters,
+                          });
 
                           const response = await getResponse({
                             messageContent: prompt,
