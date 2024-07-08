@@ -166,7 +166,9 @@ export const postRouter = createTRPCRouter({
     });
 
     for (const post of postsNotFromToday) {
-      const summary = await getResponse(prompts.summarizeText(post.content));
+      const summary = await getResponse(
+        prompts.summarizeText(post.content ?? ""),
+      );
       if (summary) {
         continue;
       }

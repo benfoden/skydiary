@@ -1,8 +1,7 @@
 "use client";
 
-import { type Comment, type Persona } from "@prisma/client";
+import { type Comment, type Persona, type User } from "@prisma/client";
 import { CircleIcon, PersonIcon, PlusIcon } from "@radix-ui/react-icons";
-import { useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,22 +12,21 @@ import FormButton from "~/app/_components/FormButton";
 import { PersonaIcon } from "~/app/_components/PersonaIcon";
 import { productPlan } from "~/utils/constants";
 import { formattedTimeStampToDate } from "~/utils/text";
+import { deleteComment } from "./serverFunctions";
 
 export default function Comments({
+  user,
   isLoading,
   comments,
   personas,
   postId,
 }: {
+  user: User;
   isLoading: boolean;
   comments: Comment[];
   personas?: Persona[];
   postId: string;
 }) {
-  const { data: session } = useSession();
-
-  const user = session?.user;
-
   const t = useTranslations();
   const locale = useLocale();
 
@@ -103,7 +101,16 @@ export default function Comments({
                       <div className="flex flex-row items-center gap-2">
                         {formattedTimeStampToDate(comment.createdAt, locale)}
 
-                        <DeleteButton hasText={false} />
+                        <DeleteButton
+                          hasText={false}
+                          onClick={async () =>
+                            await deleteComment({
+                              commentId: comment.id,
+                              postId,
+                              isLoading: isLoading,
+                            })
+                          }
+                        />
                       </div>
                     </div>
                     <div className="text-sm">{comment.content}</div>

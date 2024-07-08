@@ -6,7 +6,7 @@ import { useFormStatus } from "react-dom";
 import Button from "./Button";
 import ButtonSpinner from "./ButtonSpinner";
 
-export default function DeleteButton({
+export default function FormDeleteButton({
   hasText = true,
 }: {
   hasText?: boolean;

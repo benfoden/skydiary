@@ -8,7 +8,9 @@ import ButtonSpinner from "./ButtonSpinner";
 
 export default function DeleteButton({
   hasText = true,
+  onClick,
 }: {
+  onClick: () => void;
   hasText?: boolean;
 }) {
   const { pending }: { pending: boolean } = useFormStatus();
@@ -27,11 +29,12 @@ export default function DeleteButton({
     };
   }, [confirmDelete]);
 
-  const handleDelete = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleDelete = () => {
     if (!confirmDelete) {
-      event.preventDefault();
       setConfirmDelete(true);
+      return;
     }
+    onClick();
   };
 
   return (
