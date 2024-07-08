@@ -116,7 +116,8 @@
     "communicationSamplePlaceholder": "走れるなら、ダンスできる。話すなら、歌える。",
     "favoriteLimitTitle": "あなたのプランのお気に入りのパーソナの数が上限に達しました。",
     "favoriteLimitDescription1": "新しいパーソナを追加することはできますが、お気に入りからのコメントを受け取ることができます。",
-    "favoriteLimitDescription2": "より多くのお気に入りのパーソナを追加するには、アップグレードしてください。"
+    "favoriteLimitDescription2": "より多くのお気に入りのパーソナを追加するには、アップグレードしてください。",
+    "delete": "このパーソナを完全に削除する"
   },
   "settings": {
     "personal": "個人",

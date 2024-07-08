@@ -14,6 +14,7 @@ export default function FormDeleteButton({
   const { pending }: { pending: boolean } = useFormStatus();
   const t = useTranslations();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [readyToDelete, setReadyToDelete] = useState(true);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -28,9 +29,13 @@ export default function FormDeleteButton({
   }, [confirmDelete]);
 
   const handleDelete = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (!confirmDelete) {
+    if (!confirmDelete && readyToDelete) {
       event.preventDefault();
       setConfirmDelete(true);
+      setReadyToDelete(false);
+      setTimeout(() => {
+        setReadyToDelete(true);
+      }, 1000);
     }
   };
 
@@ -38,7 +43,7 @@ export default function FormDeleteButton({
     <Button
       variant="menuElement"
       type="submit"
-      disabled={pending}
+      disabled={pending || !readyToDelete}
       onClick={handleDelete}
     >
       {pending ? (
@@ -48,7 +53,7 @@ export default function FormDeleteButton({
         </>
       ) : confirmDelete ? (
         <>
-          {hasText && t("form.confirmDelete")} <CheckIcon className="h-5 w-5" />
+          {hasText && t("form.confirmDelete")} <CheckIcon className="h-5 w-5" />{" "}
         </>
       ) : (
         <>

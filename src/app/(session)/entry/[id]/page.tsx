@@ -203,7 +203,7 @@ export default async function Entry({
                                   }
                                 }}
                               >
-                                <FormDeleteButton hasText={false} />
+                                <FormDeleteButton />
                               </form>
                             </div>
                           </div>
