@@ -1,7 +1,6 @@
 "use server";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 import DropDownUser from "~/app/_components/DropDownUser";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { SessionNav } from "~/app/_components/SessionNav";
@@ -45,17 +44,14 @@ export default async function EntryPageServer({
         <h1>{formattedTimeStampToDate(post.createdAt, locale)}</h1>
         <DropDownUser />
       </SessionNav>
-      <Suspense fallback={<div>loading...</div>}>
-        <EntryPageClient
-          user={user}
-          initialPost={post}
-          initialComments={comments}
-          initialTags={tags}
-          initialPersonas={personas}
-          searchParams={searchParams}
-          params={params}
-        />
-      </Suspense>
+      <EntryPageClient
+        user={user}
+        post={post}
+        initialComments={comments}
+        initialTags={tags}
+        initialPersonas={personas}
+        searchParams={searchParams}
+      />
     </>
   );
 }

@@ -6,80 +6,68 @@ import {
   type Tag,
   type User,
 } from "@prisma/client";
-import { CheckCircledIcon } from "@radix-ui/react-icons";
-import { useTranslations } from "next-intl";
-import { revalidatePath } from "next/cache";
+import {
+  CheckCircledIcon,
+  CircleIcon,
+  PersonIcon,
+  PlusIcon,
+} from "@radix-ui/react-icons";
+import { useLocale, useTranslations } from "next-intl";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type SetStateAction } from "react";
 import Button from "~/app/_components/Button";
 import ButtonSpinner from "~/app/_components/ButtonSpinner";
-import { cardColors } from "~/app/_components/Card";
+import { Card, cardColors } from "~/app/_components/Card";
 import CopyTextButton from "~/app/_components/CopyTextButton";
 import DeleteButton from "~/app/_components/DeleteButton";
 import DropDownMenu from "~/app/_components/DropDown";
+import { PersonaIcon } from "~/app/_components/PersonaIcon";
 import { api } from "~/trpc/react";
-import Comments from "./Comments";
-import { deletePost } from "./serverFunctions";
+import { productPlan } from "~/utils/constants";
+import { formattedTimeStampToDate } from "~/utils/text";
+import { deleteComment, deletePost, makeComment } from "./serverFunctions";
 
 export default function EntryPageClient({
   user,
-  initialPost,
+  post,
   initialComments,
   initialTags,
   initialPersonas,
   searchParams,
-  params,
 }: {
   user: User;
-  initialPost: Post;
+  post: Post;
   initialComments: Comment[];
   initialTags: Tag[];
   initialPersonas: Persona[];
   searchParams: { s: string };
-  params: { id: string };
 }) {
-  const utils = api.useUtils();
-  const [post, setPost] = useState<Post>({});
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [personas, setPersonas] = useState<Persona[]>([]);
-  const [debounceTimeout, setDebounceTimeout] = useState(null);
-  const [isSaving, setIsSaving] = useState<boolean>(false);
-  const firstLoad = useRef(true);
+  const postId = post.id;
+  const { isSuccess, data: refetchedPost } = api.post.getByPostId.useQuery({
+    postId,
+  });
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const t = useTranslations();
+  const locale = useLocale();
   const router = useRouter();
 
-  const postId = params.id;
+  const [postContent, setPostContent] = useState<string>(post?.content);
+  const [comments, setComments] = useState<Comment[]>(initialComments);
+  const [tags, setTags] = useState<Tag[]>(initialTags);
+  const [personas, setPersonas] = useState<Persona[]>(initialPersonas);
+  const [debounceTimeout, setDebounceTimeout] = useState(null);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const updatePost = api.post.update.useMutation({
-    onMutate: async (newContent) => {
+    onMutate: () => {
       setIsSaving(true);
       router.replace(`${window.location.pathname}?s=1`, { scroll: false });
-      await utils.post.getByPostId.cancel({ postId });
-
-      // Get the data from the queryCache
-      const prevData = utils.post.getByPostId.getData({ postId });
-
-      // Optimistically update the data with our new post
-      utils.post.getByPostId.setData({ postId }, (prevPost) => ({
-        ...prevPost,
-        content: newContent,
-      }));
-
-      // Return the previous data so we can revert if something goes wrong
-      return { prevData };
     },
-    onSuccess: () => {
+    onSettled: () => {
       setIsSaving(false);
       router.replace(`${window.location.pathname}`, { scroll: false });
-    },
-    onSettled: async () => {
-      await utils.post.getByPostId.invalidate({ postId });
-      revalidatePath(`/entry/${postId}`);
-      await utils.post.getByUser.invalidate();
-      revalidatePath("/home");
     },
   });
 
@@ -91,17 +79,15 @@ export default function EntryPageClient({
   };
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newContent = e.target.value;
-
-    setPost({ ...post, content: newContent });
-    // setPost({ ...post, content: updatePost.data?.content ?? "" });
+    const content = e.target.value;
+    setPostContent(content);
 
     if (debounceTimeout) {
       clearTimeout(debounceTimeout);
     }
 
     const newTimeout = setTimeout(() => {
-      updatePost.mutate({ content: newContent, postId: post?.id });
+      updatePost.mutate({ content, postId });
     }, 1000);
 
     setDebounceTimeout(newTimeout as unknown as SetStateAction<null>);
@@ -115,14 +101,10 @@ export default function EntryPageClient({
   };
 
   useEffect(() => {
-    if (!firstLoad.current) {
-      return;
+    if (isSuccess && refetchedPost) {
+      setPostContent(refetchedPost.content ?? "");
     }
-    console.count("useEffect");
-    setPost(initialPost);
-    firstLoad.current = false;
-    return;
-  }, [initialPost]);
+  }, [refetchedPost, isSuccess]);
 
   useEffect(() => {
     adjustTextareaHeight();
@@ -133,9 +115,9 @@ export default function EntryPageClient({
       <div className="flex h-full w-full flex-col items-center gap-12 pb-4">
         <textarea
           ref={textareaRef}
-          value={post?.content ?? ""}
+          value={postContent ?? ""}
           onChange={handleContentChange}
-          placeholder={!post?.content ? t("status.loading") : t("entry.today")}
+          placeholder={!postContent ? t("status.loading") : t("entry.today")}
           className={`min-h-full w-full resize-none rounded-xl border-none px-8 py-6 focus:outline-none sm:max-w-5xl sm:rounded-3xl sm:px-16 sm:py-12 dark:text-[#DCDCDC] ${cardColors("default")}`}
           autoFocus
           style={{ height: "auto", overflow: "hidden", paddingBottom: "16px" }}
@@ -174,7 +156,7 @@ export default function EntryPageClient({
               <DeleteButton
                 onClick={async () =>
                   await deletePost({
-                    postId: post?.id,
+                    postId,
                     isLoading: searchParams.s === "1",
                   })
                 }
@@ -182,13 +164,110 @@ export default function EntryPageClient({
             </DropDownMenu>
           </div>
         </div>
-        <Comments
-          user={user}
-          postId={params?.id}
-          isLoading={searchParams.s === "1"}
-          comments={comments}
-          personas={personas}
-        />
+        <div className="flex h-full w-full flex-col items-center pb-4">
+          <div className="flex w-full flex-row items-start justify-center gap-2">
+            <ul className="flex w-full flex-row flex-wrap justify-start gap-2">
+              <Button
+                disabled={searchParams.s === "1"}
+                onClick={async () => {
+                  const newComment = await makeComment({
+                    comments,
+                    postId,
+                    userProductId: user?.stripeProductId ?? "",
+                    commentPersona: personas?.[0],
+                  });
+                  setComments((prevComments) => [...prevComments, newComment]);
+                }}
+              >
+                <div className="flex flex-row items-center gap-2 text-xs">
+                  <CircleIcon className="h-4 w-4" />
+                  sky
+                </div>
+              </Button>
+
+              {!personas?.length && (
+                <Link href="/persona/all">
+                  <Button>
+                    <PlusIcon className="h-4 w-4" />
+                    <span className="text-xs">{t("nav.addPersonas")}</span>
+                  </Button>
+                </Link>
+              )}
+              {personas
+                ?.slice(
+                  0,
+                  user?.isSpecial
+                    ? personas.length - 1
+                    : productPlan(user?.stripeProductId)?.personas,
+                )
+                .map((persona: Persona) => (
+                  <Button disabled={searchParams.s === "1"} key={persona.id}>
+                    <div className="flex flex-row items-center gap-2 font-medium">
+                      {persona.image ? (
+                        <>
+                          <Image
+                            alt={persona.name}
+                            src={persona.image}
+                            width="16"
+                            height="16"
+                            className="rounded-full"
+                          />
+                          <span className="text-xs">{persona.name}</span>
+                        </>
+                      ) : (
+                        <>
+                          <PersonIcon className="h-4 w-4" />
+                          <span className="text-xs">{persona.name}</span>
+                        </>
+                      )}
+                    </div>
+                  </Button>
+                ))}
+            </ul>
+          </div>
+
+          {comments && (
+            <ul className="flex flex-col gap-4 pt-6">
+              {comments
+                .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+                .map((comment) => (
+                  <li key={comment.id} className="flex flex-col rounded-lg">
+                    <Card isButton={false}>
+                      <div className="flex w-full flex-col gap-4 py-4">
+                        <div className="flex w-full justify-between gap-4 text-xs">
+                          <div className="font-medium">
+                            <PersonaIcon
+                              personaId={comment.createdByPersonaId ?? ""}
+                              personas={personas}
+                              coachVariant={comment.coachVariant ?? ""}
+                            />
+                          </div>
+                          <div className="flex flex-row items-center gap-2">
+                            {formattedTimeStampToDate(
+                              comment.createdAt,
+                              locale,
+                            )}
+
+                            <DeleteButton
+                              hasText={false}
+                              onClick={async () =>
+                                await deleteComment({
+                                  commentId: comment.id,
+                                  postId,
+                                  isLoading: searchParams.s === "1",
+                                })
+                              }
+                            />
+                          </div>
+                        </div>
+                        <div className="text-sm">{comment.content}</div>
+                      </div>
+                    </Card>
+                  </li>
+                ))}
+            </ul>
+          )}
+        </div>
       </div>
     </div>
   );

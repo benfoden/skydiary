@@ -27,7 +27,7 @@ export const commentRouter = createTRPCRouter({
           content: input.content,
           postId: input.postId,
           coachVariant: input.coachVariant,
-          createdByPersonaId: input.createdByPersonaId,
+          createdByPersonaId: input.createdByPersonaId ?? "sky",
         },
       });
     }),

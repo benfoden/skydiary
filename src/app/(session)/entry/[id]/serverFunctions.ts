@@ -11,20 +11,15 @@ import { commentPromptString, randomizedCoachVariant } from "~/utils/prompts";
 export async function makeComment({
   comments,
   postId,
-  isDisabled,
   userProductId,
   commentPersona,
 }: {
   comments: Comment[];
   postId: string;
-  isDisabled: boolean;
   userProductId: string;
   commentPersona?: Persona;
 }) {
   "use server";
-  if (isDisabled) {
-    return;
-  }
 
   try {
     if (
