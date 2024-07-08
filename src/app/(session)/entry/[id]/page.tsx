@@ -22,7 +22,7 @@ import { api } from "~/trpc/server";
 import { productPlan } from "~/utils/constants";
 import { formattedTimeStampToDate } from "~/utils/text";
 import EntryBody from "./EntryBody";
-import { makeComment } from "./serverFunctions";
+import { makeComment } from "./helpers";
 
 export default async function Entry({
   params,
@@ -190,8 +190,6 @@ export default async function Entry({
                                     return;
                                   }
                                   try {
-                                    //not sure why this is erorring, but it works so shut it up for now
-                                    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                                     await api.comment.delete({
                                       commentId: comment.id,
                                     });
