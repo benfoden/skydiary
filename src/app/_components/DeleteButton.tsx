@@ -39,6 +39,7 @@ export default function DeleteButton({
         setReadyToDelete(true);
       }, 1000);
     }
+    onClick();
   };
 
   return (
