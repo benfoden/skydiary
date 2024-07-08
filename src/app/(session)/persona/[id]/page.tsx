@@ -1,4 +1,4 @@
-import { PersonIcon } from "@radix-ui/react-icons";
+import { PersonIcon, StarIcon } from "@radix-ui/react-icons";
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import { redirect } from "next/navigation";
@@ -10,12 +10,14 @@ import PersonaFormFields from "~/app/_components/PersonaFormFields";
 import { SessionNav } from "~/app/_components/SessionNav";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
+import { productPlan } from "~/utils/constants";
 
 export default async function Persona({ params }: { params: { id: string } }) {
   const session = await getServerAuthSession();
   if (!session?.user) return redirect("/auth/signin");
   const personaId = params.id;
-  const persona = await api.persona.getById({ personaId });
+  const personas = await api.persona.getAllByUserId();
+  const persona = personas?.find((persona) => persona.id === personaId);
   if (!persona) return null;
   const t = await getTranslations();
 
@@ -58,6 +60,15 @@ export default async function Persona({ params }: { params: { id: string } }) {
                   "communicationSample",
                 ) as string;
 
+                let isFavorite = false;
+
+                if (
+                  personas?.length >
+                  productPlan(session?.user?.stripeProductId)?.personas
+                ) {
+                  isFavorite = formData.get("isFavorite") === "on";
+                }
+
                 if (name && traits) {
                   try {
                     await api.persona.update({
@@ -72,6 +83,7 @@ export default async function Persona({ params }: { params: { id: string } }) {
                       occupation,
                       communicationStyle,
                       communicationSample,
+                      isFavorite,
                     });
                   } catch (error) {
                     console.error("Error updating persona:", error);
@@ -92,8 +104,13 @@ export default async function Persona({ params }: { params: { id: string } }) {
                 ) : (
                   <PersonIcon className="h-16 w-16" />
                 )}
+                {persona?.isFavorite && <StarIcon className="h-4 w-4" />}
               </div>
-              <PersonaFormFields persona={persona} />
+              <PersonaFormFields
+                personas={personas}
+                personaId={personaId}
+                user={session?.user}
+              />
               <FormButton variant="submit">{t("form.update")}</FormButton>
             </form>
           </Card>

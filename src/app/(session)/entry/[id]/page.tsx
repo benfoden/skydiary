@@ -19,7 +19,6 @@ import { SessionNav } from "~/app/_components/SessionNav";
 import { getUserLocale } from "~/i18n";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
-import { productPlan } from "~/utils/constants";
 import { formattedTimeStampToDate } from "~/utils/text";
 import EntryBody from "./EntryBody";
 import { makeComment } from "./helpers";
@@ -113,16 +112,12 @@ export default async function Entry({
                     </div>
                   </FormButton>
                 </form>
-                {!personas?.length && (
-                  <Link href="/persona/all">
-                    <Button>
-                      <PlusIcon className="h-4 w-4" />
-                      <span className="text-xs">{t("nav.addPersonas")}</span>
-                    </Button>
-                  </Link>
-                )}
+
                 {personas
-                  ?.slice(0, productPlan(user?.stripeProductId)?.personas)
+                  .filter(
+                    (persona) =>
+                      persona.isFavorite || !personas.some((p) => p.isFavorite),
+                  )
                   .map((persona: Persona) => (
                     <form
                       key={persona.id}
@@ -159,6 +154,12 @@ export default async function Entry({
                       </FormButton>
                     </form>
                   ))}
+                <Link href="/persona/all">
+                  <Button>
+                    <PersonIcon className="h-4 w-4" />
+                    <PlusIcon className="h-4 w-4" />
+                  </Button>
+                </Link>
               </ul>
             </div>
 

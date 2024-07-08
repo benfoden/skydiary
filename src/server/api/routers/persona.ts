@@ -21,6 +21,7 @@ export const personaRouter = createTRPCRouter({
         communicationStyle: z.string().max(140).optional(),
         communicationSample: z.string().max(1000).optional(),
         isUser: z.boolean().optional(),
+        isFavorite: z.boolean().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -42,6 +43,7 @@ export const personaRouter = createTRPCRouter({
           communicationSample: input.communicationSample,
           isUser: input.isUser,
           createdBy: { connect: { id: ctx.session.user.id } },
+          isFavorite: input.isFavorite,
         },
       });
     }),
@@ -60,9 +62,11 @@ export const personaRouter = createTRPCRouter({
         communicationStyle: z.string().max(140).optional(),
         communicationSample: z.string().max(1000).optional(),
         isUser: z.boolean().optional(),
+        isFavorite: z.boolean().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      console.log("!!!!!", input);
       return ctx.db.persona.update({
         where: { id: input.personaId, createdBy: { id: ctx.session.user.id } },
         data: {
@@ -77,6 +81,7 @@ export const personaRouter = createTRPCRouter({
           communicationStyle: input.communicationStyle,
           communicationSample: input.communicationSample,
           isUser: input.isUser,
+          isFavorite: input.isFavorite,
         },
       });
     }),

@@ -1,18 +1,33 @@
-import { type Persona } from "@prisma/client";
+import { type Persona, type User } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
+import { isFavoritePersonaAvailable } from "../(session)/persona/helpers";
 import Input from "./Input";
 
 export default async function PersonaFormFields({
-  persona,
+  personas,
+  personaId,
+  user,
 }: {
-  persona?: Persona;
+  personas: Persona[];
+  personaId?: string;
+  user: User;
 }) {
+  const persona = personas?.find((persona) => persona.id === personaId);
   const t = await getTranslations();
 
   //todo: add placeholder strings
 
   return (
     <div className="flex w-full flex-col gap-4">
+      {JSON.stringify(persona)}
+      <Input
+        label={t("personas.favorite")}
+        id="isFavorite"
+        name="isFavorite"
+        type="checkbox"
+        checked={persona?.isFavorite ?? true}
+        disabled={!isFavoritePersonaAvailable(user, personas)}
+      />
       <Input
         label={t("personas.name")}
         id="name"

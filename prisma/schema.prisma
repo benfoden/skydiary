@@ -114,6 +114,7 @@ model Persona {
   updatedAt           DateTime  @updatedAt
   createdById         String
   comments            Comment[]
+  isFavorite          Boolean   @default(false)
   isUser              Boolean   @default(false)
   createdBy           User      @relation(fields: [createdById], references: [id])
 }

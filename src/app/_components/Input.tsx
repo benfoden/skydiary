@@ -106,7 +106,7 @@ export default function Input({
           type={type ?? "checkbox"}
           {...props}
           checked={isChecked}
-          className={`mb-4 ml-5 mt-1`}
+          className={`mb-4 ml-5 mt-1 ${props.disabled && "cursor-not-allowed"}`}
           ref={ref as React.RefObject<HTMLInputElement>}
           onFocus={handleFocus}
           onChange={(e) => {

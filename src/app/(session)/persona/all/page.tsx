@@ -1,4 +1,4 @@
-import { PlusIcon } from "@radix-ui/react-icons";
+import { PlusIcon, StarIcon } from "@radix-ui/react-icons";
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
@@ -13,6 +13,7 @@ import { PersonaIcon } from "~/app/_components/PersonaIcon";
 import { SessionNav } from "~/app/_components/SessionNav";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
+import { productPlan } from "~/utils/constants";
 
 export default async function Persona() {
   const session = await getServerAuthSession();
@@ -48,6 +49,9 @@ export default async function Persona() {
                           personaId={persona.id}
                           personas={personas}
                         />
+                        {persona?.isFavorite && (
+                          <StarIcon className="h-4 w-4" />
+                        )}
                       </Button>
                     </Link>
                   ))}
@@ -90,6 +94,14 @@ export default async function Persona() {
                       "communicationSample",
                     ) as string;
 
+                    let isFavorite = false;
+                    if (
+                      personas?.length >
+                      productPlan(session?.user?.stripeProductId)?.personas
+                    ) {
+                      isFavorite = formData.get("isFavorite") === "on";
+                    }
+
                     if (name && traits) {
                       try {
                         await api.persona.create({
@@ -103,6 +115,7 @@ export default async function Persona() {
                           occupation,
                           communicationStyle,
                           communicationSample,
+                          isFavorite,
                         });
                       } catch (error) {
                         console.error("Error updating persona:", error);
@@ -112,7 +125,7 @@ export default async function Persona() {
                     }
                   }}
                 >
-                  <PersonaFormFields />
+                  <PersonaFormFields personas={personas} user={session?.user} />
                   <FormButton variant="submit">{t("form.create")}</FormButton>
                 </form>
               </Card>
