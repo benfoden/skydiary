@@ -23,7 +23,7 @@ export default function DeleteButton({
     if (confirmDelete) {
       timer = setTimeout(() => {
         setConfirmDelete(false);
-      }, 3000);
+      }, 6000);
     }
     return () => {
       clearTimeout(timer);
