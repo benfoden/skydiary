@@ -1,19 +1,18 @@
-import { PlusIcon, StarIcon } from "@radix-ui/react-icons";
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import PersonaFormFields from "~/app/(session)/persona/PersonaFormFields";
 import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
 import FormButton from "~/app/_components/FormButton";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
-import PersonaFormFields from "~/app/_components/PersonaFormFields";
-import { PersonaIcon } from "~/app/_components/PersonaIcon";
 import { SessionNav } from "~/app/_components/SessionNav";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
-import { productPlan } from "~/utils/constants";
+import PersonaSidebar from "../Sidebar";
+import { isFavoritePersonaAvailable } from "../helpers";
 
 export default async function Persona() {
   const session = await getServerAuthSession();
@@ -33,31 +32,28 @@ export default async function Persona() {
 
       <main className="flex min-h-screen w-full flex-col items-center justify-start">
         <div className="container flex flex-col items-center justify-start gap-12 px-2 pb-12 ">
-          <div className="flex w-full flex-col items-center justify-center gap-4 border-zinc-900 md:flex-row md:items-start md:px-32">
-            <div className="mb-4 flex flex-col items-start justify-center gap-4">
-              <a href="#newPersona" className="flex items-center gap-2">
-                <Button>
-                  <PlusIcon className="h-5 w-5" /> {t("personas.add new")}
-                </Button>
-              </a>{" "}
-              {personas && (
-                <>
-                  {personas?.map((persona) => (
-                    <Link key={persona.id} href={`/persona/${persona.id}`}>
-                      <Button variant="listItem">
-                        <PersonaIcon
-                          personaId={persona.id}
-                          personas={personas}
-                        />
-                        {persona?.isFavorite && (
-                          <StarIcon className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </Link>
-                  ))}
-                </>
-              )}
-            </div>
+          {!isFavoritePersonaAvailable(session?.user, personas) && (
+            <Card isButton={false}>
+              <div className="flex w-full flex-col items-center justify-center gap-4 ">
+                <h2 className="text-lg font-medium">
+                  {t("personas.favoriteLimitTitle")}
+                </h2>
+                <p className="text-sm">
+                  {t("personas.favoriteLimitDescription1")}
+                </p>
+                <p className="text-sm">
+                  {t("personas.favoriteLimitDescription2")}
+                </p>
+                <Link href="/pricing">
+                  <Button variant="cta" isSpecial>
+                    {t("nav.upgrade")}
+                  </Button>
+                </Link>
+              </div>
+            </Card>
+          )}
+          <div className="flex w-full flex-col items-center justify-center gap-4 sm:flex-row sm:items-start sm:px-32">
+            <PersonaSidebar personas={personas} />
             <div
               id="newPersona"
               className="mb-4 flex flex-col items-start justify-center gap-4 sm:w-full"
@@ -94,13 +90,12 @@ export default async function Persona() {
                       "communicationSample",
                     ) as string;
 
-                    let isFavorite = false;
-                    if (
-                      personas?.length >
-                      productPlan(session?.user?.stripeProductId)?.personas
-                    ) {
-                      isFavorite = formData.get("isFavorite") === "on";
-                    }
+                    const isFavorite = isFavoritePersonaAvailable(
+                      session?.user,
+                      personas,
+                    )
+                      ? formData.get("isFavorite") === "on"
+                      : false;
 
                     if (name && traits) {
                       try {

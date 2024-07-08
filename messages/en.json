@@ -115,7 +115,10 @@
     "communication style": "communication style",
     "communicationStylePlaceholder": "assertive, direct, empathetic...",
     "communication sample": "communication sample",
-    "communicationSamplePlaceholder": "If you can walk you can dance, if you can talk you can sing."
+    "communicationSamplePlaceholder": "if you can walk you can dance, if you can talk you can sing.",
+    "favoriteLimitTitle": " you've reached the limit of favorite personas for your plan.",
+    "favoriteLimitDescription1": "you can add new personas but you can only get comments from favorites.",
+    "favoriteLimitDescription2": "upgrade to add more favorite personas."
   },
   "settings": {
     "personal": "personal",

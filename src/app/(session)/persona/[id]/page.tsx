@@ -1,16 +1,19 @@
-import { PersonIcon, StarIcon } from "@radix-ui/react-icons";
+import { PersonIcon, StarFilledIcon } from "@radix-ui/react-icons";
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import PersonaFormFields from "~/app/(session)/persona/PersonaFormFields";
+import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
 import FormButton from "~/app/_components/FormButton";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
-import PersonaFormFields from "~/app/_components/PersonaFormFields";
 import { SessionNav } from "~/app/_components/SessionNav";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
-import { productPlan } from "~/utils/constants";
+import PersonaSidebar from "../Sidebar";
+import { isFavoritePersonaAvailable } from "../helpers";
 
 export default async function Persona({ params }: { params: { id: string } }) {
   const session = await getServerAuthSession();
@@ -35,85 +38,116 @@ export default async function Persona({ params }: { params: { id: string } }) {
       </SessionNav>
 
       <main className="flex min-h-screen w-full flex-col items-center justify-start">
-        <div className="container flex flex-col items-center justify-start gap-12 px-2 pb-12 ">
-          <Card variant="form">
-            <form
-              className="flex w-full max-w-lg flex-col items-center justify-center gap-4"
-              action={async (formData) => {
-                "use server";
-                const name: string = formData.get("name") as string;
-                const traits: string = formData.get("traits") as string;
-                const description: string = formData.get(
-                  "description",
-                ) as string;
-                const image: string = formData.get("image") as string;
-                const age = Number(formData.get("age"));
-                const gender: string = formData.get("gender") as string;
-                const relationship: string = formData.get(
-                  "relationship",
-                ) as string;
-                const occupation: string = formData.get("occupation") as string;
-                const communicationStyle: string = formData.get(
-                  "communicationStyle",
-                ) as string;
-                const communicationSample: string = formData.get(
-                  "communicationSample",
-                ) as string;
-
-                let isFavorite = false;
-
-                if (
-                  personas?.length >
-                  productPlan(session?.user?.stripeProductId)?.personas
-                ) {
-                  isFavorite = formData.get("isFavorite") === "on";
-                }
-
-                if (name && traits) {
-                  try {
-                    await api.persona.update({
-                      personaId,
-                      name,
-                      traits,
-                      description,
-                      image,
-                      age,
-                      gender,
-                      relationship,
-                      occupation,
-                      communicationStyle,
-                      communicationSample,
-                      isFavorite,
-                    });
-                  } catch (error) {
-                    console.error("Error updating persona:", error);
-                  }
-                  redirect("/persona/all");
-                }
-              }}
-            >
-              <div className="flex w-full flex-row items-center justify-center pb-8 text-sm">
-                {persona.image ? (
-                  <Image
-                    alt={persona.name}
-                    src={persona.image ?? ""}
-                    height="64"
-                    width="64"
-                    className="rounded-full"
-                  />
-                ) : (
-                  <PersonIcon className="h-16 w-16" />
-                )}
-                {persona?.isFavorite && <StarIcon className="h-4 w-4" />}
+        <div className="container flex w-full flex-col items-center justify-start gap-12 px-2 pb-12">
+          {!isFavoritePersonaAvailable(session?.user, personas) && (
+            <Card isButton={false}>
+              <div className="flex w-full flex-col items-center justify-center gap-4 ">
+                <h2 className="text-lg font-medium">
+                  {t("personas.favoriteLimitTitle")}
+                </h2>
+                <p className="text-sm">
+                  {t("personas.favoriteLimitDescription1")}
+                </p>
+                <p className="text-sm">
+                  {t("personas.favoriteLimitDescription2")}
+                </p>
+                <Link href="/pricing">
+                  <Button variant="cta" isSpecial>
+                    {t("nav.upgrade")}
+                  </Button>
+                </Link>
               </div>
-              <PersonaFormFields
-                personas={personas}
-                personaId={personaId}
-                user={session?.user}
-              />
-              <FormButton variant="submit">{t("form.update")}</FormButton>
-            </form>
-          </Card>
+            </Card>
+          )}
+          <div className="flex w-full flex-col items-center justify-center gap-4 sm:flex-row sm:items-start sm:px-32">
+            <PersonaSidebar personas={personas} />
+            <Card variant="form">
+              <form
+                className="flex w-full max-w-lg flex-col items-center justify-center gap-4"
+                action={async (formData) => {
+                  "use server";
+                  const name: string = formData.get("name") as string;
+                  const traits: string = formData.get("traits") as string;
+                  const description: string = formData.get(
+                    "description",
+                  ) as string;
+                  const image: string = formData.get("image") as string;
+                  const age = Number(formData.get("age"));
+                  const gender: string = formData.get("gender") as string;
+                  const relationship: string = formData.get(
+                    "relationship",
+                  ) as string;
+                  const occupation: string = formData.get(
+                    "occupation",
+                  ) as string;
+                  const communicationStyle: string = formData.get(
+                    "communicationStyle",
+                  ) as string;
+                  const communicationSample: string = formData.get(
+                    "communicationSample",
+                  ) as string;
+
+                  // if no favorite is available, either keep it a favorite or not
+                  const isFavorite = isFavoritePersonaAvailable(
+                    session?.user,
+                    personas,
+                  )
+                    ? formData.get("isFavorite") === "on"
+                    : persona.isFavorite;
+
+                  if (name && traits) {
+                    try {
+                      await api.persona.update({
+                        personaId,
+                        name,
+                        traits,
+                        description,
+                        image,
+                        age,
+                        gender,
+                        relationship,
+                        occupation,
+                        communicationStyle,
+                        communicationSample,
+                        isFavorite,
+                      });
+                    } catch (error) {
+                      console.error("Error updating persona:", error);
+                    }
+                    redirect("/persona/all");
+                  }
+                }}
+              >
+                <div className="flex w-full flex-row items-center justify-center pb-8 text-sm">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    {persona.image ? (
+                      <Image
+                        alt={persona.name}
+                        src={persona.image ?? ""}
+                        height="64"
+                        width="64"
+                        className="rounded-full"
+                      />
+                    ) : (
+                      <PersonIcon className="h-16 w-16" />
+                    )}
+                    <div className="flex flex-row items-center gap-2">
+                      <p className="text-lg">{persona.name}</p>
+                      {persona?.isFavorite && (
+                        <StarFilledIcon className="h-5 w-5" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <PersonaFormFields
+                  personas={personas}
+                  personaId={personaId}
+                  user={session?.user}
+                />
+                <FormButton variant="submit">{t("form.update")}</FormButton>
+              </form>
+            </Card>
+          </div>
         </div>
       </main>
     </>
