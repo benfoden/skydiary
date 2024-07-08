@@ -19,6 +19,7 @@ import { SessionNav } from "~/app/_components/SessionNav";
 import { getUserLocale } from "~/i18n";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
+import { isCommentAvailable } from "~/utils/planLimits";
 import { formattedTimeStampToDate } from "~/utils/text";
 import EntryBody from "./EntryBody";
 import { makeComment } from "./helpers";
@@ -41,10 +42,11 @@ export default async function Entry({
     api.persona.getAllByUserId(),
   ]);
 
-  if (!post) {
-    console.error("Failed to get post.");
+  if (!post || !user) {
+    console.error("Failed to get post or user.");
     return notFound();
   }
+  const hasComment = isCommentAvailable(user, comments);
 
   return (
     <>
@@ -92,8 +94,8 @@ export default async function Entry({
               </DropDownMenu>
             </div>
           </div>
-          <div className="flex h-full w-full flex-col items-center pb-4">
-            <div className="flex w-full flex-row items-start justify-center gap-2">
+          <div className="flex h-full w-full flex-col items-center gap-4 pb-4">
+            <div className="flex w-full flex-row items-start justify-center">
               <ul className="flex w-full flex-row flex-wrap justify-start gap-2">
                 <form
                   action={async () => {
@@ -105,7 +107,9 @@ export default async function Entry({
                     });
                   }}
                 >
-                  <FormButton isDisabled={searchParams.s === "1"}>
+                  <FormButton
+                    isDisabled={searchParams.s === "1" || !hasComment}
+                  >
                     <div className="flex flex-row items-center gap-2 text-xs">
                       <CircleIcon className="h-4 w-4" />
                       sky
@@ -131,7 +135,9 @@ export default async function Entry({
                         });
                       }}
                     >
-                      <FormButton isDisabled={searchParams.s === "1"}>
+                      <FormButton
+                        isDisabled={searchParams.s === "1" || !hasComment}
+                      >
                         <div className="flex flex-row items-center gap-2 font-medium">
                           {persona.image ? (
                             <>
@@ -162,6 +168,26 @@ export default async function Entry({
                 </Link>
               </ul>
             </div>
+            {!hasComment && (
+              <Card isButton={false}>
+                <div className="flex w-full flex-col items-center justify-center gap-4 ">
+                  <h2 className="text-lg font-medium">
+                    {t("comments.limitTitle")}
+                  </h2>
+                  <p className="text-sm">
+                    {t("personas.favoriteLimitDescription1")}
+                  </p>
+                  <p className="text-sm">
+                    {t("personas.favoriteLimitDescription2")}
+                  </p>
+                  <Link href="/pricing">
+                    <Button variant="cta" isSpecial>
+                      {t("nav.upgrade")}
+                    </Button>
+                  </Link>
+                </div>
+              </Card>
+            )}
 
             {comments && (
               <ul className="flex flex-col gap-4 pt-6">
@@ -203,7 +229,7 @@ export default async function Entry({
                                   }
                                 }}
                               >
-                                <FormDeleteButton />
+                                <FormDeleteButton hasText={false} />
                               </form>
                             </div>
                           </div>

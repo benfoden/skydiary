@@ -13,8 +13,8 @@ import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { SessionNav } from "~/app/_components/SessionNav";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
+import { isFavoritePersonaAvailable } from "~/utils/planLimits";
 import PersonaSidebar from "../Sidebar";
-import { isFavoritePersonaAvailable } from "../helpers";
 
 export default async function Persona({ params }: { params: { id: string } }) {
   const session = await getServerAuthSession();

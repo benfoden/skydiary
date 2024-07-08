@@ -1,3 +1,4 @@
+import { error } from "console";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -34,9 +35,8 @@ export const userRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       if (!ctx.session.user.isAdmin) {
-        return;
+        return error("Not authorized");
       }
-      console.log("input", input);
       return ctx.db.user.update({
         where: { id: input.targetUserId },
         data: {
@@ -50,7 +50,7 @@ export const userRouter = createTRPCRouter({
 
   getAllUsersAsAdmin: protectedProcedure.query(async ({ ctx }) => {
     if (!ctx.session.user.isAdmin) {
-      return;
+      return error("Not authorized");
     }
     return ctx.db.user.findMany();
   }),

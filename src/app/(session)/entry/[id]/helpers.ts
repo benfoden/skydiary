@@ -6,18 +6,9 @@ import { getResponse } from "~/server/api/ai";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { productPlan } from "~/utils/constants";
+import { isCommentAvailable } from "~/utils/planLimits";
 import { commentPromptString, randomizedSkyAdvisor } from "~/utils/prompts";
 import { type CommentType } from "~/utils/types";
-
-function userHasCommentAvailable(comments: Comment[], userProductId: string) {
-  "server only";
-  return (
-    comments.filter(
-      (comment: Comment) =>
-        comment.createdAt.toDateString() === new Date().toDateString(),
-    ).length > productPlan(userProductId)?.comments
-  );
-}
 
 export async function makeComment({
   comments,
@@ -40,17 +31,9 @@ export async function makeComment({
       getServerAuthSession(),
     ]);
     const { user } = session;
-    if (
-      !user ||
-      !latestPost?.content ||
-      !currentUserPersona ||
-      !(
-        user.isSpecial ||
-        user.isAdmin ||
-        userHasCommentAvailable(comments, userProductId)
-      )
-    ) {
-      return;
+    if (!user || !latestPost?.content || !currentUserPersona) return null;
+    if (!isCommentAvailable(user, comments)) {
+      return "outOfComments";
     }
     let commentType: CommentType = "custom";
     if (!commentPersona) {
