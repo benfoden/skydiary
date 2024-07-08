@@ -4,9 +4,20 @@ import { type Comment, type Persona } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getResponse } from "~/server/api/ai";
+import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { productPlan } from "~/utils/constants";
-import { commentPromptString, randomizedCoachVariant } from "~/utils/prompts";
+import { commentPromptString, randomizedSkyAdvisor } from "~/utils/prompts";
+import { type CommentType } from "~/utils/types";
+
+function userHasCommentAvailable(comments: Comment[], userProductId: string) {
+  return (
+    comments.filter(
+      (comment: Comment) =>
+        comment.createdAt.toDateString() === new Date().toDateString(),
+    ).length > productPlan(userProductId)?.comments
+  );
+}
 
 export async function makeComment({
   comments,
@@ -22,40 +33,50 @@ export async function makeComment({
   "use server";
 
   try {
+    // get latest post in case there are any changes
+    const [latestPost, currentUserPersona, session] = await Promise.all([
+      api.post.getByPostId({ postId }),
+      api.persona.getUserPersona(),
+      getServerAuthSession(),
+    ]);
+    const { user } = session;
     if (
-      productPlan(userProductId)?.comments >
-      comments.filter(
-        (comment: Comment) =>
-          comment.createdAt.toDateString() === new Date().toDateString(),
-      ).length
+      !user ||
+      !latestPost?.content ||
+      !currentUserPersona ||
+      !(
+        user.isSpecial ||
+        user.isAdmin ||
+        userHasCommentAvailable(comments, userProductId)
+      )
     ) {
       return;
     }
-    const latestPost = await api.post.getByPostId({
-      postId,
-    });
-    const currentUserPersona = await api.persona.getUserPersona();
-    if (!latestPost?.content || !currentUserPersona) {
-      return;
+    let commentType: CommentType = "custom";
+    if (!commentPersona) {
+      commentType = randomizedSkyAdvisor();
     }
 
     const messageContent = commentPromptString({
-      commentType: commentPersona ? "custom" : randomizedCoachVariant,
+      commentType,
       authorDetails: currentUserPersona,
       diaryEntry: latestPost?.content ?? "",
       characters: productPlan(userProductId)?.characters,
       personaDetails: commentPersona ?? undefined,
     });
-    const content = await getResponse({
+    const responseContent = await getResponse({
       messageContent,
     });
-    if (content) {
-      const comment = await api.comment.create({
-        content,
+    if (responseContent) {
+      console.log("responseContent", responseContent);
+
+      await api.comment.create({
+        content: responseContent,
         postId,
-        coachVariant: commentPersona ? "custom" : randomizedCoachVariant,
+        coachVariant: commentType,
+        createdByPersonaId: commentPersona?.id ?? undefined,
       });
-      return comment;
+      revalidatePath(`/entry/${postId}`);
     } else {
       console.error("Failed to get a response for the comment.");
     }
@@ -102,3 +123,58 @@ export async function deletePost({
   revalidatePath("/home");
   redirect("/home");
 }
+
+// <form
+//                       key={persona.id}
+//                       action={async () => {
+//                         "use server";
+//                         if (searchParams.s === "1") {
+//                           return;
+//                         }
+//                         try {
+//                           if (
+//                             productPlan(user?.stripeProductId)?.comments >
+//                             comments.filter(
+//                               (comment) =>
+//                                 comment.createdAt.toDateString() ===
+//                                 new Date().toDateString(),
+//                             ).length
+//                           ) {
+//                             return;
+//                           }
+//                           const latestPost = await api.post.getByPostId({
+//                             postId: params.id,
+//                           });
+
+//                           const currentUserPersona =
+//                             await api.persona.getUserPersona();
+//                           //todo: measure tokens and limit based on plan
+//                           const prompt = commentPromptString({
+//                             authorDetails: currentUserPersona!,
+//                             diaryEntry: latestPost?.content ?? "",
+//                             characters: productPlan(user?.stripeProductId)
+//                               ?.characters,
+//                           });
+
+//                           const response = await getResponse({
+//                             messageContent: prompt,
+//                             model: productPlan(user?.stripeProductId)?.model,
+//                           });
+//                           if (response) {
+//                             await api.comment.create({
+//                               content: response,
+//                               postId: params?.id,
+//                               createdByPersonaId: persona.id,
+//                               coachVariant: persona.name,
+//                             });
+//                             revalidatePath(`/entry/${params.id}`);
+//                           } else {
+//                             console.error(
+//                               "Failed to get a response for the comment.",
+//                             );
+//                           }
+//                         } catch (error) {
+//                           console.error("Error creating comment:", error);
+//                         }
+//                       }}
+//                     >

@@ -1,6 +1,7 @@
 import { type Persona } from "@prisma/client";
 import { type PersonaForPrompt, type Prompt } from "global";
 import { TAGS, type NewPersonaUser } from "./constants";
+import { type CommentType } from "./types";
 
 // PROMPTS
 
@@ -11,7 +12,7 @@ const basePromptComment = ({
   personaDetails,
   characters,
 }: {
-  commentType: "custom" | "criticism" | "insight" | "boost";
+  commentType: CommentType;
   authorDetails: PersonaForPrompt;
   diaryEntry: string;
   personaDetails?: PersonaForPrompt;
@@ -301,10 +302,10 @@ export const prompts = {
   },
 };
 
-export const randomizedCoachVariant = (() => {
+export const randomizedSkyAdvisor = () => {
   const rand = Math.random();
   if (rand < 0.15) return "boost";
   if (rand < 0.7) return "insight";
   if (rand < 0.85) return "criticism";
   return "insight";
-})();
+};
