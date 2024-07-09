@@ -73,7 +73,7 @@ export default function EntryBody({ post }: { post: Post }) {
   }, []);
 
   return (
-    <div className="flex h-full w-full flex-col items-center gap-12 pb-4">
+    <div className="flex h-full w-full flex-col items-center pb-4">
       <textarea
         ref={textareaRef}
         value={content}
@@ -87,7 +87,17 @@ export default function EntryBody({ post }: { post: Post }) {
         autoFocus
         style={{ height: "auto", overflow: "hidden", paddingBottom: "16px" }}
         onInput={adjustTextareaHeight}
+        maxLength={50000}
       />
+      {content?.length > 0.9 * 50000 && (
+        <div className="flex min-h-full w-full flex-row items-center justify-end pr-4 pt-1 sm:max-w-5xl">
+          <span
+            className={`text-xs ${content?.length > 0.975 * 50000 ? (content?.length === 50000 ? "text-red-600" : "text-yellow-500") : "text-secondary"}`}
+          >
+            {content.length} / 50000
+          </span>
+        </div>
+      )}
       <div className="fixed bottom-1 right-1">
         <div className="flex items-center justify-center">
           {isSaving ? (
