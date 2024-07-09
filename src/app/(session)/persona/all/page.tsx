@@ -1,9 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import PersonaFormFields from "~/app/(session)/persona/PersonaFormFields";
-import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
 import FormButton from "~/app/_components/FormButton";
@@ -13,6 +11,7 @@ import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { isFavoritePersonaAvailable } from "~/utils/planLimits";
 import PersonaSidebar from "../Sidebar";
+import UpgradeBanner from "../UpgradeBanner";
 
 export default async function Persona() {
   const session = await getServerAuthSession();
@@ -33,24 +32,7 @@ export default async function Persona() {
       <main className="flex min-h-screen w-full flex-col items-center justify-start">
         <div className="container flex flex-col items-center justify-start gap-12 px-2 pb-12 ">
           {!isFavoritePersonaAvailable(session?.user, personas) && (
-            <Card isButton={false}>
-              <div className="flex w-full flex-col items-center justify-center gap-4 ">
-                <h2 className="text-lg font-medium">
-                  {t("personas.favoriteLimitTitle")}
-                </h2>
-                <p className="text-sm">
-                  {t("personas.favoriteLimitDescription1")}
-                </p>
-                <p className="text-sm">
-                  {t("personas.favoriteLimitDescription2")}
-                </p>
-                <Link href="/pricing">
-                  <Button variant="cta" isSpecial>
-                    {t("nav.upgrade")}
-                  </Button>
-                </Link>
-              </div>
-            </Card>
+            <UpgradeBanner />
           )}
           <div className="flex w-full flex-col items-center justify-center gap-4 sm:flex-row sm:items-start sm:px-32">
             <PersonaSidebar personas={personas} />

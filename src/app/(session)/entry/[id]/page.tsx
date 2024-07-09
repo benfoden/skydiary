@@ -172,14 +172,10 @@ export default async function Entry({
               <Card isButton={false}>
                 <div className="flex w-full flex-col items-center justify-center gap-4 ">
                   <h2 className="text-lg font-medium">
-                    {t("comments.limitTitle")}
+                    {t("entry.limitTitle")}
                   </h2>
-                  <p className="text-sm">
-                    {t("personas.favoriteLimitDescription1")}
-                  </p>
-                  <p className="text-sm">
-                    {t("personas.favoriteLimitDescription2")}
-                  </p>
+                  <p className="text-sm">{t("entry.limitDescription1")}</p>
+                  <p className="text-sm">{t("entry.limitDescription2")}</p>
                   <Link href="/pricing">
                     <Button variant="cta" isSpecial>
                       {t("nav.upgrade")}

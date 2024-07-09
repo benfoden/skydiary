@@ -65,7 +65,10 @@
     "last30Days": "Last 30 days"
   },
   "entry": {
-    "today": "Today..."
+    "today": "Today...",
+    "limitTitle": "unlock more comments",
+    "limitDescription1": "you've discovered a paid feature.",
+    "limitDescription2": "upgrade to skydiary plus to get more comments every day."
   },
   "topics": {
     "all": "all",
@@ -116,9 +119,9 @@
     "communicationStylePlaceholder": "assertive, direct, empathetic...",
     "communication sample": "communication sample",
     "communicationSamplePlaceholder": "if you can walk you can dance, if you can talk you can sing.",
-    "favoriteLimitTitle": " you've reached the limit of favorite personas for your plan.",
-    "favoriteLimitDescription1": "you can add new personas but you can only get comments from favorites.",
-    "favoriteLimitDescription2": "upgrade to add more favorite personas.",
+    "limitTitle": "unlock more favorite personas",
+    "limitDescription1": "you've discovered a paid feature.",
+    "limitDescription2": "upgrade to skydiary plus to get more favorite personas.",
     "delete": "delete this persona permanently"
   },
   "settings": {

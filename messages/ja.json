@@ -63,7 +63,10 @@
     "last30Days": "30日間"
   },
   "entry": {
-    "today": "今日..."
+    "today": "今日...",
+    "limitTitle": "コメントをもっと解除",
+    "limitDescription1": "有料機能を発見しました。",
+    "limitDescription2": "skydiaryプラスにアップグレードして、毎日もっとコメントを取得してください。"
   },
   "topics": {
     "all": "すべて",
@@ -114,9 +117,9 @@
     "communicationStylePlaceholder": "強調、直接、深刻...",
     "communication sample": "通信サンプル",
     "communicationSamplePlaceholder": "走れるなら、ダンスできる。話すなら、歌える。",
-    "favoriteLimitTitle": "あなたのプランのお気に入りのパーソナの数が上限に達しました。",
-    "favoriteLimitDescription1": "新しいパーソナを追加することはできますが、お気に入りからのコメントを受け取ることができます。",
-    "favoriteLimitDescription2": "より多くのお気に入りのパーソナを追加するには、アップグレードしてください。",
+    "limitTitle": "お気に入りのパーソナをもっと解除",
+    "limitDescription1": "有料機能を発見しました。",
+    "limitDescription2": "skydiary plusにアップグレードして、もっとお気に入りのパーソナを手に入れましょう。",
     "delete": "このパーソナを完全に削除する"
   },
   "settings": {
