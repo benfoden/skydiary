@@ -33,6 +33,7 @@ export default async function AdminLayout({
             <Link href={"/sd-admin/prompts"}>prompts</Link>
             <Link href={"/sd-admin/sandbox"}>sandbox</Link>
             <Link href={"/sd-admin/subscriptions"}>subs</Link>
+            <Link href={"/sd-admin/email"}>email</Link>
           </div>
           {children}
         </div>
