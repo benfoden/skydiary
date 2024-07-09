@@ -1,6 +1,7 @@
 import { type Persona } from "@prisma/client";
 import { type PersonaForPrompt, type Prompt } from "global";
 import { TAGS, type NewPersonaUser } from "./constants";
+import { cleanStringForPrompt } from "./text";
 import { type CommentType } from "./types";
 
 // PROMPTS
@@ -19,9 +20,14 @@ const basePromptComment = ({
   characters?: number;
   // authorMemories?: string,
 }): Prompt => {
+  const cleanDiaryEntry = cleanStringForPrompt(diaryEntry);
   let commentFocus = "criticism";
   let persona = "Persona details: ";
   let tone = "Persona writing tone: ";
+  console.log("raw diary entry", diaryEntry);
+
+  console.log("cleaned diary entry", cleanDiaryEntry);
+
   switch (commentType) {
     case "custom":
       commentFocus =
@@ -82,7 +88,7 @@ const basePromptComment = ({
         .join(". ") +
       +" End author details. " +
       "Diary entry: " +
-      diaryEntry +
+      cleanDiaryEntry +
       " End of diary entry. ",
     persona: " Persona details: " + persona,
     exemplars: personaDetails?.communicationSample
@@ -164,7 +170,12 @@ export const commentPromptString = ({
   return Object.values(prompt).join(" ");
 };
 
-export const prompts = {
+export const promptSummarizeText = (content?: string): string => {
+  if (!content) return "no text found";
+  return "Summarize 80 words or less: " + content;
+};
+
+export const OLDprompts = {
   basicPrompt:
     "Do not use any greetings like hi, hey, hello, etc. " +
     "No emojis. Use only one exclamation point if needed. " +
@@ -265,17 +276,6 @@ export const prompts = {
       " " +
       "Diary entry: " +
       diaryEntry
-    );
-  },
-  summarizeText: (content: string): string => {
-    return (
-      "Summarize the diary entry in 80 words or less, maintaining key points and meaning. " +
-      "Do not mention the author. " +
-      "Be as concise as possible. " +
-      "Write in the same language as the majority of the diary entry. " +
-      "If no diary entry, return nothing. " +
-      "Diary entry: " +
-      content
     );
   },
   generateUserPersonaPrompt: (

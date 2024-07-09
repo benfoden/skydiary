@@ -2,6 +2,7 @@ import { error } from "console";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { cleanStringForInput } from "~/utils/text";
 
 export const userRouter = createTRPCRouter({
   updateUser: protectedProcedure
@@ -17,7 +18,7 @@ export const userRouter = createTRPCRouter({
       return ctx.db.user.update({
         where: { id: userId },
         data: {
-          name: input.name,
+          name: cleanStringForInput(input.name) ?? "",
           email: input.email,
           image: input.image,
         },

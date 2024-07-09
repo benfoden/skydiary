@@ -142,7 +142,11 @@ export default async function Persona({ params }: { params: { id: string } }) {
                   <h3 className="text-lg font-medium">
                     {t("personas.delete")}
                   </h3>
-                  <FormDeleteButton hasText={true} />
+                  <div className="flex w-full flex-row items-center justify-center gap-2 pt-4">
+                    <div className="w-fit">
+                      <FormDeleteButton hasText={true} />
+                    </div>
+                  </div>
                 </form>
               </Card>
             </div>

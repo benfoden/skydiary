@@ -5,18 +5,11 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { prompts } from "~/utils/prompts";
+import { promptSummarizeText } from "~/utils/prompts";
+import { cleanStringForEntry } from "~/utils/text";
 import { getResponse } from "../ai";
 
 export const postRouter = createTRPCRouter({
-  hello: publicProcedure
-    .input(z.object({ text: z.string() }))
-    .query(({ input }) => {
-      return {
-        greeting: `Hello ${input.text}`,
-      };
-    }),
-
   create: protectedProcedure
     .input(z.object({ content: z.string().max(25000) }))
     .mutation(async ({ ctx, input }) => {
@@ -52,14 +45,17 @@ export const postRouter = createTRPCRouter({
     .input(
       z.object({
         postId: z.string(),
-        content: z.string().max(25000).optional(),
+        content: z.string().max(50000).optional(),
         summary: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       return ctx.db.post.update({
         where: { id: input.postId, createdBy: { id: ctx.session.user.id } },
-        data: { content: input.content, summary: input.summary },
+        data: {
+          content: cleanStringForEntry(input.content),
+          summary: input.summary,
+        },
       });
     }),
 
@@ -166,9 +162,9 @@ export const postRouter = createTRPCRouter({
     });
 
     for (const post of postsNotFromToday) {
-      const summary = await getResponse(
-        prompts.summarizeText(post.content ?? ""),
-      );
+      const summary = await getResponse({
+        messageContent: promptSummarizeText(post.content),
+      });
       if (summary) {
         continue;
       }
@@ -194,9 +190,9 @@ export const postRouter = createTRPCRouter({
       });
 
       if (lastPost) {
-        const summary = await getResponse(
-          prompts.summarizeText(lastPost.content),
-        );
+        const summary = await getResponse({
+          messageContent: promptSummarizeText(lastPost.content),
+        });
         if (summary) {
           await ctx.db.post.update({
             where: { id: lastPost.id },

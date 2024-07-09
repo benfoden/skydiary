@@ -78,10 +78,11 @@ export default function Input({
       >
         {label}
         {(type === "textarea" || type === "text") &&
+          props.maxLength &&
           valueLength !== null &&
           valueLength > 0.5 * (props.maxLength ?? 0) && (
             <span
-              className={`text-xs ${valueLength !== null && valueLength > 0.85 * (props.maxLength ?? 0) ? (valueLength > 0.95 * (props.maxLength ?? 0) ? "text-red-600" : "text-yellow-500") : "text-secondary"}`}
+              className={`text-xs ${valueLength !== null && valueLength > 0.85 * (props.maxLength ?? 0) ? (valueLength === props.maxLength ? "text-red-600" : "text-yellow-500") : "text-secondary"}`}
             >
               {valueLength ?? 0} / {props.maxLength ?? 0}
             </span>
