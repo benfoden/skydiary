@@ -23,9 +23,19 @@ export default function UpgradeBanner({
     setIsOpen(!isOpen);
   };
   return (
-    <button
+    <div
       onClick={() => !isOpen && toggleOpen()}
       className={`pt-2 ${!isOpen ? "cursor-pointer" : "cursor-default"}`}
+      role="button"
+      aria-expanded={isOpen}
+      aria-label={isOpen ? "Collapse upgrade banner" : "Expand upgrade banner"}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          !isOpen && toggleOpen();
+        }
+      }}
     >
       <Card isButton={!isOpen}>
         <div className="flex w-full flex-col items-center justify-center gap-4">
@@ -71,6 +81,6 @@ export default function UpgradeBanner({
           )}
         </div>
       </Card>
-    </button>
+    </div>
   );
 }
