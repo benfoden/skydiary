@@ -12,8 +12,8 @@ import { SessionNav } from "~/app/_components/SessionNav";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { isFavoritePersonaAvailable } from "~/utils/planLimits";
+import UpgradeBanner from "../../../_components/UpgradeBanner";
 import PersonaSidebar from "../Sidebar";
-import UpgradeBanner from "../UpgradeBanner";
 
 export default async function Persona({ params }: { params: { id: string } }) {
   const session = await getServerAuthSession();
@@ -40,7 +40,7 @@ export default async function Persona({ params }: { params: { id: string } }) {
       <main className="flex min-h-screen w-full flex-col items-center justify-start">
         <div className="container flex w-full flex-col items-center justify-start gap-12 px-2 pb-12">
           {!isFavoritePersonaAvailable(session?.user, personas) && (
-            <UpgradeBanner />
+            <UpgradeBanner variant="persona" />
           )}
           <div className="flex w-full flex-col items-center justify-center gap-4 sm:flex-row sm:items-start sm:px-32">
             <PersonaSidebar personas={personas} />

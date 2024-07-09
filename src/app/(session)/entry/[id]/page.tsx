@@ -16,6 +16,7 @@ import FormDeleteButton from "~/app/_components/FormDeleteButton";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { PersonaIcon } from "~/app/_components/PersonaIcon";
 import { SessionNav } from "~/app/_components/SessionNav";
+import UpgradeBanner from "~/app/_components/UpgradeBanner";
 import { getUserLocale } from "~/i18n";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
@@ -168,22 +169,7 @@ export default async function Entry({
                 </Link>
               </ul>
             </div>
-            {!hasComment && (
-              <Card isButton={false}>
-                <div className="flex w-full flex-col items-center justify-center gap-4 ">
-                  <h2 className="text-lg font-medium">
-                    {t("entry.limitTitle")}
-                  </h2>
-                  <p className="text-sm">{t("entry.limitDescription1")}</p>
-                  <p className="text-sm">{t("entry.limitDescription2")}</p>
-                  <Link href="/pricing">
-                    <Button variant="cta" isSpecial>
-                      {t("nav.upgrade")}
-                    </Button>
-                  </Link>
-                </div>
-              </Card>
-            )}
+            {!hasComment && <UpgradeBanner variant="comment" />}
 
             {comments && (
               <ul className="flex flex-col gap-4 pt-6">
