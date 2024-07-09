@@ -172,7 +172,7 @@ export default async function Entry({
             {!hasComment && <UpgradeBanner variant="comment" />}
 
             {comments && (
-              <ul className="flex flex-col gap-4 pt-6">
+              <ul className="flex flex-col gap-4 pt-4">
                 {comments
                   .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
                   .map((comment) => (
