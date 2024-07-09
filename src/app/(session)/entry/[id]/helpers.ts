@@ -44,15 +44,17 @@ export async function makeComment({
       commentType,
       authorDetails: currentUserPersona,
       diaryEntry: latestPost?.content ?? "",
-      characters: productPlan(userProductId)?.characters,
+      characters: user?.isSpecial
+        ? 10000
+        : productPlan(userProductId)?.characters,
       personaDetails: commentPersona ?? undefined,
     });
+
     const responseContent = await getResponse({
       messageContent,
+      model: user?.isSpecial ? "gpt-4o" : productPlan(userProductId)?.model,
     });
     if (responseContent) {
-      console.log("responseContent", responseContent);
-
       await api.comment.create({
         content: responseContent,
         postId,

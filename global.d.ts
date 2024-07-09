@@ -28,6 +28,8 @@ export type Prompt = {
   persona: string;
   format: string;
   tone: string;
+  authorDetails: string;
+  diaryEntry: string;
 };
 
 export type PersonaForPrompt = Omit<

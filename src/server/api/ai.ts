@@ -12,16 +12,16 @@ export async function getResponse({
   systemMessageContent?: string;
   model?: string;
 }) {
+  console.log("the model", model);
   const completion = await openai.chat.completions.create({
     messages: [
       { role: "system", content: systemMessageContent },
       { role: "user", content: messageContent },
     ],
-    max_tokens: 1000,
     model,
   });
 
-  console.log("the usage!", completion.usage);
+  console.log("the usage!!", completion.usage);
   return completion.choices[0]?.message.content;
 }
 

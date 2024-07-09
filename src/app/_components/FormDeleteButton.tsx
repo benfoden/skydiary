@@ -35,7 +35,7 @@ export default function FormDeleteButton({
       setReadyToDelete(false);
       setTimeout(() => {
         setReadyToDelete(true);
-      }, 500);
+      }, 150);
     }
   };
 

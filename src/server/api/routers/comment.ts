@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { productPlan } from "~/utils/constants";
 
 export const commentRouter = createTRPCRouter({
   create: protectedProcedure
@@ -16,7 +17,15 @@ export const commentRouter = createTRPCRouter({
       if (!input.content.trim()) {
         throw new Error("Content cannot be empty.");
       }
-
+      if (
+        !ctx.session.user.isSpecial &&
+        productPlan(ctx.session.user.stripeProductId)?.comments <=
+          (ctx.session.user.commentsUsed ?? 0)
+      ) {
+        throw new Error(
+          "You have reached the maximum number of comments for this plan.",
+        );
+      }
       await ctx.db.user.update({
         where: { id: ctx.session.user.id },
         data: { commentsUsed: { increment: 1 } },
