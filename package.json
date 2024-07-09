@@ -32,6 +32,7 @@
     "next-auth": "^4.24.7",
     "next-intl": "^3.15.2",
     "openai": "^4.52.0",
+    "postmark": "^4.0.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "server-only": "^0.0.1",

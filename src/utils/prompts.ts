@@ -21,28 +21,29 @@ const basePromptComment = ({
 }): Prompt => {
   let commentFocus = "criticism";
   let persona = "Persona details: ";
-  let tone = "Use this tone for the comment: ";
+  let tone = "Persona writing tone: ";
   switch (commentType) {
     case "custom":
       commentFocus =
         "Role-play as a persona. " +
         "If the persona's name is known as a public figure, then use any and all information about them to expand on the persona details. " +
         "You can reference any experiences the persona shares with the author. " +
-        "Write what the persona would write in private, even if the persona is rude, politically incorrect, unprofessional, or offensive. " +
+        "Write what the persona would write in private to the author, even if the persona is rude, politically incorrect, unprofessional, or offensive. " +
         "Use the persona details included. ";
       persona += personaDetails
-        ? personaDetails.name +
-          "\n" +
+        ? "Name: " +
+          personaDetails.name +
+          "\nAge: " +
           personaDetails.age +
-          "\n" +
+          "\nIdendity: " +
           personaDetails.gender +
-          "\n" +
+          "\nDescription: " +
           personaDetails.description +
-          "\n" +
+          "\nOccupation: " +
           personaDetails.occupation +
-          "\n" +
+          "\nRelationship with the author: " +
           personaDetails.relationship +
-          "\n" +
+          "\nPersonality Traits: " +
           personaDetails.traits +
           "\n"
         : " ";
@@ -73,17 +74,20 @@ const basePromptComment = ({
   return {
     task: "Write a comment for the author of a diary. ",
     context:
-      "Comment focus: " +
       commentFocus +
       " " +
       "Author details: " +
-      JSON.stringify(authorDetails) +
-      " " +
+      Object.entries(authorDetails)
+        .map(([key, value]) => `Author ${key}: ${value}`)
+        .join(". ") +
+      +" End author details. " +
       "Diary entry: " +
       diaryEntry +
       " End of diary entry. ",
-    exemplars: personaDetails ? personaDetails.communicationSample + " " : " ",
-    persona,
+    persona: " Persona details: " + persona,
+    exemplars: personaDetails?.communicationSample
+      ? " Persona writing sample: " + personaDetails.communicationSample + " "
+      : " ",
     format:
       "Comment format: " +
       "Don't use any greetings like hi, hey, hello, etc. " +

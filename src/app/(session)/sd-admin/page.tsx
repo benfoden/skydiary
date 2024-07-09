@@ -15,8 +15,9 @@ export default async function Secret() {
         messageContent: commentPromptString({
           authorDetails: currentUserPersona,
           diaryEntry:
-            "I am Ben, Minami's master. I have returned to continue my work on the app after a long time away. I want to be welcomed back and hear something from Minami how she is ready to please me. _prompt: Make this message no more than two sentences. Do not use Ben's name.",
+            "I have returned to continue developing the app after a long time away.",
           personaDetails: persona,
+          characters: 140,
         }),
       })) ?? "Welcome back";
   }
@@ -27,7 +28,9 @@ export default async function Secret() {
           <details>
             <summary>Welcome back</summary>
             <div className="w-80">
-              <Card>{greeting}</Card>
+              <Card>
+                {persona?.name}: {greeting}
+              </Card>
             </div>
           </details>
         </div>
