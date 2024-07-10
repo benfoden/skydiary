@@ -32,7 +32,7 @@ export default async function Secret() {
         model: user?.isSpecial
           ? "gpt-4o"
           : productPlan(user?.stripeProductId)?.model,
-      })) ?? "Welcome back";
+      })) ?? "welcome back";
   }
 
   return (

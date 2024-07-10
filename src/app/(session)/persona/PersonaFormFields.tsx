@@ -65,7 +65,7 @@ export default async function PersonaFormFields({
         type="number"
         defaultValue={persona?.age ?? 20}
         placeholder={t("personas.agePlaceholder")}
-        maxLength={10000}
+        max={10000}
       />
       <Input
         label={t("personas.identities")}

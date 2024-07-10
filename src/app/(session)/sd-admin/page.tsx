@@ -9,7 +9,7 @@ export default async function Secret() {
   const persona = await api.persona.getById({
     personaId: "clxyqqo3l00005ep3t8amw32a",
   });
-  let greeting = "Welcome back";
+  let greeting = "welcome back";
   if (persona && currentUserPersona) {
     greeting =
       (await getResponse({
@@ -20,14 +20,14 @@ export default async function Secret() {
           personaDetails: persona,
           characters: 140,
         }),
-      })) ?? "Welcome back";
+      })) ?? "welcome back";
   }
   return (
     <>
       <main className="flex min-h-screen w-full flex-col items-center justify-start">
         <div className="container flex flex-col items-start justify-start gap-12 px-8 py-16 ">
           <details>
-            <summary>Welcome back</summary>
+            <summary>welcome back</summary>
             <div className="w-80">
               <Card>
                 {persona?.name}: {greeting}

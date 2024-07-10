@@ -3,16 +3,17 @@
 import { signIn } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "~/app/_components/Card";
 import FormButton from "~/app/_components/FormButton";
 import Input from "~/app/_components/Input";
 
 interface Props {
+  signUpEmail: string;
   onSubmit: (email: string) => void;
 }
 
-export default function EmailSubmission({ onSubmit }: Props) {
+export default function EmailSubmission({ signUpEmail, onSubmit }: Props) {
   const locale = useLocale();
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,6 +41,10 @@ export default function EmailSubmission({ onSubmit }: Props) {
 
     setIsSubmitting(false);
   }
+
+  useEffect(() => {
+    setEmail(signUpEmail);
+  }, [signUpEmail]);
 
   return (
     <Card variant="form">

@@ -7,6 +7,7 @@ import {
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { getServerAuthSession } from "~/server/auth";
+import { ACTIVESTATUSES } from "~/utils/constants";
 import Button from "./Button";
 import DropDownMenu from "./DropDown";
 import { ThemeToggle } from "./ToggleTheme";
@@ -17,20 +18,29 @@ export default async function DropDownUser() {
 
   return (
     <DropDownMenu isUserMenu>
-      {session?.user?.isSubscriber ? (
-        <Link href={"/pricing"}>
-          <Button variant="menuElement">
-            <span className="text-blue-600 dark:text-blue-400">
-              skydiary {t("nav.premium")}
-            </span>
-          </Button>
-        </Link>
-      ) : (
-        <Link href={"/pricing"}>
-          <Button variant="menuElement" isSpecial>
-            {t("nav.upgrade")} <PlusIcon className="h-4 w-4" />
-          </Button>
-        </Link>
+      {session?.user?.stripeSubscriptionStatus &&
+        ACTIVESTATUSES.includes(session?.user?.stripeSubscriptionStatus) && (
+          <Link href={"/pricing"}>
+            <Button variant="menuElement">
+              <span className="text-blue-600 dark:text-blue-400">
+                skydiary {t("nav.plus")}
+              </span>
+            </Button>
+          </Link>
+        )}{" "}
+      {(!session?.user?.stripeSubscriptionStatus ||
+        !ACTIVESTATUSES.includes(session?.user?.stripeSubscriptionStatus)) &&
+        !session?.user?.isSpecial && (
+          <Link href={"/pricing"}>
+            <Button variant="menuElement" isSpecial>
+              {t("nav.upgrade")} <PlusIcon className="h-4 w-4" />
+            </Button>
+          </Link>
+        )}
+      {session?.user?.isSpecial && (
+        <span className="px-4 py-2 text-blue-600 dark:text-blue-400">
+          special status: on
+        </span>
       )}
       <Link href={"/settings"}>
         <Button variant="menuElement">

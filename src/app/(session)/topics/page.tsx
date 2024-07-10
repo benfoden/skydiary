@@ -1,10 +1,24 @@
+import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { SessionNav } from "~/app/_components/SessionNav";
+import { type Locale } from "~/config";
 import { api } from "~/trpc/server";
+
+export async function generateMetadata({
+  params: { locale },
+}: {
+  params: { locale: Locale };
+}): Promise<Metadata> {
+  const t = await getTranslations({ locale, namespace: "metadata" });
+
+  return {
+    title: t("topics.title"),
+  };
+}
 
 export default async function Topics() {
   const t = await getTranslations();

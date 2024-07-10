@@ -1,28 +1,38 @@
+import { type Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import Button from "~/app/_components/Button";
 import ManageBillingButton from "~/app/_components/ButtonBilling";
 import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
 import FormButton from "~/app/_components/FormButton";
 import Input from "~/app/_components/Input";
+import LocaleSwitcher from "~/app/_components/LocaleSwitcher";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { SessionNav } from "~/app/_components/SessionNav";
 import { type Locale } from "~/config";
-import { setUserLocale } from "~/i18n";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { ACTIVESTATUSES } from "~/utils/constants";
 
+export async function generateMetadata({
+  params: { locale },
+}: {
+  params: { locale: Locale };
+}): Promise<Metadata> {
+  const t = await getTranslations({ locale, namespace: "metadata" });
+
+  return {
+    title: t("settings.title"),
+  };
+}
+
 export default async function Settings() {
-  const session = await getServerAuthSession();
-
-  const userPersona = await api.persona.getUserPersona();
   const t = await getTranslations();
-
-  const subscription = await api.stripe.getUserSubDetails();
   const locale: Locale = (await getLocale()) as Locale;
+  const session = await getServerAuthSession();
+  const userPersona = await api.persona.getUserPersona();
+  const subscription = await api.stripe.getUserSubDetails();
 
   return (
     <>
@@ -110,7 +120,7 @@ export default async function Settings() {
               <FormButton variant="submit">{t("form.save")}</FormButton>
             </form>
           </Card>
-          {session?.user?.isSubscriber && (
+          {!session.user?.isSpecial && subscription && (
             <Card variant="form">
               <h2>{t("settings.billing")}</h2>
               <p>
@@ -123,7 +133,7 @@ export default async function Settings() {
               {/* todo: add active link when not in local dev, confirm email and everything works */}
               <ManageBillingButton locale={locale} />
               {subscription &&
-                ACTIVESTATUSES.includes(subscription?.status) && (
+                ACTIVESTATUSES.includes(subscription?.status ?? "none") && (
                   <form
                     action={async () => {
                       "use server";
@@ -140,22 +150,9 @@ export default async function Settings() {
 
           <Card variant="form">
             <h2>{t("settings.language")}</h2>
-            <form
-              action={async (formData) => {
-                "use server";
-                const locale: string = formData.get("data-locale") as string;
-                await setUserLocale(locale);
-                redirect("/settings");
-              }}
-              className="flex flex-row gap-2"
-            >
-              <FormButton variant="menuElement" data-locale="en">
-                {t("settings.en")}
-              </FormButton>
-              <FormButton variant="menuElement" data-locale="ja">
-                {t("settings.ja")}
-              </FormButton>
-            </form>
+            <div className="flex flex-row gap-2">
+              <LocaleSwitcher isSettings />
+            </div>
           </Card>
         </div>
       </main>

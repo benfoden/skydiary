@@ -1,11 +1,12 @@
 "use server";
 import { type Persona, type Tag } from "@prisma/client";
 import { CircleIcon, PersonIcon, PlusIcon } from "@radix-ui/react-icons";
+import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import CopyTextButton from "~/app/_components/CopyTextButton";
@@ -13,10 +14,12 @@ import DropDownMenu from "~/app/_components/DropDown";
 import DropDownUser from "~/app/_components/DropDownUser";
 import FormButton from "~/app/_components/FormButton";
 import FormDeleteButton from "~/app/_components/FormDeleteButton";
+import LoadingPageBody from "~/app/_components/LoadingPageBody";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { PersonaIcon } from "~/app/_components/PersonaIcon";
 import { SessionNav } from "~/app/_components/SessionNav";
 import UpgradeBanner from "~/app/_components/UpgradeBanner";
+import { type Locale } from "~/config";
 import { getUserLocale } from "~/i18n";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
@@ -24,6 +27,18 @@ import { isCommentAvailable } from "~/utils/planLimits";
 import { formattedTimeStampToDate } from "~/utils/text";
 import EntryBody from "./EntryBody";
 import { makeComment } from "./helpers";
+
+export async function generateMetadata({
+  params: { locale },
+}: {
+  params: { locale: Locale };
+}): Promise<Metadata> {
+  const t = await getTranslations({ locale, namespace: "metadata" });
+
+  return {
+    title: t("entry.title"),
+  };
+}
 
 export default async function Entry({
   params,
@@ -43,11 +58,11 @@ export default async function Entry({
     api.persona.getAllByUserId(),
   ]);
 
-  if (!post || !user) {
-    console.error("Failed to get post or user.");
-    return notFound();
-  }
   const hasComment = isCommentAvailable(user, comments);
+
+  if (!post) {
+    return <LoadingPageBody />;
+  }
 
   return (
     <>

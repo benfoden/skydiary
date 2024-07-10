@@ -1,3 +1,4 @@
+import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -7,11 +8,24 @@ import DropDownUser from "~/app/_components/DropDownUser";
 import FormButton from "~/app/_components/FormButton";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { SessionNav } from "~/app/_components/SessionNav";
+import { type Locale } from "~/config";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { isFavoritePersonaAvailable } from "~/utils/planLimits";
 import UpgradeBanner from "../../../_components/UpgradeBanner";
 import PersonaSidebar from "../Sidebar";
+
+export async function generateMetadata({
+  params: { locale },
+}: {
+  params: { locale: Locale };
+}): Promise<Metadata> {
+  const t = await getTranslations({ locale, namespace: "metadata" });
+
+  return {
+    title: t(`personas.title`),
+  };
+}
 
 export default async function Persona() {
   const session = await getServerAuthSession();

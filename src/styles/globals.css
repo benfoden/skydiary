@@ -25,6 +25,10 @@
     @apply font-light;
   }
 
+  .debug {
+    @apply border border-green-500 dark:border-green-400;
+  }
+
   .bg-primary {
     @apply bg-white/50 dark:bg-white/[.12];
   }

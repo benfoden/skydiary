@@ -1,4 +1,5 @@
 import { PersonIcon, StarFilledIcon } from "@radix-ui/react-icons";
+import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import { redirect } from "next/navigation";
@@ -9,11 +10,24 @@ import FormButton from "~/app/_components/FormButton";
 import FormDeleteButton from "~/app/_components/FormDeleteButton";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { SessionNav } from "~/app/_components/SessionNav";
+import { type Locale } from "~/config";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { isFavoritePersonaAvailable } from "~/utils/planLimits";
 import UpgradeBanner from "../../../_components/UpgradeBanner";
 import PersonaSidebar from "../Sidebar";
+
+export async function generateMetadata({
+  params: { locale },
+}: {
+  params: { locale: Locale };
+}): Promise<Metadata> {
+  const t = await getTranslations({ locale, namespace: "metadata" });
+
+  return {
+    title: t("personas.title"),
+  };
+}
 
 export default async function Persona({ params }: { params: { id: string } }) {
   const session = await getServerAuthSession();
