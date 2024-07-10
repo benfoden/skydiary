@@ -17,7 +17,7 @@ const NewUserPage: React.FC = async () => {
   return (
     <div className="relative flex h-full w-full overflow-hidden">
       <div className="z-20 flex h-dvh w-full items-center justify-center">
-        <div className="flex w-80 flex-col items-center justify-center">
+        <div className="flex w-full flex-col items-center justify-center sm:w-96">
           <h1 className="mb-8 text-xl font-light">{t("new-user.title")}</h1>
           <Card variant="form">
             <p className="text-sm opacity-60">{t("settings.description")}</p>

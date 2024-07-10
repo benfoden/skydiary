@@ -1,5 +1,7 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import { type Locale } from "~/config";
 
@@ -543,6 +545,9 @@ export default async function Terms() {
             - dot - app
           </p>
         </div>
+        <Link href="/">
+          <Button>{t("nav.home")}</Button>
+        </Link>
       </Card>
     </div>
   );

@@ -1,6 +1,8 @@
 import { ArrowRightIcon } from "@radix-ui/react-icons";
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { Card } from "~/app/_components/Card";
 import FormButton from "~/app/_components/FormButton";
 import HeroStringSwapper from "~/app/_components/HeroStringSwapper";
@@ -61,7 +63,16 @@ export default async function Top() {
           ) : (
             <>
               <p className="text-xl font-light">{t("top.ctaTitle")}</p>
-              <form action="/auth/signup" method="post">
+              <form
+                action={async (formData) => {
+                  "use server";
+                  const email = formData.get("email");
+                  if (email) {
+                    cookies().set("signupEmail", String(email));
+                    redirect("/auth/signin");
+                  }
+                }}
+              >
                 <Input
                   placeholder={t("top.emailPlaceholder")}
                   type="email"

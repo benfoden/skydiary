@@ -93,7 +93,8 @@ export default function Input({
           type={type}
           {...props}
           value={value}
-          className={`w-full rounded-md py-3 pl-5 pr-10 text-base outline-none transition placeholder:text-sm placeholder:font-light placeholder:text-black/60 placeholder:dark:text-white/80 ${isActive && "bg-white/80 transition dark:bg-white/[.18]"} bg-primary`}
+          defaultValue={defaultValue}
+          className={`w-full rounded-md px-5 py-3 text-base outline-none transition placeholder:text-sm placeholder:font-light placeholder:text-black/60 placeholder:dark:text-white/80 ${isActive && "bg-white/80 transition dark:bg-white/[.18]"} bg-primary`}
           ref={ref as React.RefObject<HTMLInputElement>}
           onFocus={handleFocus}
           onChange={(e) => {
