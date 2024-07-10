@@ -14,9 +14,8 @@ export const userRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.user.id;
       return ctx.db.user.update({
-        where: { id: userId },
+        where: { id: ctx?.session?.user?.id },
         data: {
           name: cleanStringForInput(input.name) ?? "",
           email: input.email,
@@ -58,27 +57,24 @@ export const userRouter = createTRPCRouter({
   // getUser is via getServerAuthSession
 
   deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
-    const userId = ctx.session.user.id;
     return ctx.db.user.delete({
-      where: { id: userId },
+      where: { id: ctx?.session?.user?.id },
     });
   }),
 
   resetDailyUsage: protectedProcedure.mutation(async ({ ctx }) => {
-    const userId = ctx.session.user.id;
-
     const now = new Date();
     const lastResetAt = new Date(
       ctx.session.user.resetAt as string | number | Date,
     );
-    const shouldReset = ctx.session.user.resetAt
+    const shouldReset = ctx?.session?.user?.resetAt
       ? now.getTime() >= lastResetAt.getTime() + 24 * 60 * 60 * 1000
       : true;
 
     return (
       shouldReset &&
       ctx.db.user.update({
-        where: { id: userId },
+        where: { id: ctx?.session?.user?.id },
         data: { commentsUsed: 0, resetAt: now },
       })
     );

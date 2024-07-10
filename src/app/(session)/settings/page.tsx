@@ -11,7 +11,6 @@ import Input from "~/app/_components/Input";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { SessionNav } from "~/app/_components/SessionNav";
 import { type Locale } from "~/config";
-import { setUserLocale } from "~/i18n";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { ACTIVESTATUSES } from "~/utils/constants";
@@ -29,13 +28,11 @@ export async function generateMetadata({
 }
 
 export default async function Settings() {
-  const session = await getServerAuthSession();
-
-  const userPersona = await api.persona.getUserPersona();
   const t = await getTranslations();
-
-  const subscription = await api.stripe.getUserSubDetails();
   const locale: Locale = (await getLocale()) as Locale;
+  const session = await getServerAuthSession();
+  const userPersona = await api.persona.getUserPersona();
+  const subscription = await api.stripe.getUserSubDetails();
 
   return (
     <>
@@ -123,53 +120,58 @@ export default async function Settings() {
               <FormButton variant="submit">{t("form.save")}</FormButton>
             </form>
           </Card>
-          {!session.user?.isSpecial &&
-            session?.user?.stripeSubscriptionStatus && (
-              <Card variant="form">
-                <h2>{t("settings.billing")}</h2>
-                <p>
-                  your billing status is:{" "}
-                  {subscription
-                    ? JSON.stringify(subscription, null, 2)
-                    : "not active"}
-                </p>
+          {!session.user?.isSpecial && subscription && (
+            <Card variant="form">
+              <h2>{t("settings.billing")}</h2>
+              <p>
+                your billing status is:{" "}
+                {subscription
+                  ? JSON.stringify(subscription, null, 2)
+                  : "not active"}
+              </p>
 
-                {/* todo: add active link when not in local dev, confirm email and everything works */}
-                <ManageBillingButton locale={locale} />
-                {subscription &&
-                  ACTIVESTATUSES.includes(subscription?.status) && (
-                    <form
-                      action={async () => {
-                        "use server";
-                        await api.stripe.cancelSubscription({
-                          subId: subscription?.id,
-                        });
-                      }}
-                    >
-                      <FormButton>Cancel your subscription</FormButton>
-                    </form>
-                  )}
-              </Card>
-            )}
+              {/* todo: add active link when not in local dev, confirm email and everything works */}
+              <ManageBillingButton locale={locale} />
+              {subscription &&
+                ACTIVESTATUSES.includes(subscription?.status ?? "none") && (
+                  <form
+                    action={async () => {
+                      "use server";
+                      await api.stripe.cancelSubscription({
+                        subId: subscription?.id,
+                      });
+                    }}
+                  >
+                    <FormButton>Cancel your subscription</FormButton>
+                  </form>
+                )}
+            </Card>
+          )}
 
           <Card variant="form">
             <h2>{t("settings.language")}</h2>
-            <form
-              action={async (formData) => {
-                "use server";
-                const locale: string = formData.get("data-locale") as string;
-                await setUserLocale(locale);
-                redirect("/settings");
-              }}
-              className="flex flex-row gap-2"
-            >
-              <FormButton variant="menuElement" data-locale="en">
-                {t("settings.en")}
-              </FormButton>
-              <FormButton variant="menuElement" data-locale="ja">
-                {t("settings.ja")}
-              </FormButton>
-            </form>
+            <div className="flex flex-row gap-2">
+              <form
+                action={async () => {
+                  "use server";
+                  redirect(`/en/switch-lang`);
+                }}
+              >
+                <FormButton variant="menuElement">
+                  {t("settings.en")}
+                </FormButton>
+              </form>
+              <form
+                action={async () => {
+                  "use server";
+                  redirect(`/ja/switch-lang`);
+                }}
+              >
+                <FormButton variant="menuElement" data-locale="ja">
+                  {t("settings.ja")}
+                </FormButton>
+              </form>
+            </div>
           </Card>
         </div>
       </main>

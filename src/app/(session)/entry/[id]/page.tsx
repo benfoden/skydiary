@@ -6,7 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import CopyTextButton from "~/app/_components/CopyTextButton";
@@ -14,6 +14,7 @@ import DropDownMenu from "~/app/_components/DropDown";
 import DropDownUser from "~/app/_components/DropDownUser";
 import FormButton from "~/app/_components/FormButton";
 import FormDeleteButton from "~/app/_components/FormDeleteButton";
+import LoadingPageBody from "~/app/_components/LoadingPageBody";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { PersonaIcon } from "~/app/_components/PersonaIcon";
 import { SessionNav } from "~/app/_components/SessionNav";
@@ -57,11 +58,11 @@ export default async function Entry({
     api.persona.getAllByUserId(),
   ]);
 
-  if (!post || !user) {
-    console.error("Failed to get post or user.");
-    return notFound();
-  }
   const hasComment = isCommentAvailable(user, comments);
+
+  if (!post) {
+    return <LoadingPageBody />;
+  }
 
   return (
     <>

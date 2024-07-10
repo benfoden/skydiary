@@ -39,7 +39,7 @@ export default async function DropDownUser() {
         )}
       {session?.user?.isSpecial && (
         <span className="px-4 py-2 text-blue-600 dark:text-blue-400">
-          hi, special user
+          special status: on
         </span>
       )}
       <Link href={"/settings"}>

@@ -83,6 +83,9 @@ export const stripeRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { stripe, session, db } = ctx;
+      if (!ctx.session.user) {
+        throw new Error("Not logged in");
+      }
 
       const customerId = await getOrCreateStripeCustomerIdForUser({
         db,
@@ -109,32 +112,18 @@ export const stripeRouter = createTRPCRouter({
     }),
 
   getUserSubDetails: protectedProcedure.query(async ({ ctx }) => {
-    const { session } = ctx;
-
-    const subscription = await ctx.db.subscription.findFirst({
+    if (!ctx?.session?.user?.id) {
+      throw new Error("User not available");
+    }
+    return await ctx.db.subscription.findFirst({
       where: {
-        userId: session.user?.id,
+        userId: ctx.session.user.id,
       },
     });
-
-    if (!subscription) {
-      console.error(
-        "Could not find subscription for user id",
-        session.user?.id,
-      );
-      return null;
-    }
-    return subscription;
   }),
 
   getAllSubs: protectedProcedure.query(async ({ ctx }) => {
-    const subscriptions = await ctx.db.subscription.findMany();
-
-    if (!subscriptions) {
-      console.error("Could not find any subscriptions");
-      return null;
-    }
-    return subscriptions;
+    return await ctx.db.subscription.findMany();
   }),
 
   getSubBySubId: protectedProcedure
