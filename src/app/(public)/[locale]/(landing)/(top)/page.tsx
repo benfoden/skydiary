@@ -57,50 +57,50 @@ export default async function Top() {
             </div>
           </div>
         </Card>
-        <Card variant="hero" isButton={false}>
-          {session ? (
-            t("top.welcomeBack")
-          ) : (
-            <>
-              <p className="text-xl font-light">{t("top.ctaTitle")}</p>
-              <form
-                action={async (formData) => {
-                  "use server";
-                  const email = formData.get("email");
-                  if (email) {
-                    cookies().set("signupEmail", String(email));
-                    redirect("/auth/signin");
-                  }
-                }}
-              >
-                <Input
-                  placeholder={t("top.emailPlaceholder")}
-                  type="email"
-                  name="email"
-                  required
-                />
-                <FormButton variant="submit" isSpecial>
-                  <div className="flex items-center gap-2">
-                    {t("top.heroCTA")}
-                    <ArrowRightIcon className="h-3 w-3 animate-ping" />
-                  </div>
-                </FormButton>
-              </form>
-            </>
-          )}
-        </Card>
-      </div>
-      <div className="flex w-full flex-col items-center justify-center sm:flex-row">
-        <Card variant="transparent" isButton={false}>
-          <div className="flex w-full flex-col items-center gap-8 sm:w-[512px] md:w-[678px]">
-            <p className="text-lg font-light">{t("top.privacyTitle")}</p>
-            <div className="flex flex-col gap-2">
-              <p className="font-light">· {t("top.privacyDetail1")}</p>
-              <p className="font-light">· {t("top.privacyDetail2")}</p>
-              <p className="font-light">· {t("top.privacyDetail3")}</p>
+
+        <div className="flex w-full flex-col items-center justify-start">
+          <Card variant="hero" isButton={false}>
+            {session ? (
+              t("top.welcomeBack")
+            ) : (
+              <>
+                <p className="text-xl font-light">{t("top.ctaTitle")}</p>
+                <form
+                  action={async (formData) => {
+                    "use server";
+                    const email = formData.get("email");
+                    if (email) {
+                      cookies().set("signupEmail", String(email));
+                      redirect("/auth/signin");
+                    }
+                  }}
+                >
+                  <Input
+                    placeholder={t("top.emailPlaceholder")}
+                    type="email"
+                    name="email"
+                    required
+                  />
+                  <FormButton variant="submit" isSpecial>
+                    <div className="flex items-center gap-2">
+                      {t("top.heroCTA")}
+                      <ArrowRightIcon className="h-3 w-3 animate-ping" />
+                    </div>
+                  </FormButton>
+                </form>
+              </>
+            )}
+          </Card>
+          <Card variant="transparent" isButton={false}>
+            <div className="flex w-fit flex-col items-center gap-8">
+              <div className="flex flex-col gap-2 text-xs">
+                <p className="font-light">· {t("top.privacyDetail1")}</p>
+                <p className="font-light">· {t("top.privacyDetail2")}</p>
+                <p className="font-light">· {t("top.privacyDetail3")}</p>
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
       </div>
     </>
   );
