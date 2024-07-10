@@ -32,6 +32,13 @@
     "description 3": "the emphasis is on simplicity. all you need to do is write a daily entry",
     "description 4": "you get automatic tags on your entry, recaps of your week, and advice or feedback when you want it",
     "description 5": "you can create a persona for anyone you want to talk to and learn new things you might not have imagined",
+    "company": {
+      "title": "about the team",
+      "description 0": "skydiary is made by a husband (B) and wife (N). we craved feedback to keep us writing our journals daily because we know it helps in so many ways, so we started this project.",
+      "description 1": "B is a software engineer and startup veteran. N is a writer and creator. ",
+      "description 2": "we're both passionate about technology, learning, and exploring our inner world. we love to share our knowledge and help others learn new things about the world and themselves.",
+      "description 3": "we hope you'll enjoy using skydiary and help us make it better. we're open to feedback and suggestions. you can reach us at contact -at- skydiary -dot- app."
+    },
     "try it": "try it for free"
   },
   "contact": {
@@ -75,6 +82,7 @@
     "privacy": "privacy",
     "terms": "terms",
     "contact": "contact",
+    "contactUs": "contact us",
     "login": "log in",
     "signup": "sign up",
     "settings": "settings",
