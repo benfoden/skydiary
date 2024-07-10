@@ -35,8 +35,8 @@
     "home": "home",
     "about": "about",
     "pricing": "pricing",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
+    "privacy": "privacy",
+    "terms": "terms",
     "contact": "contact",
     "login": "log in",
     "signup": "sign up",
@@ -259,7 +259,7 @@
     },
     "about": {
       "title": "about us",
-      "description": "we're a husband and wife team based in Japan. we craved feedback to keep us writing our journals daily because we belive it helps so much but it's hard to keep up."
+      "description": "we're a husband and wife team based in Japan. we craved feedback to keep us writing our journals daily because we know it helps in so many ways."
     },
     "pricing": {
       "title": "pricing",

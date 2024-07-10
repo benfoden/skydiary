@@ -1,13 +1,13 @@
 import { type Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import Button from "~/app/_components/Button";
 import ManageBillingButton from "~/app/_components/ButtonBilling";
 import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
 import FormButton from "~/app/_components/FormButton";
 import Input from "~/app/_components/Input";
+import LocaleSwitcher from "~/app/_components/LocaleSwitcher";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { SessionNav } from "~/app/_components/SessionNav";
 import { type Locale } from "~/config";
@@ -151,26 +151,7 @@ export default async function Settings() {
           <Card variant="form">
             <h2>{t("settings.language")}</h2>
             <div className="flex flex-row gap-2">
-              <form
-                action={async () => {
-                  "use server";
-                  redirect(`/en/switch-lang`);
-                }}
-              >
-                <FormButton variant="menuElement">
-                  {t("settings.en")}
-                </FormButton>
-              </form>
-              <form
-                action={async () => {
-                  "use server";
-                  redirect(`/ja/switch-lang`);
-                }}
-              >
-                <FormButton variant="menuElement" data-locale="ja">
-                  {t("settings.ja")}
-                </FormButton>
-              </form>
+              <LocaleSwitcher isSettings />
             </div>
           </Card>
         </div>

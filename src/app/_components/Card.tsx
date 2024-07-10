@@ -1,4 +1,6 @@
-export const cardColors = (variant?: "default" | "narrow" | "wide" | "form") =>
+export const cardColors = (
+  variant?: "default" | "narrow" | "wide" | "form" | "textBlock",
+) =>
   ` bg-white/30 dark:bg-white/[.08] ${variant === "form" ? "shadow-xl dark:shadow-black" : ""}`;
 export function Card({
   children,
@@ -7,7 +9,7 @@ export function Card({
 }: {
   children: React.ReactNode;
   isButton?: boolean;
-  variant?: "default" | "narrow" | "wide" | "form";
+  variant?: "default" | "narrow" | "wide" | "form" | "textBlock";
 }) {
   if (variant === "form") isButton = false;
 
@@ -65,6 +67,17 @@ export function Card({
           }
         >
           <div className="flex flex-col items-center justify-between gap-2">
+            {children}
+          </div>
+        </div>
+      );
+
+    case "textBlock":
+      return (
+        <div
+          className={`flex w-full flex-col gap-2 rounded-xl bg-white/30 px-6 py-4 dark:bg-black/50 ${isButton && sharedHover} `}
+        >
+          <div className="flex flex-col items-start justify-between gap-2">
             {children}
           </div>
         </div>

@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import Button from "~/app/_components/Button";
 import { getServerAuthSession } from "~/server/auth";
-import PublicLocaleSwitcher from "./PublicLocaleSwitcher";
+import LocaleSwitcher from "../../../_components/LocaleSwitcher";
 
 import dynamic from "next/dynamic";
 
@@ -19,7 +19,7 @@ export async function PublicNav() {
   const t = await getTranslations();
 
   return (
-    <nav className="flex w-full flex-wrap items-center justify-between bg-transparent pl-4 pt-4 sm:pr-4 sm:pt-0">
+    <nav className="z-100 flex w-full flex-wrap items-center justify-between bg-transparent pl-4 pt-4 sm:pr-4 sm:pt-0">
       <div className="flex items-center">
         <h1>
           <Link
@@ -35,6 +35,12 @@ export async function PublicNav() {
           className="rounded-full px-4 py-2 no-underline transition hover:bg-white/30"
         >
           {t("nav.about")}
+        </Link>
+        <Link
+          href="/pricing"
+          className="rounded-full px-4 py-2 no-underline transition hover:bg-white/30"
+        >
+          {t("nav.pricing")}
         </Link>
       </div>
       <div className="flex items-center gap-4 sm:pr-4">
@@ -54,7 +60,7 @@ export async function PublicNav() {
           </Button>
         </Link>
         <span> · </span>
-        <PublicLocaleSwitcher />
+        <LocaleSwitcher />
         <SetThemeButton />
       </div>
     </nav>
