@@ -83,4 +83,16 @@ export const userRouter = createTRPCRouter({
       })
     );
   }),
+
+  getByUserId: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+      }),
+    )
+    .query(({ ctx, input }) => {
+      return ctx.db.user.findFirst({
+        where: { id: input.userId },
+      });
+    }),
 });

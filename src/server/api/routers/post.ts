@@ -5,9 +5,9 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { promptSummarizeText } from "~/utils/prompts";
+import { getResponse } from "~/utils/ai";
+import { prompts } from "~/utils/prompts";
 import { cleanStringForEntry } from "~/utils/text";
-import { getResponse } from "../ai";
 
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
@@ -163,7 +163,7 @@ export const postRouter = createTRPCRouter({
 
     for (const post of postsNotFromToday) {
       const summary = await getResponse({
-        messageContent: promptSummarizeText(post.content),
+        messageContent: prompts.summary({ content: post.content }),
       });
       if (summary) {
         continue;
@@ -191,7 +191,7 @@ export const postRouter = createTRPCRouter({
 
       if (lastPost) {
         const summary = await getResponse({
-          messageContent: promptSummarizeText(lastPost.content),
+          messageContent: prompts.summary({ content: lastPost.content }),
         });
         if (summary) {
           await ctx.db.post.update({

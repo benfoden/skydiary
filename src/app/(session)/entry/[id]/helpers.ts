@@ -2,12 +2,12 @@
 
 import { type Comment, type Persona } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { getResponse } from "~/server/api/ai";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
+import { getResponse } from "~/utils/ai";
 import { productPlan } from "~/utils/constants";
 import { isCommentAvailable } from "~/utils/planLimits";
-import { commentPromptString, randomizedSkyAdvisor } from "~/utils/prompts";
+import { prompts, randomizedSkyAdvisor } from "~/utils/prompts";
 import { type CommentType } from "~/utils/types";
 
 export async function makeComment({
@@ -40,12 +40,12 @@ export async function makeComment({
       commentType = randomizedSkyAdvisor();
     }
 
-    const messageContent = commentPromptString({
+    const messageContent = prompts.comment({
       commentType,
       authorDetails: currentUserPersona,
-      diaryEntry: latestPost?.content ?? "",
+      content: latestPost?.content ?? "",
       characters: user?.isSpecial
-        ? 10000
+        ? 6000
         : productPlan(userProductId)?.characters,
       personaDetails: commentPersona ?? undefined,
     });

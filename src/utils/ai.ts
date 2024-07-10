@@ -23,20 +23,29 @@ export async function getResponse({
   return completion.choices[0]?.message.content;
 }
 
-export async function getResponseJSON(inputText: string) {
+export async function getResponseJSON({
+  messageContent,
+  model = "gpt-3.5-turbo",
+}: {
+  messageContent: string;
+  model?: string;
+}) {
   const completion = await openai.chat.completions.create({
-    messages: [{ role: "user", content: inputText }],
-    model: "gpt-4o",
+    messages: [{ role: "user", content: messageContent }],
+    model,
     response_format: { type: "json_object" },
   });
 
   return completion.choices[0]?.message.content;
 }
 
-export async function getResponseFromArr(inputTexts: string[]) {
+export async function getResponseFromArr(
+  inputTexts: string[],
+  model = "gpt-3.5-turbo",
+) {
   const completion = await openai.chat.completions.create({
     messages: inputTexts.map((text) => ({ role: "user", content: text })),
-    model: "gpt-4o",
+    model,
   });
 
   return completion.choices[0]?.message.content;

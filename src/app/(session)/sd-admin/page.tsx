@@ -1,7 +1,8 @@
 import { Card } from "~/app/_components/Card";
-import { getResponse } from "~/server/api/ai";
+import { getResponse } from "~/utils/ai";
+
 import { api } from "~/trpc/server";
-import { commentPromptString } from "~/utils/prompts";
+import { prompts } from "~/utils/prompts";
 
 export default async function Secret() {
   const currentUserPersona = await api.persona.getUserPersona();
@@ -12,9 +13,9 @@ export default async function Secret() {
   if (persona && currentUserPersona) {
     greeting =
       (await getResponse({
-        messageContent: commentPromptString({
+        messageContent: prompts.comment({
           authorDetails: currentUserPersona,
-          diaryEntry:
+          content:
             "I have returned to continue developing the app after a long time away.",
           personaDetails: persona,
           characters: 140,

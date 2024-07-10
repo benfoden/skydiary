@@ -1,7 +1,7 @@
 import { type NextRequest } from "next/server";
-import { getResponse } from "~/server/api/ai";
 import { api } from "~/trpc/server";
-import { TAGS } from "~/utils/constants";
+import { getResponse } from "~/utils/ai";
+import { TAGS, productPlan } from "~/utils/constants";
 import { prompts } from "~/utils/prompts";
 
 export async function GET(request: NextRequest) {
@@ -26,14 +26,21 @@ export async function GET(request: NextRequest) {
       const latestPost = await api.post.getLatestByInputUserId({
         userId: userPersona.createdById,
       });
-      if (!latestPost?.content) {
-        continue; // Changed from return to continue to ensure all userPersonas are processed
+      const user = await api.user.getByUserId({
+        userId: userPersona.createdById,
+      });
+
+      if (!latestPost?.content || !user) {
+        continue;
       }
-      const newTags = await getResponse(
-        prompts.generateTagsPrompt(latestPost?.content),
-      );
+      const newTags = await getResponse({
+        messageContent: prompts.tag({ content: latestPost?.content }),
+        model: user?.isSpecial
+          ? "gpt-4o"
+          : productPlan(user?.stripeProductId)?.model,
+      });
       if (!newTags) {
-        continue; // Changed from return to continue to ensure all userPersonas are processed
+        continue;
       }
 
       const tagContents = newTags?.split(",").map((tag) => tag.trim());

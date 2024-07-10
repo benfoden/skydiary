@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Card } from "~/app/_components/Card";
-import { getResponse } from "~/server/api/ai";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
+import { getResponse } from "~/utils/ai";
 import { productPlan } from "~/utils/constants";
-import { commentPromptString } from "~/utils/prompts";
+import { prompts } from "~/utils/prompts";
 
 export default async function Secret() {
   const currentUserPersona = await api.persona.getUserPersona();
@@ -17,9 +17,9 @@ export default async function Secret() {
     personaId: "clxy6sprp000014e4dths21fv",
   });
 
-  const prompt = commentPromptString({
+  const prompt = prompts.comment({
     authorDetails: currentUserPersona!,
-    diaryEntry:
+    content:
       "I have returned to the webmaster zone to continue my work on the app after a time away. I am tired, but determined.",
     personaDetails: persona!,
   });

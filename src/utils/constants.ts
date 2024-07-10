@@ -92,7 +92,7 @@ export const userPlanLimits: Record<string, UserPlanLimit> = {
     personas: 100,
     comments: 100,
     memories: 1000,
-    characters: 10000,
+    characters: 6000,
     model: "gpt-4o",
   },
 };
