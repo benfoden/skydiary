@@ -311,3 +311,52 @@ export const randomizedSkyAdvisor = () => {
   if (rand < 0.85) return "criticism";
   return "insight";
 };
+
+export function fastRandom(): number {
+  return (Math.random() + Math.random() + Math.random()) * 0.666666 - 1;
+}
+
+export function fastLogNormalRandom(): number {
+  return (Math.random() + Math.random() + Math.random()) * 0.333333;
+}
+
+export function gaussianRandom(stdDev: number): number {
+  const u1 = Math.random();
+  const u2 = Math.random();
+  const randomStdNormal =
+    Math.sqrt(-2.0 * Math.log(u1)) * Math.sin(2.0 * Math.PI * u2);
+  return randomStdNormal * stdDev;
+}
+
+export function gaussianRandomInRange(stdDev: number, range: number): number {
+  if (range < stdDev) {
+    throw new Error("Range should be bigger than the standard deviation!");
+  }
+
+  let randomValue;
+  do {
+    randomValue = gaussianRandom(stdDev);
+  } while (Math.abs(randomValue) > range);
+
+  return randomValue;
+}
+
+export function logNormalRandom(mean: number, stdDev: number): number {
+  return Math.exp(gaussianRandom(stdDev)) * mean;
+}
+
+export function getRandomNumberNormalDist(range: number): number {
+  if (range <= 70) {
+    throw new Error("range must be greater than 70");
+  }
+
+  const mean = (70 + range) / 2;
+  const stdDev = (range - 70) / 6; // 99.7% of values will fall within 3 standard deviations
+
+  let randomValue;
+  do {
+    randomValue = mean + gaussianRandomInRange(stdDev, range - 70);
+  } while (randomValue < 70 || randomValue > range);
+
+  return randomValue;
+}

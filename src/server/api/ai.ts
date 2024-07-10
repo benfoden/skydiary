@@ -12,7 +12,6 @@ export async function getResponse({
   systemMessageContent?: string;
   model?: string;
 }) {
-  console.log("the model", model);
   const completion = await openai.chat.completions.create({
     messages: [
       { role: "system", content: systemMessageContent },
@@ -21,7 +20,6 @@ export async function getResponse({
     model,
   });
 
-  console.log("the usage!!", completion.usage);
   return completion.choices[0]?.message.content;
 }
 
