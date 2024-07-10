@@ -1,6 +1,22 @@
+import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { type Locale } from "~/config";
 import { getServerAuthSession } from "~/server/auth";
+
+export async function generateMetadata({
+  params: { locale },
+}: {
+  params: { locale: Locale };
+}): Promise<Metadata> {
+  const t = await getTranslations({ locale, namespace: "metadata" });
+
+  return {
+    title: t("top.title"),
+    description: t("top.description"),
+    icons: [{ rel: "icon", url: "/favicon.ico" }],
+  };
+}
 
 export default async function Top() {
   const session = await getServerAuthSession();

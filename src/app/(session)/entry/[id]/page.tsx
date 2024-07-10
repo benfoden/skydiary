@@ -1,6 +1,7 @@
 "use server";
 import { type Persona, type Tag } from "@prisma/client";
 import { CircleIcon, PersonIcon, PlusIcon } from "@radix-ui/react-icons";
+import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import Image from "next/image";
@@ -17,6 +18,7 @@ import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { PersonaIcon } from "~/app/_components/PersonaIcon";
 import { SessionNav } from "~/app/_components/SessionNav";
 import UpgradeBanner from "~/app/_components/UpgradeBanner";
+import { type Locale } from "~/config";
 import { getUserLocale } from "~/i18n";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
@@ -24,6 +26,18 @@ import { isCommentAvailable } from "~/utils/planLimits";
 import { formattedTimeStampToDate } from "~/utils/text";
 import EntryBody from "./EntryBody";
 import { makeComment } from "./helpers";
+
+export async function generateMetadata({
+  params: { locale },
+}: {
+  params: { locale: Locale };
+}): Promise<Metadata> {
+  const t = await getTranslations({ locale, namespace: "metadata" });
+
+  return {
+    title: t("entry.title"),
+  };
+}
 
 export default async function Entry({
   params,

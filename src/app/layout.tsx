@@ -3,22 +3,41 @@ import "~/styles/globals.css";
 import { ThemeScript } from "next-app-theme/theme-script";
 import { Inter } from "next/font/google";
 
+import { type Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages } from "next-intl/server";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
+import { type Locale } from "node_modules/next/dist/compiled/@vercel/og/satori";
+import { getServerAuthSession } from "~/server/auth";
 import { TRPCReactProvider } from "~/trpc/react";
 import { api } from "~/trpc/server";
+
+export const siteTitle = "skydiary";
+export async function generateMetadata({
+  params: { locale },
+}: {
+  params: { locale: Locale };
+}): Promise<Metadata> {
+  const t = await getTranslations({ locale, namespace: "metadata" });
+
+  return {
+    title: { template: "%s · skydiary", default: "skydiary" },
+    description: t("top.description"),
+    icons: [{ rel: "icon", url: "/favicon.ico" }],
+    openGraph: {
+      title: { template: "%s · skydiary", default: t("top.title") },
+      description: t("top.description"),
+      url: "https://skydiary.app",
+      siteName: "skydiary",
+      locale,
+      type: "website",
+    },
+  };
+}
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
 });
-
-export const metadata = {
-  title: "skydiary",
-  description:
-    "Write a daily entry and you're done. You get recaps and advice in total privacy with an AI friend, coach, and mentor.",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
-};
 
 export default async function RootLayout({
   children,
@@ -28,7 +47,10 @@ export default async function RootLayout({
   const locale = await getLocale();
   const messages = await getMessages();
 
-  await api.user.resetDailyUsage();
+  const session = await getServerAuthSession();
+  if (session) {
+    await api.user.resetDailyUsage();
+  }
 
   return (
     <html lang={locale}>

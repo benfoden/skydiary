@@ -1,4 +1,5 @@
 import { type Post } from "@prisma/client";
+import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -53,6 +54,18 @@ function PostCard({
       </div>
     </Card>
   );
+}
+
+export async function generateMetadata({
+  params: { locale },
+}: {
+  params: { locale: Locale };
+}): Promise<Metadata> {
+  const t = await getTranslations({ locale, namespace: "metadata" });
+
+  return {
+    title: t(`home.title`),
+  };
 }
 
 export default async function Home() {

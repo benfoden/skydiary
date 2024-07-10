@@ -251,5 +251,34 @@
     "emailWithDetails": "a receipt has been sent to your registered email address",
     "thankYouDetails": "now you can use all features:",
     "tryItNow": "enjoy your experience"
+  },
+  "metadata": {
+    "top": {
+      "title": "diary with feedback that's private",
+      "description": "write a journal and get personalized feedback, for free. hear from advisors, characters, public figures, even you at another age. with private AI"
+    },
+    "about": {
+      "title": "about us",
+      "description": "we're a husband and wife team based in Japan. we craved feedback to keep us writing our journals daily because we belive it helps so much but it's hard to keep up."
+    },
+    "pricing": {
+      "title": "pricing",
+      "description": "skydiary is free to use. for more comments, more personas, and a longer persona memory you can upgrade to a paid plan."
+    },
+    "home": {
+      "title": "home"
+    },
+    "entry": {
+      "title": "entry"
+    },
+    "topics": {
+      "title": "topics"
+    },
+    "personas": {
+      "title": "personas"
+    },
+    "settings": {
+      "title": "settings"
+    }
   }
 }

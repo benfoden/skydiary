@@ -1,7 +1,22 @@
+import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
+import { type Locale } from "~/config";
+
+export async function generateMetadata({
+  params: { locale },
+}: {
+  params: { locale: Locale };
+}): Promise<Metadata> {
+  const t = await getTranslations({ locale, namespace: "metadata" });
+
+  return {
+    title: t("about.title"),
+    description: t("about.description"),
+  };
+}
 
 export default async function About() {
   const t = await getTranslations();
