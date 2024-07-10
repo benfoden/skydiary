@@ -21,7 +21,7 @@ export async function generateMetadata({
 export default async function About() {
   const t = await getTranslations();
   return (
-    <>
+    <div className="flex w-full flex-col items-start justify-start gap-2 sm:max-w-[768px]">
       <Card variant="textBlock" isButton={false}>
         <h1 className="mb-4 text-lg font-medium">{t("about.title")}</h1>
         <div className="flex flex-col items-start justify-start gap-2">
@@ -38,6 +38,6 @@ export default async function About() {
           </div>
         </div>
       </Card>
-    </>
+    </div>
   );
 }

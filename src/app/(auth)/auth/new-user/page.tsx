@@ -60,6 +60,7 @@ const NewUserPage: React.FC = async () => {
                 name="age"
                 label={t("new-user.your age")}
                 placeholder="1"
+                min={13}
               />
 
               <Input

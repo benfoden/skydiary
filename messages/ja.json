@@ -3,7 +3,26 @@
   "description": "日記を毎日書くだけで完了です。AIの友達、コーチ、メンターと一緒に完全なプライバシーで要約とアドバイスを受け取れます。",
   "top": {
     "welcome": "ようこそ",
-    "welcomeBack": "おかえりなさい"
+    "welcomeBack": "おかえりなさい",
+    "emailLabel": "メールアドレス",
+    "emailPlaceholder": "メールアドレスを入力してください",
+    "heroLine1": "コメントを書いている人は",
+    "heroDetail1": "日記の記憶を持つパーソナを作成する",
+    "heroDetail2": "月次および年次の要約を取得する",
+    "heroDetail3": "自動トピックを閲覧する",
+    "heroDescription": "何が起こっているかについて毎日日記を書き、新しいコメントを得るためにボタンをクリックします。使いやすく、完全にプライベートです。",
+    "ctaTitle": "毎日新しいコメントを取得する",
+    "heroCTA": "日記を始めましょう",
+    "personaName1": "紫式部",
+    "personaName2": "10歳の自分",
+    "personaName3": "好きなキャラクター",
+    "personaName4": "孔子",
+    "personaName5": "ジャンヌ・ダルク",
+    "personaName6": "福澤諭吉",
+    "privacyTitle": "プライバシーの約束",
+    "privacyDetail1": "個人データは、いかなる方法でも共有、追跡、プロファイル、または販売されることはありません",
+    "privacyDetail2": "個人データは、自分以外の誰にも見えません",
+    "privacyDetail3": "個人データをいつでもエクスポートまたは削除することができます"
   },
   "auth": {
     "description": "これらの詳細は、プライベートに経験をパーソナライズするのに役立ちます。",
@@ -30,6 +49,24 @@
     "description 4": "日記を書くだけで、自分の日記を自動的にタグ付け、週の要約、お願いやフィードバックを受け取ることができます。",
     "description 5": "話したい誰かについてのキャラクターを作成し、想像もしなかった新しいことを学ぶことができます",
     "try it": "無料で試してみる"
+  },
+  "contact": {
+    "title": "お問い合わせ",
+    "description": "質問？フィードバック？お聞かせください。",
+    "from": "メールアドレス",
+    "subject": "件名",
+    "message": "メッセージ",
+    "submit": "メッセージを送信",
+    "thankYouTitle": "メッセージをありがとうございます！",
+    "thankYouDescription": "すぐにご連絡いたします。"
+  },
+  "privacy": {
+    "title": "プライバシーポリシー",
+    "description": "プライバシーを守ることに専念しています。こちらがプライバシーポリシーです。"
+  },
+  "terms": {
+    "title": "利用規約",
+    "description": "これがskydiaryの利用規約です。"
   },
   "nav": {
     "home": "ホーム",
@@ -276,6 +313,20 @@
     },
     "settings": {
       "title": "設定"
+    },
+    "contact": {
+      "title": "お問い合わせ",
+      "description": "質問？フィードバック？お聞かせください。",
+      "thankYouTitle": "ありがとうございます！",
+      "thankYouDescription": "すぐにご連絡いたします。"
+    },
+    "privacy": {
+      "title": "プライバシーポリシー",
+      "description": "プライバシーを守ることに専念しています。こちらがプライバシーポリシーです。"
+    },
+    "terms": {
+      "title": "利用規約",
+      "description": "これがskydiaryの利用規約です。"
     }
   }
 }

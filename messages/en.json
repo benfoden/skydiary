@@ -2,8 +2,27 @@
   "title": "skydiary",
   "description": "Write a daily entry and you're done. You get recaps and advice in total privacy with an AI friend, coach, and mentor.",
   "top": {
-    "welcome": "Welcome",
-    "welcomeBack": "Welcome back"
+    "welcome": "welcome",
+    "welcomeBack": "welcome back",
+    "emailLabel": "email",
+    "emailPlaceholder": "type your email",
+    "heroLine1": "get comments from ",
+    "heroDetail1": "create personas with memories of your diary",
+    "heroDetail2": "get monthly and yearly recaps",
+    "heroDetail3": "browse automatic topics",
+    "heroDescription": "write a daily entry about what's happening and click a button to get a new comment. it's super easy-to-use and totally private",
+    "ctaTitle": "get new comments every day",
+    "heroCTA": "start your diary",
+    "personaName1": "yourself at 10",
+    "personaName2": "Aristotle",
+    "personaName3": "your favorite character",
+    "personaName4": "Cleopatra",
+    "personaName5": "your imaginary friend",
+    "personaName6": "Confucius",
+    "privacyTitle": "our privacy promise",
+    "privacyDetail1": "your personal data will never be shared, tracked, profiled, or sold in any way",
+    "privacyDetail2": "your personal data is not visible to anyone except you",
+    "privacyDetail3": "you can export or delete all your personal data at any time"
   },
   "about": {
     "title": "about skydiary",
@@ -14,6 +33,24 @@
     "description 4": "you get automatic tags on your entry, recaps of your week, and advice or feedback when you want it",
     "description 5": "you can create a persona for anyone you want to talk to and learn new things you might not have imagined",
     "try it": "try it for free"
+  },
+  "contact": {
+    "title": "contact us",
+    "description": "questions? feedback? we'd love to hear from you.",
+    "from": "your email",
+    "subject": "subject",
+    "message": "message",
+    "submit": "send message",
+    "thankYouTitle": "thanks for your message!",
+    "thankYouDescription": "we'll get back to you soon."
+  },
+  "privacy": {
+    "title": "privacy policy",
+    "description": "we are dedicated to preserving your privacy. here's our privacy policy."
+  },
+  "terms": {
+    "title": "terms of service",
+    "description": "these are the terms of service for skydiary."
   },
   "auth": {
     "description": "these details help to personalize your experience, privately.",
@@ -264,6 +301,20 @@
     "pricing": {
       "title": "pricing",
       "description": "skydiary is free to use. for more comments, more personas, and a longer persona memory you can upgrade to a paid plan."
+    },
+    "contact": {
+      "title": "contact us",
+      "description": "questions? feedback? we'd love to hear from you.",
+      "thankYouTitle": "thank you",
+      "thankYouDescription": "we'll get back to you soon."
+    },
+    "privacy": {
+      "title": "privacy policy",
+      "description": "we are dedicated to preserving your privacy. here's our privacy policy."
+    },
+    "terms": {
+      "title": "terms of service",
+      "description": "these are the terms of service for skydiary."
     },
     "home": {
       "title": "home"

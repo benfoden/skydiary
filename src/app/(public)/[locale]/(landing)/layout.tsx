@@ -11,7 +11,7 @@ export default async function RootLayout({
     <>
       <PublicNav />
       <main className="flex min-h-screen w-full flex-col items-start justify-start px-2 sm:px-8">
-        <div className="my-8 flex w-full flex-col items-start justify-start gap-2 sm:max-w-[768px]">
+        <div className="my-8 flex w-full flex-col items-start justify-start gap-2">
           {children}
         </div>
       </main>
