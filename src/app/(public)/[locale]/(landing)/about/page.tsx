@@ -38,6 +38,18 @@ export default async function About() {
           </div>
         </div>
       </Card>
+      <Card variant="textBlock" isButton={false}>
+        <h1 className="mb-4 text-lg font-medium">{t("about.company.title")}</h1>
+        <div className="flex flex-col items-start justify-start gap-2">
+          <p>{t("about.company.description 0")}</p>
+          <p>{t("about.company.description 1")}</p>
+          <p>{t("about.company.description 2")}</p>
+          <p>{t("about.company.description 3")}</p>
+          <Link href="/contact">
+            <Button>{t("nav.contactUs")}</Button>
+          </Link>
+        </div>
+      </Card>
     </div>
   );
 }
