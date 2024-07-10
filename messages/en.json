@@ -24,8 +24,8 @@
     "send a new code": "send a new code",
     "verify and continue": "verify and continue",
     "verifying": "verifying...",
-    "signing in": "signing in...",
-    "sign in": "sign in",
+    "signing in": "logging in...",
+    "sign in": "log in / sign up",
     "back to home": "back to home",
     "signing out": "signing out...",
     "sign out": "sign out",
@@ -34,6 +34,7 @@
   "nav": {
     "home": "home",
     "about": "about",
+    "pricing": "pricing",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "contact": "contact",
@@ -46,7 +47,9 @@
     "addPersonas": "add personas",
     "copy all text": "copy text",
     "back": "back",
-    "today": "today"
+    "today": "today",
+    "upgrade": "upgrade",
+    "plus": "plus"
   },
   "new-user": {
     "title": "welcome to skydiary",
@@ -62,7 +65,10 @@
     "last30Days": "Last 30 days"
   },
   "entry": {
-    "today": "Today..."
+    "today": "Today...",
+    "limitTitle": "unlock more comments",
+    "limitDescription1": "you've discovered a paid feature.",
+    "limitDescription2": "upgrade to skydiary plus to get more comments every day."
   },
   "topics": {
     "all": "all",
@@ -93,6 +99,7 @@
     "new persona": "new persona",
     "newDescription": "create a persona you want to get comments from on your daily entries",
     "add new": "add new",
+    "favorite": "favorite",
     "name": "name",
     "namePlaceholder": "John Smith, Jane Doe...",
     "age": "age",
@@ -111,7 +118,11 @@
     "communication style": "communication style",
     "communicationStylePlaceholder": "assertive, direct, empathetic...",
     "communication sample": "communication sample",
-    "communicationSamplePlaceholder": "If you can walk you can dance, if you can talk you can sing."
+    "communicationSamplePlaceholder": "if you can walk you can dance, if you can talk you can sing.",
+    "limitTitle": "unlock more favorite personas",
+    "limitDescription1": "you've discovered a paid feature.",
+    "limitDescription2": "upgrade to skydiary plus to get more favorite personas.",
+    "delete": "delete persona permanently"
   },
   "settings": {
     "personal": "personal",
@@ -124,7 +135,9 @@
     "your identities": "your identities",
     "placeholder identities": "woman, daughter, mother, etc.",
     "en": "English",
-    "ja": "日本語 (Japanese)"
+    "ja": "日本語 (Japanese)",
+    "billing": "billing",
+    "editBilling": "edit billing"
   },
   "form": {
     "save": "save",
@@ -182,5 +195,61 @@
   "theme": {
     "light": "light mode",
     "dark": "dark mode"
+  },
+  "pricing": {
+    "title": "pricing & plans",
+    "yearly": "yearly",
+    "monthly": "monthly",
+    "signIn": "log in or sign up",
+    "createAccountToStart": "create an account for free",
+    "subscribe": "subscribe now",
+    "details": "renews automatically. cancel any time.",
+    "perMonth": "per month",
+    "tba": "to be announced",
+    "comingSoon": "coming soon",
+    "checkingOut": "checking out...",
+    "yourPlan": "subscribed",
+    "yearlyPriceDetail0": "get 2+ months free",
+    "lite": {
+      "title": "lite",
+      "entries": "unlimited daily entries",
+      "personas": "one custom persona",
+      "comments": "one comment per day",
+      "commentLength": "comments up to 140 characters",
+      "featureAccess": "default access to new features",
+      "memory": "short-term persona memory"
+    },
+    "plus": {
+      "title": "plus",
+      "entries": "unlimited daily entries",
+      "personas": "up to 10 custom personas",
+      "comments": "up to 10 comments per day",
+      "commentLength": "comments up to 1400 characters",
+      "featureAccess": "early access to new features",
+      "memory": "long-term persona memory",
+      "welcome": "welcome to skydiary plus",
+      "monthlyPrice": "$5",
+      "yearlyPrice": "$4",
+      "yearlyPriceDetail1": "2+ months free",
+      "yearlyPriceDetail2": "billed yearly $48"
+    },
+    "premium": {
+      "title": "premium",
+      "entries": "unlimited daily entries",
+      "personas": "up to 100 custom personas",
+      "comments": "up to 100 comments per day",
+      "commentLength": "comments up to 2800 characters",
+      "featureAccess": "early access to new features",
+      "memory": "super long-term persona memory",
+      "welcome": "welcome to skydiary premium",
+      "monthlyPrice": "$15",
+      "yearlyPrice": "$12",
+      "yearlyPriceDetail1": "2+ months free",
+      "yearlyPriceDetail2": "billed yearly $144"
+    },
+    "thankYou": "thank you",
+    "emailWithDetails": "a receipt has been sent to your registered email address",
+    "thankYouDetails": "now you can use all features:",
+    "tryItNow": "enjoy your experience"
   }
 }

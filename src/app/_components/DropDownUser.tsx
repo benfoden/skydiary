@@ -1,4 +1,9 @@
-import { ExitIcon, GearIcon, PersonIcon } from "@radix-ui/react-icons";
+import {
+  ExitIcon,
+  GearIcon,
+  PersonIcon,
+  PlusIcon,
+} from "@radix-ui/react-icons";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { getServerAuthSession } from "~/server/auth";
@@ -9,8 +14,24 @@ import { ThemeToggle } from "./ToggleTheme";
 export default async function DropDownUser() {
   const session = await getServerAuthSession();
   const t = await getTranslations();
+
   return (
     <DropDownMenu isUserMenu>
+      {session?.user?.isSubscriber ? (
+        <Link href={"/pricing"}>
+          <Button variant="menuElement">
+            <span className="text-blue-600 dark:text-blue-400">
+              skydiary {t("nav.premium")}
+            </span>
+          </Button>
+        </Link>
+      ) : (
+        <Link href={"/pricing"}>
+          <Button variant="menuElement" isSpecial>
+            {t("nav.upgrade")} <PlusIcon className="h-4 w-4" />
+          </Button>
+        </Link>
+      )}
       <Link href={"/settings"}>
         <Button variant="menuElement">
           {t("nav.settings")} <GearIcon className="h-4 w-4" />

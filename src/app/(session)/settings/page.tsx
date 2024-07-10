@@ -1,22 +1,28 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import Button from "~/app/_components/Button";
+import ManageBillingButton from "~/app/_components/ButtonBilling";
 import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
 import FormButton from "~/app/_components/FormButton";
 import Input from "~/app/_components/Input";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { SessionNav } from "~/app/_components/SessionNav";
+import { type Locale } from "~/config";
 import { setUserLocale } from "~/i18n";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
+import { ACTIVESTATUSES } from "~/utils/constants";
 
 export default async function Settings() {
   const session = await getServerAuthSession();
 
   const userPersona = await api.persona.getUserPersona();
   const t = await getTranslations();
+
+  const subscription = await api.stripe.getUserSubDetails();
+  const locale: Locale = (await getLocale()) as Locale;
 
   return (
     <>
@@ -29,7 +35,7 @@ export default async function Settings() {
       </SessionNav>
 
       <main className="flex min-h-screen w-full flex-col items-center justify-start">
-        <div className="container flex flex-col items-center justify-start gap-12 sm:w-96">
+        <div className="container flex flex-col items-center justify-start gap-12 px-2 sm:w-96">
           {session?.user.email === "ben.foden@gmail.com" && (
             <Link href={"/sd-admin"}>
               <Button>webmaster zone</Button>
@@ -104,6 +110,33 @@ export default async function Settings() {
               <FormButton variant="submit">{t("form.save")}</FormButton>
             </form>
           </Card>
+          {session?.user?.isSubscriber && (
+            <Card variant="form">
+              <h2>{t("settings.billing")}</h2>
+              <p>
+                your billing status is:{" "}
+                {subscription
+                  ? JSON.stringify(subscription, null, 2)
+                  : "not active"}
+              </p>
+
+              {/* todo: add active link when not in local dev, confirm email and everything works */}
+              <ManageBillingButton locale={locale} />
+              {subscription &&
+                ACTIVESTATUSES.includes(subscription?.status) && (
+                  <form
+                    action={async () => {
+                      "use server";
+                      await api.stripe.cancelSubscription({
+                        subId: subscription?.id,
+                      });
+                    }}
+                  >
+                    <FormButton>Cancel your subscription</FormButton>
+                  </form>
+                )}
+            </Card>
+          )}
 
           <Card variant="form">
             <h2>{t("settings.language")}</h2>

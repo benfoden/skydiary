@@ -6,3 +6,5 @@ export interface EmailDetails {
   goBack: string;
   safelyIgnore: string;
 }
+
+export type CommentType = "custom" | "criticism" | "insight" | "boost";

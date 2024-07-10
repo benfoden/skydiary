@@ -1,7 +1,10 @@
 
 // To update the DB, run:
 bun prisma migrate dev --name <name_here>
-bun prisma migrate diff --from-url file:"./tmp/dev.db" --to-url "libsql://skydiary-benfoden.turso.io"
-bun prisma generate
 bun prisma migrate deploy <name_here>
+bun prisma generate
 turso db shell skydiary < ./prisma/migrations/20240514025841_addcols/migration.sql
+
+
+Probably not needed:
+bun prisma migrate diff --from-url file:"./tmp/dev.db" --to-url "libsql://skydiary-benfoden.turso.io"

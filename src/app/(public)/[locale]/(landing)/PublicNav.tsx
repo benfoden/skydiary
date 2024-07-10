@@ -19,7 +19,7 @@ export async function PublicNav() {
   const t = await getTranslations();
 
   return (
-    <nav className="flex w-full items-center justify-between bg-transparent p-4">
+    <nav className="flex w-full flex-wrap items-center justify-between bg-transparent pl-4 pt-4 sm:pr-4 sm:pt-0">
       <div className="flex items-center">
         <h1>
           <Link
@@ -37,7 +37,7 @@ export async function PublicNav() {
           {t("nav.about")}
         </Link>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 sm:pr-4">
         {!session && (
           <Link
             href={session ? "/home" : "/auth/signin"}

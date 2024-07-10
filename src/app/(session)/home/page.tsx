@@ -78,7 +78,7 @@ export default async function Home() {
         <DropDownUser />
       </SessionNav>
       <main className="flex min-h-screen flex-col items-start">
-        <div className="container flex flex-col items-center justify-start gap-12 px-4 py-16 ">
+        <div className="container flex flex-col items-center justify-start px-2 pb-12">
           <Suspense fallback={<Spinner />}>
             <div className="flex flex-col items-start justify-center gap-4 sm:max-w-5xl">
               {t("home.today")}

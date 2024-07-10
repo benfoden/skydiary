@@ -1,4 +1,6 @@
-import { getResponse } from "~/server/api/ai";
+import { Card } from "~/app/_components/Card";
+import { getResponse } from "~/utils/ai";
+
 import { api } from "~/trpc/server";
 import { prompts } from "~/utils/prompts";
 
@@ -7,21 +9,31 @@ export default async function Secret() {
   const persona = await api.persona.getById({
     personaId: "clxyqqo3l00005ep3t8amw32a",
   });
-  let greeting = "Welcome back. ";
+  let greeting = "Welcome back";
   if (persona && currentUserPersona) {
-    greeting += await getResponse(
-      prompts.personaCommentPrompt(
-        persona,
-        "Working on the app again, in the admin zone! _prompt: Make this message a single sentence.",
-        currentUserPersona,
-      ),
-    );
+    greeting =
+      (await getResponse({
+        messageContent: prompts.comment({
+          authorDetails: currentUserPersona,
+          content:
+            "I have returned to continue developing the app after a long time away.",
+          personaDetails: persona,
+          characters: 140,
+        }),
+      })) ?? "Welcome back";
   }
   return (
     <>
       <main className="flex min-h-screen w-full flex-col items-center justify-start">
-        <div className="container flex flex-col items-start justify-start gap-12 px-8  py-16 ">
-          {greeting}
+        <div className="container flex flex-col items-start justify-start gap-12 px-8 py-16 ">
+          <details>
+            <summary>Welcome back</summary>
+            <div className="w-80">
+              <Card>
+                {persona?.name}: {greeting}
+              </Card>
+            </div>
+          </details>
         </div>
       </main>
     </>

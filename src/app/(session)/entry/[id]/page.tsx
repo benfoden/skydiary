@@ -9,19 +9,21 @@ import { notFound, redirect } from "next/navigation";
 import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import CopyTextButton from "~/app/_components/CopyTextButton";
-import DeleteButton from "~/app/_components/DeleteButton";
 import DropDownMenu from "~/app/_components/DropDown";
 import DropDownUser from "~/app/_components/DropDownUser";
 import FormButton from "~/app/_components/FormButton";
+import FormDeleteButton from "~/app/_components/FormDeleteButton";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { PersonaIcon } from "~/app/_components/PersonaIcon";
 import { SessionNav } from "~/app/_components/SessionNav";
+import UpgradeBanner from "~/app/_components/UpgradeBanner";
 import { getUserLocale } from "~/i18n";
-import { getResponse } from "~/server/api/ai";
+import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
-import { prompts } from "~/utils/prompts";
+import { isCommentAvailable } from "~/utils/planLimits";
 import { formattedTimeStampToDate } from "~/utils/text";
 import EntryBody from "./EntryBody";
+import { makeComment } from "./helpers";
 
 export default async function Entry({
   params,
@@ -30,6 +32,8 @@ export default async function Entry({
   params: { id: string };
   searchParams: { s: string };
 }) {
+  const session = await getServerAuthSession();
+  const { user } = session;
   const [t, locale, post, comments, tags, personas] = await Promise.all([
     getTranslations(),
     getUserLocale(),
@@ -39,10 +43,11 @@ export default async function Entry({
     api.persona.getAllByUserId(),
   ]);
 
-  if (!post) {
-    console.error("Failed to get post.");
+  if (!post || !user) {
+    console.error("Failed to get post or user.");
     return notFound();
   }
+  const hasComment = isCommentAvailable(user, comments);
 
   return (
     <>
@@ -85,142 +90,89 @@ export default async function Entry({
                     redirect("/home");
                   }}
                 >
-                  <DeleteButton />
+                  <FormDeleteButton />
                 </form>
               </DropDownMenu>
             </div>
           </div>
-          <div className="flex h-full w-full flex-col items-center pb-4">
-            <div className="flex w-full flex-row items-start justify-center gap-2">
+          <div className="flex h-full w-full flex-col items-center gap-4 pb-4">
+            <div className="flex w-full flex-row items-start justify-center">
               <ul className="flex w-full flex-row flex-wrap justify-start gap-2">
                 <form
                   action={async () => {
                     "use server";
-                    if (searchParams.s === "1") {
-                      return;
-                    }
-                    try {
-                      const latestPost = await api.post.getByPostId({
-                        postId: params.id,
-                      });
-                      if (!latestPost?.content) {
-                        return;
-                      }
-
-                      const currentUserPersona =
-                        await api.persona.getUserPersona();
-
-                      const coachVariant = await getResponse(
-                        prompts.generateCoachPrompt(latestPost?.content),
-                      );
-                      const prompt = prompts.skyCommentPrompt(
-                        coachVariant!,
-                        latestPost?.content,
-                        currentUserPersona!,
-                      );
-
-                      const response = await getResponse(prompt);
-                      if (response) {
-                        await api.comment.create({
-                          content: response,
-                          postId: params?.id,
-                          coachVariant: coachVariant!,
-                        });
-                        revalidatePath(`/entry/${params.id}`);
-                      } else {
-                        console.error(
-                          "Failed to get a response for the comment.",
-                        );
-                      }
-                    } catch (error) {
-                      console.error("Error creating comment:", error);
-                    }
+                    await makeComment({
+                      comments,
+                      postId: params.id,
+                      userProductId: user?.stripeProductId ?? "",
+                    });
                   }}
                 >
-                  <FormButton isDisabled={searchParams.s === "1"}>
+                  <FormButton
+                    isDisabled={searchParams.s === "1" || !hasComment}
+                  >
                     <div className="flex flex-row items-center gap-2 text-xs">
                       <CircleIcon className="h-4 w-4" />
                       sky
                     </div>
                   </FormButton>
                 </form>
-                {!personas?.length && (
-                  <Link href="/persona/all">
-                    <Button>
-                      <PlusIcon className="h-4 w-4" />
-                      <span className="text-xs">{t("nav.addPersonas")}</span>
-                    </Button>
-                  </Link>
-                )}
-                {personas?.map((persona: Persona) => (
-                  <form
-                    key={persona.id}
-                    action={async () => {
-                      "use server";
-                      if (searchParams.s === "1") {
-                        return;
-                      }
-                      try {
-                        const latestPost = await api.post.getByPostId({
+
+                {personas
+                  .filter(
+                    (persona) =>
+                      persona.isFavorite || !personas.some((p) => p.isFavorite),
+                  )
+                  .map((persona: Persona) => (
+                    <form
+                      key={persona.id}
+                      action={async () => {
+                        "use server";
+                        await makeComment({
+                          comments,
                           postId: params.id,
+                          userProductId: user?.stripeProductId ?? "",
+                          commentPersona: persona,
                         });
-
-                        const currentUserPersona =
-                          await api.persona.getUserPersona();
-
-                        const response = await getResponse(
-                          prompts.personaCommentPrompt(
-                            persona,
-                            latestPost?.content ?? "",
-                            currentUserPersona!,
-                          ),
-                        );
-                        if (response) {
-                          await api.comment.create({
-                            content: response,
-                            postId: params?.id,
-                            createdByPersonaId: persona.id,
-                            coachVariant: persona.name,
-                          });
-                          revalidatePath(`/entry/${params.id}`);
-                        } else {
-                          console.error(
-                            "Failed to get a response for the comment.",
-                          );
-                        }
-                      } catch (error) {
-                        console.error("Error creating comment:", error);
-                      }
-                    }}
-                  >
-                    <FormButton isDisabled={searchParams.s === "1"}>
-                      <div className="flex flex-row items-center gap-2 font-medium">
-                        {persona.image ? (
-                          <>
-                            <Image
-                              alt={persona.name}
-                              src={persona.image}
-                              width="16"
-                              height="16"
-                              className="rounded-full"
-                            />
-                            <span className="text-xs">{persona.name}</span>
-                          </>
-                        ) : (
-                          <>
-                            <PersonIcon className="h-4 w-4" />
-                            <span className="text-xs">{persona.name}</span>
-                          </>
-                        )}
-                      </div>
-                    </FormButton>
-                  </form>
-                ))}
+                      }}
+                    >
+                      <FormButton
+                        isDisabled={searchParams.s === "1" || !hasComment}
+                      >
+                        <div className="flex flex-row items-center gap-2 font-medium">
+                          {persona.image ? (
+                            <>
+                              <Image
+                                alt={persona.name}
+                                src={persona.image}
+                                width="16"
+                                height="16"
+                                className="rounded-full"
+                              />
+                              <span className="text-xs">{persona.name}</span>
+                            </>
+                          ) : (
+                            <>
+                              <PersonIcon className="h-4 w-4" />
+                              <span className="text-xs">{persona.name}</span>
+                            </>
+                          )}
+                        </div>
+                      </FormButton>
+                    </form>
+                  ))}
+                <Link href="/persona/all">
+                  <Button>
+                    <PersonIcon className="h-4 w-4" />
+                    <PlusIcon className="h-4 w-4" />
+                  </Button>
+                </Link>
               </ul>
             </div>
+            {!hasComment && <UpgradeBanner variant="comment" />}
 
             {comments && (
-              <ul className="flex flex-col gap-4 pt-6">
+              <ul className="flex flex-col gap-4 pt-4">
                 {comments
                   .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
                   .map((comment) => (
@@ -247,8 +199,6 @@ export default async function Entry({
                                     return;
                                   }
                                   try {
-                                    //not sure why this is erorring, but it works so shut it up for now
-                                    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                                     await api.comment.delete({
                                       commentId: comment.id,
                                     });
@@ -261,11 +211,13 @@ export default async function Entry({
                                   }
                                 }}
                               >
-                                <DeleteButton hasText={false} />
+                                <FormDeleteButton hasText={false} />
                               </form>
                             </div>
                           </div>
-                          <div className="text-sm">{comment.content}</div>
+                          <div className="whitespace-pre-line text-sm">
+                            {comment.content}
+                          </div>
                         </div>
                       </Card>
                     </li>

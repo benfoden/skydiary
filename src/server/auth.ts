@@ -2,15 +2,18 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import { type User as PrismaUser } from "@prisma/client";
 import { randomBytes, randomInt, randomUUID } from "crypto";
 import {
   getServerSession,
   type DefaultSession,
   type NextAuthOptions,
+  type Session,
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
 import EmailProvider from "next-auth/providers/email";
 import { createTransport } from "nodemailer";
+import Stripe from "stripe";
 import { env } from "~/env";
 
 import { db } from "~/server/db";
@@ -24,17 +27,14 @@ import { type EmailDetails } from "~/utils/types";
  */
 declare module "next-auth" {
   interface Session extends DefaultSession {
-    user: {
-      id: string;
-      // ...other properties
-      // role: UserRole;
-    } & DefaultSession["user"];
+    user: PrismaUser;
   }
-
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
+  //who cares
+  interface User extends PrismaUser {
+    stripeCustomerId?: string;
+    stripeSubscriptionId?: string;
+    stripeProductId?: string;
+  }
 }
 
 export const authOptions = (emailDetails: EmailDetails): NextAuthOptions => {
@@ -51,11 +51,41 @@ export const authOptions = (emailDetails: EmailDetails): NextAuthOptions => {
         user: {
           ...session.user,
           id: user.id,
+          stripeCustomerId: user.stripeCustomerId,
+          stripeProductId: user.stripeProductId,
+          stripeSubscriptionId: user.stripeSubscriptionId,
+          stripeSubscriptionStatus: user.stripeSubscriptionStatus,
+          commentsUsed: user.commentsUsed,
+          personasUsed: user.personasUsed,
+          memoryUsed: user.memoryUsed,
+          resetAt: user.resetAt,
+          isAdmin: user.isAdmin,
+          isSpecial: user.isSpecial,
         },
         generateSessionToken: () => {
           return randomUUID?.() ?? randomBytes(32).toString("hex");
         },
       }),
+    },
+    events: {
+      createUser: async ({ user }) => {
+        const stripe = new Stripe(env.STRIPE_SECRET_KEY_TEST, {
+          apiVersion: "2024-06-20",
+        });
+        await stripe.customers
+          .create({
+            email: user.email!,
+            name: user.name!,
+          })
+          .then(async (customer) => {
+            return db.user.update({
+              where: { id: user.id },
+              data: {
+                stripeCustomerId: customer.id,
+              },
+            });
+          });
+      },
     },
     adapter: PrismaAdapter(db) as Adapter,
     providers: [
@@ -135,5 +165,7 @@ export const authOptions = (emailDetails: EmailDetails): NextAuthOptions => {
  *
  * @see https://next-auth.js.org/configuration/nextjs
  */
-export const getServerAuthSession = () =>
-  getServerSession(authOptions(null as unknown as EmailDetails));
+export const getServerAuthSession = async (): Promise<Session> =>
+  getServerSession(
+    authOptions(null as unknown as EmailDetails),
+  ) as Promise<Session>;

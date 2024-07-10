@@ -82,11 +82,20 @@ model User {
   image         String?
   isAdmin       Boolean   @default(false)
   isSpecial     Boolean   @default(false)
+  stripeProductId   String?
+  stripeSubscriptionId String?
+  stripeSubscriptionStatus String?
+  stripeCustomerId String? @unique
+  commentsUsed   Int?
+  personasUsed   Int?
+  memoryUsed     Int?
+  resetAt        DateTime?
   accounts      Account[]
   personas      Persona[]
   posts         Post[]
   sessions      Session[]
   tags          Tag[]     @relation("UserTags")
+  subscriptions Subscription[] @relation("UserSubscriptions")
 }
 
 model Persona {
@@ -105,6 +114,7 @@ model Persona {
   updatedAt           DateTime  @updatedAt
   createdById         String
   comments            Comment[]
+  isFavorite          Boolean   @default(false)
   isUser              Boolean   @default(false)
   createdBy           User      @relation(fields: [createdById], references: [id])
 }
@@ -115,4 +125,50 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Product {
+  id          String  @id
+  active      Boolean
+  name        String
+  description String?
+  image       String?
+  metadata    String
+  prices      Price[] @relation("ProductPrices")
+}
+
+model Price {
+  id              String              @id
+  product         Product             @relation(fields: [productId], references: [id], name: "ProductPrices")
+  productId       String
+  active          Boolean
+  description     String?
+  unitAmount      BigInt
+  currency        String
+  type            String
+  interval        String
+  intervalCount   Int
+  trialPeriodDays Int?
+  metadata        String
+  subscriptions   Subscription[]      @relation("PriceSubscriptions")
+}
+
+model Subscription {
+  id                String               @id
+  user              User                 @relation(fields: [userId], references: [id], name: "UserSubscriptions")
+  userId            String
+  status            String
+  metadata          String
+  price             Price                @relation(fields: [priceId], references: [id], name: "PriceSubscriptions")
+  priceId           String
+  quantity          Int
+  cancelAtPeriodEnd Boolean
+  created           DateTime             @default(now())
+  currentPeriodStart DateTime            @default(now())
+  currentPeriodEnd  DateTime             @default(now())
+  endedAt           DateTime?
+  cancelAt          DateTime?
+  canceledAt        DateTime?
+  trialStart        DateTime?
+  trialEnd          DateTime?
 }

@@ -1,7 +1,10 @@
 import { getTranslations } from "next-intl/server";
+import { revalidatePath } from "next/cache";
 import { Card } from "~/app/_components/Card";
+import CopyText from "~/app/_components/CopyText";
 import FormButton from "~/app/_components/FormButton";
 import Input from "~/app/_components/Input";
+import { env } from "~/env";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 
@@ -10,11 +13,13 @@ export default async function Secret() {
   const userPersona = await api.persona.getUserPersona();
   const t = await getTranslations();
 
+  const users = await api.user.getAllUsersAsAdmin();
+
   return (
-    <>
+    <div className="flex w-full flex-col gap-4 sm:flex-row">
       <Card variant="form">
-        <div className="flex w-full flex-col items-center gap-4 sm:w-[512px]">
-          <h2>Current persona</h2>
+        <div className="flex w-full flex-col gap-4">
+          <h2>{userPersona?.name}</h2>
           <form
             className="flex w-full flex-col gap-4"
             action={async (formData) => {
@@ -122,11 +127,111 @@ export default async function Secret() {
               label={t("personas.communication sample")}
               defaultValue={userPersona?.communicationSample ?? ""}
             />
-
             <FormButton variant="submit">{t("form.save")}</FormButton>
           </form>
         </div>
       </Card>
-    </>
+      <Card variant="form">
+        <div className="flex w-full flex-col gap-4">
+          <h2>Update User</h2>
+          <form
+            action={async (formData) => {
+              "use server";
+              const targetUserId: string = formData.get(
+                "targetUserId",
+              ) as string;
+              const email: string | undefined = formData.get("email") as string;
+              const stripeProduct: string | undefined = formData.get(
+                "stripeProduct",
+              ) as string;
+              const isAdmin: boolean = formData.get("isAdmin") === "on";
+              const isSpecial: boolean = formData.get("isSpecial") === "on";
+
+              let stripeProductId: string | undefined;
+              if (stripeProduct) {
+                if (stripeProduct === "premium") {
+                  stripeProductId =
+                    env.PRODUCT_ID_PREMIUM_TEST ?? env.PRODUCT_ID_PREMIUM;
+                } else if (stripeProduct === "plus") {
+                  stripeProductId =
+                    env.PRODUCT_ID_PLUS_TEST ?? env.PRODUCT_ID_PLUS;
+                } else {
+                  stripeProductId = env.PRODUCT_ID_LITE;
+                }
+              }
+
+              const updateData = {
+                targetUserId,
+                ...(email ? { email } : {}),
+                ...(isAdmin !== undefined ? { isAdmin } : {}),
+                ...(isSpecial !== undefined ? { isSpecial } : {}),
+                ...(stripeProductId ? { stripeProductId } : {}),
+              };
+
+              await api.user.updateUserAsAdmin(updateData);
+
+              revalidatePath("/sd-admin/user");
+            }}
+          >
+            <Input
+              id="targetUserId"
+              name="targetUserId"
+              label="Target User Id *"
+            />
+            <Input id="email" name="email" label="Email" />
+            <Input
+              id="isAdmin"
+              name="isAdmin"
+              label="Is Admin"
+              type="checkbox"
+            />
+            <Input
+              id="isSpecial"
+              name="isSpecial"
+              label="Is Special"
+              type="checkbox"
+            />
+            <Input
+              id="stripeProduct"
+              name="stripeProduct"
+              label="Stripe Product"
+              placeholder="lite, plus, or premium"
+            />
+            <FormButton variant="submit">Update user</FormButton>
+          </form>
+        </div>
+        <div>
+          <h2>Current user</h2>
+          <div className="w-80">{JSON.stringify(session?.user, null, 2)}</div>
+
+          <div className="w-80">comments used: {session.user.commentsUsed}</div>
+          <div className="w-80">
+            custom personas used: {session.user.personasUsed}
+          </div>
+        </div>
+      </Card>
+      <Card variant="form">
+        <div className="flex w-full flex-col gap-4">
+          <h2>{users?.length} users</h2>
+          {users?.map((user) => (
+            <details key={user.id}>
+              <summary>{user.name ?? user.email}</summary>
+              <div>
+                id: <CopyText value={user.id} />
+              </div>
+              <div>
+                name: <CopyText value={user.name ?? ""} />
+              </div>
+              <div>
+                email: <CopyText value={user.email!} />
+              </div>
+              <div>isAdmin: {user.isAdmin ? "true" : "false"}</div>
+              <div>isSpecial: {user.isSpecial ? "true" : "false"}</div>
+              <div>productId: {user.stripeProductId}</div>
+            </details>
+          ))}
+        </div>
+      </Card>
+    </div>
   );
 }

@@ -15,7 +15,7 @@
     "verify and continue": "確認して続行",
     "verifying": "確認中...",
     "signing in": "ログイン中...",
-    "sign in": "ログイン",
+    "sign in": "ログイン / サインアップ",
     "back to home": "ホームに戻る",
     "signing out": "サインアウト中...",
     "sign out": "サインアウト",
@@ -46,7 +46,8 @@
     "addPersonas": "パーソナを追加",
     "copy all text": "キストをコピー",
     "back": "戻る",
-    "today": "今日"
+    "today": "今日",
+    "upgrade": "今すぐアップグレード"
   },
   "new-user": {
     "title": "skydiaryへようこそ",
@@ -62,7 +63,10 @@
     "last30Days": "30日間"
   },
   "entry": {
-    "today": "今日..."
+    "today": "今日...",
+    "limitTitle": "コメントをもっと解除",
+    "limitDescription1": "有料機能を発見しました。",
+    "limitDescription2": "skydiaryプラスにアップグレードして、毎日もっとコメントを取得してください。"
   },
   "topics": {
     "all": "すべて",
@@ -93,6 +97,7 @@
     "new persona": "新しいパーソナ",
     "newDescription": "日常のエントリにコメントを受け取るためのパーソナを作成",
     "add new": "追加",
+    "favorite": "お気に入り",
     "name": "名前",
     "namePlaceholder": "山田太郎、田中花子...",
     "age": "年齢",
@@ -111,7 +116,11 @@
     "communication style": "通信スタイル",
     "communicationStylePlaceholder": "強調、直接、深刻...",
     "communication sample": "通信サンプル",
-    "communicationSamplePlaceholder": "走れるなら、ダンスできる。話すなら、歌える。"
+    "communicationSamplePlaceholder": "走れるなら、ダンスできる。話すなら、歌える。",
+    "limitTitle": "お気に入りのパーソナをもっと解除",
+    "limitDescription1": "有料機能を発見しました。",
+    "limitDescription2": "skydiary plusにアップグレードして、もっとお気に入りのパーソナを手に入れましょう。",
+    "delete": "このパーソナを完全に削除する"
   },
   "settings": {
     "personal": "個人",
@@ -182,5 +191,61 @@
   "theme": {
     "light": "ライトモード",
     "dark": "ダークモード"
+  },
+  "pricing": {
+    "title": "価格とプラン",
+    "yearly": "年間",
+    "monthly": "月間",
+    "signIn": "ログインまたは登録",
+    "createAccountToStart": "アカウントを作成して開始する",
+    "subscribe": "今すぐ登録",
+    "details": "自動的に更新されます。いつでもキャンセルできます。",
+    "perMonth": "月あたり",
+    "tba": "近日発表",
+    "comingSoon": "近日公開",
+    "checkingOut": "チェックアウト中...",
+    "yourPlan": "登録済み",
+    "yearlyPriceDetail0": "2ヶ月以上無料",
+    "lite": {
+      "title": "ライト",
+      "entries": "無制限の日常エントリ",
+      "personas": "カスタムパーソナは1つ",
+      "comments": "1日につき1つのコメント",
+      "commentLength": "140文字までのコメント",
+      "featureAccess": "新機能へのデフォルトアクセス",
+      "memory": "短期のパーソナメモリ"
+    },
+    "plus": {
+      "title": "プラス",
+      "entries": "無制限の日常エントリ",
+      "personas": "最大10のカスタムパーソナ",
+      "comments": "1日につき最大10のコメント",
+      "commentLength": "2000文字までのコメント",
+      "featureAccess": "新機能への早期アクセス",
+      "memory": "長期のパーソナメモリ",
+      "welcome": "skydiaryプラスへようこそ",
+      "monthlyPrice": "￥600",
+      "yearlyPrice": "￥500",
+      "yearlyPriceDetail1": "2ヶ月以上無料",
+      "yearlyPriceDetail2": "年間￥6000"
+    },
+    "premium": {
+      "title": "プレミアム",
+      "entries": "無制限の日常エントリ",
+      "personas": "最大100のカスタムパーソナ",
+      "comments": "1日につき最大100のコメント",
+      "commentLength": "6000文字までのコメント",
+      "featureAccess": "新機能への早期アクセス",
+      "memory": "超長期のパーソナメモリ",
+      "welcome": "skydiaryプレミアムへようこそ",
+      "monthlyPrice": "￥1800",
+      "yearlyPrice": "￥1500",
+      "yearlyPriceDetail1": "2ヶ月以上無料",
+      "yearlyPriceDetail2": "年間￥18000"
+    },
+    "thankYou": "ありがとうございます",
+    "emailWithDetails": "登録されたメールアドレスに、領収証が送信されました。",
+    "thankYouDetails": "機能をすべて使用できます:",
+    "tryItNow": "プラスを使ってみましょう"
   }
 }

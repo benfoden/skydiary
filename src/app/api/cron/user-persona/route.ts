@@ -1,8 +1,8 @@
 import { type Persona } from "@prisma/client";
 import { type NextRequest } from "next/server";
-import { getResponseJSON } from "~/server/api/ai";
 import { api } from "~/trpc/server";
-import { NEWPERSONAUSER } from "~/utils/constants";
+import { getResponseJSON } from "~/utils/ai";
+import { NEWPERSONAUSER, productPlan } from "~/utils/constants";
 import { prompts } from "~/utils/prompts";
 
 export async function GET(request: NextRequest) {
@@ -27,15 +27,24 @@ export async function GET(request: NextRequest) {
       const latestPost = await api.post.getLatestByInputUserId({
         userId: userPersona.createdById,
       });
-      if (!latestPost?.content) {
+      const user = await api.user.getByUserId({
+        userId: userPersona.createdById,
+      });
+      if (!latestPost?.content || !user) {
         continue;
       }
-      const generatedPersona = await getResponseJSON(
-        prompts.generateUserPersonaPrompt(
-          userPersona ?? NEWPERSONAUSER,
-          latestPost?.content,
-        ),
-      );
+      const generatedPersona = await getResponseJSON({
+        messageContent: prompts.userPersona({
+          persona: userPersona ?? NEWPERSONAUSER,
+          content: latestPost?.content,
+          wordLimit: user?.isSpecial
+            ? 180
+            : productPlan(user?.stripeProductId).memories,
+        }),
+        model: user?.isSpecial
+          ? "gpt-4o"
+          : productPlan(user?.stripeProductId)?.model,
+      });
 
       if (!generatedPersona) {
         continue;

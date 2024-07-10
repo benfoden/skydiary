@@ -40,4 +40,11 @@
   .border-primary {
     @apply border-black dark:border-white;
   }
+
+  .theme-icon-dark {
+    @apply hidden opacity-0 dark:block dark:opacity-100;
+  }
+  .theme-icon-light {
+    @apply opacity-100 dark:hidden dark:opacity-0;
+  }
 }
