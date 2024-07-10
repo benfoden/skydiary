@@ -45,7 +45,7 @@ export async function makeComment({
       authorDetails: currentUserPersona,
       content: latestPost?.content ?? "",
       characters: user?.isSpecial
-        ? 6000
+        ? 2800
         : productPlan(userProductId)?.characters,
       personaDetails: commentPersona ?? undefined,
     });
@@ -55,6 +55,7 @@ export async function makeComment({
       model: user?.isSpecial ? "gpt-4o" : productPlan(userProductId)?.model,
     });
     if (responseContent) {
+      console.log("responseContent", responseContent);
       await api.comment.create({
         content: responseContent,
         postId,

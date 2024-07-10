@@ -20,6 +20,7 @@ export async function getResponse({
     model,
   });
 
+  console.log("raw", completion.choices[0]?.message.content);
   return completion.choices[0]?.message.content;
 }
 

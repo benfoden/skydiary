@@ -215,7 +215,9 @@ export default async function Entry({
                               </form>
                             </div>
                           </div>
-                          <div className="text-sm">{comment.content}</div>
+                          <div className="whitespace-pre-line text-sm">
+                            {comment.content}
+                          </div>
                         </div>
                       </Card>
                     </li>

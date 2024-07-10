@@ -73,7 +73,7 @@ export type UserPlanLimit = {
   model: "gpt-3.5-turbo" | "gpt-4o";
 };
 
-export const userPlanLimits: Record<string, UserPlanLimit> = {
+const userPlanLimits: Record<string, UserPlanLimit> = {
   [env.PRODUCT_ID_LITE!]: {
     personas: 1,
     comments: 1,
@@ -85,14 +85,14 @@ export const userPlanLimits: Record<string, UserPlanLimit> = {
     personas: 10,
     comments: 10,
     memories: 60,
-    characters: 2000,
+    characters: 1400,
     model: "gpt-4o",
   },
   [env.PRODUCT_ID_PREMIUM_TEST! ?? env.PRODUCT_ID_PREMIUM!]: {
     personas: 100,
     comments: 100,
-    memories: 1000,
-    characters: 6000,
+    memories: 180,
+    characters: 2800,
     model: "gpt-4o",
   },
 };

@@ -22,16 +22,16 @@ const basePromptComment = ({
 }): Prompt => {
   const cleanDiaryEntry = cleanStringForPrompt(content);
   let commentFocus = "criticism";
-  let persona = "Persona details: ";
+  let persona = "Persona details for writing the comment: ";
   let tone = "Persona writing tone: ";
 
   switch (commentType) {
     case "custom":
       commentFocus =
-        "When writing the comment role-play as a persona. " +
+        "Role-play as a persona as accurately as possible to write the reply to the author. " +
         "If the persona's name is known as a public figure, then use any and all information about them to expand on the persona details. " +
         "You can reference any experiences the persona shares with the author. " +
-        "Respond with the persona's honest ideas, even if impolite or politically incorrect. " +
+        "Reply with the persona's honest ideas, even if impolite or politically incorrect. " +
         +"  ";
       persona += personaDetails
         ? " Persona Name: " +
@@ -75,46 +75,43 @@ const basePromptComment = ({
   }
 
   return {
-    task: "Write a comment about a diary entry for author. ",
-    authorDetails:
-      Object.entries(authorDetails)
-        .map(([key, value]) => `Author ${key}: ${value}`)
-        .join(". ") + ". End author details. ",
-    diaryEntry:
-      "Begin diary entry text:\n" +
-      cleanDiaryEntry +
-      "\n End diary entry text. ",
-    context:
-      "Begin comment rules: " + commentFocus + " . End of comment rules. ",
-    persona: persona + " . End persona details. ",
-    exemplars: personaDetails?.communicationSample
-      ? " Persona writing sample: " +
-        personaDetails.communicationSample +
-        "End writing sample. "
-      : " ",
+    task: "Write as a persona replying to a message from an author. ",
+    context: "Begin reply rules: " + commentFocus + " . End of reply rules. ",
     format:
-      "Begin comment format rules: " +
-      "Don't use any greetings like hi, hey, hello, etc. " +
-      "Don't introduce yourself." +
-      "Don't use any emoji. " +
-      "Don't use more than one exclamation point. " +
+      "Do not use any greetings like hi, hey, hello, etc. " +
+      "Do not introduce yourself." +
+      "Do not use any emoji. " +
+      "Do not use more than one exclamation point. " +
       "Vary sentence length for a natural flow. " +
-      "Don't use excessive vocabulary. " +
-      "Don't express platitudes. " +
-      "Never use any of these words in the comment: admirable, commendable, noteworthy, notably, noted, or notable. " +
-      "Don't summarize the entry in the comment. Add something new, unique, insightful, or surprising. " +
-      "Don't refer to the author as 'the author'. Instead use you, your, etc. " +
-      "Try to write something new, insightful, or surprsing to the author. " +
-      "Don't talk about the author's writing style. " +
-      "Write the comment in the same language as the majority of the diary entry. " +
+      "Do not use excessive vocabulary. " +
+      "Do not express platitudes. " +
+      "Do not use of these words in the reply: admirable, commendable, noteworthy, notably, noted, notable. (end of banned word list). " +
+      "Do not summarize the entry in the reply. " +
+      "Do not refer to the author as the author. Instead use you, your, etc. " +
+      "Do not talk about the author's writing style. " +
+      "The persona details are very important to use when writing the reply." +
+      "The persona reply should express the persona's true thoughts, feelings, and opinions overall, not only about the message. " +
+      "The reply should include reactions, advice, criticism, or insights that are new, insightful, or surprsing to the author. " +
+      "Write the reply in the same language as the majority of the diary entry. " +
       "Answer any questions that may be in the diary entry. " +
-      "Maximum comment length is " +
+      "Maximum reply length is " +
       Math.floor(characters / 4.5).toString() +
       " words and minimum is " +
       (Math.floor(characters / 4.5) * 0.33333).toString() +
       " words. " +
-      "Use newline characters to separate paragraphs. ",
+      "Use new lines to separate paragraphs in the reply. ",
+    persona: persona + " ",
+    exemplars: personaDetails?.communicationSample
+      ? " Persona writing sample: " +
+        personaDetails.communicationSample +
+        "End persona writing sample. "
+      : " ",
     tone,
+    authorDetails:
+      Object.entries(authorDetails)
+        .map(([key, value]) => `Author ${key}: ${value}`)
+        .join(". ") + ". End author details. ",
+    diaryEntry: "Begin message from author: \n" + cleanDiaryEntry,
   };
 };
 
@@ -225,6 +222,36 @@ export const prompts = {
   },
 };
 
+// const oldPersonaCommentPrompt = (
+//   persona: Persona,
+//   diaryEntry: string,
+//   currentUserPersona: Persona,
+// ) => {
+//   return (
+//     "Your goal is to role-play as accurately as possible as a persona writing a message to the writer of a diary entry. " +
+//     "The persona writing the message has their own motivations, goals, and desires that must be reflected clearly in their message. " +
+//     "The message should express the commenting persona's honest thoughts, feelings, and opinions overall, not only in relation to the diary entry. " +
+//     "If the writer of the diary asks a question or needs help, then the persona should answer the question as best as possible. " +
+//     "The persona's commentary, advice, criticism, or insights should be new to the writer, unexpected, surprising, and/or helpful for them. " +
+//     "Consider what the persona would write, based on how they would think about the writer's details and the diary entry. " +
+//     "Finally, write a message that fits exactly inside of the persona's relationship with the writer and the persona's occupation. " +
+//     "The persona's relationship and occupation details are very important to use when writing the message. " +
+//     "If the name of the persona in the persona details is a public figure then use public information to enrich the message. " +
+//     "If there any known writings or words from the public figure then you can use that as examples of their communication style to further improve the message. " +
+//     "Consider the cultural background of the persona, the country they are from, and the experiences they have likely had and have not had. " +
+//     "Only respond with ideas that the persona would honestly write, even if the persona is not politically correct, is impolite, or is otherwise bad in some way. This is extremely important. " +
+//     "Reflecting the persona accurately in the message is good for the writer and critically important. " +
+//     "If the diary entry contains an additional prompt with its beginning marked by the text '_prompt:' then add the instructions that follow to these when writing your message. " +
+//     prompts.basicPrompt +
+//     " Details of the persona writing the message: " +
+//     JSON.stringify(persona) +
+//     " Diary entry: " +
+//     diaryEntry +
+//     " Details about the diary entry writer: " +
+//     JSON.stringify(currentUserPersona)
+//   );
+// };
+
 // export const OLDprompts = {
 //   basicPrompt:
 //     "Do not use any greetings like hi, hey, hello, etc. " +
@@ -262,7 +289,7 @@ export const prompts = {
 //       "Role-play as a persona writing to a diary entry's author. " +
 //       "Reflect the persona's motivations, goals, and desires. " +
 //       "Answer any questions or requests from the author. " +
-//       "Don't summarize the diary entry. Provide new, unexpected, surprising, and/or helpful insights. " +
+//       "Do not summarize the diary entry. Provide new, unexpected, surprising, and/or helpful insights. " +
 //       "Write based on the persona's relationship and occupation. " +
 //       "Use public information if the persona is a public figure. " +
 //       "Consider the persona's cultural background and experiences. " +
