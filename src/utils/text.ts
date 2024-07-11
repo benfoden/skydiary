@@ -95,7 +95,7 @@ export function analyzeSentiment(text: string): {
 export const cleanStringForPrompt = (input: string): string | undefined => {
   if (!input) return undefined;
   return input
-    .replace(/[~`/!+_&$#[\]{}()'""]/g, "")
+    .replace(/[~`/!+_&$#[\]{}]/g, "")
     .replace(/[^\x00-\x7F]/g, "")
     .replace(/\b(a|in|of|the)\b/g, "")
     .replace(/[\u{1F600}-\u{1F64F}]/gu, "")
@@ -105,7 +105,7 @@ export const cleanStringForPrompt = (input: string): string | undefined => {
 export const cleanStringForInput = (input?: string): string | undefined => {
   if (!input) return undefined;
   return input
-    .replace(/[~`/!&$#[\]{}()'""]/g, "")
+    .replace(/[~`/!&$#[\]{}]/g, "")
     .replace(/\s+/g, " ")
     .replace(/[^\x00-\x7F]/g, "")
     .replace(/[\u{1F600}-\u{1F64F}]/gu, "");
@@ -113,5 +113,5 @@ export const cleanStringForInput = (input?: string): string | undefined => {
 
 export const cleanStringForEntry = (input?: string): string | undefined => {
   if (!input) return undefined;
-  return input.replace(/[~`&$#[\]{}'""]/g, "");
+  return input.replace(/[~`&$#[\]{}]/g, "");
 };
