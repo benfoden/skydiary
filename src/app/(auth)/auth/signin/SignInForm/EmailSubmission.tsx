@@ -2,12 +2,12 @@
 
 import { signIn } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
-import { cookies } from "next/headers";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Card } from "~/app/_components/Card";
 import FormButton from "~/app/_components/FormButton";
 import Input from "~/app/_components/Input";
+import { deleteSignUpEmailCookie } from "../helpers";
 
 interface Props {
   signUpEmail: string;
@@ -45,7 +45,7 @@ export default function EmailSubmission({ signUpEmail, onSubmit }: Props) {
 
   useEffect(() => {
     setEmail(signUpEmail);
-    cookies().delete("signupEmail");
+    deleteSignUpEmailCookie().catch((error: Error) => console.error(error));
   }, [signUpEmail]);
 
   return (
