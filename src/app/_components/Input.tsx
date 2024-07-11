@@ -23,7 +23,6 @@ export default function Input({
   const [isActive, setIsActive] = useState(false);
   const [valueLength, setValueLength] = useState<number | null>(null);
   const [isChecked, setIsChecked] = useState(defaultChecked ?? false);
-  const [localValue, setLocalValue] = useState(value);
 
   const handleFocus = () => {
     setIsActive(true);
@@ -73,18 +72,6 @@ export default function Input({
     }
   }, [value]);
 
-  useEffect(() => {
-    if (initialValue) {
-      setLocalValue(initialValue);
-    }
-  }, [initialValue]);
-
-  useEffect(() => {
-    if (value) {
-      setLocalValue(value);
-    }
-  }, [value]);
-
   return (
     <div className={`relative flex w-full flex-col items-start`}>
       <label
@@ -107,7 +94,7 @@ export default function Input({
         <input
           type={type}
           {...props}
-          value={localValue}
+          value={initialValue ?? value}
           className={`w-full rounded-md px-5 py-3 text-base outline-none transition placeholder:text-sm placeholder:font-light placeholder:text-black/60 placeholder:dark:text-white/80 ${isActive && "bg-white/80 transition dark:bg-white/[.18]"} bg-primary ${props.disabled && "opacity-60"}`}
           ref={ref as React.RefObject<HTMLInputElement>}
           onFocus={handleFocus}
