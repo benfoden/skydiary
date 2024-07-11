@@ -37,7 +37,7 @@ export function Card({
         cardColors(variant)
       }
     >
-      <div className="flex flex-col items-center justify-between gap-2">
+      <div className="flex w-full flex-col items-center justify-between gap-2">
         {children}
       </div>
     </div>

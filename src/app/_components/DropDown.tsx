@@ -1,8 +1,8 @@
 "use client";
 import {
-  AvatarIcon,
   DotsHorizontalIcon,
   DotsVerticalIcon,
+  HamburgerMenuIcon,
 } from "@radix-ui/react-icons";
 import { useState } from "react";
 
@@ -13,10 +13,12 @@ const DropDownMenu = ({
   children,
   isUserMenu = false,
   isEntryMenu = false,
+  isTopMenu = false,
 }: {
   children: React.ReactNode;
   isUserMenu?: boolean;
   isEntryMenu?: boolean;
+  isTopMenu?: boolean;
 }) => {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -47,9 +49,10 @@ const DropDownMenu = ({
       className={`relative flex flex-col items-end ${open ? "open" : ""} ${isUserMenu && "mr-4"}`}
     >
       <Button variant="dropdownToggle" onClick={toggleDropdown}>
-        {isUserMenu && <AvatarIcon className="h-6 w-6" />}
+        {isUserMenu && <HamburgerMenuIcon className="h-6 w-6" />}
         {isEntryMenu && <DotsHorizontalIcon className="h-6 w-6" />}
-        {!isUserMenu && !isEntryMenu && (
+        {isTopMenu && <HamburgerMenuIcon className="h-6 w-6" />}
+        {!isUserMenu && !isEntryMenu && !isTopMenu && (
           <DotsVerticalIcon className="h-6 w-6" />
         )}
       </Button>

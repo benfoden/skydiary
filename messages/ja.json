@@ -93,7 +93,11 @@
     "back": "戻る",
     "today": "今日",
     "pricing": "価格設定",
-    "upgrade": "今すぐアップグレード"
+    "upgrade": "今すぐアップグレード",
+    "plus": "プラス",
+    "premium": "プレミアム",
+    "topPage": "トップページ",
+    "userHome": "ホーム"
   },
   "new-user": {
     "title": "skydiaryへようこそ",

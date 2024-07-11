@@ -5,6 +5,8 @@ import { getServerAuthSession } from "~/server/auth";
 import LocaleSwitcher from "../../../_components/LocaleSwitcher";
 
 import dynamic from "next/dynamic";
+import DropDownMenu from "~/app/_components/DropDown";
+import { ThemeToggle } from "~/app/_components/ToggleTheme";
 
 const SetThemeButton = dynamic(
   () => import("~/app/_components/ToggleTheme").then((mod) => mod.ThemeToggle),
@@ -30,20 +32,22 @@ export async function PublicNav() {
             skydiary
           </Link>
         </h1>
-        <Link
-          href="/about"
-          className="rounded-full px-4 py-2 no-underline transition hover:bg-white/30"
-        >
-          {t("nav.about")}
-        </Link>
-        <Link
-          href="/pricing"
-          className="rounded-full px-4 py-2 no-underline transition hover:bg-white/30"
-        >
-          {t("nav.pricing")}
-        </Link>
+        <div className="hidden md:block">
+          <Link
+            href="/about"
+            className="rounded-full px-4 py-2 no-underline transition hover:bg-white/30"
+          >
+            {t("nav.about")}
+          </Link>
+          <Link
+            href="/pricing"
+            className="rounded-full px-4 py-2 no-underline transition hover:bg-white/30"
+          >
+            {t("nav.pricing")}
+          </Link>
+        </div>
       </div>
-      <div className="flex items-center gap-4 sm:pr-4">
+      <div className="hidden items-center gap-4 md:flex md:pr-4">
         {!session && (
           <Link
             href={session ? "/home" : "/auth/signin"}
@@ -62,6 +66,34 @@ export async function PublicNav() {
         <span> · </span>
         <LocaleSwitcher />
         <SetThemeButton />
+      </div>
+      <div className="block pr-6 md:hidden">
+        <DropDownMenu isTopMenu>
+          <LocaleSwitcher isSettings />
+          <ThemeToggle isMenuButton />
+          {session && (
+            <Link href={"/home"}>
+              <Button variant="menuElement">{t("nav.userHome")}</Button>
+            </Link>
+          )}
+          <Link href={"/pricing"}>
+            <Button variant="menuElement">{t("nav.pricing")}</Button>
+          </Link>
+          <Link href={"/about"}>
+            <Button variant="menuElement">{t("nav.about")}</Button>
+          </Link>
+          <Link href={"/contact"}>
+            <Button variant="menuElement">{t("nav.contactUs")}</Button>
+          </Link>
+          <Link href={"/auth/signin"}>
+            <Button variant="menuElement">{t("nav.login")}</Button>
+          </Link>
+          <Link href={"/auth/signin"}>
+            <Button variant="menuElement" isSpecial>
+              {t("nav.signup")}
+            </Button>
+          </Link>
+        </DropDownMenu>
       </div>
     </nav>
   );

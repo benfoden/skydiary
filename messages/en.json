@@ -94,7 +94,10 @@
     "back": "back",
     "today": "today",
     "upgrade": "upgrade",
-    "plus": "plus"
+    "plus": "plus",
+    "premium": "premium",
+    "topPage": "top page",
+    "userHome": "your homepage"
   },
   "new-user": {
     "title": "welcome to skydiary",

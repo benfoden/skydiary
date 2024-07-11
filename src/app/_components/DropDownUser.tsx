@@ -1,4 +1,5 @@
 import {
+  CaretUpIcon,
   EnvelopeClosedIcon,
   ExitIcon,
   GearIcon,
@@ -45,25 +46,25 @@ export default async function DropDownUser() {
           </Button>
         </Link>
       )}
-      <Link href={"/settings"}>
-        <Button variant="menuElement">
-          {t("nav.settings")} <GearIcon className="h-4 w-4" />
-        </Button>
-      </Link>
+      <ThemeToggle isMenuButton />
       <Link href={"/persona/all"}>
         <Button variant="menuElement">
           {t("nav.personas")} <PersonIcon className="h-4 w-4" />
         </Button>
       </Link>
-      {session?.user.email === "ben.foden@gmail.com" && (
-        <Link href={"/sd-admin"}>
-          <Button variant="menuElement">webmaster zone</Button>
-        </Link>
-      )}
-      <ThemeToggle isMenuButton />
+      <Link href={"/settings"}>
+        <Button variant="menuElement">
+          {t("nav.settings")} <GearIcon className="h-4 w-4" />
+        </Button>
+      </Link>
       <Link href={"/contact"}>
         <Button type="submit" variant="menuElement">
-          {t("nav.contactUs")} <EnvelopeClosedIcon className="h-4 w-4" />
+          {t("nav.contact")} <EnvelopeClosedIcon className="h-4 w-4" />
+        </Button>
+      </Link>
+      <Link href={"/"}>
+        <Button type="submit" variant="menuElement">
+          {t("nav.topPage")} <CaretUpIcon className="h-4 w-4" />
         </Button>
       </Link>
       <Link href={"/auth/signout"}>
@@ -72,6 +73,13 @@ export default async function DropDownUser() {
           <ExitIcon className="h-4 w-4" />
         </Button>
       </Link>
+      {session?.user.email === "ben.foden@gmail.com" && (
+        <Link href={"/sd-admin"}>
+          <Button variant="menuElement">
+            webmaster <GearIcon className="h-4 w-4" />
+          </Button>
+        </Link>
+      )}
     </DropDownMenu>
   );
 }
