@@ -53,12 +53,12 @@ export default async function Contact() {
                     ${message}<br/>
                     ${session?.user?.email ? `User account email: ${session?.user?.email}` : `contact form email: ${from}`}`,
                   MessageStream: "outbound",
-                }).catch((error: Error) =>
-                  console.error("contact form send error", error),
-                );
+                });
 
                 if (result) {
                   return redirect("/contact/thank-you");
+                } else {
+                  throw new Error("contact form send error");
                 }
               }}
               className=" space-y-4"
