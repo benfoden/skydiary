@@ -16,7 +16,7 @@ interface Props {
 
 export default function EmailSubmission({ signUpEmail, onSubmit }: Props) {
   const locale = useLocale();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(signUpEmail);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
@@ -44,9 +44,8 @@ export default function EmailSubmission({ signUpEmail, onSubmit }: Props) {
   }
 
   useEffect(() => {
-    setEmail(signUpEmail);
     deleteSignUpEmailCookie().catch((error: Error) => console.error(error));
-  }, [signUpEmail]);
+  }, []);
 
   return (
     <Card variant="form">
