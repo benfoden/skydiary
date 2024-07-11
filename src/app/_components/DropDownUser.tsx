@@ -6,9 +6,7 @@ import {
   PlusIcon,
 } from "@radix-ui/react-icons";
 import { getTranslations } from "next-intl/server";
-import { cookies } from "next/headers";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { getServerAuthSession } from "~/server/auth";
 import { ACTIVESTATUSES } from "~/utils/constants";
 import Button from "./Button";
@@ -63,18 +61,11 @@ export default async function DropDownUser() {
         </Link>
       )}
       <ThemeToggle isMenuButton />
-      <form
-        action={async () => {
-          "use server";
-          console.log("contact email", session?.user?.email);
-          cookies().set("contactEmail", String(session?.user?.email ?? ""));
-          redirect("/contact");
-        }}
-      >
+      <Link href={"/contact"}>
         <Button type="submit" variant="menuElement">
           {t("nav.contactUs")} <EnvelopeClosedIcon className="h-4 w-4" />
         </Button>
-      </form>
+      </Link>
       <Link href={"/auth/signout"}>
         <Button variant="menuElement">
           {t("nav.signout")}

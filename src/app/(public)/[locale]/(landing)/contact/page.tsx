@@ -1,14 +1,12 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import postmark from "postmark";
 import { Card } from "~/app/_components/Card";
 import FormButton from "~/app/_components/FormButton";
 import Input from "~/app/_components/Input";
 import { type Locale } from "~/config";
 import { getServerAuthSession } from "~/server/auth";
-import { deleteContactEmailCookie } from "./helpers";
+import { sendEmail } from "~/utils/email";
 
 export async function generateMetadata({
   params: { locale },
@@ -25,7 +23,6 @@ export async function generateMetadata({
 
 export default async function Contact() {
   const t = await getTranslations();
-  const contactEmail = cookies().get("contactEmail")?.value;
   const session = await getServerAuthSession();
 
   return (
@@ -39,36 +36,30 @@ export default async function Contact() {
             <form
               action={async (formData) => {
                 "use server";
-                try {
-                  await deleteContactEmailCookie().catch((error: Error) =>
-                    console.error(error),
-                  );
 
-                  const client = new postmark.ServerClient(
-                    "648fc4f7-a7c8-4211-8715-251d66e22762",
-                  );
+                const subject: string = formData.get("subject") as string;
+                const message: string = formData.get(
+                  "contactMessage",
+                ) as string;
+                const from: string = formData.get("from") as string;
 
-                  const from: string = formData.get("from") as string;
+                console.log("the message", message);
 
-                  const subject: string = formData.get("subject") as string;
-                  const body: string = formData.get("body") as string;
+                const result = await sendEmail({
+                  from: "contactform@mail.skydiary.app",
+                  to: "contact@skydiary.app",
+                  subject,
+                  textBody: `Message: ${message}`,
+                  htmlBody: `<body style="font-family: sans-serif; color: #000; padding: 32px 16px; text-align: center;">Message:<br/> 
+                    ${message}<br/>
+                    ${session?.user?.email ? `User account email: ${session?.user?.email}` : `contact form email: ${from}`}`,
+                  MessageStream: "outbound",
+                }).catch((error: Error) =>
+                  console.error("contact form send error", error),
+                );
 
-                  const result = await client.sendEmail({
-                    To: "contact@skydiary.app",
-                    From: from,
-                    Subject: subject,
-                    TextBody: body,
-                    HtmlBody: `<body style="font-family: sans-serif; color: #000; padding: 32px 16px; text-align: center;">User message: 
-                    ${body}
-                    User account: ${session?.user?.email ?? "not logged in"}
-                  </body>`,
-                  });
-
-                  if (result) {
-                    redirect("/contact/thank-you");
-                  }
-                } catch (error) {
-                  throw new Error("Failed to send email.");
+                if (result) {
+                  return redirect("/contact/thank-you");
                 }
               }}
               className=" space-y-4"
@@ -78,8 +69,8 @@ export default async function Contact() {
                   label={t("contact.from")}
                   name="from"
                   type="email"
-                  initialValue={contactEmail}
-                  disabled={!!contactEmail}
+                  initialValue={session?.user?.email ?? undefined}
+                  disabled={!!session?.user?.email}
                   required
                 />
                 <Input
@@ -90,7 +81,8 @@ export default async function Contact() {
                 />
                 <Input
                   label={t("contact.message")}
-                  name="body"
+                  name="contactMessage"
+                  id="contactMessage"
                   type="textarea"
                   required
                 />

@@ -13,7 +13,7 @@ export default function DefaultErrorBody({ reset }: { reset: () => void }) {
         <h1 className="mb-8 flex w-full items-center justify-center text-xl font-light">
           {t("error.default.heading")}
         </h1>
-        <Card>
+        <Card isButton={false}>
           <div className="flex flex-col items-center gap-3 text-sm">
             <p>{t("error.default.message")}</p>
             <Button onClick={() => reset()}>

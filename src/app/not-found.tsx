@@ -11,7 +11,7 @@ export default function NotFound() {
         <h1 className="mb-8 flex w-full items-center justify-center text-xl font-light">
           {t("error.notfound.heading")}
         </h1>
-        <Card>
+        <Card isButton={false}>
           <div className="flex flex-col items-center gap-3 text-sm">
             <p>{t("error.notfound.message")}</p>
             <Link href="/">
