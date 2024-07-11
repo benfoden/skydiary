@@ -5,11 +5,13 @@ export default function Input({
   type,
   label,
   defaultChecked,
+  initialValue,
   ...props
 }: {
   type?: "text" | "textarea" | "number" | "email" | "password" | "checkbox";
   label?: string;
   defaultChecked?: boolean;
+  initialValue?: string | number;
 } & React.InputHTMLAttributes<
   | HTMLInputElement
   | HTMLTextAreaElement
@@ -21,6 +23,7 @@ export default function Input({
   const [isActive, setIsActive] = useState(false);
   const [valueLength, setValueLength] = useState<number | null>(null);
   const [isChecked, setIsChecked] = useState(defaultChecked ?? false);
+  const [localValue, setLocalValue] = useState(value);
 
   const handleFocus = () => {
     setIsActive(true);
@@ -50,12 +53,6 @@ export default function Input({
   }, []);
 
   useEffect(() => {
-    if (value) {
-      setIsActive(true);
-    }
-  }, [value]);
-
-  useEffect(() => {
     if (type === "checkbox") {
       setValueLength(null);
     } else if (
@@ -69,6 +66,24 @@ export default function Input({
       setValueLength(null);
     }
   }, [defaultValue, type]);
+
+  useEffect(() => {
+    if (value) {
+      setIsActive(true);
+    }
+  }, [value]);
+
+  useEffect(() => {
+    if (initialValue) {
+      setLocalValue(initialValue);
+    }
+  }, [initialValue]);
+
+  useEffect(() => {
+    if (value) {
+      setLocalValue(value);
+    }
+  }, [value]);
 
   return (
     <div className={`relative flex w-full flex-col items-start`}>
@@ -92,9 +107,8 @@ export default function Input({
         <input
           type={type}
           {...props}
-          value={value}
-          defaultValue={defaultValue}
-          className={`w-full rounded-md px-5 py-3 text-base outline-none transition placeholder:text-sm placeholder:font-light placeholder:text-black/60 placeholder:dark:text-white/80 ${isActive && "bg-white/80 transition dark:bg-white/[.18]"} bg-primary`}
+          value={localValue}
+          className={`w-full rounded-md px-5 py-3 text-base outline-none transition placeholder:text-sm placeholder:font-light placeholder:text-black/60 placeholder:dark:text-white/80 ${isActive && "bg-white/80 transition dark:bg-white/[.18]"} bg-primary ${props.disabled && "opacity-60"}`}
           ref={ref as React.RefObject<HTMLInputElement>}
           onFocus={handleFocus}
           onChange={(e) => {

@@ -23,7 +23,7 @@ export default async function ContactThankYou() {
   return (
     <div className="flex w-full flex-col items-start justify-start gap-2 sm:max-w-[768px]">
       <Card variant="form" isButton={false}>
-        <div className="flex w-fit flex-row gap-4">
+        <div className="flex w-fit flex-col gap-4">
           <h1 className="mb-4 text-lg font-medium">
             {t("contact.thankYouTitle")}
           </h1>

@@ -63,8 +63,8 @@ export default async function Settings() {
                 const gender: string = formData.get("gender") as string;
                 const isUser = true;
 
-                if (name) {
-                  try {
+                try {
+                  if (name) {
                     await api.user.updateUser({ name });
                     if (!userPersona) {
                       await api.persona.create({
@@ -84,9 +84,9 @@ export default async function Settings() {
                         isUser,
                       });
                     }
-                  } catch (error) {
-                    console.error("Error updating user:", error);
                   }
+                } catch (error) {
+                  throw new Error("Error updating user");
                 }
               }}
             >
@@ -137,9 +137,13 @@ export default async function Settings() {
                   <form
                     action={async () => {
                       "use server";
-                      await api.stripe.cancelSubscription({
-                        subId: subscription?.id,
-                      });
+                      try {
+                        await api.stripe.cancelSubscription({
+                          subId: subscription?.id,
+                        });
+                      } catch (error) {
+                        throw new Error("Error cancelling subscription");
+                      }
                     }}
                   >
                     <FormButton>Cancel your subscription</FormButton>

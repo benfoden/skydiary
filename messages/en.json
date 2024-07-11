@@ -216,7 +216,8 @@
     },
     "default": {
       "heading": "Error",
-      "message": "There was an unknown error. Please refresh the page and try again."
+      "message": "There was an unknown error. Please refresh the page and try again.",
+      "tryAgain": "try again"
     },
     "notfound": {
       "heading": "Page Not Found",
