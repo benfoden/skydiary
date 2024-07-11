@@ -33,9 +33,7 @@ export default async function EmailForm() {
                 </body>`,
           });
 
-          if (result) {
-            console.log("Email sent successfully!");
-          } else {
+          if (!result) {
             console.error("Failed to send email.");
           }
         }}

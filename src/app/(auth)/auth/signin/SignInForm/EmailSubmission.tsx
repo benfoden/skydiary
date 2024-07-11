@@ -2,6 +2,7 @@
 
 import { signIn } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Card } from "~/app/_components/Card";
@@ -16,7 +17,7 @@ interface Props {
 
 export default function EmailSubmission({ signUpEmail, onSubmit }: Props) {
   const locale = useLocale();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(signUpEmail);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
@@ -44,13 +45,12 @@ export default function EmailSubmission({ signUpEmail, onSubmit }: Props) {
   }
 
   useEffect(() => {
-    setEmail(signUpEmail);
     deleteSignUpEmailCookie().catch((error: Error) => console.error(error));
-  }, [signUpEmail]);
+  }, []);
 
   return (
     <Card variant="form">
-      <form onSubmit={handleEmailSubmission} className="flex flex-col gap-2">
+      <form onSubmit={handleEmailSubmission} className="flex flex-col gap-4">
         <Input
           label={t("auth.email")}
           type="email"
@@ -65,6 +65,20 @@ export default function EmailSubmission({ signUpEmail, onSubmit }: Props) {
         <FormButton variant="submit" isDisabled={isSubmitting}>
           {isSubmitting ? t("auth.signing in") : t("auth.sign in")}
         </FormButton>
+        <p className="text-xs opacity-70">
+          {t.rich("auth.privacyAndTerms", {
+            privacyLink: (chunks) => (
+              <Link href="/privacy" className="font-bold">
+                {chunks}
+              </Link>
+            ),
+            termsLink: (chunks) => (
+              <Link href="/terms" className="font-bold">
+                {chunks}
+              </Link>
+            ),
+          })}
+        </p>
       </form>
     </Card>
   );

@@ -55,7 +55,6 @@ export async function makeComment({
       model: user?.isSpecial ? "gpt-4o" : productPlan(userProductId)?.model,
     });
     if (responseContent) {
-      console.log("responseContent", responseContent);
       await api.comment.create({
         content: responseContent,
         postId,

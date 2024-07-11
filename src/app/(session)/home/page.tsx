@@ -46,7 +46,7 @@ function PostCard({
 }): JSX.Element {
   return (
     <Card>
-      <div className="flex flex-col items-start justify-between gap-2 py-2">
+      <div className="flex w-full flex-col items-start justify-between gap-2 py-2">
         <div className="text-xs">
           {formattedTimeStampToDate(post.createdAt, locale)}
         </div>
@@ -93,16 +93,18 @@ export default async function Home() {
       <main className="flex min-h-screen flex-col items-start">
         <div className="container flex flex-col items-center justify-start px-2 pb-12">
           <Suspense fallback={<Spinner />}>
-            <div className="flex flex-col items-start justify-center gap-4 sm:max-w-5xl">
-              {t("home.today")}
+            <div className="flex w-full flex-col items-start justify-center gap-4 md:max-w-3xl">
+              <div className="ml-4">{t("home.today")}</div>
               {lastPostDate !== today || userPosts?.length === 0 ? (
-                <Link href="/today" prefetch={true}>
+                <Link href="/today" prefetch={true} className="w-full">
                   <Button>{t("home.whats happening")}</Button>
                 </Link>
               ) : (
                 <Link
                   key={userPosts[0]?.id}
                   href={`/entry/${userPosts[0]?.id}`}
+                  className="w-full"
+                  prefetch={true}
                 >
                   <PostCard
                     key={userPosts[0]?.id}
@@ -113,12 +115,12 @@ export default async function Home() {
               )}
               {filterPostsByDateRange(0, 6, userPosts).length > 0 && (
                 <>
-                  {t("home.last7Days")}
+                  <div className="ml-4">{t("home.last7Days")}</div>
                   {filterPostsByDateRange(0, 6, userPosts).map((post) => (
                     <Link
                       key={post.id}
                       href={`/entry/${post.id}`}
-                      prefetch={true}
+                      className="w-full"
                     >
                       <PostCard key={post.id} post={post} locale={locale} />
                     </Link>
@@ -127,9 +129,13 @@ export default async function Home() {
               )}
               {filterPostsByDateRange(8, 30, userPosts).length > 0 && (
                 <>
-                  {t("home.last30Days")}
+                  <div className="ml-4">{t("home.last30Days")}</div>
                   {filterPostsByDateRange(8, 30, userPosts).map((post) => (
-                    <Link key={post.id} href={`/entry/${post.id}`}>
+                    <Link
+                      key={post.id}
+                      href={`/entry/${post.id}`}
+                      className="w-full"
+                    >
                       <PostCard key={post.id} post={post} locale={locale} />
                     </Link>
                   ))}
