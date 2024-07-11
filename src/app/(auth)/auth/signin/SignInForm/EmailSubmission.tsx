@@ -62,7 +62,7 @@ export default function EmailSubmission({ signUpEmail, onSubmit }: Props) {
           required
         />
 
-        <FormButton variant="submit" isDisabled={isSubmitting || !email}>
+        <FormButton variant="submit" isDisabled={isSubmitting}>
           {isSubmitting ? t("auth.signing in") : t("auth.sign in")}
         </FormButton>
       </form>
