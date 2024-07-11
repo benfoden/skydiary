@@ -12,7 +12,7 @@ export const personaRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string(),
-        description: z.string().max(500).optional(),
+        description: z.string().max(700).optional(),
         image: z.string().optional(),
         age: z.number().max(120).optional(),
         gender: z.string().max(140).optional(),
@@ -20,7 +20,7 @@ export const personaRouter = createTRPCRouter({
         occupation: z.string().max(140).optional(),
         traits: z.string().max(140),
         communicationStyle: z.string().max(140).optional(),
-        communicationSample: z.string().max(1400).optional(),
+        communicationSample: z.string().max(1000).optional(),
         isUser: z.boolean().optional(),
         isFavorite: z.boolean().optional(),
       }),
@@ -53,7 +53,7 @@ export const personaRouter = createTRPCRouter({
       z.object({
         personaId: z.string(),
         name: z.string().optional(),
-        description: z.string().max(500).optional(),
+        description: z.string().max(700).optional(),
         image: z.string().optional(),
         age: z.number().max(10000).optional(),
         gender: z.string().max(140).optional(),
@@ -61,7 +61,7 @@ export const personaRouter = createTRPCRouter({
         occupation: z.string().max(140).optional(),
         traits: z.string().max(140).optional(),
         communicationStyle: z.string().max(140).optional(),
-        communicationSample: z.string().max(1400).optional(),
+        communicationSample: z.string().max(1000).optional(),
         isUser: z.boolean().optional(),
         isFavorite: z.boolean().optional(),
       }),
