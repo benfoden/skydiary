@@ -13,7 +13,7 @@ import FormButton from "~/app/_components/FormButton";
 import StarsBackground from "~/app/_components/StarsBackground";
 import { type Locale } from "~/config";
 import { api } from "~/trpc/react";
-import { planFromId } from "~/utils/constants";
+import { planFromId } from "~/utils/planDetails";
 
 export default function UpgradeBody({ user }: { user?: Session["user"] }) {
   const { mutateAsync: createCheckoutSession } =

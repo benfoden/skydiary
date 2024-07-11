@@ -1,17 +1,19 @@
 import { type NextRequest } from "next/server";
 import { api } from "~/trpc/server";
 import { getResponse } from "~/utils/ai";
-import { TAGS, productPlan } from "~/utils/constants";
+import { TAGS } from "~/utils/constants";
+import { productPlan } from "~/utils/planDetails";
+
 import { prompts } from "~/utils/prompts";
 
 export async function GET(request: NextRequest) {
   setTimeout(() => {
-    console.error("Cron job timed out after 9999 milliseconds");
+    console.error("Cron job for post tagstimed out after 9900 milliseconds");
     return Response.json(
-      { error: "Cron job timed out after 9999 milliseconds" },
+      { error: "Cron job for post tags timed out after 9900 milliseconds" },
       { status: 504 },
     );
-  }, 9999);
+  }, 9900);
 
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {

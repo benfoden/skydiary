@@ -4,7 +4,7 @@ import { Card } from "~/app/_components/Card";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { getResponse } from "~/utils/ai";
-import { productPlan } from "~/utils/constants";
+import { productPlan } from "~/utils/planDetails";
 import { prompts } from "~/utils/prompts";
 
 export default async function Secret() {

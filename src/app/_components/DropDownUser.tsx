@@ -7,7 +7,7 @@ import {
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { getServerAuthSession } from "~/server/auth";
-import { ACTIVESTATUSES } from "~/utils/constants";
+import { ACTIVESTATUSES } from "~/utils/planDetails";
 import Button from "./Button";
 import DropDownMenu from "./DropDown";
 import { ThemeToggle } from "./ToggleTheme";

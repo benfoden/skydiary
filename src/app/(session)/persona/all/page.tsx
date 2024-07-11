@@ -11,7 +11,7 @@ import { SessionNav } from "~/app/_components/SessionNav";
 import { type Locale } from "~/config";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
-import { isFavoritePersonaAvailable } from "~/utils/planLimits";
+import { isFavoritePersonaAvailable } from "~/utils/planDetails";
 import UpgradeBanner from "../../../_components/UpgradeBanner";
 import PersonaSidebar from "../Sidebar";
 

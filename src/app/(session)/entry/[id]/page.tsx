@@ -23,7 +23,7 @@ import { type Locale } from "~/config";
 import { getUserLocale } from "~/i18n";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
-import { isCommentAvailable } from "~/utils/planLimits";
+import { isCommentAvailable } from "~/utils/planDetails";
 import { formattedTimeStampToDate } from "~/utils/text";
 import EntryBody from "./EntryBody";
 import { makeComment } from "./helpers";

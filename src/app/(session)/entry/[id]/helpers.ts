@@ -5,8 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { getResponse } from "~/utils/ai";
-import { productPlan } from "~/utils/constants";
-import { isCommentAvailable } from "~/utils/planLimits";
+import { isCommentAvailable, productPlan } from "~/utils/planDetails";
 import { prompts, randomizedSkyAdvisor } from "~/utils/prompts";
 import { type CommentType } from "~/utils/types";
 

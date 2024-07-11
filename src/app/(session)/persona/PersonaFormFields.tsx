@@ -1,6 +1,6 @@
 import { type Persona, type User } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
-import { isFavoritePersonaAvailable } from "~/utils/planLimits";
+import { isFavoritePersonaAvailable } from "~/utils/planDetails";
 import Input from "../../_components/Input";
 
 export default async function PersonaFormFields({
