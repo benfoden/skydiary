@@ -2,7 +2,7 @@ import { z } from "zod";
 import { env } from "~/env";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { getOrCreateStripeCustomerIdForUser } from "~/server/stripe/stripe-webhook-handlers";
-import { baseURL } from "~/utils/constants";
+import { getBaseUrl } from "~/utils/clientConstants";
 
 export const stripeRouter = createTRPCRouter({
   createCheckoutSession: protectedProcedure
@@ -55,8 +55,8 @@ export const stripeRouter = createTRPCRouter({
               quantity: 1,
             },
           ],
-          success_url: `${baseURL()}/pricing?checkoutSuccess=true`,
-          cancel_url: `${baseURL()}/pricing?checkoutCanceled=true`,
+          success_url: `${getBaseUrl()}/pricing?checkoutSuccess=true`,
+          cancel_url: `${getBaseUrl()}/pricing?checkoutCanceled=true`,
           subscription_data: {
             metadata: {
               userId: session.user?.id,
@@ -100,7 +100,7 @@ export const stripeRouter = createTRPCRouter({
       const stripeBillingPortalSession =
         await stripe.billingPortal.sessions.create({
           customer: customerId,
-          return_url: `${baseURL()}/settings`,
+          return_url: `${getBaseUrl()}/settings`,
           locale: input.locale,
         });
 

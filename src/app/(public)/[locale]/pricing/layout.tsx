@@ -3,12 +3,15 @@ import DropDownUser from "~/app/_components/DropDownUser";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { SessionNav } from "~/app/_components/SessionNav";
 import { getServerAuthSession } from "~/server/auth";
+import { planFromId } from "~/utils/constants";
 import { PublicNav } from "../(landing)/PublicNav";
 import UpgradeBody from "./page";
 
 export default async function Upgrade() {
   const t = await getTranslations();
   const session = await getServerAuthSession();
+  const userPlan = planFromId(session?.user?.stripeProductId);
+
   return (
     <>
       {session ? (
@@ -23,7 +26,7 @@ export default async function Upgrade() {
         <PublicNav />
       )}
 
-      <UpgradeBody user={session?.user ?? undefined} />
+      <UpgradeBody user={session?.user ?? undefined} userPlan={userPlan} />
     </>
   );
 }

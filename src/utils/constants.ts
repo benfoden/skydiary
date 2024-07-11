@@ -1,3 +1,5 @@
+import { env } from "~/env";
+
 export function pathHelper(pathname: string): string {
   switch (pathname) {
     case "/":
@@ -10,19 +12,6 @@ export function pathHelper(pathname: string): string {
       return pathname;
   }
 }
-
-export const baseURL = (): string => {
-  const url =
-    process?.env?.LOCAL_DEV_URL && process.env.LOCAL_DEV_URL !== ""
-      ? process.env.LOCAL_DEV_URL
-      : process?.env?.NEXT_PUBLIC_WEBSITE_URL &&
-          process.env.NEXT_PUBLIC_WEBSITE_URL !== ""
-        ? process.env.NEXT_PUBLIC_WEBSITE_URL
-        : process?.env?.VERCEL_URL && process.env.VERCEL_URL !== ""
-          ? process.env.VERCEL_URL
-          : "";
-  return url.includes("http") ? url : `https://${url}`;
-};
 
 export const TAGS = [
   { content: "career", id: "clwg3mpgd0001vsr5m46ocag5" },
@@ -59,4 +48,71 @@ export const NEWPERSONAUSER = {
   occupation: "",
   relationship: "",
   traits: "",
+};
+
+export const ACTIVESTATUSES: string[] = ["trialing", "active", "past_due"];
+
+export type UserPlanLimit = {
+  personas: number;
+  comments: number;
+  memories: number;
+  characters: number;
+  model: "gpt-3.5-turbo" | "gpt-4o";
+};
+
+const userplanDetails: Record<string, UserPlanLimit> = {
+  [env.PRODUCT_ID_LITE]: {
+    personas: 1,
+    comments: 1,
+    memories: 10,
+    characters: 280,
+    model: "gpt-3.5-turbo",
+  },
+  [env.PRODUCT_ID_PLUS_TEST ?? env.PRODUCT_ID_PLUS]: {
+    personas: 10,
+    comments: 10,
+    memories: 60,
+    characters: 500,
+    model: "gpt-4o",
+  },
+  [env.PRODUCT_ID_PREMIUM_TEST ?? env.PRODUCT_ID_PREMIUM]: {
+    personas: 100,
+    comments: 100,
+    memories: 180,
+    characters: 1000,
+    model: "gpt-4o",
+  },
+};
+
+export const productPlan = (stripeProductId?: string | null): UserPlanLimit => {
+  "server only";
+  return userplanDetails[stripeProductId ?? env.PRODUCT_ID_LITE]!;
+};
+
+export type OpenAIModels = ["gpt-4o", "gpt-3.5-turbo"];
+
+export type PlanNames = "lite" | "plus" | "premium";
+
+export const planFromId = (
+  stripeProductId?: string | null | undefined,
+): PlanNames => {
+  if (!stripeProductId) {
+    return "lite";
+  }
+  switch (stripeProductId) {
+    case "lite":
+      return stripeProductId === env.PRODUCT_ID_LITE ? "lite" : "lite";
+    case "plus":
+      return stripeProductId === env.PRODUCT_ID_PLUS_TEST ||
+        stripeProductId === env.PRODUCT_ID_PLUS
+        ? "plus"
+        : "lite";
+    case "premium":
+      return stripeProductId === env.PRODUCT_ID_PREMIUM_TEST ||
+        stripeProductId === env.PRODUCT_ID_PREMIUM
+        ? "premium"
+        : "lite";
+    default:
+      return "lite";
+  }
 };
