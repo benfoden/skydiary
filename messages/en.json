@@ -73,7 +73,8 @@
     "back to home": "back to home",
     "signing out": "signing out...",
     "sign out": "sign out",
-    "save and continue": "save and continue"
+    "save and continue": "save and continue",
+    "privacyAndTerms": "By continuing, you agree to our <privacyLink>privacy policy</privacyLink> and <termsLink>terms of service</termsLink>."
   },
   "nav": {
     "home": "home",

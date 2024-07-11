@@ -38,7 +38,8 @@
     "back to home": "ホームに戻る",
     "signing out": "サインアウト中...",
     "sign out": "サインアウト",
-    "save and continue": "保存して続行"
+    "save and continue": "保存して続行",
+    "privacyAndTerms": "続行することで、<privacyLink>プライバシーポリシー</privacyLink>および<termsLink>利用規約</termsLink>に同意したことになります。"
   },
   "about": {
     "title": "skydiaryとは",
