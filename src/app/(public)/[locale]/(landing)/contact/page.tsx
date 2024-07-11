@@ -44,8 +44,6 @@ export default async function Contact() {
                 ) as string;
                 const from: string = formData.get("from") as string;
 
-                console.log("the message", message);
-
                 const result = await sendEmail({
                   from: env.CONTACT_EMAIL_FROM,
                   to: "contact@skydiary.app",
