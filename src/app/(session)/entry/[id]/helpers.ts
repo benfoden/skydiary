@@ -45,7 +45,7 @@ export async function makeComment({
       authorDetails: currentUserPersona,
       content: latestPost?.content ?? "",
       characters: user?.isSpecial
-        ? 1000
+        ? 1500
         : productPlan(userProductId)?.characters,
       personaDetails: commentPersona ?? undefined,
     });
