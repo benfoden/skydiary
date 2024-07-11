@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { productPlan } from "~/utils/planDetails";
+import { productPlan } from "~/utils/constants";
 
 export const commentRouter = createTRPCRouter({
   create: protectedProcedure

@@ -3,7 +3,7 @@ import { type PrismaClient } from "@prisma/client";
 import type Stripe from "stripe";
 import { env } from "~/env";
 import { getServerAuthSession } from "~/server/auth";
-import { ACTIVESTATUSES } from "~/utils/planDetails";
+import { ACTIVESTATUSES } from "~/utils/constants";
 
 // retrieves a Stripe customer id for a given user if it exists or creates a new one
 export const getOrCreateStripeCustomerIdForUser = async ({

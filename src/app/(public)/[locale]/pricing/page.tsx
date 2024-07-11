@@ -283,7 +283,9 @@ export default function Pricing({
                           {user && (
                             <>
                               <FormButton variant="submit" isDisabled={true}>
-                                {t("comingSoon")}
+                                {user?.isSpecial
+                                  ? "your special status"
+                                  : t("comingSoon")}
                               </FormButton>
                             </>
                           )}

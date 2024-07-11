@@ -1,9 +1,7 @@
 import { type NextRequest } from "next/server";
 import { api } from "~/trpc/server";
 import { getResponse } from "~/utils/ai";
-import { TAGS } from "~/utils/constants";
-import { productPlan } from "~/utils/planDetails";
-
+import { TAGS, productPlan } from "~/utils/constants";
 import { prompts } from "~/utils/prompts";
 
 export async function GET(request: NextRequest) {

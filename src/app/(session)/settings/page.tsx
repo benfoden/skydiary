@@ -13,7 +13,7 @@ import { SessionNav } from "~/app/_components/SessionNav";
 import { type Locale } from "~/config";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
-import { ACTIVESTATUSES } from "~/utils/planDetails";
+import { ACTIVESTATUSES } from "~/utils/constants";
 
 export async function generateMetadata({
   params: { locale },

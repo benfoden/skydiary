@@ -2,8 +2,7 @@ import { type Persona } from "@prisma/client";
 import { type NextRequest } from "next/server";
 import { api } from "~/trpc/server";
 import { getResponseJSON } from "~/utils/ai";
-import { NEWPERSONAUSER } from "~/utils/constants";
-import { productPlan } from "~/utils/planDetails";
+import { NEWPERSONAUSER, productPlan } from "~/utils/constants";
 import { prompts } from "~/utils/prompts";
 
 export async function GET(request: NextRequest) {
