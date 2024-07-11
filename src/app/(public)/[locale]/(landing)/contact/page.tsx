@@ -5,6 +5,7 @@ import { Card } from "~/app/_components/Card";
 import FormButton from "~/app/_components/FormButton";
 import Input from "~/app/_components/Input";
 import { type Locale } from "~/config";
+import { env } from "~/env";
 import { getServerAuthSession } from "~/server/auth";
 import { sendEmail } from "~/utils/email";
 
@@ -46,7 +47,7 @@ export default async function Contact() {
                 console.log("the message", message);
 
                 const result = await sendEmail({
-                  from: "contactform@mail.skydiary.app",
+                  from: env.CONTACT_EMAIL_FROM,
                   to: "contact@skydiary.app",
                   subject,
                   textBody: `Message: ${message}`,

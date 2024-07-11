@@ -65,7 +65,7 @@
     "email": "email",
     "check your email": "please check your email",
     "passcode expires": "your passcode will expire in 5 minutes",
-    "send a new code": "send a new code",
+    "tryAgain": "try again",
     "verify and continue": "verify and continue",
     "verifying": "verifying...",
     "signing in": "logging in...",
