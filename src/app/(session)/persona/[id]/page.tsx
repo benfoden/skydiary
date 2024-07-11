@@ -56,7 +56,7 @@ export default async function Persona({ params }: { params: { id: string } }) {
           {!isFavoritePersonaAvailable(session?.user, personas) && (
             <UpgradeBanner variant="persona" />
           )}
-          <div className="flex w-full flex-col items-center justify-center gap-4 sm:flex-row sm:items-start sm:px-32">
+          <div className="flex w-full flex-col items-center justify-center gap-4 md:flex-row md:items-start md:px-32">
             <PersonaSidebar personas={personas} />
             <div className="flex w-full flex-col items-center justify-center gap-4">
               <Card variant="form">
