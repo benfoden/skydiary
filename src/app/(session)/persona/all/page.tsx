@@ -11,7 +11,7 @@ import { SessionNav } from "~/app/_components/SessionNav";
 import { type Locale } from "~/config";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
-import { isFavoritePersonaAvailable } from "~/utils/planLimits";
+import { isFavoritePersonaAvailable } from "~/utils/planDetails";
 import UpgradeBanner from "../../../_components/UpgradeBanner";
 import PersonaSidebar from "../Sidebar";
 
@@ -48,11 +48,11 @@ export default async function Persona() {
           {!isFavoritePersonaAvailable(session?.user, personas) && (
             <UpgradeBanner variant="persona" />
           )}
-          <div className="flex w-full flex-col items-center justify-center gap-4 sm:flex-row sm:items-start sm:px-32">
+          <div className="flex w-full flex-col items-center justify-center gap-4 md:flex-row md:items-start md:px-32">
             <PersonaSidebar personas={personas} />
             <div
               id="newPersona"
-              className="mb-4 flex flex-col items-start justify-center gap-4 sm:w-full"
+              className="mb-4 flex flex-col items-start justify-center gap-4 md:w-full"
             >
               <Card variant="form">
                 <h2 className="mb-2 text-lg font-medium">

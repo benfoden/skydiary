@@ -1,6 +1,6 @@
 "use client";
 import { type Persona } from "@prisma/client";
-import { PlusIcon, StarFilledIcon } from "@radix-ui/react-icons";
+import { PersonIcon, PlusIcon, StarFilledIcon } from "@radix-ui/react-icons";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import Button from "~/app/_components/Button";
@@ -11,8 +11,12 @@ export default function PersonaSidebar({ personas }: { personas: Persona[] }) {
   return (
     <div className="mb-4 flex flex-col items-start justify-center gap-4">
       <a href="/persona/all#newPersona" className="flex items-center gap-2">
-        <Button>
-          <PlusIcon className="h-5 w-5" /> {t("personas.add new")}
+        <Button variant="listItem">
+          <div className="flex w-full flex-row items-center justify-between gap-2">
+            <PersonIcon className="h-6 w-6" />
+            {t("personas.add new")}
+            <PlusIcon className="h-6 w-6" />
+          </div>
         </Button>
       </a>{" "}
       {personas && (

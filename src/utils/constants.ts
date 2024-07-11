@@ -1,4 +1,4 @@
-import { env } from "process";
+import { env } from "~/env";
 
 export function pathHelper(pathname: string): string {
   switch (pathname) {
@@ -12,19 +12,6 @@ export function pathHelper(pathname: string): string {
       return pathname;
   }
 }
-
-export const baseURL = (): string => {
-  const url =
-    process?.env?.LOCAL_DEV_URL && process.env.LOCAL_DEV_URL !== ""
-      ? process.env.LOCAL_DEV_URL
-      : process?.env?.NEXT_PUBLIC_WEBSITE_URL &&
-          process.env.NEXT_PUBLIC_WEBSITE_URL !== ""
-        ? process.env.NEXT_PUBLIC_WEBSITE_URL
-        : process?.env?.VERCEL_URL && process.env.VERCEL_URL !== ""
-          ? process.env.VERCEL_URL
-          : "";
-  return url.includes("http") ? url : `https://${url}`;
-};
 
 export const TAGS = [
   { content: "career", id: "clwg3mpgd0001vsr5m46ocag5" },
@@ -73,33 +60,33 @@ export type UserPlanLimit = {
   model: "gpt-3.5-turbo" | "gpt-4o";
 };
 
-const userPlanLimits: Record<string, UserPlanLimit> = {
-  [env.PRODUCT_ID_LITE!]: {
+const userplanDetails: Record<string, UserPlanLimit> = {
+  [env.PRODUCT_ID_LITE]: {
     personas: 1,
     comments: 1,
     memories: 10,
-    characters: 140,
+    characters: 250,
     model: "gpt-3.5-turbo",
   },
-  [env.PRODUCT_ID_PLUS_TEST! ?? env.PRODUCT_ID_PLUS!]: {
+  [env.PRODUCT_ID_PLUS_TEST ?? env.PRODUCT_ID_PLUS]: {
     personas: 10,
     comments: 10,
     memories: 60,
-    characters: 1400,
+    characters: 1000,
     model: "gpt-4o",
   },
-  [env.PRODUCT_ID_PREMIUM_TEST! ?? env.PRODUCT_ID_PREMIUM!]: {
+  [env.PRODUCT_ID_PREMIUM_TEST ?? env.PRODUCT_ID_PREMIUM]: {
     personas: 100,
     comments: 100,
     memories: 180,
-    characters: 2800,
+    characters: 1500,
     model: "gpt-4o",
   },
 };
 
 export const productPlan = (stripeProductId?: string | null): UserPlanLimit => {
   "server only";
-  return userPlanLimits[stripeProductId ?? env.PRODUCT_ID_LITE!]!;
+  return userplanDetails[stripeProductId ?? env.PRODUCT_ID_LITE]!;
 };
 
 export type OpenAIModels = ["gpt-4o", "gpt-3.5-turbo"];
@@ -108,7 +95,7 @@ export type PlanNames = "lite" | "plus" | "premium";
 
 export const planFromId = (
   stripeProductId?: string | null | undefined,
-): string => {
+): PlanNames => {
   if (!stripeProductId) {
     return "lite";
   }

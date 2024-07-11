@@ -13,9 +13,15 @@ import FormButton from "~/app/_components/FormButton";
 import StarsBackground from "~/app/_components/StarsBackground";
 import { type Locale } from "~/config";
 import { api } from "~/trpc/react";
-import { planFromId } from "~/utils/constants";
+import { type PlanNames } from "~/utils/constants";
 
-export default function UpgradeBody({ user }: { user?: Session["user"] }) {
+export default function Pricing({
+  user,
+  userPlan,
+}: {
+  user?: Session["user"];
+  userPlan?: PlanNames;
+}) {
   const { mutateAsync: createCheckoutSession } =
     api.stripe.createCheckoutSession.useMutation();
   const router = useRouter();
@@ -79,9 +85,7 @@ export default function UpgradeBody({ user }: { user?: Session["user"] }) {
           {checkoutStatus === SUCCESS && (
             <div className="flex flex-col items-start gap-6 sm:items-center">
               <h2 className="text-4xl">
-                {planFromId(user?.stripeProductId) === "plus"
-                  ? t("plus.welcome")
-                  : t("premium.welcome")}
+                {userPlan === "plus" ? t("plus.welcome") : t("premium.welcome")}
               </h2>
               <p className="text-4xl font-light">{t("thankYou")}</p>
               <p>{t("emailWithDetails")}</p>
@@ -113,7 +117,7 @@ export default function UpgradeBody({ user }: { user?: Session["user"] }) {
                   </div>
                 </Button>
               </div>
-              <div className="flex w-full flex-col-reverse items-center justify-center gap-8 sm:flex-row sm:items-start">
+              <div className="flex w-full flex-col items-center justify-center gap-8 md:flex-row md:items-start">
                 <div className="flex w-80 flex-col items-center justify-center gap-8 text-xl">
                   <Card isButton={false}>
                     <div className="flex flex-col items-start gap-8 pb-4 text-xl">
@@ -202,8 +206,7 @@ export default function UpgradeBody({ user }: { user?: Session["user"] }) {
                                 <div className="flex items-center gap-2 text-lg font-light">
                                   {!isLoading ? (
                                     <>
-                                      {planFromId(user?.stripeProductId) !==
-                                      "plus" ? (
+                                      {userPlan !== "plus" ? (
                                         <>
                                           {t("subscribe")}
                                           <ArrowRightIcon className="h-3 w-3 animate-ping" />
@@ -280,7 +283,9 @@ export default function UpgradeBody({ user }: { user?: Session["user"] }) {
                           {user && (
                             <>
                               <FormButton variant="submit" isDisabled={true}>
-                                {t("comingSoon")}
+                                {user?.isSpecial
+                                  ? "your special status"
+                                  : t("comingSoon")}
                               </FormButton>
                             </>
                           )}

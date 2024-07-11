@@ -2,6 +2,7 @@ import { ArrowRightIcon } from "@radix-ui/react-icons";
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { cookies } from "next/headers";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Card } from "~/app/_components/Card";
 import FormButton from "~/app/_components/FormButton";
@@ -30,7 +31,7 @@ export default async function Top() {
 
   return (
     <>
-      <div className="flex w-full flex-col items-center justify-center sm:flex-row">
+      <div className="flex w-full flex-col items-center justify-center md:flex-row">
         <Card variant="transparent" isButton={false}>
           <div className="flex w-full flex-col items-start gap-8 sm:w-[512px] md:w-[678px]">
             <div className="font-regular text-4xl">
@@ -59,11 +60,22 @@ export default async function Top() {
         </Card>
 
         <div className="flex w-full flex-col items-center justify-start">
-          <Card variant="hero" isButton={false}>
-            {session ? (
-              t("top.welcomeBack")
-            ) : (
-              <>
+          {session ? (
+            <Link href="/home">
+              <Card variant="hero">
+                <div className="flex flex-row items-center gap-2">
+                  {t("top.welcomeBack")}
+                  {session.user?.name && (
+                    <>
+                      <span>{session.user.name}</span>
+                    </>
+                  )}
+                </div>
+              </Card>
+            </Link>
+          ) : (
+            <>
+              <Card variant="hero" isButton={false}>
                 <p className="text-xl font-light">{t("top.ctaTitle")}</p>
                 <form
                   action={async (formData) => {
@@ -88,18 +100,18 @@ export default async function Top() {
                     </div>
                   </FormButton>
                 </form>
-              </>
-            )}
-          </Card>
-          <Card variant="transparent" isButton={false}>
-            <div className="flex w-fit flex-col items-center gap-8">
-              <div className="flex flex-col gap-2 text-xs">
-                <p className="font-light">· {t("top.privacyDetail1")}</p>
-                <p className="font-light">· {t("top.privacyDetail2")}</p>
-                <p className="font-light">· {t("top.privacyDetail3")}</p>
-              </div>
-            </div>
-          </Card>
+              </Card>
+              <Card variant="transparent" isButton={false}>
+                <div className="flex w-fit flex-col items-center gap-8">
+                  <div className="flex flex-col gap-2 text-xs">
+                    <p className="font-light">· {t("top.privacyDetail1")}</p>
+                    <p className="font-light">· {t("top.privacyDetail2")}</p>
+                    <p className="font-light">· {t("top.privacyDetail3")}</p>
+                  </div>
+                </div>
+              </Card>
+            </>
+          )}
         </div>
       </div>
     </>

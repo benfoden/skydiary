@@ -1,6 +1,6 @@
 import { type Persona, type User } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
-import { isFavoritePersonaAvailable } from "~/utils/planLimits";
+import { isFavoritePersonaAvailable } from "~/utils/planDetails";
 import Input from "../../_components/Input";
 
 export default async function PersonaFormFields({
@@ -49,7 +49,7 @@ export default async function PersonaFormFields({
         name="description"
         defaultValue={persona?.description ?? ""}
         placeholder={t("personas.descriptionPlaceholder")}
-        maxLength={500}
+        maxLength={700}
       />
       <Input
         label={t("personas.image link")}
@@ -107,7 +107,7 @@ export default async function PersonaFormFields({
         name="communicationSample"
         defaultValue={persona?.communicationSample ?? ""}
         placeholder={t("personas.communicationSamplePlaceholder")}
-        maxLength={1400}
+        maxLength={1000}
       />
     </div>
   );

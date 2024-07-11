@@ -38,9 +38,11 @@ export default async function DropDownUser() {
           </Link>
         )}
       {session?.user?.isSpecial && (
-        <span className="px-4 py-2 text-blue-600 dark:text-blue-400">
-          special status: on
-        </span>
+        <Link href={"/pricing"}>
+          <Button variant="menuElement" isSpecial>
+            special status: on
+          </Button>
+        </Link>
       )}
       <Link href={"/settings"}>
         <Button variant="menuElement">

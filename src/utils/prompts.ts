@@ -111,7 +111,7 @@ const basePromptComment = ({
       Object.entries(authorDetails)
         .map(([key, value]) => `Author ${key}: ${value}`)
         .join(". ") + ". End author details. ",
-    diaryEntry: "Begin message from author: \n" + cleanDiaryEntry,
+    diaryEntry: "Begin message from author: " + cleanDiaryEntry,
   };
 };
 
