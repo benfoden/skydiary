@@ -2,6 +2,7 @@
 
 import { signIn } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
+import { cookies } from "next/headers";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Card } from "~/app/_components/Card";
@@ -44,6 +45,7 @@ export default function EmailSubmission({ signUpEmail, onSubmit }: Props) {
 
   useEffect(() => {
     setEmail(signUpEmail);
+    cookies().delete("signupEmail");
   }, [signUpEmail]);
 
   return (
