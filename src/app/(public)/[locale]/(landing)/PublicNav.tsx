@@ -48,21 +48,19 @@ export async function PublicNav() {
         </div>
       </div>
       <div className="hidden items-center gap-4 md:flex md:pr-4">
-        {!session && (
-          <Link
-            href={session ? "/home" : "/auth/signin"}
-            className="text-nowrap rounded-full px-4 py-2 no-underline transition hover:bg-white/50 dark:bg-black/60"
-          >
-            {t("nav.login")}
+        {!session ? (
+          <>
+            <Link href={"/auth/signin"}>
+              <Button variant="chip">{t("nav.login")}</Button>
+            </Link>
+          </>
+        ) : (
+          <Link href={"/home"}>
+            <Button variant="chip">
+              <span className="text-nowrap">{t("nav.home")}</span>
+            </Button>
           </Link>
         )}
-        <Link href={session ? "/home" : "/auth/signin"}>
-          <Button>
-            <span className="text-nowrap">
-              {session ? t("nav.home") : t("nav.signup")}
-            </span>
-          </Button>
-        </Link>
         <span> · </span>
         <LocaleSwitcher />
         <SetThemeButton />
