@@ -98,7 +98,7 @@ export const authOptions = (emailDetails: EmailDetails): NextAuthOptions => {
             pass: env.EMAIL_SERVER_PASSWORD,
           },
         },
-        from: env.EMAIL_FROM,
+        from: env.VERIFICATION_EMAIL_FROM,
         generateVerificationToken() {
           return randomInt(100000, 999999).toString();
         },

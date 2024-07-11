@@ -100,9 +100,13 @@ export default async function Entry({
                 <form
                   action={async () => {
                     "use server";
-                    await api.post.delete({ postId: post?.id });
-                    revalidatePath("/home");
-                    redirect("/home");
+                    try {
+                      await api.post.delete({ postId: post?.id });
+                      revalidatePath("/home");
+                      redirect("/home");
+                    } catch (error) {
+                      throw new Error("Error deleting post");
+                    }
                   }}
                 >
                   <FormDeleteButton />
@@ -116,11 +120,15 @@ export default async function Entry({
                 <form
                   action={async () => {
                     "use server";
-                    await makeComment({
-                      comments,
-                      postId: params.id,
-                      userProductId: user?.stripeProductId ?? "",
-                    });
+                    try {
+                      await makeComment({
+                        comments,
+                        postId: params.id,
+                        userProductId: user?.stripeProductId ?? "",
+                      });
+                    } catch (error) {
+                      throw new Error("Error making sky comment");
+                    }
                   }}
                 >
                   <FormButton
@@ -143,12 +151,16 @@ export default async function Entry({
                       key={persona.id}
                       action={async () => {
                         "use server";
-                        await makeComment({
-                          comments,
-                          postId: params.id,
-                          userProductId: user?.stripeProductId ?? "",
-                          commentPersona: persona,
-                        });
+                        try {
+                          await makeComment({
+                            comments,
+                            postId: params.id,
+                            userProductId: user?.stripeProductId ?? "",
+                            commentPersona: persona,
+                          });
+                        } catch (error) {
+                          throw new Error("Error making persona comment");
+                        }
                       }}
                     >
                       <FormButton
@@ -219,10 +231,7 @@ export default async function Entry({
                                     });
                                     revalidatePath(`/entry/${params.id}`);
                                   } catch (error) {
-                                    console.error(
-                                      "Error deleting comment:",
-                                      error,
-                                    );
+                                    throw new Error("Error deleting comment");
                                   }
                                 }}
                               >

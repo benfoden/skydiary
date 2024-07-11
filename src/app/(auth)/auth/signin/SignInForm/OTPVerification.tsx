@@ -71,7 +71,7 @@ export default function OTPVerification({ email }: Props) {
           location.reload();
         }}
       >
-        {t("auth.send a new code")}
+        {t("auth.tryAgain")}
       </Link>
     </>
   );

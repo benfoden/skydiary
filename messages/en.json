@@ -65,7 +65,7 @@
     "email": "email",
     "check your email": "please check your email",
     "passcode expires": "your passcode will expire in 5 minutes",
-    "send a new code": "send a new code",
+    "tryAgain": "try again",
     "verify and continue": "verify and continue",
     "verifying": "verifying...",
     "signing in": "logging in...",
@@ -216,7 +216,8 @@
     },
     "default": {
       "heading": "Error",
-      "message": "There was an unknown error. Please refresh the page and try again."
+      "message": "There was an unknown error. Please refresh the page and try again.",
+      "tryAgain": "try again"
     },
     "notfound": {
       "heading": "Page Not Found",

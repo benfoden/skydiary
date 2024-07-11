@@ -86,15 +86,15 @@ export default async function Persona({ params }: { params: { id: string } }) {
                     ) as string;
 
                     // if no favorite is available, either keep it a favorite or not
-                    const isFavorite = isFavoritePersonaAvailable(
-                      session?.user,
-                      personas,
-                    )
-                      ? formData.get("isFavorite") === "on"
-                      : persona.isFavorite;
 
-                    if (name && traits) {
-                      try {
+                    try {
+                      const isFavorite = isFavoritePersonaAvailable(
+                        session?.user,
+                        personas,
+                      )
+                        ? formData.get("isFavorite") === "on"
+                        : persona.isFavorite;
+                      if (name && traits) {
                         await api.persona.update({
                           personaId,
                           name,
@@ -109,10 +109,11 @@ export default async function Persona({ params }: { params: { id: string } }) {
                           communicationSample,
                           isFavorite,
                         });
-                      } catch (error) {
-                        console.error("Error updating persona:", error);
+
+                        redirect("/persona/all");
                       }
-                      redirect("/persona/all");
+                    } catch (error) {
+                      throw new Error("Error updating persona");
                     }
                   }}
                 >

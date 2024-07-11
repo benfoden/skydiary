@@ -1,0 +1,32 @@
+import { ServerClient } from "postmark";
+import { env } from "~/env";
+
+export const postmarkClient = new ServerClient(env.POSTMARK_API_KEY);
+
+export const sendEmail = async ({
+  from,
+  to,
+  subject,
+  textBody,
+  htmlBody,
+  MessageStream = "outbound",
+}: {
+  from: string;
+  to: string;
+  subject: string;
+  textBody: string;
+  htmlBody: string;
+  MessageStream?: string;
+}) => {
+  "use server";
+  const result = await postmarkClient.sendEmail({
+    From: from,
+    To: to,
+    Subject: subject,
+    TextBody: textBody,
+    HtmlBody: htmlBody,
+    MessageStream: MessageStream,
+  });
+
+  return result;
+};

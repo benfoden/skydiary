@@ -1,11 +1,13 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { createTransport } from "nodemailer";
-import { env } from "process";
+import { redirect } from "next/navigation";
 import { Card } from "~/app/_components/Card";
 import FormButton from "~/app/_components/FormButton";
 import Input from "~/app/_components/Input";
 import { type Locale } from "~/config";
+import { env } from "~/env";
+import { getServerAuthSession } from "~/server/auth";
+import { sendEmail } from "~/utils/email";
 
 export async function generateMetadata({
   params: { locale },
@@ -22,6 +24,8 @@ export async function generateMetadata({
 
 export default async function Contact() {
   const t = await getTranslations();
+  const session = await getServerAuthSession();
+
   return (
     <div className="flex w-full flex-col items-start justify-start gap-2 sm:max-w-[768px]">
       <Card variant="form" isButton={false}>
@@ -33,34 +37,30 @@ export default async function Contact() {
             <form
               action={async (formData) => {
                 "use server";
-                const server = {
-                  host: env.EMAIL_SERVER_HOST,
-                  port: Number(env.EMAIL_SERVER_PORT),
-                  auth: {
-                    user: env.EMAIL_SERVER_USER,
-                    pass: env.EMAIL_SERVER_PASSWORD,
-                  },
-                };
-                const from: string = formData.get("from") as string;
 
                 const subject: string = formData.get("subject") as string;
-                const body: string = formData.get("body") as string;
+                const message: string = formData.get(
+                  "contactMessage",
+                ) as string;
+                const from: string = formData.get("from") as string;
 
-                const result = await createTransport(server).sendMail({
+                console.log("the message", message);
+
+                const result = await sendEmail({
+                  from: env.CONTACT_EMAIL_FROM,
                   to: "contact@skydiary.app",
-                  from,
                   subject,
-                  text: "contact message",
-                  html: `<body style="font-family: sans-serif; background: linear-gradient(to bottom, #cce3f1, #F3F6F6) no-repeat; background-size: cover; color: #000; padding: 32px 16px; text-align: center;">
-                 User message: 
-                  ${body}
-                </body>`,
-                });
+                  textBody: `Message: ${message}`,
+                  htmlBody: `<body style="font-family: sans-serif; color: #000; padding: 32px 16px; text-align: center;">Message:<br/> 
+                    ${message}<br/>
+                    ${session?.user?.email ? `User account email: ${session?.user?.email}` : `contact form email: ${from}`}`,
+                  MessageStream: "outbound",
+                }).catch((error: Error) =>
+                  console.error("contact form send error", error),
+                );
 
                 if (result) {
-                  console.log("Email sent successfully!");
-                } else {
-                  console.error("Failed to send email.");
+                  return redirect("/contact/thank-you");
                 }
               }}
               className=" space-y-4"
@@ -70,6 +70,8 @@ export default async function Contact() {
                   label={t("contact.from")}
                   name="from"
                   type="email"
+                  initialValue={session?.user?.email ?? undefined}
+                  disabled={!!session?.user?.email}
                   required
                 />
                 <Input
@@ -80,7 +82,8 @@ export default async function Contact() {
                 />
                 <Input
                   label={t("contact.message")}
-                  name="body"
+                  name="contactMessage"
+                  id="contactMessage"
                   type="textarea"
                   required
                 />

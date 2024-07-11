@@ -30,7 +30,7 @@
     "email": "メールアドレス",
     "check your email": "メールアドレスを確認してください",
     "passcode expires": "パスコードは5分後に失効します",
-    "send a new code": "新しいコードを送信",
+    "tryAgain": "再試行",
     "verify and continue": "確認して続行",
     "verifying": "確認中...",
     "signing in": "ログイン中...",

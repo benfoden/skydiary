@@ -86,15 +86,15 @@ export default async function Persona() {
                       "communicationSample",
                     ) as string;
 
-                    const isFavorite = isFavoritePersonaAvailable(
-                      session?.user,
-                      personas,
-                    )
-                      ? formData.get("isFavorite") === "on"
-                      : false;
+                    try {
+                      const isFavorite = isFavoritePersonaAvailable(
+                        session?.user,
+                        personas,
+                      )
+                        ? formData.get("isFavorite") === "on"
+                        : false;
 
-                    if (name && traits) {
-                      try {
+                      if (name && traits) {
                         await api.persona.create({
                           name,
                           traits,
@@ -108,11 +108,12 @@ export default async function Persona() {
                           communicationSample,
                           isFavorite,
                         });
-                      } catch (error) {
-                        console.error("Error updating persona:", error);
+
+                        revalidatePath("/persona/all");
+                        redirect("/persona/all");
                       }
-                      revalidatePath("/persona/all");
-                      redirect("/persona/all");
+                    } catch (error) {
+                      throw new Error("Error creating persona");
                     }
                   }}
                 >

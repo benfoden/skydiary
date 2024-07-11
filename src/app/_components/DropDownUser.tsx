@@ -1,4 +1,5 @@
 import {
+  EnvelopeClosedIcon,
   ExitIcon,
   GearIcon,
   PersonIcon,
@@ -60,6 +61,11 @@ export default async function DropDownUser() {
         </Link>
       )}
       <ThemeToggle isMenuButton />
+      <Link href={"/contact"}>
+        <Button type="submit" variant="menuElement">
+          {t("nav.contactUs")} <EnvelopeClosedIcon className="h-4 w-4" />
+        </Button>
+      </Link>
       <Link href={"/auth/signout"}>
         <Button variant="menuElement">
           {t("nav.signout")}
