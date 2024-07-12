@@ -12,12 +12,13 @@ import {
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
 import EmailProvider from "next-auth/providers/email";
+import { createTransport } from "nodemailer";
 import Stripe from "stripe";
 import { env } from "~/env";
 
-import { createTransport } from "nodemailer";
 import { db } from "~/server/db";
 import { type EmailDetails } from "~/utils/types";
+
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
  * object and keep type safety.
@@ -68,14 +69,9 @@ export const authOptions = (emailDetails: EmailDetails): NextAuthOptions => {
     },
     events: {
       createUser: async ({ user }) => {
-        const stripe = new Stripe(
-          env.STRIPE_SECRET_KEY !== "development"
-            ? env.STRIPE_SECRET_KEY
-            : env.STRIPE_SECRET_KEY_TEST,
-          {
-            apiVersion: "2024-06-20",
-          },
-        );
+        const stripe = new Stripe(env.STRIPE_SECRET_KEY_TEST, {
+          apiVersion: "2024-06-20",
+        });
         await stripe.customers
           .create({
             email: user.email!,
@@ -109,7 +105,7 @@ export const authOptions = (emailDetails: EmailDetails): NextAuthOptions => {
         maxAge: 5 * 60,
         async sendVerificationRequest(params) {
           const { identifier: to, provider, token } = params;
-          const { from, server } = provider;
+          const { server, from } = provider;
           const { subject, text, body, code, goBack, safelyIgnore } =
             emailDetails;
 
@@ -119,38 +115,38 @@ export const authOptions = (emailDetails: EmailDetails): NextAuthOptions => {
             subject,
             text,
             html: `<body style="font-family: sans-serif; background: linear-gradient(to bottom, #cce3f1, #F3F6F6) no-repeat; background-size: cover; color: #000; padding: 32px 16px; text-align: center;">
-                      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background: rgba(255,255,255,0.4); max-width: 360px; min-height: 360px; margin: auto; border-radius: 10px; vertical-align: middle; padding: 32px 0px;">
-                        <tr>
-                          <td align="center" style="font-size: 22px; color: #000; font-weight: 300; padding-bottom: 16px;">${body}</td>
-                        </tr>
-                        <tr>
-                          <td align="center">
-                            <table border="0" cellspacing="0" cellpadding="0" style="margin: auto;">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background: rgba(255,255,255,0.4); max-width: 360px; min-height: 360px; margin: auto; border-radius: 10px; vertical-align: middle; padding: 32px 0px;">
+                      <tr>
+                        <td align="center" style="font-size: 22px; color: #000; font-weight: 300; padding-bottom: 16px;">${body}</td>
+                      </tr>
+                      <tr>
+                        <td align="center">
+                          <table border="0" cellspacing="0" cellpadding="0" style="margin: auto;">
+                          <tr>
+                              <td align="center" style="border-radius: 5px; padding-bottom: 16px;">
+                                <span style="font-size: 16px;">${code}</span>
+                              </td>
+                            </tr>
                             <tr>
-                                <td align="center" style="border-radius: 5px; padding-bottom: 16px;">
-                                  <span style="font-size: 16px;">${code}</span>
-                                </td>
-                              </tr>
-                              <tr>
-                                <td align="center" style="border-radius: 5px;">
-                                  <code style="font-size: 22px;">${token}</code>
-                                </td>
-                              </tr>
-                              <tr>
-                                <td align="center" style="padding-top: 16px;">
-                                  <p style="font-size: 16px; color: #000;">${goBack}</p>
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td align="center" style="font-size: 16px; line-height: 22px; color: #000; padding: 0px 16px; font-weight: 300;">
-                          ${safelyIgnore}
-                          </td>
-                        </tr>
-                      </table>
-                    </body>`,
+                              <td align="center" style="border-radius: 5px;">
+                                <code style="font-size: 22px;">${token}</code>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td align="center" style="padding-top: 16px;">
+                                <p style="font-size: 16px; color: #000;">${goBack}</p>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td align="center" style="font-size: 16px; line-height: 22px; color: #000; padding: 0px 16px; font-weight: 300;">
+                        ${safelyIgnore}
+                        </td>
+                      </tr>
+                    </table>
+                  </body>`,
           });
           const failed = result.rejected.concat(result.pending).filter(Boolean);
           if (failed.length) {
