@@ -29,9 +29,9 @@ export const stripeRouter = createTRPCRouter({
 
         let price: string;
         if (input.period === "yearly") {
-          price = env.PRICE_ID_PLUS_YEARLY_TEST ?? env.PRICE_ID_PLUS_YEARLY;
+          price = env.PRICE_ID_PLUS_YEARLY ?? env.PRICE_ID_PLUS_YEARLY_TEST;
         } else if (input.period === "monthly") {
-          price = env.PRICE_ID_PLUS_MONTHLY_TEST ?? env.PRICE_ID_PLUS_MONTHLY;
+          price = env.PRICE_ID_PLUS_MONTHLY ?? env.PRICE_ID_PLUS_MONTHLY_TEST;
         } else {
           console.error("Invalid period or productId");
           throw new Error("Invalid period or productId");

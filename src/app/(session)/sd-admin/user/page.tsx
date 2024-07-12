@@ -151,10 +151,10 @@ export default async function Secret() {
               if (stripeProduct) {
                 if (stripeProduct === "premium") {
                   stripeProductId =
-                    env.PRODUCT_ID_PREMIUM_TEST ?? env.PRODUCT_ID_PREMIUM;
+                    env.PRODUCT_ID_PREMIUM ?? env.PRODUCT_ID_PREMIUM_TEST;
                 } else if (stripeProduct === "plus") {
                   stripeProductId =
-                    env.PRODUCT_ID_PLUS_TEST ?? env.PRODUCT_ID_PLUS;
+                    env.PRODUCT_ID_PLUS ?? env.PRODUCT_ID_PLUS_TEST;
                 } else {
                   stripeProductId = env.PRODUCT_ID_LITE;
                 }

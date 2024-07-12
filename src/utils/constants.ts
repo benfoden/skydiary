@@ -68,14 +68,14 @@ const userplanDetails: Record<string, UserPlanLimit> = {
     characters: 250,
     model: "gpt-3.5-turbo",
   },
-  [env.PRODUCT_ID_PLUS_TEST ?? env.PRODUCT_ID_PLUS]: {
+  [env.PRODUCT_ID_PLUS ?? env.PRODUCT_ID_PLUS_TEST]: {
     personas: 10,
     comments: 10,
     memories: 60,
     characters: 1000,
     model: "gpt-4o",
   },
-  [env.PRODUCT_ID_PREMIUM_TEST ?? env.PRODUCT_ID_PREMIUM]: {
+  [env.PRODUCT_ID_PREMIUM ?? env.PRODUCT_ID_PREMIUM_TEST]: {
     personas: 100,
     comments: 100,
     memories: 180,
