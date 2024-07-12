@@ -8,8 +8,10 @@ import ButtonSpinner from "./ButtonSpinner";
 
 export default function FormDeleteButton({
   hasText = true,
+  children,
 }: {
   hasText?: boolean;
+  children?: React.ReactNode;
 }) {
   const { pending }: { pending: boolean } = useFormStatus();
   const t = useTranslations();
@@ -53,11 +55,13 @@ export default function FormDeleteButton({
         </>
       ) : confirmDelete ? (
         <>
-          {hasText && t("form.confirmDelete")} <CheckIcon className="h-5 w-5" />{" "}
+          {(hasText || children) && t("form.confirmDelete")}{" "}
+          <CheckIcon className="h-5 w-5" />{" "}
         </>
       ) : (
         <>
-          <Cross1Icon className="h-5 w-5" /> {hasText && t("form.delete")}
+          <Cross1Icon className="h-5 w-5" />{" "}
+          {hasText && !children ? t("form.delete") : children}
         </>
       )}
     </Button>

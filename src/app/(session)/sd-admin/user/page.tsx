@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { Card } from "~/app/_components/Card";
 import CopyText from "~/app/_components/CopyText";
 import FormButton from "~/app/_components/FormButton";
@@ -8,12 +9,20 @@ import { env } from "~/env";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 
-export default async function Secret() {
+export default async function Secret({
+  searchParams,
+}: {
+  searchParams?: { targetUserId?: string };
+}) {
   const session = await getServerAuthSession();
   const userPersona = await api.persona.getUserPersona();
   const t = await getTranslations();
 
   const users = await api.user.getAllUsersAsAdmin();
+
+  const targetUser = await api.user.getByUserId({
+    userId: searchParams?.targetUserId ?? "",
+  });
 
   return (
     <div className="flex w-full flex-col gap-4 sm:flex-row">
@@ -141,67 +150,67 @@ export default async function Secret() {
                 "targetUserId",
               ) as string;
               const email: string | undefined = formData.get("email") as string;
-              const stripeProduct: string | undefined = formData.get(
-                "stripeProduct",
+              const stripeProductId: string | undefined = formData.get(
+                "stripeProductId",
               ) as string;
               const isAdmin: boolean = formData.get("isAdmin") === "on";
               const isSpecial: boolean = formData.get("isSpecial") === "on";
 
-              let stripeProductId: string | undefined;
-              if (stripeProduct) {
-                if (stripeProduct === "premium") {
-                  stripeProductId =
-                    env.PRODUCT_ID_PREMIUM_TEST ?? env.PRODUCT_ID_PREMIUM;
-                } else if (stripeProduct === "plus") {
-                  stripeProductId =
-                    env.PRODUCT_ID_PLUS_TEST ?? env.PRODUCT_ID_PLUS;
-                } else {
-                  stripeProductId = env.PRODUCT_ID_LITE;
-                }
+              let stripeProdId: string | undefined = stripeProductId;
+              if (!stripeProductId) {
+                stripeProdId = env.PRODUCT_ID_LITE;
               }
-
               const updateData = {
                 targetUserId,
                 ...(email ? { email } : {}),
                 ...(isAdmin !== undefined ? { isAdmin } : {}),
                 ...(isSpecial !== undefined ? { isSpecial } : {}),
-                ...(stripeProductId ? { stripeProductId } : {}),
+                ...(stripeProdId ? { stripeProductId: stripeProdId } : {}),
               };
 
               await api.user.updateUserAsAdmin(updateData);
 
               revalidatePath("/sd-admin/user");
+              redirect(`/sd-admin/user`);
             }}
           >
             <Input
               id="targetUserId"
               name="targetUserId"
               label="Target User Id *"
+              defaultValue={targetUser?.id}
             />
-            <Input id="email" name="email" label="Email" />
+            <Input
+              id="email"
+              name="email"
+              label="Email"
+              defaultValue={targetUser?.email ?? ""}
+            />
             <Input
               id="isAdmin"
               name="isAdmin"
               label="Is Admin"
               type="checkbox"
+              defaultChecked={targetUser?.isAdmin}
             />
             <Input
               id="isSpecial"
               name="isSpecial"
               label="Is Special"
               type="checkbox"
+              defaultChecked={targetUser?.isSpecial}
             />
             <Input
               id="stripeProduct"
-              name="stripeProduct"
-              label="Stripe Product"
-              placeholder="lite, plus, or premium"
+              name="stripeProductId"
+              label="Stripe Product Id"
+              defaultValue={targetUser?.stripeProductId ?? ""}
             />
             <FormButton variant="submit">Update user</FormButton>
           </form>
         </div>
-        <div>
-          <h2>Current user</h2>
+        <div className="flex w-full flex-col items-start gap-4 pt-8">
+          <h2>Current admin user</h2>
           <div className="w-80">{JSON.stringify(session?.user, null, 2)}</div>
 
           <div className="w-80">comments used: {session.user.commentsUsed}</div>
@@ -227,7 +236,20 @@ export default async function Secret() {
               </div>
               <div>isAdmin: {user.isAdmin ? "true" : "false"}</div>
               <div>isSpecial: {user.isSpecial ? "true" : "false"}</div>
-              <div>productId: {user.stripeProductId}</div>
+              <div>stripeProductId: {user.stripeProductId}</div>
+              <form
+                action={async () => {
+                  "use server";
+                  redirect(`/sd-admin/user?targetUserId=${user.id}`);
+                }}
+              >
+                <FormButton
+                  variant="submit"
+                  isDisabled={searchParams?.targetUserId === user.id}
+                >
+                  Send to update form
+                </FormButton>
+              </form>
             </details>
           ))}
         </div>

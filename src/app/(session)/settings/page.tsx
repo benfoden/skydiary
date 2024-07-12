@@ -1,11 +1,13 @@
 import { type Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import Button from "~/app/_components/Button";
 import ManageBillingButton from "~/app/_components/ButtonBilling";
 import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
 import FormButton from "~/app/_components/FormButton";
+import FormDeleteButton from "~/app/_components/FormDeleteButton";
 import Input from "~/app/_components/Input";
 import LocaleSwitcher from "~/app/_components/LocaleSwitcher";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
@@ -157,6 +159,30 @@ export default async function Settings() {
             <div className="flex flex-row gap-2">
               <LocaleSwitcher isSettings />
             </div>
+          </Card>
+          <Card variant="form">
+            <h2>{t("settings.deleteAccount")}</h2>
+            <p className="text-sm opacity-60">
+              {t("settings.deleteAccountDescription")}
+            </p>
+            <form
+              action={async () => {
+                "use server";
+                try {
+                  const deleted = await api.user.deleteUser();
+                  if (deleted) redirect("/");
+                } catch (error) {
+                  console.error("Error deleting user:", error);
+                  throw new Error("Error deleting user");
+                }
+              }}
+            >
+              <FormDeleteButton>
+                <span className="text-red-500">
+                  {t("settings.deleteAccountButton")}
+                </span>
+              </FormDeleteButton>
+            </form>
           </Card>
         </div>
       </main>

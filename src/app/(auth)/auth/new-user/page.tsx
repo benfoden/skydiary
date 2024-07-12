@@ -8,11 +8,11 @@ import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 
 const NewUserPage: React.FC = async () => {
+  const t = await getTranslations();
   const session = await getServerAuthSession();
 
   if (!session) return redirect("/auth/signin");
   if (session.user.name) return redirect("/home");
-  const t = await getTranslations();
 
   return (
     <div className="relative flex h-full w-full overflow-hidden">
@@ -51,7 +51,7 @@ const NewUserPage: React.FC = async () => {
               <Input
                 id="name"
                 name="name"
-                label={t("new-user.your name")}
+                label={t("new-user.yourName")}
                 required
               />
               <Input

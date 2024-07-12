@@ -1,7 +1,6 @@
 "use server";
-import { createTransport } from "nodemailer";
 import Input from "~/app/_components/Input";
-import { env } from "~/env";
+import { sendEmail } from "~/utils/email";
 
 export default async function EmailForm() {
   return (
@@ -10,32 +9,22 @@ export default async function EmailForm() {
       <form
         action={async (formData) => {
           "use server";
-          const server = {
-            host: env.EMAIL_SERVER_HOST,
-            port: Number(env.EMAIL_SERVER_PORT),
-            auth: {
-              user: env.EMAIL_SERVER_USER,
-              pass: env.EMAIL_SERVER_PASSWORD,
-            },
-          };
           const to: string = formData.get("to") as string;
 
           const subject: string = formData.get("subject") as string;
           const body: string = formData.get("body") as string;
-
-          const result = await createTransport(server).sendMail({
+          await sendEmail({
             to,
             from: "hi@mail.skydiary.app",
             subject,
-            text: "test",
-            html: `<body style="font-family: sans-serif; background: linear-gradient(to bottom, #cce3f1, #F3F6F6) no-repeat; background-size: cover; color: #000; padding: 32px 16px; text-align: center;">
+            textBody: "test",
+            htmlBody: `<body style="font-family: sans-serif; background: linear-gradient(to bottom, #cce3f1, #F3F6F6) no-repeat; background-size: cover; color: #000; padding: 32px 16px; text-align: center;">
                  ${body}
                 </body>`,
+          }).catch((error) => {
+            console.error("Email sending failed.", error);
+            throw new Error(`Email sending failed.`);
           });
-
-          if (!result) {
-            console.error("Failed to send email.");
-          }
         }}
         className="space-y-4"
       >

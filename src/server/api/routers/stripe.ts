@@ -2,7 +2,11 @@ import { z } from "zod";
 import { env } from "~/env";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { getOrCreateStripeCustomerIdForUser } from "~/server/stripe/stripe-webhook-handlers";
-import { getBaseUrl } from "~/utils/clientConstants";
+
+function baseUrl() {
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return `http://localhost:3000`;
+}
 
 export const stripeRouter = createTRPCRouter({
   createCheckoutSession: protectedProcedure
@@ -29,9 +33,15 @@ export const stripeRouter = createTRPCRouter({
 
         let price: string;
         if (input.period === "yearly") {
-          price = env.PRICE_ID_PLUS_YEARLY_TEST ?? env.PRICE_ID_PLUS_YEARLY;
+          price =
+            env.PRICE_ID_PLUS_YEARLY !== "development"
+              ? env.PRICE_ID_PLUS_YEARLY
+              : env.PRICE_ID_PLUS_YEARLY_TEST;
         } else if (input.period === "monthly") {
-          price = env.PRICE_ID_PLUS_MONTHLY_TEST ?? env.PRICE_ID_PLUS_MONTHLY;
+          price =
+            env.PRICE_ID_PLUS_MONTHLY !== "development"
+              ? env.PRICE_ID_PLUS_MONTHLY
+              : env.PRICE_ID_PLUS_MONTHLY_TEST;
         } else {
           console.error("Invalid period or productId");
           throw new Error("Invalid period or productId");
@@ -55,8 +65,8 @@ export const stripeRouter = createTRPCRouter({
               quantity: 1,
             },
           ],
-          success_url: `${getBaseUrl()}/pricing?checkoutSuccess=true`,
-          cancel_url: `${getBaseUrl()}/pricing?checkoutCanceled=true`,
+          success_url: `${baseUrl()}/pricing?checkoutSuccess=true`,
+          cancel_url: `${baseUrl()}/pricing?checkoutCanceled=true`,
           subscription_data: {
             metadata: {
               userId: session.user?.id,
@@ -100,7 +110,7 @@ export const stripeRouter = createTRPCRouter({
       const stripeBillingPortalSession =
         await stripe.billingPortal.sessions.create({
           customer: customerId,
-          return_url: `${getBaseUrl()}/settings`,
+          return_url: `${baseUrl()}/settings`,
           locale: input.locale,
         });
 

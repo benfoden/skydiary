@@ -14,7 +14,7 @@
     "ctaTitle": "毎日新しいコメントを取得する",
     "heroCTA": "日記を始めましょう",
     "personaName1": "紫式部",
-    "personaName2": "10歳の自分",
+    "personaName2": "エキスパートコーチ",
     "personaName3": "好きなキャラクター",
     "personaName4": "孔子",
     "personaName5": "ジャンヌ・ダルク",
@@ -102,7 +102,7 @@
   },
   "new-user": {
     "title": "skydiaryへようこそ",
-    "your name": "名前",
+    "yourName": "名前（必須）",
     "your age": "年齢",
     "your identities": "身分",
     "placeholder identities": "女性、母親、妻、その他"
@@ -184,7 +184,12 @@
     "your identities": "身分",
     "placeholder identities": "女性、母親、妻",
     "en": "English(英語)",
-    "ja": "日本語"
+    "ja": "日本語",
+    "billing": "請求",
+    "editBilling": "請求情報を編集",
+    "deleteAccount": "アカウントを削除",
+    "deleteAccountDescription": "このアクションは取り消しできません。すべてのデータを永久に失います。",
+    "deleteAccountButton": "はい、すべてを削除します"
   },
   "form": {
     "save": "保存",

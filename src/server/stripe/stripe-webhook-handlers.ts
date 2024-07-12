@@ -58,18 +58,13 @@ export const handleSubscriptionCreatedOrUpdated = async ({
   event: Stripe.Event;
   db: PrismaClient;
 }) => {
-  const session = await getServerAuthSession();
-
-  if (!session?.user) throw new Error("User not found");
-
-  const { user } = session;
-
   const subscription = event.data.object as Stripe.Subscription;
+  const userId = subscription.metadata.userId;
 
   // update user with subscription data
   await db.user.update({
     where: {
-      id: user.id,
+      id: userId,
     },
     data: {
       stripeSubscriptionId: subscription.id,
@@ -118,15 +113,14 @@ export const handleSubscriptionDeleted = async ({
   db: PrismaClient;
 }) => {
   const subscription = event.data.object as Stripe.Subscription;
-  const session = await getServerAuthSession();
+  const userId = subscription.metadata.userId;
 
-  if (!session?.user) throw new Error("User not found");
+  if (!userId) throw new Error("User not found");
 
-  const { user } = session;
   // remove subscription data from user
   await db.user.update({
     where: {
-      id: user.id,
+      id: userId,
     },
     data: {
       stripeSubscriptionId: null,

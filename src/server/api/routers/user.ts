@@ -57,9 +57,31 @@ export const userRouter = createTRPCRouter({
   // getUser is via getServerAuthSession
 
   deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
-    return ctx.db.user.delete({
-      where: { id: ctx?.session?.user?.id },
+    if (
+      ctx?.session?.user?.email === "ben.foden@gmail.com" ||
+      ctx?.session?.user?.isAdmin
+    ) {
+      return error("Cannot delete admin account");
+    }
+    const userId = ctx?.session?.user?.id;
+    if (!userId) {
+      return error("User ID not found in session");
+    }
+
+    await ctx.db.post.deleteMany({
+      where: { createdById: userId },
     });
+    // Ensure all related data is deleted before deleting the user
+    await ctx.db.persona.deleteMany({
+      where: { createdById: userId },
+    });
+    await ctx.db.subscription.deleteMany({
+      where: { userId: userId },
+    });
+    await ctx.db.user.delete({
+      where: { id: userId },
+    });
+    return { message: "success" };
   }),
 
   resetDailyUsage: protectedProcedure.mutation(async ({ ctx }) => {
