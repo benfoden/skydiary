@@ -14,9 +14,8 @@ interface Props {
 export default function OTPVerification({ email }: Props) {
   const [code, setCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const t = useTranslations();
-
   const router = useRouter();
+  const t = useTranslations();
 
   async function handleOTPVerification(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -24,11 +23,14 @@ export default function OTPVerification({ email }: Props) {
 
     const formattedEmail = encodeURIComponent(email.toLowerCase().trim());
     const formattedCode = encodeURIComponent(code);
-    const formattedCallback = encodeURIComponent("/auth/new-user");
+    const formattedCallback = encodeURIComponent("/auth/verified");
     const otpRequestURL = `/api/auth/callback/email?email=${formattedEmail}&token=${formattedCode}&callbackUrl=${formattedCallback}`;
     const response = await fetch(otpRequestURL);
 
     //todo: why is this required?
+    if (response.url.includes("/auth/verified")) {
+      router.replace("/home");
+    }
     if (!response) {
       setIsSubmitting(false);
       router.replace(`/auth/signin?error=Verification`);
@@ -51,7 +53,10 @@ export default function OTPVerification({ email }: Props) {
           <p>{t("auth.check your email")}</p>
           <p>{t("auth.passcode expires")}</p>
 
-          <FormButton variant="submit">
+          <FormButton
+            variant="submit"
+            isDisabled={isSubmitting || !code || code.length !== 6}
+          >
             {isSubmitting ? t("auth.verifying") : t("auth.verify and continue")}
           </FormButton>
         </div>
