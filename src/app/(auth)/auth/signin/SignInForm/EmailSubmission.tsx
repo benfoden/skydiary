@@ -5,7 +5,6 @@ import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import FormButton from "~/app/_components/FormButton";
 import Input from "~/app/_components/Input";
@@ -50,9 +49,6 @@ export default function EmailSubmission({ signUpEmail, onSubmit }: Props) {
   useEffect(() => {
     deleteSignUpEmailCookie().catch((error: Error) => console.error(error));
   }, []);
-  const handleResetSession = async () => {
-    await reset({ userEmail: "ben.foden@gmail.com" });
-  };
 
   return (
     <Card variant="form">
@@ -86,7 +82,6 @@ export default function EmailSubmission({ signUpEmail, onSubmit }: Props) {
           })}
         </p>
       </form>
-      <Button onClick={handleResetSession}>reset session</Button>
     </Card>
   );
 }
