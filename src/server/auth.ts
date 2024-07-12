@@ -69,9 +69,14 @@ export const authOptions = (emailDetails: EmailDetails): NextAuthOptions => {
     },
     events: {
       createUser: async ({ user }) => {
-        const stripe = new Stripe(env.STRIPE_SECRET_KEY_TEST, {
-          apiVersion: "2024-06-20",
-        });
+        const stripe = new Stripe(
+          env.STRIPE_SECRET_KEY !== "development"
+            ? env.STRIPE_SECRET_KEY
+            : env.STRIPE_SECRET_KEY_TEST,
+          {
+            apiVersion: "2024-06-20",
+          },
+        );
         await stripe.customers
           .create({
             email: user.email!,
