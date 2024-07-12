@@ -32,6 +32,7 @@ export default async function PersonaFormFields({
         placeholder={t("personas.namePlaceholder")}
         defaultValue={persona?.name ?? ""}
         maxLength={140}
+        required
       />
       <Input
         type="textarea"
@@ -41,6 +42,7 @@ export default async function PersonaFormFields({
         defaultValue={persona?.traits ?? ""}
         placeholder={t("personas.traitsPlaceholder")}
         maxLength={140}
+        required
       />
       <Input
         type="textarea"
