@@ -51,7 +51,6 @@ export const stripeRouter = createTRPCRouter({
           ja: "jpy",
           en: "usd",
         };
-        console.log("baseurl", baseUrl());
 
         const checkoutSession = await stripe.checkout.sessions.create({
           customer: customerId,

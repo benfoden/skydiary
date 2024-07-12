@@ -184,7 +184,12 @@
     "your identities": "身分",
     "placeholder identities": "女性、母親、妻",
     "en": "English(英語)",
-    "ja": "日本語"
+    "ja": "日本語",
+    "billing": "請求",
+    "editBilling": "請求情報を編集",
+    "deleteAccount": "アカウントを削除",
+    "deleteAccountDescription": "このアクションは取り消しできません。すべてのデータを永久に失います。",
+    "deleteAccountButton": "はい、すべてを削除します"
   },
   "form": {
     "save": "保存",

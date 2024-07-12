@@ -186,7 +186,10 @@
     "en": "English",
     "ja": "日本語 (Japanese)",
     "billing": "billing",
-    "editBilling": "edit billing"
+    "editBilling": "edit billing",
+    "deleteAccount": "delete account",
+    "deleteAccountDescription": "this action is irreversible. ALL of your data wiil be permanently deleted.",
+    "deleteAccountButton": "yes, delete my account"
   },
   "form": {
     "save": "save",

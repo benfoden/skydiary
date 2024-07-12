@@ -15,10 +15,9 @@ import EmailProvider from "next-auth/providers/email";
 import Stripe from "stripe";
 import { env } from "~/env";
 
+import { createTransport } from "nodemailer";
 import { db } from "~/server/db";
-import { sendEmail } from "~/utils/email";
 import { type EmailDetails } from "~/utils/types";
-
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
  * object and keep type safety.
@@ -95,6 +94,14 @@ export const authOptions = (emailDetails: EmailDetails): NextAuthOptions => {
     adapter: PrismaAdapter(db) as Adapter,
     providers: [
       EmailProvider({
+        server: {
+          host: env.EMAIL_SERVER_HOST,
+          port: Number(env.EMAIL_SERVER_PORT),
+          auth: {
+            user: env.EMAIL_SERVER_USER,
+            pass: env.EMAIL_SERVER_PASSWORD,
+          },
+        },
         from: env.VERIFICATION_EMAIL_FROM,
         generateVerificationToken() {
           return randomInt(100000, 999999).toString();
@@ -102,52 +109,55 @@ export const authOptions = (emailDetails: EmailDetails): NextAuthOptions => {
         maxAge: 5 * 60,
         async sendVerificationRequest(params) {
           const { identifier: to, provider, token } = params;
-          const { from } = provider;
+          const { from, server } = provider;
           const { subject, text, body, code, goBack, safelyIgnore } =
             emailDetails;
 
-          await sendEmail({
+          const result = await createTransport(server).sendMail({
             to,
             from,
             subject,
-            textBody: text,
-            htmlBody: `<body style="font-family: sans-serif; background: linear-gradient(to bottom, #cce3f1, #F3F6F6) no-repeat; background-size: cover; color: #000; padding: 32px 16px; text-align: center;">
-                    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background: rgba(255,255,255,0.4); max-width: 360px; min-height: 360px; margin: auto; border-radius: 10px; vertical-align: middle; padding: 32px 0px;">
-                      <tr>
-                        <td align="center" style="font-size: 22px; color: #000; font-weight: 300; padding-bottom: 16px;">${body}</td>
-                      </tr>
-                      <tr>
-                        <td align="center">
-                          <table border="0" cellspacing="0" cellpadding="0" style="margin: auto;">
-                          <tr>
-                              <td align="center" style="border-radius: 5px; padding-bottom: 16px;">
-                                <span style="font-size: 16px;">${code}</span>
-                              </td>
-                            </tr>
+            text,
+            html: `<body style="font-family: sans-serif; background: linear-gradient(to bottom, #cce3f1, #F3F6F6) no-repeat; background-size: cover; color: #000; padding: 32px 16px; text-align: center;">
+                      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background: rgba(255,255,255,0.4); max-width: 360px; min-height: 360px; margin: auto; border-radius: 10px; vertical-align: middle; padding: 32px 0px;">
+                        <tr>
+                          <td align="center" style="font-size: 22px; color: #000; font-weight: 300; padding-bottom: 16px;">${body}</td>
+                        </tr>
+                        <tr>
+                          <td align="center">
+                            <table border="0" cellspacing="0" cellpadding="0" style="margin: auto;">
                             <tr>
-                              <td align="center" style="border-radius: 5px;">
-                                <code style="font-size: 22px;">${token}</code>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td align="center" style="padding-top: 16px;">
-                                <p style="font-size: 16px; color: #000;">${goBack}</p>
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td align="center" style="font-size: 16px; line-height: 22px; color: #000; padding: 0px 16px; font-weight: 300;">
-                        ${safelyIgnore}
-                        </td>
-                      </tr>
-                    </table>
-                  </body>`,
-          }).catch((error) => {
-            console.error("Verification email sending failed.", error);
-            throw new Error(`Verification email sending failed.`);
+                                <td align="center" style="border-radius: 5px; padding-bottom: 16px;">
+                                  <span style="font-size: 16px;">${code}</span>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td align="center" style="border-radius: 5px;">
+                                  <code style="font-size: 22px;">${token}</code>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td align="center" style="padding-top: 16px;">
+                                  <p style="font-size: 16px; color: #000;">${goBack}</p>
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center" style="font-size: 16px; line-height: 22px; color: #000; padding: 0px 16px; font-weight: 300;">
+                          ${safelyIgnore}
+                          </td>
+                        </tr>
+                      </table>
+                    </body>`,
           });
+          const failed = result.rejected.concat(result.pending).filter(Boolean);
+          if (failed.length) {
+            throw new Error(
+              `Email(s) (${failed.join(", ")}) could not be sent`,
+            );
+          }
         },
       }),
     ],
