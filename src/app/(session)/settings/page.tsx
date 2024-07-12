@@ -169,12 +169,12 @@ export default async function Settings() {
               action={async () => {
                 "use server";
                 try {
-                  const deleted = await api.user.deleteUser();
-                  if (deleted) redirect("/");
+                  await api.user.deleteUser();
                 } catch (error) {
                   console.error("Error deleting user:", error);
                   throw new Error("Error deleting user");
                 }
+                redirect("/");
               }}
             >
               <FormDeleteButton>

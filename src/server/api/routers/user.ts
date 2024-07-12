@@ -57,30 +57,46 @@ export const userRouter = createTRPCRouter({
   // getUser is via getServerAuthSession
 
   deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
-    if (
-      ctx?.session?.user?.email === "ben.foden@gmail.com" ||
-      ctx?.session?.user?.isAdmin
-    ) {
-      return error("Cannot delete admin account");
+    if (ctx?.session?.user?.isAdmin) {
+      return;
     }
     const userId = ctx?.session?.user?.id;
     if (!userId) {
-      return error("User ID not found in session");
+      return;
     }
 
-    await ctx.db.post.deleteMany({
-      where: { createdById: userId },
-    });
-    // Ensure all related data is deleted before deleting the user
-    await ctx.db.persona.deleteMany({
-      where: { createdById: userId },
-    });
-    await ctx.db.subscription.deleteMany({
-      where: { userId: userId },
-    });
+    try {
+      await ctx.db.post.deleteMany({
+        where: { createdById: userId },
+      });
+    } catch (error) {
+      // Handle error if no posts exist
+      console.error("Error deleting posts:", error);
+    }
+
+    try {
+      await ctx.db.persona.deleteMany({
+        where: { createdById: userId },
+      });
+    } catch (error) {
+      // Handle error if no personas exist
+      console.error("Error deleting personas:", error);
+    }
+
+    try {
+      await ctx.db.subscription.deleteMany({
+        where: { userId: userId },
+      });
+    } catch (error) {
+      // Handle error if no subscriptions exist
+      console.error("Error deleting subscriptions:", error);
+    }
+
     await ctx.db.user.delete({
       where: { id: userId },
     });
+    // Handle error if user deletion fails
+
     return { message: "success" };
   }),
 
