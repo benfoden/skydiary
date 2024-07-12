@@ -12,11 +12,11 @@ import {
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
 import EmailProvider from "next-auth/providers/email";
-import { createTransport } from "nodemailer";
 import Stripe from "stripe";
 import { env } from "~/env";
 
 import { db } from "~/server/db";
+import { sendEmail } from "~/utils/email";
 import { type EmailDetails } from "~/utils/types";
 
 /**
@@ -90,14 +90,6 @@ export const authOptions = (emailDetails: EmailDetails): NextAuthOptions => {
     adapter: PrismaAdapter(db) as Adapter,
     providers: [
       EmailProvider({
-        server: {
-          host: env.EMAIL_SERVER_HOST,
-          port: Number(env.EMAIL_SERVER_PORT),
-          auth: {
-            user: env.EMAIL_SERVER_USER,
-            pass: env.EMAIL_SERVER_PASSWORD,
-          },
-        },
         from: env.VERIFICATION_EMAIL_FROM,
         generateVerificationToken() {
           return randomInt(100000, 999999).toString();
@@ -105,16 +97,16 @@ export const authOptions = (emailDetails: EmailDetails): NextAuthOptions => {
         maxAge: 5 * 60,
         async sendVerificationRequest(params) {
           const { identifier: to, provider, token } = params;
-          const { server, from } = provider;
+          const { from } = provider;
           const { subject, text, body, code, goBack, safelyIgnore } =
             emailDetails;
 
-          const result = await createTransport(server).sendMail({
+          await sendEmail({
             to,
             from,
             subject,
-            text,
-            html: `<body style="font-family: sans-serif; background: linear-gradient(to bottom, #cce3f1, #F3F6F6) no-repeat; background-size: cover; color: #000; padding: 32px 16px; text-align: center;">
+            textBody: text,
+            htmlBody: `<body style="font-family: sans-serif; background: linear-gradient(to bottom, #cce3f1, #F3F6F6) no-repeat; background-size: cover; color: #000; padding: 32px 16px; text-align: center;">
                     <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background: rgba(255,255,255,0.4); max-width: 360px; min-height: 360px; margin: auto; border-radius: 10px; vertical-align: middle; padding: 32px 0px;">
                       <tr>
                         <td align="center" style="font-size: 22px; color: #000; font-weight: 300; padding-bottom: 16px;">${body}</td>
@@ -147,13 +139,10 @@ export const authOptions = (emailDetails: EmailDetails): NextAuthOptions => {
                       </tr>
                     </table>
                   </body>`,
+          }).catch((error) => {
+            console.error("Verification email sending failed.", error);
+            throw new Error(`Verification email sending failed.`);
           });
-          const failed = result.rejected.concat(result.pending).filter(Boolean);
-          if (failed.length) {
-            throw new Error(
-              `Email(s) (${failed.join(", ")}) could not be sent`,
-            );
-          }
         },
       }),
     ],

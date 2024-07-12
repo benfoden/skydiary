@@ -1,7 +1,6 @@
-import { ServerClient } from "postmark";
-import { env } from "~/env";
+"use server";
 
-export const postmarkClient = new ServerClient(env.POSTMARK_API_KEY);
+import { postmarkClient } from "~/config";
 
 export const sendEmail = async ({
   from,
