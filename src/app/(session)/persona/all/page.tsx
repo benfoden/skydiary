@@ -86,6 +86,7 @@ export default async function Persona() {
                       "communicationSample",
                     ) as string;
 
+                    let created;
                     try {
                       const isFavorite = isFavoritePersonaAvailable(
                         session?.user,
@@ -95,7 +96,7 @@ export default async function Persona() {
                         : false;
 
                       if (name && traits) {
-                        await api.persona.create({
+                        created = await api.persona.create({
                           name,
                           traits,
                           description,
@@ -108,12 +109,13 @@ export default async function Persona() {
                           communicationSample,
                           isFavorite,
                         });
-
-                        revalidatePath("/persona/all");
-                        redirect("/persona/all");
                       }
                     } catch (error) {
                       throw new Error("Error creating persona");
+                    }
+                    if (created) {
+                      revalidatePath("/persona/all");
+                      redirect("/persona/all");
                     }
                   }}
                 >

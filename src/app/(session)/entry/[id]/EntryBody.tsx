@@ -16,7 +16,7 @@ export default function EntryBody({ post }: { post: Post }) {
   const t = useTranslations();
   const router = useRouter();
 
-  const { isFetching, isLoading, data } = api.post.getByPostId.useQuery({
+  const { data, isSuccess } = api.post.getByPostId.useQuery({
     postId: post?.id,
   });
 
@@ -63,10 +63,10 @@ export default function EntryBody({ post }: { post: Post }) {
   };
 
   useEffect(() => {
-    if (!isLoading && !isFetching && data) {
+    if (isSuccess) {
       setContent(data?.content ?? "");
     }
-  }, [data, isLoading, isFetching]);
+  }, [data, isSuccess]);
 
   useEffect(() => {
     adjustTextareaHeight();
@@ -78,11 +78,7 @@ export default function EntryBody({ post }: { post: Post }) {
         ref={textareaRef}
         value={content}
         onChange={handleContentChange}
-        placeholder={
-          !content && (isLoading || isFetching)
-            ? t("status.loading")
-            : t("entry.today")
-        }
+        placeholder={!isSuccess ? t("status.loading") : t("entry.today")}
         className={`min-h-full w-full resize-none rounded-xl border-none px-8 py-6 focus:outline-none sm:max-w-5xl sm:rounded-3xl sm:px-16 sm:py-12 dark:text-[#DCDCDC] ${cardColors("default")}`}
         autoFocus
         style={{ height: "auto", overflow: "hidden", paddingBottom: "16px" }}
