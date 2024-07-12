@@ -23,12 +23,12 @@ export default function OTPVerification({ email }: Props) {
 
     const formattedEmail = encodeURIComponent(email.toLowerCase().trim());
     const formattedCode = encodeURIComponent(code);
-    const formattedCallback = encodeURIComponent("verified");
+    const formattedCallback = encodeURIComponent("/verified");
     const otpRequestURL = `/api/auth/callback/email?email=${formattedEmail}&token=${formattedCode}&callbackUrl=${formattedCallback}`;
     const response = await fetch(otpRequestURL);
 
     if (response.url.includes("verified")) {
-      router.replace("/home");
+      router.replace("/auth/new-user");
     }
     if (!response) {
       setIsSubmitting(false);
