@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import FormButton from "~/app/_components/FormButton";
 import Input from "~/app/_components/Input";
-import { getServerAuthSession } from "~/server/auth";
 
 interface Props {
   email: string;
@@ -24,15 +23,14 @@ export default function OTPVerification({ email }: Props) {
 
     const formattedEmail = encodeURIComponent(email.toLowerCase().trim());
     const formattedCode = encodeURIComponent(code);
-    const otpRequestURL = `/api/auth/callback/email?email=${formattedEmail}&token=${formattedCode}`;
+    const formattedCallback = encodeURIComponent("/verified");
+    const otpRequestURL = `/api/auth/callback/email?email=${formattedEmail}&token=${formattedCode}&callbackUrl=${formattedCallback}`;
     const response = await fetch(otpRequestURL);
 
-    const session = await getServerAuthSession();
-
-    if (response && session?.user?.name) {
+    //todo: why is this required?
+    if (response.url.includes("/verified")) {
       router.replace("/home");
     }
-
     if (!response) {
       setIsSubmitting(false);
       router.replace(`/auth/signin?error=Verification`);
