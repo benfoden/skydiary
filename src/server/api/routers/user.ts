@@ -1,7 +1,11 @@
 import { error } from "console";
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
 import { cleanStringForInput } from "~/utils/text";
 
 export const userRouter = createTRPCRouter({
@@ -128,5 +132,35 @@ export const userRouter = createTRPCRouter({
       return ctx.db.user.findFirst({
         where: { id: input.userId },
       });
+    }),
+
+  resetSession: publicProcedure
+    .input(
+      z.object({
+        userEmail: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const user = await ctx.db.user.findFirst({
+          where: { email: input.userEmail },
+        });
+        await ctx.db.session.deleteMany({
+          where: { userId: user?.id },
+        });
+
+        await ctx.db.verificationToken.deleteMany({
+          where: { identifier: user?.id },
+        });
+
+        return {
+          message: "Sessions and verification tokens deleted successfully",
+        };
+      } catch (error) {
+        console.error(
+          "Error deleting sessions and verification tokens:",
+          error,
+        );
+      }
     }),
 });

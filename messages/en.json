@@ -63,7 +63,7 @@
     "description": "these details help to personalize your experience, privately.",
     "passcode": "passcode",
     "email": "email",
-    "check your email": "please check your email",
+    "check your email": "please check your email. it may take a minute",
     "passcode expires": "your passcode will expire in 5 minutes",
     "tryAgain": "try again",
     "verify and continue": "verify and continue",
