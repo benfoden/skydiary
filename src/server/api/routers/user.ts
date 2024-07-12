@@ -81,7 +81,7 @@ export const userRouter = createTRPCRouter({
     await ctx.db.user.delete({
       where: { id: userId },
     });
-    return { message: "User and related data deleted successfully" };
+    return { message: "success" };
   }),
 
   resetDailyUsage: protectedProcedure.mutation(async ({ ctx }) => {

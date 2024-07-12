@@ -53,8 +53,6 @@ export default async function Settings() {
               <Button>webmaster zone</Button>
             </Link>
           )}
-          <pre>{JSON.stringify(session.user, null, 2)}</pre>
-          <pre>{JSON.stringify(subscription, null, 2)}</pre>
           <Card variant="form">
             <h2>{t("settings.personal")}</h2>
             <p className="text-sm opacity-60">{t("settings.description")}</p>
@@ -171,8 +169,8 @@ export default async function Settings() {
               action={async () => {
                 "use server";
                 try {
-                  await api.user.deleteUser();
-                  redirect("/");
+                  const deleted = await api.user.deleteUser();
+                  if (deleted) redirect("/");
                 } catch (error) {
                   console.error("Error deleting user:", error);
                   throw new Error("Error deleting user");
@@ -180,7 +178,9 @@ export default async function Settings() {
               }}
             >
               <FormDeleteButton>
-                {t("settings.deleteAccountButton")}
+                <span className="text-red-500">
+                  {t("settings.deleteAccountButton")}
+                </span>
               </FormDeleteButton>
             </form>
           </Card>
