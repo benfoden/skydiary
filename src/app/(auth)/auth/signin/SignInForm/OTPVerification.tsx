@@ -23,12 +23,13 @@ export default function OTPVerification({ email }: Props) {
 
     const formattedEmail = encodeURIComponent(email.toLowerCase().trim());
     const formattedCode = encodeURIComponent(code);
-    const formattedCallback = encodeURIComponent("/verified");
+    const formattedCallback = encodeURIComponent("/auth/verified");
     const otpRequestURL = `/api/auth/callback/email?email=${formattedEmail}&token=${formattedCode}&callbackUrl=${formattedCallback}`;
     const response = await fetch(otpRequestURL);
 
-    if (response.url.includes("verified")) {
-      router.replace("/auth/new-user");
+    //todo: why is this required?
+    if (response.url.includes("/auth/verified")) {
+      router.replace("/home");
     }
     if (!response) {
       setIsSubmitting(false);
