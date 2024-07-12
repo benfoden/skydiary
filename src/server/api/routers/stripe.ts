@@ -12,6 +12,7 @@ export const stripeRouter = createTRPCRouter({
   createCheckoutSession: protectedProcedure
     .input(
       z.object({
+        plan: z.enum(["plus", "premium"]),
         period: z.enum(["monthly", "yearly"]),
         locale: z.enum(["en", "ja"]),
       }),
@@ -32,16 +33,26 @@ export const stripeRouter = createTRPCRouter({
         }
 
         let price: string;
-        if (input.period === "yearly") {
+        if (input.period === "yearly" && input.plan === "plus") {
           price =
             env.PRICE_ID_PLUS_YEARLY !== "development"
               ? env.PRICE_ID_PLUS_YEARLY
               : env.PRICE_ID_PLUS_YEARLY_TEST;
-        } else if (input.period === "monthly") {
+        } else if (input.period === "monthly" && input.plan === "plus") {
           price =
             env.PRICE_ID_PLUS_MONTHLY !== "development"
               ? env.PRICE_ID_PLUS_MONTHLY
               : env.PRICE_ID_PLUS_MONTHLY_TEST;
+        } else if (input.period === "yearly" && input.plan === "premium") {
+          price =
+            env.PRICE_ID_PREMIUM_YEARLY !== "development"
+              ? env.PRICE_ID_PREMIUM_YEARLY
+              : env.PRICE_ID_PREMIUM_YEARLY_TEST;
+        } else if (input.period === "monthly" && input.plan === "premium") {
+          price =
+            env.PRICE_ID_PREMIUM_MONTHLY !== "development"
+              ? env.PRICE_ID_PREMIUM_MONTHLY
+              : env.PRICE_ID_PREMIUM_MONTHLY_TEST;
         } else {
           console.error("Invalid period or productId");
           throw new Error("Invalid period or productId");

@@ -9,7 +9,7 @@ import {
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { getServerAuthSession } from "~/server/auth";
-import { ACTIVESTATUSES } from "~/utils/constants";
+import { ACTIVESTATUSES, planFromId } from "~/utils/constants";
 import Button from "./Button";
 import DropDownMenu from "./DropDown";
 import { ThemeToggle } from "./ToggleTheme";
@@ -25,7 +25,11 @@ export default async function DropDownUser() {
           <Link href={"/pricing"}>
             <Button variant="menuElement">
               <span className="text-blue-600 dark:text-blue-400">
-                skydiary {t("nav.plus")}
+                skydiary{" "}
+                {planFromId(session?.user?.stripeProductId) === "plus" &&
+                  t("nav.plus")}
+                {planFromId(session?.user?.stripeProductId) === "premium" &&
+                  t("nav.premium")}
               </span>
             </Button>
           </Link>

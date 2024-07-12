@@ -36,7 +36,10 @@ export default function Pricing({
 
   const gotLocale: Locale = useLocale() as Locale;
 
-  const checkoutHandler = async (event: FormEvent) => {
+  const checkoutHandler = async (
+    event: FormEvent,
+    plan: "plus" | "premium",
+  ) => {
     event.preventDefault();
     try {
       setIsLoading(true);
@@ -45,13 +48,14 @@ export default function Pricing({
       }
       const period = isYearly ? "yearly" : "monthly";
 
-      const { checkoutUrl } = await createCheckoutSession({
+      const checkoutSession = await createCheckoutSession({
+        plan,
         period,
         locale,
       });
 
-      if (checkoutUrl) {
-        void router.push(checkoutUrl);
+      if (checkoutSession?.checkoutUrl) {
+        void router.push(checkoutSession.checkoutUrl);
       }
     } catch (error) {
       console.error("submit checkout session error:", error);
@@ -169,7 +173,10 @@ export default function Pricing({
                   <Card variant="form">
                     <div className="flex w-full flex-col items-start gap-8 pb-4">
                       <h2 className="text-lg">{t("plus.title")}</h2>
-                      <form className="w-full" onSubmit={checkoutHandler}>
+                      <form
+                        className="w-full"
+                        onSubmit={(event) => checkoutHandler(event, "plus")}
+                      >
                         <div className="flex w-full flex-row items-end justify-start gap-2 pb-2">
                           <span className="text-5xl font-medium">
                             {isYearly
@@ -197,6 +204,7 @@ export default function Pricing({
                                 isSpecial={true}
                                 isDisabled={
                                   isLoading ||
+                                  user?.isSpecial ||
                                   (env.PRODUCT_ID_PLUS !== "development" &&
                                     user?.stripeProductId ===
                                       env.PRODUCT_ID_PLUS) ||
@@ -207,13 +215,13 @@ export default function Pricing({
                                 <div className="flex items-center gap-2 text-lg font-light">
                                   {!isLoading ? (
                                     <>
-                                      {userPlan !== "plus" ? (
+                                      {userPlan === "plus" ? (
+                                        <>{t("yourPlan")}</>
+                                      ) : (
                                         <>
                                           {t("subscribe")}
                                           <ArrowRightIcon className="h-3 w-3 animate-ping" />
                                         </>
-                                      ) : (
-                                        <>{t("yourPlan")}</>
                                       )}
                                     </>
                                   ) : (
@@ -260,7 +268,10 @@ export default function Pricing({
                   <Card variant="form">
                     <div className="flex w-full flex-col items-start gap-8 pb-4">
                       <h2 className="text-lg">{t("premium.title")}</h2>
-                      <form className="w-full">
+                      <form
+                        className="w-full"
+                        onSubmit={(event) => checkoutHandler(event, "premium")}
+                      >
                         <div className="flex w-full flex-row items-end justify-start gap-2 pb-2">
                           <span className="text-5xl font-medium">
                             {isYearly
@@ -283,10 +294,38 @@ export default function Pricing({
                         <div className="flex w-full flex-col gap-4">
                           {user && (
                             <>
-                              <FormButton variant="submit" isDisabled={true}>
-                                {user?.isSpecial
-                                  ? "your special status"
-                                  : t("comingSoon")}
+                              <FormButton
+                                variant="submit"
+                                isSpecial={true}
+                                isDisabled={
+                                  isLoading ||
+                                  user?.isSpecial ||
+                                  (env.PRODUCT_ID_PREMIUM !== "development" &&
+                                    user?.stripeProductId ===
+                                      env.PRODUCT_ID_PREMIUM) ||
+                                  user?.stripeProductId ===
+                                    env.PRODUCT_ID_PREMIUM_TEST
+                                }
+                              >
+                                <div className="flex items-center gap-2 text-lg font-light">
+                                  {!isLoading ? (
+                                    <>
+                                      {userPlan === "premium" ||
+                                      user?.isSpecial ? (
+                                        <>{t("yourPlan")}</>
+                                      ) : (
+                                        <>
+                                          {t("subscribe")}
+                                          <ArrowRightIcon className="h-3 w-3 animate-ping" />
+                                        </>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ButtonSpinner /> {t("checkingOut")}
+                                    </>
+                                  )}
+                                </div>
                               </FormButton>
                             </>
                           )}
