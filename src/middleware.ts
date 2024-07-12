@@ -19,11 +19,11 @@ export default function middleware(request: NextRequest) {
   const unTranslatedAPIRoutes = [
     "/api/cron",
     "/api/trpc",
-    "/api/stripe/checkout-session",
+    "/api/stripe-webhook",
   ];
 
-  const isUntranslatedAPIRoute = unTranslatedAPIRoutes.some((route) =>
-    pathname.startsWith(route),
+  const isUntranslatedAPIRoute = unTranslatedAPIRoutes.some(
+    (route) => pathname.startsWith(route) || pathname === route,
   );
 
   if (isUntranslatedAPIRoute) {

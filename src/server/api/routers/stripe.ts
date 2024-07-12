@@ -74,12 +74,9 @@ export const stripeRouter = createTRPCRouter({
           },
         });
 
-        if (!checkoutSession) {
-          console.error("Could not create checkout session");
-          throw new Error("Could not create checkout session");
+        if (checkoutSession) {
+          return { checkoutUrl: checkoutSession.url };
         }
-
-        return { checkoutUrl: checkoutSession.url };
       } catch (error) {
         console.error("Error creating checkout session:", error);
         throw new Error("Failed to create checkout session");
