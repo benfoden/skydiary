@@ -85,17 +85,19 @@ export default async function Persona({ params }: { params: { id: string } }) {
                       "communicationSample",
                     ) as string;
 
-                    // if no favorite is available, either keep it a favorite or not
-
+                    let updated;
                     try {
-                      const isFavorite = isFavoritePersonaAvailable(
+                      const isFavoriteAvail = isFavoritePersonaAvailable(
                         session?.user,
                         personas,
-                      )
+                      );
+
+                      const isFavorite = isFavoriteAvail
                         ? formData.get("isFavorite") === "on"
                         : persona.isFavorite;
+
                       if (name && traits) {
-                        await api.persona.update({
+                        updated = await api.persona.update({
                           personaId,
                           name,
                           traits,
@@ -109,11 +111,13 @@ export default async function Persona({ params }: { params: { id: string } }) {
                           communicationSample,
                           isFavorite,
                         });
-
-                        redirect("/persona/all");
                       }
                     } catch (error) {
                       throw new Error("Error updating persona");
+                    }
+
+                    if (updated) {
+                      redirect("/persona/all");
                     }
                   }}
                 >
@@ -146,24 +150,26 @@ export default async function Persona({ params }: { params: { id: string } }) {
                   <FormButton variant="submit">{t("form.update")}</FormButton>
                 </form>
               </Card>
-              <Card isButton={false}>
-                <form
-                  action={async () => {
-                    "use server";
-                    await api.persona.delete({ personaId });
-                    redirect("/persona/all");
-                  }}
-                >
-                  <h3 className="text-lg font-medium">
-                    {t("personas.delete")}
-                  </h3>
-                  <div className="flex w-full flex-row items-center justify-center gap-2 pt-4">
-                    <div className="w-fit">
-                      <FormDeleteButton hasText={true} />
+              <div className="flex w-full flex-row pt-8">
+                <Card isButton={false}>
+                  <form
+                    action={async () => {
+                      "use server";
+                      await api.persona.delete({ personaId });
+                      redirect("/persona/all");
+                    }}
+                  >
+                    <h3 className="text-lg font-medium">
+                      {t("personas.delete")}
+                    </h3>
+                    <div className="flex w-full flex-row items-center justify-center gap-2 pt-4">
+                      <div className="w-fit">
+                        <FormDeleteButton hasText={true} />
+                      </div>
                     </div>
-                  </div>
-                </form>
-              </Card>
+                  </form>
+                </Card>
+              </div>
             </div>
           </div>
         </div>

@@ -102,8 +102,7 @@ export const cleanStringForPrompt = (input: string): string | undefined => {
     .toLowerCase();
 };
 
-export const cleanStringForInput = (input?: string): string | undefined => {
-  if (!input) return undefined;
+export const cleanStringForInput = (input: string): string => {
   return input
     .replace(/[~`/!&$#[\]{}]/g, "")
     .replace(/\s+/g, " ")
