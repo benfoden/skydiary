@@ -1,6 +1,6 @@
 "use server";
 
-import { postmarkClient } from "~/config";
+import { postmarkClient } from "~/utils/postmark";
 
 export const sendEmail = async ({
   from,

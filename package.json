@@ -23,6 +23,7 @@
     "@t3-oss/env-nextjs": "^0.10.1",
     "@tanstack/react-query": "^5.45.1",
     "@trpc/client": "next",
+    "@trpc/next": "^10.45.2",
     "@trpc/react-query": "next",
     "@trpc/server": "next",
     "jose": "^5.4.1",

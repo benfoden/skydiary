@@ -102,7 +102,7 @@
   },
   "new-user": {
     "title": "welcome to skydiary",
-    "your name": "your name",
+    "yourName": "your first name (required)",
     "your age": "your age",
     "your identities": "your identities",
     "placeholder identities": "woman, daughter, mother, etc."

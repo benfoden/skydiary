@@ -1,6 +1,4 @@
 import { type LocalePrefix, type Pathnames } from "next-intl/routing";
-import { ServerClient } from "postmark";
-import { env } from "./env";
 
 export const defaultLocale = "en";
 export type Locales = "en" | "ja";
@@ -16,5 +14,3 @@ export const pathnames: Pathnames<typeof locales> = {
 };
 
 export const localePrefix: LocalePrefix<typeof locales> = "always";
-
-export const postmarkClient = new ServerClient(env.POSTMARK_API_KEY);

@@ -197,8 +197,9 @@ export default function Pricing({
                                 isSpecial={true}
                                 isDisabled={
                                   isLoading ||
-                                  user?.stripeProductId ===
-                                    env.PRODUCT_ID_PLUS ||
+                                  (env.PRODUCT_ID_PLUS !== "development" &&
+                                    user?.stripeProductId ===
+                                      env.PRODUCT_ID_PLUS) ||
                                   user?.stripeProductId ===
                                     env.PRODUCT_ID_PLUS_TEST
                                 }

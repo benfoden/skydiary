@@ -102,7 +102,7 @@
   },
   "new-user": {
     "title": "skydiaryへようこそ",
-    "your name": "名前",
+    "yourName": "名前（必須）",
     "your age": "年齢",
     "your identities": "身分",
     "placeholder identities": "女性、母親、妻、その他"

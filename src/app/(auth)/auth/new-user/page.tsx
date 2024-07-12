@@ -51,7 +51,7 @@ const NewUserPage: React.FC = async () => {
               <Input
                 id="name"
                 name="name"
-                label={t("new-user.your name")}
+                label={t("new-user.yourName")}
                 required
               />
               <Input
