@@ -66,7 +66,8 @@
     "message": "メッセージ",
     "submit": "メッセージを送信",
     "thankYouTitle": "メッセージをありがとうございます！",
-    "thankYouDescription": "すぐにご連絡いたします。"
+    "thankYouDescription": "すぐにご連絡いたします。",
+    "challenge": "7 x 6は何ですか？"
   },
   "privacy": {
     "title": "プライバシーポリシー",
@@ -333,10 +334,7 @@
       "title": "設定"
     },
     "contact": {
-      "title": "お問い合わせ",
-      "description": "質問？フィードバック？お聞かせください。",
-      "thankYouTitle": "ありがとうございます！",
-      "thankYouDescription": "すぐにご連絡いたします。"
+      "title": "お問い合わせ"
     },
     "privacy": {
       "title": "プライバシーポリシー",

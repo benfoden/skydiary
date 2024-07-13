@@ -49,7 +49,8 @@
     "message": "message",
     "submit": "send message",
     "thankYouTitle": "thanks for your message!",
-    "thankYouDescription": "we'll get back to you soon."
+    "thankYouDescription": "we'll get back to you soon.",
+    "challenge": "what is 7 x 6 equal to?"
   },
   "privacy": {
     "title": "privacy policy",
@@ -320,9 +321,7 @@
     },
     "contact": {
       "title": "contact us",
-      "description": "questions? feedback? we'd love to hear from you.",
-      "thankYouTitle": "thank you",
-      "thankYouDescription": "we'll get back to you soon."
+      "description": "questions? feedback? we'd love to hear from you."
     },
     "privacy": {
       "title": "privacy policy",
