@@ -27,13 +27,12 @@ export default async function Contact() {
   const session = await getServerAuthSession();
 
   return (
-    <div className="flex w-full flex-col items-start justify-start gap-2 sm:max-w-[768px]">
+    <div className="flex w-full flex-col items-start justify-start gap-2 md:max-w-[600px]">
       <Card variant="form" isButton={false}>
         <h1 className="mb-4 text-lg font-medium">{t("contact.title")}</h1>
-        <div className="flex flex-col items-start justify-start gap-2">
+        <div className="flex w-full flex-col items-center justify-start gap-2">
           <p>{t("contact.description")}</p>
-
-          <div className="flex w-full flex-col items-start pt-8">
+          <div className="flex w-full flex-col items-center py-8">
             <form
               action={async (formData) => {
                 "use server";
@@ -43,6 +42,16 @@ export default async function Contact() {
                   "contactMessage",
                 ) as string;
                 const from: string = formData.get("from") as string;
+                const challenge: string = formData.get("challenge") as string;
+
+                if (
+                  !session?.user &&
+                  challenge !== "42" &&
+                  challenge !== "fourty two"
+                ) {
+                  console.error("contact form challenge failed");
+                  throw new Error("challenge not correct, please try again");
+                }
 
                 const result = await sendEmail({
                   from: env.CONTACT_EMAIL_FROM,
@@ -61,34 +70,46 @@ export default async function Contact() {
                   return redirect("/contact/thank-you");
                 }
               }}
-              className=" space-y-4"
+              className="flex w-full flex-col gap-4"
             >
-              <div className="flex w-fit flex-col gap-4">
-                <Input
-                  label={t("contact.from")}
-                  name="from"
-                  type="email"
-                  initialValue={session?.user?.email ?? undefined}
-                  disabled={!!session?.user?.email}
-                  required
-                />
-                <Input
-                  label={t("contact.subject")}
-                  name="subject"
-                  type="text"
-                  required
-                />
-                <Input
-                  label={t("contact.message")}
-                  name="contactMessage"
-                  id="contactMessage"
-                  type="textarea"
-                  required
-                />
-                <FormButton variant="submit" isSpecial>
-                  {t("contact.submit")}
-                </FormButton>
-              </div>
+              <Input
+                label={t("contact.from")}
+                name="from"
+                type="email"
+                initialValue={session?.user?.email ?? undefined}
+                disabled={!!session?.user?.email}
+                required
+              />
+              <Input
+                label={t("contact.subject")}
+                name="subject"
+                type="text"
+                required
+              />
+              <Input
+                label={t("contact.message")}
+                name="contactMessage"
+                id="contactMessage"
+                type="textarea"
+                required
+              />
+              {!session?.user && (
+                <>
+                  <p className="sr-only">
+                    (disregard this if you are using a screen reader.) The
+                    answer to the question is 76.
+                  </p>
+                  <Input
+                    label={t("contact.challenge")}
+                    name="challenge"
+                    type="text"
+                    required={!session?.user}
+                  />
+                </>
+              )}
+              <FormButton variant="submit" isSpecial>
+                {t("contact.submit")}
+              </FormButton>
             </form>
           </div>
         </div>
