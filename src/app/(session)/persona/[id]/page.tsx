@@ -131,9 +131,9 @@ export default async function Persona({ params }: { params: { id: string } }) {
                         <Image
                           alt={persona.name}
                           src={persona.image ?? ""}
-                          height="64"
-                          width="64"
-                          className="rounded-full"
+                          width="0"
+                          height="0"
+                          className="h-8 w-8 rounded-full"
                         />
                       ) : (
                         <PersonIcon className="h-16 w-16" />

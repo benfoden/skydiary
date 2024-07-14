@@ -56,9 +56,9 @@ const DropDownMenu = ({
           <Image
             alt={"your profilepicture"}
             src={userProfileIconUrl}
-            height="24"
-            width="24"
-            className="rounded-full"
+            width="0"
+            height="0"
+            className="h-auto w-6 rounded-full"
           />
         )}
         {isUserMenu && !userProfileIconUrl && (

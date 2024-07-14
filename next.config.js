@@ -30,7 +30,7 @@ const config = {
         {
           key: "Content-Security-Policy",
           value:
-            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com; img-src 'self'; style-src 'self' 'unsafe-inline'; object-src 'none';",
+            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com; img-src 'self' https://utfs.io; style-src 'self' 'unsafe-inline'; object-src 'none';",
         },
         {
           key: "Strict-Transport-Security",
