@@ -19,7 +19,7 @@ export default async function DropDownUser() {
   const t = await getTranslations();
 
   return (
-    <DropDownMenu isUserMenu>
+    <DropDownMenu isUserMenu userProfileIconUrl={session?.user?.image ?? ""}>
       {session?.user?.stripeSubscriptionStatus &&
         ACTIVESTATUSES.includes(session?.user?.stripeSubscriptionStatus) && (
           <Link href={"/pricing"}>

@@ -1,5 +1,6 @@
 import { type Persona, type User } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
+import Image from "next/image";
 import { isFavoritePersonaAvailable } from "~/utils/planDetails";
 import Input from "../../_components/Input";
 
@@ -53,12 +54,21 @@ export default async function PersonaFormFields({
         placeholder={t("personas.descriptionPlaceholder")}
         maxLength={700}
       />
+      {persona?.image && (
+        <Image
+          src={persona.image}
+          alt={persona.name}
+          width="0"
+          height="0"
+          className="h-auto w-8 rounded-full"
+        />
+      )}
+      {persona?.image}
       <Input
-        label={t("personas.image link")}
-        id="image"
-        name="image"
-        defaultValue={persona?.image ?? ""}
-        placeholder="https://example.com/image.jpg"
+        label={t("personas.image")}
+        type="file"
+        id="imageFile"
+        name="imageFile"
       />
       <Input
         label={t("personas.age")}

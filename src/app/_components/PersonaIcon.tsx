@@ -26,9 +26,9 @@ export const PersonaIcon = ({
         <Image
           alt={persona?.name}
           src={persona?.image}
-          width="24"
-          height="24"
-          className="rounded-full"
+          width="0"
+          height="0"
+          className="h-auto w-6 rounded-full"
         />
       ) : (
         <PersonIcon className="h-6 w-6" />

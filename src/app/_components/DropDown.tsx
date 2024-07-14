@@ -6,6 +6,7 @@ import {
 } from "@radix-ui/react-icons";
 import { useState } from "react";
 
+import Image from "next/image";
 import { useEffect, useRef } from "react";
 import Button from "./Button";
 
@@ -14,11 +15,13 @@ const DropDownMenu = ({
   isUserMenu = false,
   isEntryMenu = false,
   isTopMenu = false,
+  userProfileIconUrl,
 }: {
   children: React.ReactNode;
   isUserMenu?: boolean;
   isEntryMenu?: boolean;
   isTopMenu?: boolean;
+  userProfileIconUrl?: string;
 }) => {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -49,7 +52,18 @@ const DropDownMenu = ({
       className={`relative flex flex-col items-end ${open ? "open" : ""} ${isUserMenu && "mr-4"}`}
     >
       <Button variant="dropdownToggle" onClick={toggleDropdown}>
-        {isUserMenu && <HamburgerMenuIcon className="h-6 w-6" />}
+        {isUserMenu && userProfileIconUrl && (
+          <Image
+            alt={"your profilepicture"}
+            src={userProfileIconUrl}
+            width="0"
+            height="0"
+            className="h-auto w-6 rounded-full"
+          />
+        )}
+        {isUserMenu && !userProfileIconUrl && (
+          <HamburgerMenuIcon className="h-6 w-6" />
+        )}
         {isEntryMenu && <DotsHorizontalIcon className="h-6 w-6" />}
         {isTopMenu && <HamburgerMenuIcon className="h-6 w-6" />}
         {!isUserMenu && !isEntryMenu && !isTopMenu && (

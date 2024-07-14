@@ -1,5 +1,6 @@
 import { type Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import Button from "~/app/_components/Button";
@@ -15,6 +16,7 @@ import { SessionNav } from "~/app/_components/SessionNav";
 import { type Locale } from "~/config";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
+import { getNewImageUrl } from "~/utils/_uploads";
 import { ACTIVESTATUSES } from "~/utils/constants";
 
 export async function generateMetadata({
@@ -63,11 +65,13 @@ export default async function Settings() {
                 const name: string = formData.get("name") as string;
                 const age = Number(formData.get("age"));
                 const gender: string = formData.get("gender") as string;
+                const imageFile = formData.get("imageFile") as File;
+                const image = await getNewImageUrl({ imageFile });
                 const isUser = true;
 
                 try {
                   if (name) {
-                    await api.user.updateUser({ name });
+                    await api.user.updateUser({ name, image });
                     if (!userPersona) {
                       await api.persona.create({
                         name,
@@ -109,7 +113,21 @@ export default async function Settings() {
                 defaultValue={userPersona?.age ?? 0}
                 label={t("settings.your age")}
               />
-
+              {session?.user?.image && (
+                <Image
+                  alt={session?.user?.name ?? "no username"}
+                  src={session?.user?.image ?? ""}
+                  width="0"
+                  height="0"
+                  className="h-auto w-8 rounded-full"
+                />
+              )}
+              <Input
+                id="imageFile"
+                name="imageFile"
+                label={t("settings.profilePicture")}
+                type="file"
+              />
               <Input
                 id="gender"
                 name="gender"

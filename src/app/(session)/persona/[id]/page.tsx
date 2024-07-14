@@ -13,6 +13,7 @@ import { SessionNav } from "~/app/_components/SessionNav";
 import { type Locale } from "~/config";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
+import { getNewImageUrl } from "~/utils/_uploads";
 import { isFavoritePersonaAvailable } from "~/utils/planDetails";
 import UpgradeBanner from "../../../_components/UpgradeBanner";
 import PersonaSidebar from "../Sidebar";
@@ -69,7 +70,6 @@ export default async function Persona({ params }: { params: { id: string } }) {
                     const description: string = formData.get(
                       "description",
                     ) as string;
-                    const image: string = formData.get("image") as string;
                     const age = Number(formData.get("age"));
                     const gender: string = formData.get("gender") as string;
                     const relationship: string = formData.get(
@@ -84,6 +84,10 @@ export default async function Persona({ params }: { params: { id: string } }) {
                     const communicationSample: string = formData.get(
                       "communicationSample",
                     ) as string;
+
+                    const imageFile =
+                      (formData.get("imageFile") as File) ?? undefined;
+                    const image = await getNewImageUrl({ imageFile });
 
                     let updated;
                     try {
@@ -127,9 +131,9 @@ export default async function Persona({ params }: { params: { id: string } }) {
                         <Image
                           alt={persona.name}
                           src={persona.image ?? ""}
-                          height="64"
-                          width="64"
-                          className="rounded-full"
+                          width="0"
+                          height="0"
+                          className="h-8 w-8 rounded-full"
                         />
                       ) : (
                         <PersonIcon className="h-16 w-16" />
