@@ -10,7 +10,8 @@
     "dev": "next dev",
     "postinstall": "prisma generate",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "intldiff": "npx json-diff -k ./messages/en.json ./messages/ja.json"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^1.6.0",
@@ -27,6 +28,7 @@
     "@trpc/react-query": "next",
     "@trpc/server": "next",
     "jose": "^5.6.3",
+    "json-diff": "^1.0.6",
     "next": "^14.2.5",
     "next-app-theme": "^0.1.10",
     "next-auth": "^4.24.7",
