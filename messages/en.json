@@ -106,7 +106,8 @@
     "yourName": "your first name (required)",
     "your age": "your age",
     "your identities": "your identities",
-    "placeholder identities": "woman, daughter, mother, etc."
+    "placeholder identities": "woman, daughter, mother, etc.",
+    "profilePicture": "profile picture"
   },
   "home": {
     "whats happening": "What's happening today?",
@@ -190,7 +191,8 @@
     "editBilling": "edit billing",
     "deleteAccount": "delete account",
     "deleteAccountDescription": "this action is irreversible. ALL of your data wiil be permanently deleted.",
-    "deleteAccountButton": "yes, delete my account"
+    "deleteAccountButton": "yes, delete my account",
+    "profilePicture": "profile picture"
   },
   "form": {
     "save": "save",

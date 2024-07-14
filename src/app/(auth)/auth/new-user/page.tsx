@@ -6,6 +6,7 @@ import FormButton from "~/app/_components/FormButton";
 import Input from "~/app/_components/Input";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
+import { getNewImageUrl } from "~/utils/_uploads";
 
 const NewUserPage: React.FC = async () => {
   const t = await getTranslations();
@@ -28,6 +29,10 @@ const NewUserPage: React.FC = async () => {
                 const name: string = formData.get("name") as string;
                 const age = Number(formData.get("age"));
                 const gender: string = formData.get("gender") as string;
+
+                const imageFile =
+                  (formData.get("imageFile") as File) ?? undefined;
+                const image = await getNewImageUrl({ imageFile });
                 const isUser = true;
 
                 if (name) {
@@ -39,6 +44,7 @@ const NewUserPage: React.FC = async () => {
                       age: age ?? 0,
                       gender: gender ?? "",
                       traits: "",
+                      image,
                       isUser,
                     });
                   } catch (error) {
@@ -69,6 +75,12 @@ const NewUserPage: React.FC = async () => {
                 name="gender"
                 label={t("new-user.your identities")}
                 placeholder={t("new-user.placeholder identities")}
+              />
+              <Input
+                type="file"
+                id="imageFile"
+                name="imageFile"
+                label={t("new-user.profilePicture")}
               />
               <FormButton variant="submit">
                 {t("auth.save and continue")}

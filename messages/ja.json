@@ -106,7 +106,8 @@
     "yourName": "名前（必須）",
     "your age": "年齢",
     "your identities": "身分",
-    "placeholder identities": "女性、母親、妻、その他"
+    "placeholder identities": "女性、母親、妻、その他",
+    "profilePicture": "プロフィール画像"
   },
   "home": {
     "whats happening": "今日何が起こっていますか？",
@@ -190,7 +191,8 @@
     "editBilling": "請求情報を編集",
     "deleteAccount": "アカウントを削除",
     "deleteAccountDescription": "このアクションは取り消しできません。すべてのデータを永久に失います。",
-    "deleteAccountButton": "はい、すべてを削除します"
+    "deleteAccountButton": "はい、すべてを削除します",
+    "profilePicture": "プロフィール画像"
   },
   "form": {
     "save": "保存",

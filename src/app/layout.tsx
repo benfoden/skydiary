@@ -3,14 +3,11 @@ import "~/styles/globals.css";
 import { ThemeScript } from "next-app-theme/theme-script";
 import { Inter } from "next/font/google";
 
-import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { Analytics } from "@vercel/analytics/react";
 import { type Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { type Locale } from "node_modules/next/dist/compiled/@vercel/og/satori";
-import { extractRouterConfig } from "uploadthing/server";
-import { ourFileRouter } from "~/app/api/upload/core";
 import { getServerAuthSession } from "~/server/auth";
 import { TRPCReactProvider } from "~/trpc/react";
 import { api } from "~/trpc/server";
@@ -66,9 +63,6 @@ export default async function RootLayout({
           <div className="absolute inset-0 z-[-20] min-h-full w-full bg-gradient-to-b from-[#cce3f1] to-[#f3f6f6] dark:from-[#0b0f10] dark:to-[#20202c]" />
           <NextIntlClientProvider messages={messages}>
             <TRPCReactProvider>
-              <NextSSRPlugin
-                routerConfig={extractRouterConfig(ourFileRouter)}
-              />
               <div className="relative z-0 mx-auto min-h-screen">
                 {children}
               </div>

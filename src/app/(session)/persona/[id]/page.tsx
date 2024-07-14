@@ -13,7 +13,7 @@ import { SessionNav } from "~/app/_components/SessionNav";
 import { type Locale } from "~/config";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
-import { uploadFile } from "~/utils/_actions";
+import { getNewImageUrl } from "~/utils/_uploads";
 import { isFavoritePersonaAvailable } from "~/utils/planDetails";
 import UpgradeBanner from "../../../_components/UpgradeBanner";
 import PersonaSidebar from "../Sidebar";
@@ -85,16 +85,9 @@ export default async function Persona({ params }: { params: { id: string } }) {
                       "communicationSample",
                     ) as string;
 
-                    let image = "";
-                    const imageFile = formData.get("imageFile") as File;
-                    if (imageFile) {
-                      console.log("imageFile", imageFile);
-                      const uploadedFiles = await uploadFile(imageFile);
-                      console.log("uploadedFiles", uploadedFiles);
-                      if (uploadedFiles.length > 0) {
-                        image = uploadedFiles[0]?.data?.url ?? "";
-                      }
-                    }
+                    const imageFile =
+                      (formData.get("imageFile") as File) ?? undefined;
+                    const image = await getNewImageUrl({ imageFile });
 
                     let updated;
                     try {
