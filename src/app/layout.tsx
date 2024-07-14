@@ -3,6 +3,7 @@ import "~/styles/globals.css";
 import { ThemeScript } from "next-app-theme/theme-script";
 import { Inter } from "next/font/google";
 
+import { Analytics } from "@vercel/analytics/react";
 import { type Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
@@ -65,6 +66,7 @@ export default async function RootLayout({
               <div className="relative z-0 mx-auto min-h-screen">
                 {children}
               </div>
+              <Analytics />
             </TRPCReactProvider>
           </NextIntlClientProvider>
         </div>
