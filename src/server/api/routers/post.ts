@@ -74,6 +74,52 @@ export const postRouter = createTRPCRouter({
       });
     }),
 
+  getLatestUnprocessedByInputUserId: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(({ ctx, input }) => {
+      return ctx.db.post.findFirst({
+        orderBy: { createdAt: "desc" },
+        where: {
+          createdBy: { id: input.userId },
+          content: { not: "" },
+          tags: { none: {} },
+        },
+        include: {
+          tags: true,
+        },
+      });
+    }),
+
+  getAllUnprocessedByInputUserId: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(({ ctx, input }) => {
+      return ctx.db.post.findMany({
+        orderBy: { createdAt: "desc" },
+        where: {
+          createdBy: { id: input.userId },
+          tags: { none: {} },
+        },
+        include: {
+          tags: true,
+        },
+      });
+    }),
+
+  getAllProcessedByInputUserId: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(({ ctx, input }) => {
+      return ctx.db.post.findMany({
+        orderBy: { createdAt: "desc" },
+        where: {
+          createdBy: { id: input.userId },
+          tags: { some: {} },
+        },
+        include: {
+          tags: true,
+        },
+      });
+    }),
+
   getTagsAndCounts: protectedProcedure.query(async ({ ctx }) => {
     const posts = await ctx.db.post.findMany({
       where: { createdBy: { id: ctx.session.user.id } },

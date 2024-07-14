@@ -177,7 +177,7 @@ export const prompts = {
   tag: ({ content }: { content?: string }): string => {
     return (
       "Select tags from tag list for diary entry. " +
-      "Only respond with a comma-separated list of up to three tags. " +
+      "Only respond with a comma-separated list. Maximum of three tags. " +
       "Tag list: " +
       TAGS.map((tag) => tag.content).join(", ") +
       " " +

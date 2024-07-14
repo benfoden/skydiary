@@ -20,6 +20,14 @@ export default async function DropDownUser() {
 
   return (
     <DropDownMenu isUserMenu userProfileIconUrl={session?.user?.image ?? ""}>
+      {session?.user.isAdmin &&
+        session?.user.email === "ben.foden@gmail.com" && (
+          <Link href={"/sd-admin"}>
+            <Button variant="menuElement">
+              webmaster <GearIcon className="h-4 w-4" />
+            </Button>
+          </Link>
+        )}
       {session?.user?.stripeSubscriptionStatus &&
         ACTIVESTATUSES.includes(session?.user?.stripeSubscriptionStatus) && (
           <Link href={"/pricing"}>
@@ -77,13 +85,6 @@ export default async function DropDownUser() {
           <ExitIcon className="h-4 w-4" />
         </Button>
       </Link>
-      {session?.user.email === "ben.foden@gmail.com" && (
-        <Link href={"/sd-admin"}>
-          <Button variant="menuElement">
-            webmaster <GearIcon className="h-4 w-4" />
-          </Button>
-        </Link>
-      )}
     </DropDownMenu>
   );
 }
