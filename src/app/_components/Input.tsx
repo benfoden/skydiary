@@ -8,7 +8,14 @@ export default function Input({
   initialValue,
   ...props
 }: {
-  type?: "text" | "textarea" | "number" | "email" | "password" | "checkbox";
+  type?:
+    | "text"
+    | "textarea"
+    | "number"
+    | "email"
+    | "password"
+    | "checkbox"
+    | "file";
   label?: string;
   defaultChecked?: boolean;
   initialValue?: string | number;
@@ -90,7 +97,7 @@ export default function Input({
             </span>
           )}
       </label>
-      {type !== "textarea" && type !== "checkbox" && (
+      {type !== "textarea" && type !== "checkbox" && type !== "file" && (
         <input
           type={type}
           {...props}
@@ -130,6 +137,16 @@ export default function Input({
             }
             handleChange(e);
           }}
+        />
+      )}
+      {type === "file" && (
+        <input
+          type={type ?? "file"}
+          {...props}
+          className={`w-full rounded-md py-4 pl-5 pr-10 outline-none transition placeholder:text-sm placeholder:font-light ${isActive && "bg-white/80 dark:bg-white/[.18]"} bg-primary`}
+          ref={ref as React.RefObject<HTMLInputElement>}
+          onFocus={handleFocus}
+          onChange={handleChange}
         />
       )}
     </div>

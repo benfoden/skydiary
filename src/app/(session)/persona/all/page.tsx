@@ -11,6 +11,7 @@ import { SessionNav } from "~/app/_components/SessionNav";
 import { type Locale } from "~/config";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
+import { uploadFile } from "~/utils/_actions";
 import { isFavoritePersonaAvailable } from "~/utils/planDetails";
 import UpgradeBanner from "../../../_components/UpgradeBanner";
 import PersonaSidebar from "../Sidebar";
@@ -70,7 +71,6 @@ export default async function Persona() {
                     const description: string = formData.get(
                       "description",
                     ) as string;
-                    const image: string = formData.get("image") as string;
                     const age = Number(formData.get("age"));
                     const gender: string = formData.get("gender") as string;
                     const relationship: string = formData.get(
@@ -85,6 +85,14 @@ export default async function Persona() {
                     const communicationSample: string = formData.get(
                       "communicationSample",
                     ) as string;
+                    const imageFile = formData.get("imageFile") as File;
+                    let image = "";
+                    if (imageFile) {
+                      const uploadedFiles = await uploadFile(imageFile);
+                      if (uploadedFiles.length > 0) {
+                        image = uploadedFiles[0]?.data?.url ?? "";
+                      }
+                    }
 
                     let created;
                     try {

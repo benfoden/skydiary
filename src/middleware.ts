@@ -20,6 +20,7 @@ export default function middleware(request: NextRequest) {
     "/api/cron",
     "/api/trpc",
     "/api/stripe-webhook",
+    "/api/upload",
   ];
 
   const isUntranslatedAPIRoute = unTranslatedAPIRoutes.some(
