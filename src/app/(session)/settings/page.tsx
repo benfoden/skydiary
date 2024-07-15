@@ -178,7 +178,7 @@ export default async function Settings() {
               <LocaleSwitcher isSettings />
             </div>
           </Card>
-          <Card variant="form">
+          {/* <Card variant="form">
             <h2>{t("settings.exportData")}</h2>
             <p className="text-sm opacity-60">
               {t("settings.exportDataDescription")}
@@ -186,7 +186,7 @@ export default async function Settings() {
             <Link href="/settings/export">
               <Button>{t("settings.exportDataButton")}</Button>
             </Link>
-          </Card>
+          </Card> */}
           <Card variant="form">
             <h2>{t("settings.deleteAccount")}</h2>
             <p className="text-sm opacity-60">

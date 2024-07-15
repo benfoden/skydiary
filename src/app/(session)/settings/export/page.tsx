@@ -9,6 +9,7 @@ export default async function Export({
   searchParams: { status: string };
 }) {
   const isReady = searchParams.status === "ready";
+  if (!isReady) return null;
   const session = await getServerAuthSession();
   const sessionUser = session?.user;
   if (!sessionUser) {
@@ -35,14 +36,16 @@ export default async function Export({
             URL.revokeObjectURL(url);
 
             // Append the URL to the button with id download
-            const downloadLink = document.getElementById("download");
+            const downloadLink = document.getElementById(
+              "download",
+            ) as HTMLAnchorElement;
             if (downloadLink) {
               downloadLink.href = url;
             }
             //todo: do this on server side?
-            replace(`${window.location.pathname}?status=ready`, {
-              scroll: false,
-            });
+            // replace(`${window.location.pathname}?status=ready`, {
+            //   scroll: false,
+            // });
           } catch (error) {
             console.error("Error exporting data:", error);
             throw new Error("Error exporting data");
