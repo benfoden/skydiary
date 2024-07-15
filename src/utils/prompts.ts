@@ -177,7 +177,7 @@ export const prompts = {
   tag: ({ content }: { content?: string }): string => {
     return (
       "Select tags from tag list for diary entry. " +
-      "Only respond with a comma-separated list of up to three tags. " +
+      "Only respond with a comma-separated list. Maximum of three tags. " +
       "Tag list: " +
       TAGS.map((tag) => tag.content).join(", ") +
       " " +
@@ -198,6 +198,7 @@ export const prompts = {
     return (
       "Update persona object with values that describe the author of the diary entry below as concisely as possible. " +
       "Only update existing values if they have changed. " +
+      "Write as concisely as possible. This is for AI to read, not for humans. " +
       "Low priority values should be truncated first when words are limited. " +
       "Here are examples, listed in order of priority from high to low. " +
       "description: major goals, deep desires, main interests, and hobbies. " +

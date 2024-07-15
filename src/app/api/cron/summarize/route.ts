@@ -1,4 +1,5 @@
 import { type NextRequest } from "next/server";
+import { env } from "~/env";
 import { api } from "~/trpc/server";
 
 export async function GET(request: NextRequest) {
@@ -10,7 +11,7 @@ export async function GET(request: NextRequest) {
     );
   }, 9999);
   const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (authHeader !== `Bearer ${env.CRON_SECRET}`) {
     return new Response("Unauthorized", {
       status: 401,
     });

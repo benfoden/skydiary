@@ -26,7 +26,7 @@ export default async function AdminLayout({
 
       <div className="flex min-h-screen w-full flex-col items-center justify-start">
         <div className="container flex flex-col items-start justify-start gap-12 px-8  py-16 ">
-          <div className="flex flex-row gap-4">
+          <div className="flex flex-col gap-4 md:flex-row">
             <Link href={"/sd-admin"}>webmaster home</Link>
             <Link href={"/sd-admin/user"}>user</Link>
             <Link href={"/sd-admin/tags"}>tags</Link>
@@ -34,6 +34,7 @@ export default async function AdminLayout({
             <Link href={"/sd-admin/sandbox"}>sandbox</Link>
             <Link href={"/sd-admin/subscriptions"}>subs</Link>
             <Link href={"/sd-admin/email"}>email</Link>
+            <Link href={"/sd-admin/cron"}>cron</Link>
           </div>
           {children}
         </div>

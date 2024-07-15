@@ -20,7 +20,7 @@ export default async function Secret({
 
   const users = await api.user.getAllUsersAsAdmin();
 
-  const targetUser = await api.user.getByUserId({
+  const targetUser = await api.user.getById({
     userId: searchParams?.targetUserId ?? "",
   });
 
