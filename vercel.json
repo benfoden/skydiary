@@ -1,12 +1,8 @@
 {
   "crons": [
     {
-      "path": "/api/cron/post-tags",
+      "path": "/api/cron/job-queue",
       "schedule": "0 4 * * *"
-    },
-    {
-      "path": "/api/cron/user-persona",
-      "schedule": "0 5 * * *"
     }
   ]
 }

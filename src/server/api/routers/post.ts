@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { env } from "~/env";
 
 import {
   createTRPCRouter,
@@ -41,6 +42,31 @@ export const postRouter = createTRPCRouter({
       });
     }),
 
+  addTagsAsCron: publicProcedure
+    .input(
+      z.object({
+        postId: z.string(),
+        tagIds: z.array(z.string()),
+        cronSecret: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
+
+      await ctx.db.post.update({
+        where: { id: input.postId },
+        data: {
+          tags: {
+            connect: input.tagIds.map((tagId: string) => ({
+              id: tagId,
+            })),
+          },
+        },
+      });
+    }),
+
   update: protectedProcedure
     .input(
       z.object({
@@ -65,18 +91,24 @@ export const postRouter = createTRPCRouter({
       where: { createdBy: { id: ctx.session.user.id } },
     });
   }),
-  getLatestByInputUserId: publicProcedure
-    .input(z.object({ userId: z.string() }))
+  getLatestByInputUserIdAsCron: publicProcedure
+    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
     .query(({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
       return ctx.db.post.findFirst({
         orderBy: { createdAt: "desc" },
         where: { createdBy: { id: input.userId } },
       });
     }),
 
-  getLatestUnprocessedByInputUserId: publicProcedure
-    .input(z.object({ userId: z.string() }))
+  getLatestUnprocessedByInputUserIdAsCron: publicProcedure
+    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
     .query(({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
       return ctx.db.post.findFirst({
         orderBy: { createdAt: "desc" },
         where: {
@@ -90,9 +122,12 @@ export const postRouter = createTRPCRouter({
       });
     }),
 
-  getAllUnprocessedByInputUserId: publicProcedure
-    .input(z.object({ userId: z.string() }))
+  getAllUnprocessedByInputUserIdAsCron: publicProcedure
+    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
     .query(({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
       return ctx.db.post.findMany({
         orderBy: { createdAt: "desc" },
         where: {
@@ -105,9 +140,12 @@ export const postRouter = createTRPCRouter({
       });
     }),
 
-  getAllProcessedByInputUserId: publicProcedure
-    .input(z.object({ userId: z.string() }))
+  getAllProcessedByInputUserIdAsCron: publicProcedure
+    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
     .query(({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
       return ctx.db.post.findMany({
         orderBy: { createdAt: "desc" },
         where: {

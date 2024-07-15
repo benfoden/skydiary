@@ -1,72 +1,92 @@
+import { type Post } from "@prisma/client";
 import { type NextRequest } from "next/server";
-import { getServerAuthSession } from "~/server/auth";
+import { env } from "~/env";
 import { api } from "~/trpc/server";
 import { getResponse } from "~/utils/ai";
+import { getBaseUrl } from "~/utils/clientConstants";
 import { TAGS } from "~/utils/constants";
 import { prompts } from "~/utils/prompts";
 
 export async function POST(request: NextRequest) {
-  // setTimeout(() => {
-  //   console.error("Cron job for post tagstimed out after 9900 milliseconds");
-  //   return Response.json(
-  //     { error: "Cron job for post tags timed out after 9900 milliseconds" },
-  //     { status: 504 },
-  //   );
-  // }, 9900);
-
   const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const cronSecret = authHeader?.split(" ")[1];
+  if (cronSecret !== env.CRON_SECRET) {
     return new Response("Unauthorized", {
       status: 401,
     });
   }
   try {
-    // const userPersonas = await api.persona.getAllUserPersonas();
-    const session = await getServerAuthSession();
+    const body = (await request.json()) as {
+      postQueueOutput: (Post & {
+        tags: {
+          id: string;
+          content: string;
+          isSentiment: boolean;
+          createdAt: Date;
+        }[];
+      })[];
+    };
+    const postQueue = body.postQueueOutput.filter(
+      (post) => post.tags.length === 0,
+    );
 
-    const { user } = session;
-    const userId = user.id;
-
-    // for (const userPersona of userPersonas) {
-    const latestPost = await api.post.getLatestUnprocessedByInputUserId({
-      userId,
-    });
-
-    if (!latestPost) {
-      console.log("No unprocessed post found for userId:", userId);
-      // continue;
-      return;
-    }
-    const newTags = await getResponse({
-      messageContent: prompts.tag({ content: latestPost?.content }),
-      model: "gpt-3.5-turbo",
-    });
-    if (!newTags) {
-      console.log("No new tags found for post:", latestPost?.id);
-      return;
+    if (!postQueue.length) {
+      return Response.json({
+        message: "All posts tagged.",
+        status: 200,
+      });
     }
 
-    const tagContents = newTags?.split(",").map((tag) => tag.trim());
+    for (const post of postQueue) {
+      if (!post?.id) {
+        continue;
+      }
+      const postId = post.id;
 
-    const tagIds = tagContents
-      ?.map((content) => {
-        const tag = TAGS.find((tag) => tag.content === content);
-        return tag?.id ?? undefined;
-      })
-      .filter((tag): tag is string => tag !== undefined);
-    if (!tagIds?.length) {
-      console.log("No tagIds found for post:", latestPost?.id);
-      return; // Changed from return to continue to ensure all userPersonas are processed
+      const newTags = await getResponse({
+        messageContent: prompts.tag({ content: post?.content }),
+        model: "gpt-3.5-turbo",
+      });
+
+      if (!newTags) {
+        continue;
+      }
+
+      const tagContents = newTags?.split(",").map((tag) => tag.trim());
+
+      const tagIds = tagContents
+        ?.map((content) => {
+          const tag = TAGS.find((tag) => tag.content === content);
+          return tag?.id ?? undefined;
+        })
+        .filter((tag): tag is string => tag !== undefined);
+      if (!tagIds?.length) {
+        continue;
+      }
+      await api.post.addTagsAsCron({
+        postId,
+        tagIds,
+        cronSecret,
+      });
+
+      await fetch(`${getBaseUrl()}/api/cron/post-tags`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${cronSecret}`,
+        },
+        body: JSON.stringify({
+          postQueueOutput: postQueue.filter((post) => post.id !== postId),
+        }),
+      });
+
+      Response.json({
+        message: "Tags added to a post in the queue.",
+        status: 200,
+      });
     }
-    await api.post.addTags({
-      postId: latestPost?.id,
-      tagIds: tagIds,
-    });
-
-    return Response.json({ message: "Tags added successfully." });
-    // }
   } catch (error) {
-    console.error("Error adding tags in cron job:", error);
+    console.error("Error in post-tags cron job:", error);
     const { message, stack } = error as Error;
     console.error(message, stack);
     return Response.json({

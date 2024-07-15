@@ -1,16 +1,20 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import FormButton from "~/app/_components/FormButton";
+import { env } from "~/env";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { getBaseUrl } from "~/utils/clientConstants";
 export default async function TheCronic() {
   const session = await getServerAuthSession();
-  const unProcessedPosts = await api.post.getAllUnprocessedByInputUserId({
-    userId: session.user.id,
+  const unProcessedPosts = await api.post.getAllUnprocessedByInputUserIdAsCron({
+    userId: session?.user.id,
+    cronSecret: env.CRON_SECRET,
   });
-  const processedPosts = await api.post.getAllProcessedByInputUserId({
-    userId: session.user.id,
+  const processedPosts = await api.post.getAllProcessedByInputUserIdAsCron({
+    userId: session?.user.id,
+    cronSecret: env.CRON_SECRET,
   });
 
   return (
@@ -41,11 +45,11 @@ export default async function TheCronic() {
         action={async () => {
           "use server";
           try {
-            await fetch(`${getBaseUrl()}/api/cron/post-tags`, {
-              method: "POST",
+            await fetch(`${getBaseUrl()}/api/cron/job-queue`, {
+              method: "GET",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${process.env.CRON_SECRET}`,
+                Authorization: `Bearer ${env.CRON_SECRET}`,
               },
             });
             revalidatePath("/sd-admin/cron");
@@ -56,12 +60,7 @@ export default async function TheCronic() {
         className="space-y-4"
       >
         <div className="w-fit">
-          <button
-            type="submit"
-            className="rounded-md bg-blue-500 px-4 py-2 text-white"
-          >
-            Run post tags
-          </button>
+          <FormButton variant="submit">Run post tags</FormButton>
         </div>
       </form>
     </div>

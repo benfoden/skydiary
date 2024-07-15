@@ -1,7 +1,12 @@
 import { error } from "console";
 import { z } from "zod";
+import { env } from "~/env";
 
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
 import { cleanStringForInput } from "~/utils/text";
 
 export const userRouter = createTRPCRouter({
@@ -17,7 +22,7 @@ export const userRouter = createTRPCRouter({
       return ctx.db.user.update({
         where: { id: ctx?.session?.user?.id },
         data: {
-          name: cleanStringForInput(input.name) ?? "",
+          name: cleanStringForInput(input.name ?? ""),
           email: input.email,
           image: input.image,
         },
@@ -118,7 +123,7 @@ export const userRouter = createTRPCRouter({
     );
   }),
 
-  getByUserId: protectedProcedure
+  getById: protectedProcedure
     .input(
       z.object({
         userId: z.string(),
@@ -128,5 +133,30 @@ export const userRouter = createTRPCRouter({
       return ctx.db.user.findFirst({
         where: { id: input.userId },
       });
+    }),
+
+  getByIdAsCron: publicProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        cronSecret: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
+      return await ctx.db.user.findFirst({
+        where: { id: input.userId },
+      });
+    }),
+
+  getAllAsCron: publicProcedure
+    .input(z.object({ cronSecret: z.string() }))
+    .query(async ({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
+      return await ctx.db.user.findMany();
     }),
 });
