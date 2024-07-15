@@ -15,7 +15,6 @@ export const getOrCreateStripeCustomerIdForUser = async ({
   userId: string;
   db: PrismaClient;
 }) => {
-  console.log("getOrCreateStripeCustomerIdForUser");
   const session = await getServerAuthSession();
 
   if (!session?.user) throw new Error("User not found");

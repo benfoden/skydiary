@@ -29,7 +29,6 @@ export async function GET(request: NextRequest) {
       cronSecret,
     });
 
-    console.log("userPersonasLength", userPersonas.length);
     for (const userPersona of userPersonas) {
       const latestPosts = await api.post.getAllUntaggedByInputUserIdAsCron({
         userId: userPersona?.createdById,
@@ -43,8 +42,6 @@ export async function GET(request: NextRequest) {
       }
       postQueueOutput.push(...latestPosts);
     }
-    console.log("postQueueOutputLength", postQueueOutput.length);
-    console.log("userPersonaQueueOutputLength", userPersonaQueueOutput.length);
 
     if (!postQueueOutput.length && !userPersonaQueueOutput.length) {
       return Response.json({

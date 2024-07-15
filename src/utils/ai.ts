@@ -50,18 +50,6 @@ export async function getResponseFromChatMessages({
   aiPersonaId: string;
   model?: string;
 }) {
-  console.log(
-    "the messages",
-    messages.map((message) => ({
-      role:
-        message.personaId === "system"
-          ? "system"
-          : message.personaId === userPersonaId
-            ? "user"
-            : "assistant",
-      content: message.content,
-    })),
-  );
   const completion = await openai.chat.completions.create({
     messages: messages.map((message) => ({
       role:

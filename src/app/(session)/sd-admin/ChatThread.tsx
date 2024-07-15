@@ -1,7 +1,7 @@
 "use client";
-import { type Persona } from "@prisma/client";
+import { type Persona, type User } from "@prisma/client";
+import Image from "next/image";
 import { useEffect, useState } from "react";
-import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import FormButton from "~/app/_components/FormButton";
 import Input from "~/app/_components/Input";
@@ -10,9 +10,11 @@ import { api } from "~/trpc/react";
 export default function ChatThread({
   firstMessage,
   currentUserPersona,
+  user,
 }: {
   firstMessage: string;
   currentUserPersona: Persona;
+  user: User;
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<
@@ -20,7 +22,6 @@ export default function ChatThread({
   >([{ personaId: "system", content: firstMessage }]);
 
   const [personas, setPersonas] = useState<Persona[]>([]);
-  const [activePersona, setActivePersona] = useState<Persona | undefined>();
 
   const { data: personasData, isSuccess } =
     api.persona.getAllByUserId.useQuery();
@@ -50,7 +51,9 @@ export default function ChatThread({
         body: JSON.stringify({
           messages: [...messages, newCommand],
           userPersona: currentUserPersona,
-          aiPersona: personas.find((persona) => persona.isUser === false),
+          aiPersona: personas.find(
+            (persona) => persona.id === "clxyqqo3l00005ep3t8amw32a",
+          ),
         }),
       });
 
@@ -81,43 +84,70 @@ export default function ChatThread({
     }
   }, [personasData, isSuccess]);
 
-  useEffect(() => {
-    setActivePersona(personas[4]);
-  }, [personas]);
-
   return (
     <>
-      <Card isButton={false}>
-        <div>
-          {personas.map((persona) => (
-            <Button key={persona.id} onClick={() => setActivePersona(persona)}>
-              {persona.name}
-            </Button>
+      <details>
+        <summary>personas</summary>
+        <Card isButton={false}>
+          <div>
+            {personas.map((persona) => (
+              <div key={persona.id}>
+                {persona.name} /{persona.id}
+              </div>
+            ))}
+          </div>
+        </Card>
+      </details>
+      <div className="w-full md:max-w-3xl">
+        <Card isButton={false}>
+          {messages.slice(1).map((message, index) => (
+            <Card key={index} isButton={false}>
+              <div
+                key={index}
+                className="flex w-full flex-row items-start gap-2"
+              >
+                {message.personaId === currentUserPersona?.id && (
+                  <Image
+                    src={user?.image ?? ""}
+                    alt="yo"
+                    width={64}
+                    height={64}
+                    className="rounded-full"
+                  />
+                )}
+                {personas.find(
+                  (persona) => persona.id === message.personaId,
+                ) && (
+                  <>
+                    <Image
+                      src={
+                        personas.find(
+                          (persona) => persona.id === message.personaId,
+                        )?.image ?? ""
+                      }
+                      alt="yo"
+                      width={64}
+                      height={64}
+                      className="rounded-full"
+                    />
+                  </>
+                )}
+                <p>{message.content}</p>
+              </div>
+            </Card>
           ))}
-        </div>
-      </Card>
-      <Card isButton={false}>
-        {messages.slice(1).map((message, index) => (
-          <Card key={index} isButton={false}>
-            <div key={index} className="flex w-full flex-row items-start gap-2">
-              <p>
-                {message.personaId === currentUserPersona?.id &&
-                  currentUserPersona.name}
-                {message.personaId === activePersona?.id && activePersona?.name}
-                :
-              </p>
-              <p>{message.content}</p>
-            </div>
-          </Card>
-        ))}
-        <p>{activePersona?.name}</p>
-        <form onSubmit={(event) => handleCommand(event)}>
-          <Input id="chatInput" />
-          <FormButton isDisabled={isLoading} variant="submit">
-            Enter
-          </FormButton>
-        </form>
-      </Card>
+
+          <form
+            onSubmit={(event) => handleCommand(event)}
+            className="flex w-full flex-col"
+          >
+            <Input id="chatInput" />
+            <FormButton isDisabled={isLoading} variant="submit">
+              enter
+            </FormButton>
+          </form>
+        </Card>
+      </div>
     </>
   );
 }
