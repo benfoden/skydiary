@@ -172,9 +172,9 @@ export default async function Entry({
                               <Image
                                 alt={persona.name}
                                 src={persona.image}
-                                width="0"
-                                height="0"
-                                className="h-auto w-4 rounded-full"
+                                width="64"
+                                height="64"
+                                className="h-4 w-auto rounded-full"
                               />
                               <span className="text-xs">{persona.name}</span>
                             </>

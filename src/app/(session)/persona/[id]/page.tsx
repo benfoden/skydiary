@@ -131,12 +131,12 @@ export default async function Persona({ params }: { params: { id: string } }) {
                         <Image
                           alt={persona.name}
                           src={persona.image ?? ""}
-                          width="0"
-                          height="0"
-                          className="h-8 w-8 rounded-full"
+                          width="256"
+                          height="256"
+                          className="h-32 w-auto rounded-full"
                         />
                       ) : (
-                        <PersonIcon className="h-16 w-16" />
+                        <PersonIcon className="h-32 w-32" />
                       )}
                       <div className="flex flex-row items-center gap-2">
                         <p className="text-lg">{persona.name}</p>

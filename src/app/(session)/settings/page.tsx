@@ -117,9 +117,9 @@ export default async function Settings() {
                 <Image
                   alt={session?.user?.name ?? "no username"}
                   src={session?.user?.image ?? ""}
-                  width="0"
-                  height="0"
-                  className="h-auto w-8 rounded-full"
+                  width="64"
+                  height="64"
+                  className="h-16 w-auto rounded-full"
                 />
               )}
               <Input
