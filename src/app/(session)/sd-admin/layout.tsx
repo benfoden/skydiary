@@ -36,6 +36,7 @@ export default async function AdminLayout({
             <Link href={"/sd-admin/email"}>email</Link>
             <Link href={"/sd-admin/cron"}>cron</Link>
           </div>
+
           {children}
         </div>
       </div>
