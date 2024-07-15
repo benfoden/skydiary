@@ -1,4 +1,4 @@
-import { type Persona, type Post } from "@prisma/client";
+import { type Persona } from "@prisma/client";
 import { type NextRequest } from "next/server";
 import { env } from "~/env";
 import { api } from "~/trpc/server";
@@ -16,33 +16,34 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  console.log("here");
-
   try {
     const body = (await request.json()) as {
-      userPersonaPostQueueOutput: Post[];
-      userPersona: Persona;
+      userPersonaQueueOutput: Persona[];
     };
 
-    // const userPersonaQueue = body.userPersonaQueueOutput.filter(
-    //   (persona) =>
-    //     persona.updatedAt < new Date(Date.now() - 24 * 60 * 60 * 1000),
-    // );
+    const userPersonaQueue = body.userPersonaQueueOutput.filter(
+      (persona) =>
+        persona.updatedAt < new Date(Date.now() - 24 * 60 * 60 * 1000),
+    );
 
-    const userPersonaPostQueue = body.userPersonaPostQueueOutput;
-
-    if (!userPersonaPostQueue.length) {
+    if (!userPersonaQueue.length) {
       return Response.json({
         message: "All user personas updated.",
         status: 200,
       });
     }
 
-    for (const userPersonaPost of userPersonaPostQueue) {
+    for (const userPersona of userPersonaQueue) {
       const user = await api.user.getByIdAsCron({
         userId: userPersona.createdById,
         cronSecret,
       });
+
+      const latestPost = await api.post.getLatestByInputUserIdAsCron({
+        userId: userPersona.createdById,
+        cronSecret,
+      });
+
       if (!latestPost?.content || !user) {
         continue;
       }
@@ -54,23 +55,16 @@ export async function POST(request: NextRequest) {
             ? 180
             : productPlan(user?.stripeProductId).memories,
         }),
-        model: user?.isSpecial
-          ? "gpt-4o"
-          : productPlan(user?.stripeProductId)?.model,
+        model: "gpt-3.5-turbo",
       });
 
       if (!generatedPersona) {
         continue;
       }
 
-      console.log(
-        "generatedPersona: ",
-        JSON.parse(generatedPersona),
-        "for userId",
-        userPersona?.createdById,
-      );
       const personaObject = JSON.parse(generatedPersona) as Persona;
-      await api.persona.updateAsCron({
+      await api.persona.updateUserPersonaAsCron({
+        createdById: userPersona?.createdById,
         personaId: userPersona?.id ?? "",
         name: userPersona?.name ?? "",
         description: personaObject?.description ?? "",

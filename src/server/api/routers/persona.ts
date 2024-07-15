@@ -95,9 +95,10 @@ export const personaRouter = createTRPCRouter({
       });
     }),
 
-  updateAsCron: protectedProcedure
+  updateUserPersonaAsCron: publicProcedure
     .input(
       z.object({
+        createdById: z.string(),
         personaId: z.string(),
         name: z.string().max(140),
         traits: z.string().max(140),
@@ -109,7 +110,6 @@ export const personaRouter = createTRPCRouter({
         occupation: z.string().max(140).optional(),
         communicationStyle: z.string().max(140).optional(),
         communicationSample: z.string().max(1000).optional(),
-        isUser: z.boolean().optional(),
         isFavorite: z.boolean().optional(),
         cronSecret: z.string(),
       }),
@@ -119,7 +119,11 @@ export const personaRouter = createTRPCRouter({
         throw new Error("Unauthorized");
       }
       return ctx.db.persona.update({
-        where: { id: input.personaId, createdBy: { id: ctx.session.user.id } },
+        where: {
+          id: input.personaId,
+          createdBy: { id: input.createdById },
+          isUser: true,
+        },
         data: {
           name: cleanStringForInput(input.name),
           description: cleanStringForInput(input.description ?? ""),
@@ -135,7 +139,6 @@ export const personaRouter = createTRPCRouter({
           communicationSample: cleanStringForInput(
             input.communicationSample ?? "",
           ),
-          isUser: input.isUser,
           isFavorite: input.isFavorite,
         },
       });
@@ -157,6 +160,7 @@ export const personaRouter = createTRPCRouter({
         orderBy: { createdAt: "asc" },
       });
     }),
+
   getById: protectedProcedure
     .input(z.object({ personaId: z.string() }))
     .query(({ ctx, input }) => {

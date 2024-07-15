@@ -1,4 +1,4 @@
-import { type Post } from "@prisma/client";
+import { type Persona, type Post } from "@prisma/client";
 import { type NextRequest } from "next/server";
 import { env } from "~/env";
 import { api } from "~/trpc/server";
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const userPersonaPostQueueOutput: Post[] = [];
+    const userPersonaQueueOutput: Persona[] = [];
 
     const postQueueOutput: (Post & {
       tags: {
@@ -35,30 +35,18 @@ export async function GET(request: NextRequest) {
         userId: userPersona?.createdById,
         cronSecret,
       });
+      if (userPersona.updatedAt < new Date(Date.now() - 24 * 60 * 60 * 1000)) {
+        userPersonaQueueOutput.push(userPersona);
+      }
       if (!latestPosts || latestPosts.length === 0) {
         continue;
       }
       postQueueOutput.push(...latestPosts);
-
-      const unScannedPost = await api.post.getLatestByInputUserIdAsCron({
-        userId: userPersona?.createdById,
-        cronSecret,
-      });
-
-      if (!unScannedPost || unScannedPost.content.length === 0) {
-        continue;
-      }
-      // if (userPersona.updatedAt < new Date(Date.now() - 24 * 60 * 60 * 1000)) {
-      userPersonaPostQueueOutput.push(unScannedPost);
-      // }
     }
     console.log("postQueueOutputLength", postQueueOutput.length);
-    console.log(
-      "userPersonaQueueOutputLength",
-      userPersonaPostQueueOutput.length,
-    );
+    console.log("userPersonaQueueOutputLength", userPersonaQueueOutput.length);
 
-    if (!postQueueOutput.length && !userPersonaPostQueueOutput.length) {
+    if (!postQueueOutput.length && !userPersonaQueueOutput.length) {
       return Response.json({
         message: "No unprocessed posts or user personas found.",
         status: 200,
@@ -76,16 +64,16 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // if (userPersonaPostQueueOutput.length) {
-    //   await fetch(`${getBaseUrl()}/api/cron/user-persona`, {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       Authorization: `Bearer ${cronSecret}`,
-    //     },
-    //     body: JSON.stringify({ userPersonaPostQueueOutput }),
-    //   });
-    // }
+    if (userPersonaQueueOutput.length) {
+      await fetch(`${getBaseUrl()}/api/cron/user-persona`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${cronSecret}`,
+        },
+        body: JSON.stringify({ userPersonaQueueOutput }),
+      });
+    }
   } catch (error) {
     console.error("Error getting posts in cron job:", error);
     const { message, stack } = error as Error;

@@ -8,11 +8,11 @@ import { api } from "~/trpc/server";
 import { getBaseUrl } from "~/utils/clientConstants";
 export default async function TheCronic() {
   const session = await getServerAuthSession();
-  const unProcessedPosts = await api.post.getAllUnprocessedByInputUserIdAsCron({
+  const unProcessedPosts = await api.post.getAllUntaggedByInputUserIdAsCron({
     userId: session?.user.id,
     cronSecret: env.CRON_SECRET,
   });
-  const processedPosts = await api.post.getAllProcessedByInputUserIdAsCron({
+  const processedPosts = await api.post.getAllTaggedByInputUserIdAsCron({
     userId: session?.user.id,
     cronSecret: env.CRON_SECRET,
   });

@@ -100,7 +100,7 @@ export const postRouter = createTRPCRouter({
       }
       return ctx.db.post.findFirst({
         orderBy: { createdAt: "desc" },
-        where: { createdBy: { id: input.userId } },
+        where: { createdBy: { id: input.userId }, content: { not: "" } },
       });
     }),
 
