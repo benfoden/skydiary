@@ -29,6 +29,7 @@ export function middleware(request: NextRequest) {
     "/api/trpc",
     "/api/stripe-webhook",
     "/api/upload",
+    "/api/chat",
   ];
 
   const isUntranslatedAPIRoute = unTranslatedAPIRoutes.some(

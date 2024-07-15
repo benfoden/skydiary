@@ -1,39 +1,34 @@
-import { Card } from "~/app/_components/Card";
-import { getResponse } from "~/utils/ai";
-
+"use server";
+import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { prompts } from "~/utils/prompts";
+import ChatThread from "./ChatThread";
 
 export default async function Secret() {
-  const currentUserPersona = await api.persona.getUserPersona();
-  const persona = await api.persona.getById({
+  const session = await getServerAuthSession();
+  const userPersona = await api.persona.getUserPersona();
+  const aiPersona = await api.persona.getById({
     personaId: "clxyqqo3l00005ep3t8amw32a",
   });
-  let greeting = "welcome back";
-  if (persona && currentUserPersona) {
-    greeting =
-      (await getResponse({
-        messageContent: prompts.comment({
-          authorDetails: currentUserPersona,
-          content:
-            "I have returned to continue developing the app after a long time away.",
-          personaDetails: persona,
-          characters: 140,
-        }),
-      })) ?? "welcome back";
-  }
+
+  if (!userPersona?.id || !aiPersona?.id) return null;
+
+  const firstMessage = prompts.chatStart({
+    authorDetails: userPersona,
+    personaDetails: aiPersona,
+    commentType: "custom",
+    characters: 280,
+  });
+
   return (
     <>
       <main className="flex min-h-screen w-full flex-col items-center justify-start">
         <div className="container flex flex-col items-start justify-start gap-12 px-8 py-16 ">
-          <details>
-            <summary>welcome back</summary>
-            <div className="w-80">
-              <Card>
-                {persona?.name}: {greeting}
-              </Card>
-            </div>
-          </details>
+          <ChatThread
+            user={session?.user}
+            firstMessage={firstMessage}
+            currentUserPersona={userPersona}
+          />
         </div>
       </main>
     </>

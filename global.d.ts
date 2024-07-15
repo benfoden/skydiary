@@ -32,6 +32,15 @@ export type Prompt = {
   diaryEntry: string;
 };
 
+export type ChatPrompt = {
+  context: string;
+  exemplars: string;
+  persona: string;
+  format: string;
+  tone: string;
+  authorDetails: string;
+};
+
 export type PersonaForPrompt = Omit<
   Persona,
   "id" | "image" | "createdAt" | "updatedAt" | "createdById" | "isUser"

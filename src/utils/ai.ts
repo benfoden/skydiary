@@ -39,14 +39,32 @@ export async function getResponseJSON({
   return completion.choices[0]?.message.content;
 }
 
-export async function getResponseFromArr(
-  inputTexts: string[],
+export async function getResponseFromChatMessages({
+  messages,
+  userPersonaId,
+  aiPersonaId,
   model = "gpt-3.5-turbo",
-) {
+}: {
+  messages: { personaId: string | undefined | null; content: string }[];
+  userPersonaId: string;
+  aiPersonaId: string;
+  model?: string;
+}) {
   const completion = await openai.chat.completions.create({
-    messages: inputTexts.map((text) => ({ role: "user", content: text })),
+    messages: messages.map((message) => ({
+      role:
+        message.personaId === "system"
+          ? "system"
+          : message.personaId === userPersonaId
+            ? "user"
+            : "assistant",
+      content: message.content,
+    })),
     model,
   });
 
-  return completion.choices[0]?.message.content;
+  return {
+    personaId: aiPersonaId,
+    content: completion.choices[0]?.message.content ?? "error",
+  };
 }

@@ -3,6 +3,7 @@ import {
   EnvelopeClosedIcon,
   ExitIcon,
   GearIcon,
+  LockClosedIcon,
   PersonIcon,
   PlusIcon,
 } from "@radix-ui/react-icons";
@@ -24,7 +25,7 @@ export default async function DropDownUser() {
         session?.user.email === "ben.foden@gmail.com" && (
           <Link href={"/sd-admin"}>
             <Button variant="menuElement">
-              webmaster <GearIcon className="h-4 w-4" />
+              webmaster <LockClosedIcon className="h-4 w-4" />
             </Button>
           </Link>
         )}

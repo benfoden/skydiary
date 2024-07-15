@@ -55,15 +55,16 @@ export default async function PersonaFormFields({
         maxLength={700}
       />
       {persona?.image && (
-        <Image
-          src={persona.image}
-          alt={persona.name}
-          width="0"
-          height="0"
-          className="h-auto w-8 rounded-full"
-        />
+        <div className="w-fit">
+          <Image
+            src={persona.image}
+            alt={persona.name}
+            width="128"
+            height="128"
+            className="h-16 w-auto rounded-full"
+          />
+        </div>
       )}
-      {persona?.image}
       <Input
         label={t("personas.image")}
         type="file"
