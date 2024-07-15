@@ -192,7 +192,11 @@
     "deleteAccount": "アカウントを削除",
     "deleteAccountDescription": "このアクションは取り消しできません。すべてのデータを永久に失います。",
     "deleteAccountButton": "はい、すべてを削除します",
-    "profilePicture": "プロフィール画像"
+    "profilePicture": "プロフィール画像",
+    "exportData": "データをエクスポート",
+    "exportDataDescription": "これはベータ版であり、時間がかかる場合があります。うまくいかない場合は、お問い合わせください。",
+    "exportDataButton": "エクスポート",
+    "downloadDataButton": "ダウンロード"
   },
   "form": {
     "save": "保存",

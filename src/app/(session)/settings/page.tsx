@@ -119,7 +119,7 @@ export default async function Settings() {
                   src={session?.user?.image ?? ""}
                   width="64"
                   height="64"
-                  className="h-16 w-auto rounded-full"
+                  className="h-16 w-fit rounded-full"
                 />
               )}
               <Input
@@ -177,6 +177,15 @@ export default async function Settings() {
             <div className="flex flex-row gap-2">
               <LocaleSwitcher isSettings />
             </div>
+          </Card>
+          <Card variant="form">
+            <h2>{t("settings.exportData")}</h2>
+            <p className="text-sm opacity-60">
+              {t("settings.exportDataDescription")}
+            </p>
+            <Link href="/settings/export">
+              <Button>{t("settings.exportDataButton")}</Button>
+            </Link>
           </Card>
           <Card variant="form">
             <h2>{t("settings.deleteAccount")}</h2>
