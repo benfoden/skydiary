@@ -82,7 +82,7 @@ export default function ChatThread({
   }, [personasData, isSuccess]);
 
   useEffect(() => {
-    setActivePersona(personas[0]);
+    setActivePersona(personas[4]);
   }, [personas]);
 
   return (
