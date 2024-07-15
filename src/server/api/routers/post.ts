@@ -91,6 +91,7 @@ export const postRouter = createTRPCRouter({
       where: { createdBy: { id: ctx.session.user.id } },
     });
   }),
+
   getLatestByInputUserIdAsCron: publicProcedure
     .input(z.object({ userId: z.string(), cronSecret: z.string() }))
     .query(({ ctx, input }) => {
@@ -103,7 +104,7 @@ export const postRouter = createTRPCRouter({
       });
     }),
 
-  getLatestUnprocessedByInputUserIdAsCron: publicProcedure
+  getLatestTaggedByInputUserIdAsCron: publicProcedure
     .input(z.object({ userId: z.string(), cronSecret: z.string() }))
     .query(({ ctx, input }) => {
       if (input.cronSecret !== env.CRON_SECRET) {
@@ -122,7 +123,7 @@ export const postRouter = createTRPCRouter({
       });
     }),
 
-  getAllUnprocessedByInputUserIdAsCron: publicProcedure
+  getAllUntaggedByInputUserIdAsCron: publicProcedure
     .input(z.object({ userId: z.string(), cronSecret: z.string() }))
     .query(({ ctx, input }) => {
       if (input.cronSecret !== env.CRON_SECRET) {
@@ -140,7 +141,7 @@ export const postRouter = createTRPCRouter({
       });
     }),
 
-  getAllProcessedByInputUserIdAsCron: publicProcedure
+  getAllTaggedByInputUserIdAsCron: publicProcedure
     .input(z.object({ userId: z.string(), cronSecret: z.string() }))
     .query(({ ctx, input }) => {
       if (input.cronSecret !== env.CRON_SECRET) {

@@ -1,4 +1,4 @@
-import { type Persona } from "@prisma/client";
+import { type Persona, type Post } from "@prisma/client";
 import { type NextRequest } from "next/server";
 import { env } from "~/env";
 import { api } from "~/trpc/server";
@@ -16,28 +16,29 @@ export async function POST(request: NextRequest) {
     });
   }
 
+  console.log("here");
+
   try {
     const body = (await request.json()) as {
-      userPersonaQueueOutput: Persona[];
+      userPersonaPostQueueOutput: Post[];
+      userPersona: Persona;
     };
 
-    const userPersonaQueue = body.userPersonaQueueOutput.filter(
-      (persona) =>
-        persona.updatedAt < new Date(Date.now() - 24 * 60 * 60 * 1000),
-    );
+    // const userPersonaQueue = body.userPersonaQueueOutput.filter(
+    //   (persona) =>
+    //     persona.updatedAt < new Date(Date.now() - 24 * 60 * 60 * 1000),
+    // );
 
-    if (!userPersonaQueue.length) {
+    const userPersonaPostQueue = body.userPersonaPostQueueOutput;
+
+    if (!userPersonaPostQueue.length) {
       return Response.json({
         message: "All user personas updated.",
         status: 200,
       });
     }
 
-    for (const userPersona of userPersonaQueue) {
-      const latestPost = await api.post.getLatestByInputUserIdAsCron({
-        userId: userPersona.createdById,
-        cronSecret,
-      });
+    for (const userPersonaPost of userPersonaPostQueue) {
       const user = await api.user.getByIdAsCron({
         userId: userPersona.createdById,
         cronSecret,
@@ -61,6 +62,13 @@ export async function POST(request: NextRequest) {
       if (!generatedPersona) {
         continue;
       }
+
+      console.log(
+        "generatedPersona: ",
+        JSON.parse(generatedPersona),
+        "for userId",
+        userPersona?.createdById,
+      );
       const personaObject = JSON.parse(generatedPersona) as Persona;
       await api.persona.updateAsCron({
         personaId: userPersona?.id ?? "",
