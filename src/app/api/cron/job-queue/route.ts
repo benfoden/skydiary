@@ -34,20 +34,17 @@ export async function GET(request: NextRequest) {
         userId: userPersona?.createdById,
         cronSecret,
       });
-      if (userPersona.updatedAt < new Date(Date.now() - 24 * 60 * 60 * 1000)) {
+      // run for personas that haven't been updated in the last hour
+      if (
+        new Date(userPersona.updatedAt).getTime() <
+        Date.now() - 60 * 60 * 1000
+      ) {
         userPersonaQueueOutput.push(userPersona);
       }
       if (!latestPosts || latestPosts.length === 0) {
         continue;
       }
       postQueueOutput.push(...latestPosts);
-    }
-
-    if (!postQueueOutput.length && !userPersonaQueueOutput.length) {
-      return Response.json({
-        message: "No unprocessed posts or user personas found.",
-        status: 200,
-      });
     }
 
     if (postQueueOutput.length) {
@@ -58,6 +55,10 @@ export async function GET(request: NextRequest) {
           Authorization: `Bearer ${cronSecret}`,
         },
         body: JSON.stringify({ postQueueOutput }),
+      });
+      Response.json({
+        message: "Post tags updated.",
+        status: 200,
       });
     }
 
@@ -70,6 +71,21 @@ export async function GET(request: NextRequest) {
         },
         body: JSON.stringify({ userPersonaQueueOutput }),
       });
+      Response.json({
+        message: "User personas updated.",
+        status: 200,
+      });
+    }
+    if (!postQueueOutput.length && !userPersonaQueueOutput.length) {
+      return Response.json({
+        message: "No unprocessed posts or user personas found.",
+        status: 200,
+      });
+    } else {
+      return Response.json({
+        message: "Cron job ran successfully.",
+        status: 200,
+      });
     }
   } catch (error) {
     console.error("Error getting posts in cron job:", error);
@@ -79,6 +95,7 @@ export async function GET(request: NextRequest) {
       error: "Error getting posts in cron job:",
       message: message ?? "Unknown error",
       stack: stack ?? "Unknown stack",
+      status: 500,
     });
   }
 }

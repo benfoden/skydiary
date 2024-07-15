@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     const userPersonaQueue = body.userPersonaQueueOutput.filter(
       (persona) =>
-        persona.updatedAt < new Date(Date.now() - 24 * 60 * 60 * 1000),
+        new Date(persona.updatedAt).getTime() < Date.now() - 60 * 60 * 1000,
     );
 
     if (!userPersonaQueue.length) {
@@ -39,18 +39,19 @@ export async function POST(request: NextRequest) {
         cronSecret,
       });
 
-      const latestPost = await api.post.getLatestByInputUserIdAsCron({
+      const latestPosts = await api.post.getLatestTwoByInputUserIdAsCron({
         userId: userPersona.createdById,
         cronSecret,
       });
 
-      if (!latestPost?.content || !user) {
+      const latestPostWithContent = latestPosts.find((post) => post.content);
+      if (!latestPostWithContent || !user) {
         continue;
       }
       const generatedPersona = await getResponseJSON({
         messageContent: prompts.userPersona({
           persona: userPersona ?? NEWPERSONAUSER,
-          content: latestPost?.content,
+          content: latestPostWithContent.content,
           wordLimit: user?.isSpecial
             ? 180
             : productPlan(user?.stripeProductId).memories,
@@ -97,6 +98,12 @@ export async function POST(request: NextRequest) {
         status: 200,
       });
     }
+    return new Response(
+      "No out of date personas remain to update. Jobs done.",
+      {
+        status: 200,
+      },
+    );
   } catch (error) {
     console.error("Error adding user personas in cron job:", error);
     const { message, stack } = error as Error;
@@ -105,6 +112,7 @@ export async function POST(request: NextRequest) {
       error: "Error adding user personas in cron job:",
       message: message ?? "Unknown error",
       stack: stack ?? "Unknown stack",
+      status: 500,
     });
   }
 }
