@@ -58,7 +58,7 @@ const DropDownMenu = ({
             src={userProfileIconUrl}
             width="48"
             height="48"
-            className="h-6 w-auto rounded-full"
+            className="h-6 w-fit rounded-full"
           />
         )}
         {isUserMenu && !userProfileIconUrl && (

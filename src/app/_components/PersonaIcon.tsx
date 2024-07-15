@@ -28,7 +28,7 @@ export const PersonaIcon = ({
           src={persona?.image}
           width="48"
           height="48"
-          className="h-6 w-auto rounded-full"
+          className="h-6 w-fit rounded-full"
         />
       ) : (
         <PersonIcon className="h-6 w-6" />

@@ -192,7 +192,11 @@
     "deleteAccount": "delete account",
     "deleteAccountDescription": "this action is irreversible. ALL of your data wiil be permanently deleted.",
     "deleteAccountButton": "yes, delete my account",
-    "profilePicture": "profile picture"
+    "profilePicture": "profile picture",
+    "exportData": "export data",
+    "exportDataDescription": "this is in beta and may take time. if it doesn't work, please contact us.",
+    "exportDataButton": "export",
+    "downloadDataButton": "download"
   },
   "form": {
     "save": "save",
