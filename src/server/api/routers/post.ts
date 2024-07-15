@@ -92,15 +92,16 @@ export const postRouter = createTRPCRouter({
     });
   }),
 
-  getLatestByInputUserIdAsCron: publicProcedure
+  getLatestTwoByInputUserIdAsCron: publicProcedure
     .input(z.object({ userId: z.string(), cronSecret: z.string() }))
     .query(({ ctx, input }) => {
       if (input.cronSecret !== env.CRON_SECRET) {
         throw new Error("Unauthorized");
       }
-      return ctx.db.post.findFirst({
+      return ctx.db.post.findMany({
         orderBy: { createdAt: "desc" },
         where: { createdBy: { id: input.userId }, content: { not: "" } },
+        take: 2,
       });
     }),
 

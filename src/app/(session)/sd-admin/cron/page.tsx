@@ -60,7 +60,7 @@ export default async function TheCronic() {
         className="space-y-4"
       >
         <div className="w-fit">
-          <FormButton variant="submit">Run post tags</FormButton>
+          <FormButton variant="submit">Run cron job queue</FormButton>
         </div>
       </form>
     </div>
