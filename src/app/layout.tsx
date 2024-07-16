@@ -61,7 +61,7 @@ export default async function RootLayout({
       </head>
       <body className={`font-sans ${inter.variable} bg-transparent`}>
         <div className="relative min-h-screen w-full">
-          <div className="absolute inset-0 z-[-20] min-h-full w-full bg-gradient-to-b from-[#cce3f1] to-[#f3f6f6] dark:from-[#0b0f10] dark:to-[#20202c]" />
+          <div className="absolute inset-0 z-[-20] min-h-full w-full bg-gradient-to-b from-[#cce3f1] to-[#f3f6f6] dark:from-[#161f22] dark:to-[#252538]" />
           <NextIntlClientProvider messages={messages}>
             <TRPCReactProvider>
               <div className="relative z-0 mx-auto min-h-screen">
