@@ -149,6 +149,7 @@ export const personaRouter = createTRPCRouter({
       orderBy: { createdAt: "asc" },
     });
   }),
+
   getAllUserPersonasAsCron: publicProcedure
     .input(z.object({ cronSecret: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -160,6 +161,37 @@ export const personaRouter = createTRPCRouter({
         orderBy: { createdAt: "asc" },
       });
     }),
+
+  getAllAiPersonasByUserIdAsCron: publicProcedure
+    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
+    .query(async ({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
+      return await ctx.db.persona.findMany({
+        where: { isUser: false, createdBy: { id: input.userId } },
+        orderBy: { createdAt: "asc" },
+      });
+    }),
+
+  getAllByUserForExport: protectedProcedure.query(async ({ ctx }) => {
+    const personas = await ctx.db.persona.findMany({
+      where: { createdBy: { id: ctx.session.user.id }, isUser: false },
+      orderBy: { createdAt: "asc" },
+    });
+
+    return personas.map((persona) => ({
+      id: persona.id,
+      name: persona.name,
+      description: persona.description,
+      gender: persona.gender,
+      occupation: persona.occupation,
+      relationship: persona.relationship,
+      traits: persona.traits,
+      communicationSample: persona.communicationSample,
+      communicationStyle: persona.communicationStyle,
+    }));
+  }),
 
   getById: protectedProcedure
     .input(z.object({ personaId: z.string() }))

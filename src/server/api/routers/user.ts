@@ -159,4 +159,28 @@ export const userRouter = createTRPCRouter({
       }
       return await ctx.db.user.findMany();
     }),
+  getUserForExport: protectedProcedure.query(async ({ ctx }) => {
+    const userPersona = await ctx.db.persona.findFirst({
+      where: {
+        createdBy: {
+          id: ctx.session.user.id,
+        },
+        AND: {
+          isUser: true,
+        },
+      },
+    });
+    if (!userPersona) {
+      throw new Error("User persona not found in user export call");
+    }
+
+    return {
+      id: ctx.session.user.id,
+      name: ctx.session.user.name,
+      email: ctx.session.user.email,
+      image: ctx.session.user.image,
+      age: userPersona.age,
+      identity: userPersona.gender,
+    };
+  }),
 });

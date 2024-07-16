@@ -160,6 +160,18 @@ export const postRouter = createTRPCRouter({
       });
     }),
 
+  getAllByUserIdAsCron: publicProcedure
+    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
+    .query(({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
+      return ctx.db.post.findMany({
+        where: { createdBy: { id: input.userId } },
+        orderBy: { createdAt: "desc" },
+      });
+    }),
+
   getTagsAndCounts: protectedProcedure.query(async ({ ctx }) => {
     const posts = await ctx.db.post.findMany({
       where: { createdBy: { id: ctx.session.user.id } },
@@ -214,6 +226,38 @@ export const postRouter = createTRPCRouter({
       where: { createdBy: { id: ctx.session.user.id } },
       orderBy: { createdAt: "desc" },
     });
+  }),
+
+  getAllByUserForExport: protectedProcedure.query(async ({ ctx }) => {
+    const posts = await ctx.db.post.findMany({
+      where: { createdBy: { id: ctx.session.user.id } },
+      orderBy: { createdAt: "desc" },
+      include: {
+        tags: {
+          select: {
+            content: true,
+          },
+        },
+      },
+    });
+
+    return posts.map(
+      (post: {
+        content: string;
+        updatedAt: Date;
+        createdAt: Date;
+        id: string;
+        tags: { content: string }[];
+      }) => ({
+        id: post.id,
+        content: post.content,
+        updatedAt: post.updatedAt,
+        createdAt: post.createdAt,
+        tags: post.tags.map((tag) => ({
+          content: tag.content,
+        })),
+      }),
+    );
   }),
 
   getByPostId: protectedProcedure

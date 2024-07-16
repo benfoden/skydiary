@@ -194,9 +194,12 @@
     "deleteAccountButton": "yes, delete my account",
     "profilePicture": "profile picture",
     "exportData": "export data",
-    "exportDataDescription": "this is in beta and may take time. if it doesn't work, please contact us.",
-    "exportDataButton": "export",
-    "downloadDataButton": "download"
+    "exportDataDescription": "this may take a few minutes.",
+    "exportDataButton": "export now",
+    "preparingExport": "preparing export...",
+    "checkDownloadsFolder": "export and download complete. check your downloads folder",
+    "backToSettings": "back to settings",
+    "exportDataTitle": "skydiary user data export"
   },
   "form": {
     "save": "save",

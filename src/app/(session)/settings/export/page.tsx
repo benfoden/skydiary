@@ -1,65 +1,58 @@
-import { DownloadIcon } from "@radix-ui/react-icons";
 import { getTranslations } from "next-intl/server";
-import FormButton from "~/app/_components/FormButton";
+import { stringifyError } from "next/dist/shared/lib/utils";
 import { getServerAuthSession } from "~/server/auth";
+import { api } from "~/trpc/server";
+import ClientPage from "./ClientPage";
 
-export default async function Export({
-  searchParams,
-}: {
-  searchParams: { status: string };
-}) {
-  const isReady = searchParams.status === "ready";
-  if (!isReady) return null;
+export default async function ExportPage() {
   const session = await getServerAuthSession();
-  const sessionUser = session?.user;
-  if (!sessionUser) {
-    console.error("No user session found");
-    return;
-  }
   const t = await getTranslations();
+  let outputError;
+  let exportData;
+  if (!session?.user) {
+    console.error("No user session found for export");
+    outputError = "Unauthorized. Please log in to export your data.";
+  }
+  try {
+    const [exportUser, exportPersonas, exportPosts] = await Promise.all([
+      api.user.getUserForExport(),
+      api.persona.getAllByUserForExport(),
+      api.post.getAllByUserForExport(),
+    ]);
+
+    if (
+      exportUser === null ||
+      exportPersonas === null ||
+      exportPosts === null
+    ) {
+      console.error("Error getting export data");
+      outputError =
+        "Error getting export data. Plesase contact us at contact@skydiary.app";
+    }
+
+    exportData = {
+      exportUser,
+      exportPersonas,
+      exportPosts,
+    };
+  } catch (error) {
+    outputError = stringifyError(
+      error instanceof Error ? error : new Error(String(error)),
+    );
+
+    console.error(error);
+  }
+
+  const json = JSON.stringify(exportData, null, 2);
 
   return (
-    <div>
-      <form
-        action={async () => {
-          "use server";
-          try {
-            const json = JSON.stringify(session?.user, null, 2);
-            const blob = new Blob([json], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `${session?.user?.name}_data-${new Date().toISOString()}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            // Append the URL to the button with id download
-            const downloadLink = document.getElementById(
-              "download",
-            ) as HTMLAnchorElement;
-            if (downloadLink) {
-              downloadLink.href = url;
-            }
-            //todo: do this on server side?
-            // replace(`${window.location.pathname}?status=ready`, {
-            //   scroll: false,
-            // });
-          } catch (error) {
-            console.error("Error exporting data:", error);
-            throw new Error("Error exporting data");
-          }
-        }}
-      >
-        <FormButton>{t("settings.exportDataButton")}</FormButton>
-      </form>
-      <a href="#" id="download" download>
-        <div className="flex items-center gap-2">
-          <DownloadIcon className="h-4 w-4" />
-          <span className="text-xs">{t("settings.downloadDataButton")}</span>
-        </div>
-      </a>
+    <div className="flex flex-col items-start justify-center gap-4 p-4">
+      <h1 className="text-xl">{t("settings.exportDataTitle")}</h1>
+      <ClientPage
+        json={json}
+        error={outputError ?? null}
+        isLoading={!exportData}
+      />
     </div>
   );
 }

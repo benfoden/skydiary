@@ -194,9 +194,11 @@
     "deleteAccountButton": "はい、すべてを削除します",
     "profilePicture": "プロフィール画像",
     "exportData": "データをエクスポート",
-    "exportDataDescription": "これはベータ版であり、時間がかかる場合があります。うまくいかない場合は、お問い合わせください。",
-    "exportDataButton": "エクスポート",
-    "downloadDataButton": "ダウンロード"
+    "exportDataDescription": "これは時間がかかる場合があります。",
+    "exportDataButton": "今すぐエクスポート",
+    "preparingExport": "エクスポートの準備中...",
+    "checkDownloadsFolder": "エクスポートとダウンロードが完了しました。ダウンロードフォルダを確認してください",
+    "backToSettings": "設定に戻る"
   },
   "form": {
     "save": "保存",
