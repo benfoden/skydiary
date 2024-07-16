@@ -1,9 +1,9 @@
 import { PersonIcon, StarFilledIcon } from "@radix-ui/react-icons";
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import Image from "next/image";
 import { redirect } from "next/navigation";
 import PersonaFormFields from "~/app/(session)/persona/PersonaFormFields";
+import { Avatar } from "~/app/_components/Avatar";
 import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
 import FormButton from "~/app/_components/FormButton";
@@ -128,15 +128,13 @@ export default async function Persona({ params }: { params: { id: string } }) {
                   <div className="flex w-full flex-row items-center justify-center pb-8 text-sm">
                     <div className="flex flex-col items-center justify-center gap-2">
                       {persona.image ? (
-                        <Image
+                        <Avatar
                           alt={persona.name}
-                          src={persona.image ?? ""}
-                          width="256"
-                          height="256"
-                          className="h-32 w-auto rounded-full"
+                          src={persona.image}
+                          size="large"
                         />
                       ) : (
-                        <PersonIcon className="h-32 w-32" />
+                        <PersonIcon className="h-24 w-24" />
                       )}
                       <div className="flex flex-row items-center gap-2">
                         <p className="text-lg">{persona.name}</p>

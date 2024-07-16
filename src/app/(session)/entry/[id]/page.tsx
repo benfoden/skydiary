@@ -4,9 +4,9 @@ import { CircleIcon, PersonIcon, PlusIcon } from "@radix-ui/react-icons";
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
-import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Avatar } from "~/app/_components/Avatar";
 import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import CopyTextButton from "~/app/_components/CopyTextButton";
@@ -169,13 +169,7 @@ export default async function Entry({
                         <div className="flex flex-row items-center gap-2 font-medium">
                           {persona.image ? (
                             <>
-                              <Image
-                                alt={persona.name}
-                                src={persona.image}
-                                width="64"
-                                height="64"
-                                className="h-4 w-fit rounded-full"
-                              />
+                              <Avatar src={persona.image} alt={persona.name} />
                               <span className="text-xs">{persona.name}</span>
                             </>
                           ) : (
@@ -204,43 +198,54 @@ export default async function Entry({
                   .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
                   .map((comment) => (
                     <li key={comment.id} className="flex flex-col rounded-lg">
-                      <Card isButton={false}>
+                      <Card variant="comment" isButton={false}>
                         <div className="flex w-full flex-col gap-4 py-4">
-                          <div className="flex w-full justify-between gap-4 text-xs">
-                            <div className="font-medium">
+                          <div className="flex w-full flex-row items-start justify-start gap-2">
+                            <div className="pt-1">
                               <PersonaIcon
                                 personaId={comment.createdByPersonaId!}
                                 personas={personas}
                                 coachVariant={comment.coachVariant ?? ""}
                               />
                             </div>
-                            <div className="flex flex-row items-center gap-2">
-                              {formattedTimeStampToDate(
-                                comment.createdAt,
-                                locale,
-                              )}
-                              <form
-                                action={async () => {
-                                  "use server";
-                                  if (searchParams.s === "1") {
-                                    return;
+                            <div className="flex flex-col">
+                              <p className="whitespace-pre-line text-sm leading-6">
+                                <span className="pr-1 font-bold">
+                                  {
+                                    personas?.find(
+                                      (persona) =>
+                                        persona.id ===
+                                        comment.createdByPersonaId!,
+                                    )?.name
                                   }
-                                  try {
-                                    await api.comment.delete({
-                                      commentId: comment.id,
-                                    });
-                                    revalidatePath(`/entry/${params.id}`);
-                                  } catch (error) {
-                                    throw new Error("Error deleting comment");
-                                  }
-                                }}
-                              >
-                                <FormDeleteButton hasText={false} />
-                              </form>
+                                </span>
+                                {comment.content}
+                              </p>
+                              <div className="flex w-full flex-row items-center justify-between text-xs">
+                                {formattedTimeStampToDate(
+                                  comment.createdAt,
+                                  locale,
+                                )}
+                                <form
+                                  action={async () => {
+                                    "use server";
+                                    if (searchParams.s === "1") {
+                                      return;
+                                    }
+                                    try {
+                                      await api.comment.delete({
+                                        commentId: comment.id,
+                                      });
+                                      revalidatePath(`/entry/${params.id}`);
+                                    } catch (error) {
+                                      throw new Error("Error deleting comment");
+                                    }
+                                  }}
+                                >
+                                  <FormDeleteButton hasText={false} />
+                                </form>
+                              </div>
                             </div>
-                          </div>
-                          <div className="whitespace-pre-line text-sm">
-                            {comment.content}
                           </div>
                         </div>
                       </Card>

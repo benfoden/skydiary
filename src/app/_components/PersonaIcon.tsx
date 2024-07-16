@@ -1,6 +1,6 @@
 import { type Persona } from "@prisma/client";
 import { PersonIcon } from "@radix-ui/react-icons";
-import Image from "next/image";
+import { Avatar } from "./Avatar";
 
 export const PersonaIcon = ({
   personaId,
@@ -21,19 +21,12 @@ export const PersonaIcon = ({
   const persona = personas?.find((persona) => persona.id === personaId);
 
   return (
-    <div className="flex flex-row items-center gap-2">
+    <div>
       {persona?.image ? (
-        <Image
-          alt={persona?.name}
-          src={persona?.image}
-          width="48"
-          height="48"
-          className="h-6 w-fit rounded-full"
-        />
+        <Avatar alt={persona?.name} src={persona?.image} size="medium" />
       ) : (
-        <PersonIcon className="h-6 w-6" />
+        <PersonIcon className="h-8 w-8" />
       )}
-      <p>{persona?.name}</p>
     </div>
   );
 };

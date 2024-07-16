@@ -6,8 +6,8 @@ import {
 } from "@radix-ui/react-icons";
 import { useState } from "react";
 
-import Image from "next/image";
 import { useEffect, useRef } from "react";
+import { Avatar } from "./Avatar";
 import Button from "./Button";
 
 const DropDownMenu = ({
@@ -53,12 +53,10 @@ const DropDownMenu = ({
     >
       <Button variant="dropdownToggle" onClick={toggleDropdown}>
         {isUserMenu && userProfileIconUrl && (
-          <Image
-            alt={"your profilepicture"}
+          <Avatar
             src={userProfileIconUrl}
-            width="48"
-            height="48"
-            className="h-6 w-fit rounded-full"
+            alt={"your profilepicture"}
+            size="medium"
           />
         )}
         {isUserMenu && !userProfileIconUrl && (
