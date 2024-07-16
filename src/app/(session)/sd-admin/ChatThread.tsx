@@ -98,8 +98,8 @@ export default function ChatThread({
           </div>
         </Card>
       </details>
-      <div className="w-full md:max-w-3xl">
-        <Card isButton={false}>
+      <Card isButton={false}>
+        <div className="w-full md:max-w-3xl">
           {messages.slice(1).map((message, index) => (
             <Card key={index} isButton={false}>
               <div
@@ -109,9 +109,9 @@ export default function ChatThread({
                 {message.personaId === currentUserPersona?.id && (
                   <Image
                     src={user?.image ?? ""}
-                    alt="yo"
-                    width={64}
-                    height={64}
+                    alt="me"
+                    width={32}
+                    height={32}
                     className="rounded-full"
                   />
                 )}
@@ -125,9 +125,9 @@ export default function ChatThread({
                           (persona) => persona.id === message.personaId,
                         )?.image ?? ""
                       }
-                      alt="yo"
-                      width={64}
-                      height={64}
+                      alt="them"
+                      width={32}
+                      height={32}
                       className="rounded-full"
                     />
                   </>
@@ -146,8 +146,8 @@ export default function ChatThread({
               enter
             </FormButton>
           </form>
-        </Card>
-      </div>
+        </div>
+      </Card>
     </>
   );
 }

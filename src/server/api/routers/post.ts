@@ -228,6 +228,38 @@ export const postRouter = createTRPCRouter({
     });
   }),
 
+  getAllByUserForExport: protectedProcedure.query(async ({ ctx }) => {
+    const posts = await ctx.db.post.findMany({
+      where: { createdBy: { id: ctx.session.user.id } },
+      orderBy: { createdAt: "desc" },
+      include: {
+        tags: {
+          select: {
+            content: true,
+          },
+        },
+      },
+    });
+
+    return posts.map(
+      (post: {
+        content: string;
+        updatedAt: Date;
+        createdAt: Date;
+        id: string;
+        tags: { content: string }[];
+      }) => ({
+        id: post.id,
+        content: post.content,
+        updatedAt: post.updatedAt,
+        createdAt: post.createdAt,
+        tags: post.tags.map((tag) => ({
+          content: tag.content,
+        })),
+      }),
+    );
+  }),
+
   getByPostId: protectedProcedure
     .input(z.object({ postId: z.string() }))
     .query(({ ctx, input }) => {
