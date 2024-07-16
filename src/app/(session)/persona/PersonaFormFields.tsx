@@ -1,6 +1,6 @@
 import { type Persona, type User } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
-import Image from "next/image";
+import { Avatar } from "~/app/_components/Avatar";
 import { isFavoritePersonaAvailable } from "~/utils/planDetails";
 import Input from "../../_components/Input";
 
@@ -55,13 +55,7 @@ export default async function PersonaFormFields({
         maxLength={700}
       />
       {persona?.image && (
-        <Image
-          src={persona.image}
-          alt={persona.name}
-          width="128"
-          height="128"
-          className="h-16 w-fit rounded-full"
-        />
+        <Avatar alt={persona.name} src={persona.image} size="large" />
       )}
       <Input
         label={t("personas.image")}

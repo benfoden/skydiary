@@ -26,6 +26,7 @@ export default function PersonaSidebar({ personas }: { personas: Persona[] }) {
               <Button variant="listItem">
                 <div className="flex w-full flex-row items-center justify-between gap-2">
                   <PersonaIcon personaId={persona.id} personas={personas} />
+                  {persona?.name}
                   {persona?.isFavorite && (
                     <StarFilledIcon className="h-4 w-4" />
                   )}

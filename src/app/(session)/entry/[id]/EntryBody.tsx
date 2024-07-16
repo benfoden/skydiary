@@ -79,7 +79,7 @@ export default function EntryBody({ post }: { post: Post }) {
         value={content}
         onChange={handleContentChange}
         placeholder={!isSuccess ? t("status.loading") : t("entry.today")}
-        className={`min-h-full w-full resize-none rounded-xl border-none px-8 py-6 focus:outline-none sm:max-w-5xl sm:rounded-3xl sm:px-16 sm:py-12 dark:text-[#DCDCDC] ${cardColors("default")}`}
+        className={` min-h-full w-full resize-none rounded-xl border-none px-8 py-6 leading-6 focus:outline-none sm:max-w-5xl sm:rounded-3xl sm:px-16 sm:py-12 dark:text-[#DCDCDC] ${cardColors("default")}`}
         autoFocus
         style={{ height: "auto", overflow: "hidden", paddingBottom: "16px" }}
         onInput={adjustTextareaHeight}

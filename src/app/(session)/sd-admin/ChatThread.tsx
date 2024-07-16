@@ -1,7 +1,7 @@
 "use client";
 import { type Persona, type User } from "@prisma/client";
-import Image from "next/image";
 import { useEffect, useState } from "react";
+import { Avatar } from "~/app/_components/Avatar";
 import { Card } from "~/app/_components/Card";
 import FormButton from "~/app/_components/FormButton";
 import Input from "~/app/_components/Input";
@@ -107,30 +107,20 @@ export default function ChatThread({
                 className="flex w-full flex-row items-start gap-2"
               >
                 {message.personaId === currentUserPersona?.id && (
-                  <Image
-                    src={user?.image ?? ""}
-                    alt="me"
-                    width={32}
-                    height={32}
-                    className="rounded-full"
-                  />
+                  <Avatar src={user?.image ?? ""} alt="me" size="medium" />
                 )}
                 {personas.find(
                   (persona) => persona.id === message.personaId,
                 ) && (
-                  <>
-                    <Image
-                      src={
-                        personas.find(
-                          (persona) => persona.id === message.personaId,
-                        )?.image ?? ""
-                      }
-                      alt="them"
-                      width={32}
-                      height={32}
-                      className="rounded-full"
-                    />
-                  </>
+                  <Avatar
+                    src={
+                      personas.find(
+                        (persona) => persona.id === message.personaId,
+                      )?.image ?? ""
+                    }
+                    alt="them"
+                    size="medium"
+                  />
                 )}
                 <p>{message.content}</p>
               </div>

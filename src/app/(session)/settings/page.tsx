@@ -1,8 +1,8 @@
 import { type Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
-import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Avatar } from "~/app/_components/Avatar";
 import Button from "~/app/_components/Button";
 import ManageBillingButton from "~/app/_components/ButtonBilling";
 import { Card } from "~/app/_components/Card";
@@ -114,12 +114,10 @@ export default async function Settings() {
                 label={t("settings.your age")}
               />
               {session?.user?.image && (
-                <Image
-                  alt={session?.user?.name ?? "no username"}
+                <Avatar
                   src={session?.user?.image ?? ""}
-                  width="64"
-                  height="64"
-                  className="h-16 w-fit rounded-full"
+                  alt={session?.user?.name ?? "no username"}
+                  size="medium"
                 />
               )}
               <Input
