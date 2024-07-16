@@ -160,6 +160,18 @@ export const postRouter = createTRPCRouter({
       });
     }),
 
+  getAllByUserIdAsCron: publicProcedure
+    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
+    .query(({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
+      return ctx.db.post.findMany({
+        where: { createdBy: { id: input.userId } },
+        orderBy: { createdAt: "desc" },
+      });
+    }),
+
   getTagsAndCounts: protectedProcedure.query(async ({ ctx }) => {
     const posts = await ctx.db.post.findMany({
       where: { createdBy: { id: ctx.session.user.id } },

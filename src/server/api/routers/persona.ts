@@ -161,6 +161,18 @@ export const personaRouter = createTRPCRouter({
       });
     }),
 
+    getAllAiPersonasByUserIdAsCron: publicProcedure
+    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
+    .query(async ({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
+      return await ctx.db.persona.findMany({
+        where: { isUser: false, createdBy: { id: input.userId } },
+        orderBy: { createdAt: "asc" },
+      });
+    }),
+
   getById: protectedProcedure
     .input(z.object({ personaId: z.string() }))
     .query(({ ctx, input }) => {
