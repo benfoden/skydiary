@@ -1,26 +1,17 @@
-import { DownloadIcon } from "@radix-ui/react-icons";
-import { getTranslations } from "next-intl/server";
-import FormButton from "~/app/_components/FormButton";
 import { getServerAuthSession } from "~/server/auth";
 
-export default async function Export({
-  searchParams,
-}: {
-  searchParams: { status: string };
-}) {
-  const isReady = searchParams.status === "ready";
-  if (!isReady) return null;
+export default async function Export() {
   const session = await getServerAuthSession();
   const sessionUser = session?.user;
   if (!sessionUser) {
     console.error("No user session found");
     return;
   }
-  const t = await getTranslations();
+  // const t = await getTranslations();
 
   return (
     <div>
-      <form
+      {/* <form
         action={async () => {
           "use server";
           try {
@@ -53,12 +44,10 @@ export default async function Export({
         }}
       >
         <FormButton>{t("settings.exportDataButton")}</FormButton>
-      </form>
-      <a href="#" id="download" download>
-        <div className="flex items-center gap-2">
-          <DownloadIcon className="h-4 w-4" />
-          <span className="text-xs">{t("settings.downloadDataButton")}</span>
-        </div>
+      </form> */}
+      <h1>Download JSON File</h1>
+      <a href={`/api/export/${session?.user?.id}`} download="userData.json">
+        Download JSON
       </a>
     </div>
   );

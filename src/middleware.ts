@@ -30,6 +30,7 @@ export function middleware(request: NextRequest) {
     "/api/stripe-webhook",
     "/api/upload",
     "/api/chat",
+    "/api/export",
   ];
 
   const isUntranslatedAPIRoute = unTranslatedAPIRoutes.some(
