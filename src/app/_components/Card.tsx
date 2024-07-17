@@ -9,7 +9,7 @@ export const cardColors = (
     | "comment"
     | "transparent",
 ) =>
-  ` bg-white/30 dark:bg-black/50 ${variant === "form" ? "shadow-xl dark:shadow-black" : ""}`;
+  ` bg-white/30 dark:bg-white/10 ${variant === "form" ? "shadow-xl dark:shadow-black" : ""}`;
 export function Card({
   children,
   isButton = true,
@@ -30,7 +30,7 @@ export function Card({
   if (variant === "form") isButton = false;
 
   const sharedHover =
-    " cursor-pointer transition hover:bg-white/60 hover:dark:bg-white/[.16] ";
+    " cursor-pointer transition hover:bg-white/60 hover:dark:bg-white/10 ";
 
   const DefaultCard = () => (
     <div
@@ -78,7 +78,7 @@ export function Card({
       return (
         <div
           className={
-            `flex w-full flex-col gap-2 rounded-xl bg-white/50 px-8 py-6 shadow-lg dark:bg-black/60 ${isButton && sharedHover} ` +
+            `flex w-full flex-col gap-2 rounded-xl bg-white/50 px-8 py-6 shadow-lg dark:bg-white/10 ${isButton && sharedHover} ` +
             cardColors(variant)
           }
         >
@@ -91,7 +91,7 @@ export function Card({
     case "textBlock":
       return (
         <div
-          className={`flex w-full flex-col gap-2 rounded-xl bg-white/30 px-6 py-4 dark:bg-black/50 ${isButton && sharedHover} `}
+          className={`flex w-full flex-col gap-2 rounded-xl bg-white/30 px-6 py-4 dark:bg-white/10 ${isButton && sharedHover} `}
         >
           <div className="flex w-fit flex-col items-start justify-between gap-2">
             {children}
@@ -102,7 +102,7 @@ export function Card({
     case "hero":
       return (
         <div
-          className={`flex h-fit w-fit flex-col gap-2 rounded-full bg-white/30 px-6 py-4 dark:bg-black/50 ${isButton && sharedHover} shadow-xl dark:shadow-black `}
+          className={`flex h-fit w-fit flex-col gap-2 rounded-full bg-white/30 px-6 py-4 dark:bg-white/10 ${isButton && sharedHover} shadow-xl dark:shadow-black `}
         >
           <div className="flex flex-col items-start justify-between gap-2 px-16 py-8">
             {children}
@@ -122,7 +122,7 @@ export function Card({
     case "comment":
       return (
         <div
-          className={`flex w-fit flex-col items-start justify-between gap-2 rounded-xl bg-white/30 px-6 py-4 dark:bg-black/50 ${isButton && sharedHover} `}
+          className={`flex w-fit flex-col items-start justify-between gap-2 rounded-xl bg-white/30 px-6 py-4 dark:bg-white/10 ${isButton && sharedHover} `}
         >
           {children}
         </div>
