@@ -33,7 +33,7 @@ export default async function Top() {
     <>
       <div className="flex w-full flex-col items-center justify-center md:flex-row">
         <Card variant="transparent" isButton={false}>
-          <div className="flex w-full flex-col items-start gap-8 sm:w-[512px] md:w-[678px]">
+          <div className="flex w-full flex-col items-start gap-8 px-4 md:w-[678px] md:px-0">
             <div className="font-regular text-4xl">
               <div>{t("top.heroLine1")}</div>
               <div>
