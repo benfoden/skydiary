@@ -12,12 +12,16 @@ const basePromptComment = ({
   content,
   personaDetails,
   characters,
+  contentDate,
+  commentDate,
 }: {
   commentType: CommentType;
   authorDetails: PersonaForPrompt;
   content: string;
   characters: number;
   personaDetails?: PersonaForPrompt;
+  contentDate?: Date;
+  commentDate?: Date;
   // authorMemories?: string,
 }): Prompt => {
   const cleanDiaryEntry = cleanStringForPrompt(content);
@@ -74,6 +78,16 @@ const basePromptComment = ({
     default:
       commentFocus = "criticism";
   }
+  const replyDateString = commentDate
+    ? "The reply is being written on this date: " +
+      commentDate.toLocaleDateString() +
+      ". "
+    : "";
+  const entryDateString = contentDate
+    ? "The diary entry refers to the author's life on this date: " +
+      contentDate.toLocaleDateString() +
+      ". "
+    : "";
 
   return {
     task: "Write as a persona replying to a message from an author. ",
@@ -86,7 +100,7 @@ const basePromptComment = ({
       "Vary sentence length for a natural flow. " +
       "Do not use excessive vocabulary. " +
       "Do not express platitudes. " +
-      "Do not use of these words in the reply: admirable, commendable, noteworthy, notably, noted, notable. (end of banned word list). " +
+      "Do not use these words in the reply: admirable, commendable, noteworthy, notably, noted, notable. (end of banned word list). " +
       "Do not summarize the entry in the reply. " +
       "Do not refer to the author as the author. Instead use you, your, etc. " +
       "Do not talk about the author's writing style. " +
@@ -95,14 +109,16 @@ const basePromptComment = ({
       "The reply should include reactions, advice, criticism, or insights that are new, insightful, or surprsing to the author. " +
       "Write the reply in the same language as the majority of the diary entry. " +
       "Answer any questions that may be in the diary entry. " +
+      "Use new lines to separate paragraphs in the reply. " +
+      replyDateString +
+      entryDateString +
       "Maximum reply length is " +
       Math.floor(characters / 4.5)
         .toFixed(0)
         .toString() +
       " words and minimum is " +
       (Math.floor(characters / 4.5) * 0.33333).toFixed(0).toString() +
-      " words. " +
-      "Use new lines to separate paragraphs in the reply. ",
+      " words. ",
     persona: persona + " ",
     exemplars: personaDetails?.communicationSample
       ? " Persona writing sample: " +
@@ -220,12 +236,16 @@ export const prompts = {
     personaDetails,
     commentType = "custom",
     characters = 280,
+    contentDate,
+    commentDate,
   }: {
     authorDetails: PersonaForPrompt;
     content: string;
     commentType?: "custom" | "criticism" | "insight" | "boost";
     personaDetails?: PersonaForPrompt;
     characters?: number;
+    contentDate?: Date;
+    commentDate?: Date;
   }): string => {
     const filteredAuthorDetails = Object.fromEntries(
       Object.entries(authorDetails).filter(
@@ -263,6 +283,8 @@ export const prompts = {
       content,
       personaDetails: filteredPersonaDetails,
       characters: characters * fastLogNormalRandom(),
+      contentDate,
+      commentDate,
     });
     return Object.values(prompt).join(" ");
   },
