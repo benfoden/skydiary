@@ -48,6 +48,8 @@ export async function makeComment({
         ? 1500
         : productPlan(userProductId)?.characters,
       personaDetails: commentPersona ?? undefined,
+      contentDate: latestPost?.createdAt,
+      commentDate: new Date(),
     });
 
     const responseContent = await getResponse({
