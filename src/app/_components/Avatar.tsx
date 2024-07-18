@@ -11,7 +11,7 @@ export function Avatar({
 }) {
   if (size === "small") {
     return (
-      <div className="relative h-4 w-4 overflow-hidden rounded-full">
+      <div className="w relative h-4 w-4 min-w-4 overflow-hidden rounded-full">
         <Image
           src={src}
           alt={alt}
@@ -24,7 +24,7 @@ export function Avatar({
   }
   if (size === "medium") {
     return (
-      <div className="relative h-8 w-8 overflow-hidden rounded-full">
+      <div className="relative h-8 w-8 min-w-8 overflow-hidden rounded-full">
         <Image
           src={src}
           alt={alt}
@@ -37,7 +37,7 @@ export function Avatar({
   }
   if (size === "large") {
     return (
-      <div className="relative h-24 w-24 overflow-hidden rounded-full">
+      <div className="relative h-24 w-24 min-w-24 overflow-hidden rounded-full">
         <Image
           src={src}
           alt={alt}
