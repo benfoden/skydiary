@@ -202,7 +202,11 @@ export default async function Settings() {
                 redirect("/");
               }}
             >
-              <FormDeleteButton>
+              <FormDeleteButton
+                isDisabled={ACTIVESTATUSES.some(
+                  (s) => s === subscription?.status,
+                )}
+              >
                 <span className="text-red-500">
                   {t("settings.deleteAccountButton")}
                 </span>

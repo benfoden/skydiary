@@ -9,9 +9,11 @@ import ButtonSpinner from "./ButtonSpinner";
 export default function FormDeleteButton({
   hasText = true,
   children,
+  isDisabled,
 }: {
   hasText?: boolean;
   children?: React.ReactNode;
+  isDisabled?: boolean;
 }) {
   const { pending }: { pending: boolean } = useFormStatus();
   const t = useTranslations();
@@ -45,7 +47,7 @@ export default function FormDeleteButton({
     <Button
       variant="menuElement"
       type="submit"
-      disabled={pending || !readyToDelete}
+      disabled={pending || !readyToDelete || isDisabled}
       onClick={handleDelete}
     >
       {pending ? (
