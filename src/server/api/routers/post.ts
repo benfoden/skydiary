@@ -225,6 +225,9 @@ export const postRouter = createTRPCRouter({
     return ctx.db.post.findMany({
       where: { createdBy: { id: ctx.session.user.id } },
       orderBy: { createdAt: "desc" },
+      include: {
+        tags: true,
+      },
     });
   }),
 

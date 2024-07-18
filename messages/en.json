@@ -119,7 +119,8 @@
     "today": "Today...",
     "limitTitle": "unlock more comments",
     "limitDescription1": "you've discovered a paid feature.",
-    "limitDescription2": "upgrade to skydiary plus to get more comments every day."
+    "limitDescription2": "upgrade to skydiary plus to get more comments every day.",
+    "personaButton": "personas"
   },
   "topics": {
     "all": "all",
@@ -211,7 +212,8 @@
     "confirmDelete": "delete?",
     "optional": "optional",
     "or": "or",
-    "try again": "try again"
+    "try again": "try again",
+    "optionalInput": "(optional)"
   },
   "status": {
     "loading": "loading...",

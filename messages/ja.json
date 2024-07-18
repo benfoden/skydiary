@@ -119,7 +119,8 @@
     "today": "今日...",
     "limitTitle": "コメントをもっと解除",
     "limitDescription1": "有料機能を発見しました。",
-    "limitDescription2": "skydiaryプラスにアップグレードして、毎日もっとコメントを取得してください。"
+    "limitDescription2": "skydiaryプラスにアップグレードして、毎日もっとコメントを取得してください。",
+    "personaButton": "パーソナ"
   },
   "topics": {
     "all": "すべて",
@@ -210,7 +211,8 @@
     "confirmDelete": "削除？",
     "optional": "任意",
     "or": "または",
-    "try again": "再試行"
+    "try again": "再試行",
+    "optionalInput": "（任意）"
   },
   "status": {
     "loading": "読み込み中...",
