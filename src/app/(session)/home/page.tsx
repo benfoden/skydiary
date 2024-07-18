@@ -116,24 +116,25 @@ export default async function Home() {
                   <Button>{t("home.whats happening")}</Button>
                 </Link>
               ) : (
-                <Link
+                <PostCard
                   key={userPosts[0]?.id}
-                  href={`/entry/${userPosts[0]?.id}`}
-                  className="w-full"
-                  prefetch={true}
-                >
-                  <PostCard
-                    key={userPosts[0]?.id}
-                    post={userPosts[0]!}
-                    locale={locale}
-                  />
-                </Link>
+                  post={userPosts[0]!}
+                  locale={locale}
+                />
               )}
               {filterPostsByDateRange(0, 6, userPosts).length > 0 && (
                 <>
                   <div className="ml-4">{t("home.last7Days")}</div>
                   {filterPostsByDateRange(0, 6, userPosts).map((post) => (
-                    <PostCard key={post.id} post={post} locale={locale} />
+                    <PostCard
+                      key={post.id}
+                      post={
+                        post as Post & {
+                          tags: { content: string; id: string }[];
+                        }
+                      }
+                      locale={locale}
+                    />
                   ))}
                 </>
               )}
@@ -141,13 +142,15 @@ export default async function Home() {
                 <>
                   <div className="ml-4">{t("home.last30Days")}</div>
                   {filterPostsByDateRange(8, 30, userPosts).map((post) => (
-                    <Link
+                    <PostCard
                       key={post.id}
-                      href={`/entry/${post.id}`}
-                      className="w-full"
-                    >
-                      <PostCard key={post.id} post={post} locale={locale} />
-                    </Link>
+                      post={
+                        post as Post & {
+                          tags: { content: string; id: string }[];
+                        }
+                      }
+                      locale={locale}
+                    />
                   ))}
                 </>
               )}
