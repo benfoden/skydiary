@@ -38,7 +38,7 @@ export default async function Persona() {
     <>
       <SessionNav>
         <div className="flex items-center gap-2">
-          <NavChevronLeft targetPathname={"/today"} label={t("nav.today")} />
+          <NavChevronLeft targetPathname={"/home"} label={t("nav.home")} />
         </div>
         <h1>{t("nav.personas")}</h1>
         <DropDownUser />
