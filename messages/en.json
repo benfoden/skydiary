@@ -211,7 +211,8 @@
     "confirmDelete": "delete?",
     "optional": "optional",
     "or": "or",
-    "try again": "try again"
+    "try again": "try again",
+    "optionalInput": "(optional)"
   },
   "status": {
     "loading": "loading...",
