@@ -30,7 +30,7 @@ export function Card({
   if (variant === "form") isButton = false;
 
   const sharedHover =
-    " cursor-pointer transition hover:bg-white/60 hover:dark:bg-white/10 ";
+    " cursor-pointer transition hover:bg-white/60 hover:dark:bg-white/20 ";
 
   const DefaultCard = () => (
     <div
