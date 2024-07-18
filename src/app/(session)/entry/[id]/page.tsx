@@ -184,8 +184,12 @@ export default async function Entry({
                   ))}
                 <Link href="/persona/all">
                   <Button>
-                    <PersonIcon className="h-4 w-4" />
-                    <PlusIcon className="h-4 w-4" />
+                    <div className="flex flex-row items-center gap-1">
+                      <PlusIcon className="h-4 w-4" />
+                      <span className="text-xs font-bold">
+                        {t("entry.personaButton")}
+                      </span>
+                    </div>
                   </Button>
                 </Link>
               </ul>
