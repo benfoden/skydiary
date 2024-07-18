@@ -192,6 +192,7 @@
     "deleteAccount": "delete account",
     "deleteAccountDescription": "this action is irreversible. ALL of your data wiil be permanently deleted.",
     "deleteAccountButton": "yes, delete my account",
+    "unsubscribeBeforeDeleteAccount": "if you want to delete your account, you need to unsubscribe first",
     "profilePicture": "profile picture",
     "exportData": "export data",
     "exportDataDescription": "this may take a few minutes.",

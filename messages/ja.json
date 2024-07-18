@@ -192,6 +192,7 @@
     "deleteAccount": "アカウントを削除",
     "deleteAccountDescription": "このアクションは取り消しできません。すべてのデータを永久に失います。",
     "deleteAccountButton": "はい、すべてを削除します",
+    "unsubscribeBeforeDeleteAccount": "アカウントを削除するには、まずサブスクリプションを解除する必要があります",
     "profilePicture": "プロフィール画像",
     "exportData": "データをエクスポート",
     "exportDataDescription": "これは時間がかかる場合があります。",

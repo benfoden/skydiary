@@ -190,24 +190,34 @@ export default async function Settings() {
             <p className="text-sm opacity-60">
               {t("settings.deleteAccountDescription")}
             </p>
-            <form
-              action={async () => {
-                "use server";
-                try {
-                  await api.user.deleteUser();
-                } catch (error) {
-                  console.error("Error deleting user:", error);
-                  throw new Error("Error deleting user");
-                }
-                redirect("/");
-              }}
-            >
-              <FormDeleteButton>
-                <span className="text-red-500">
-                  {t("settings.deleteAccountButton")}
-                </span>
-              </FormDeleteButton>
-            </form>
+            {ACTIVESTATUSES.some((s) => s === subscription?.status) ? (
+              <p className="text-base">
+                {t("settings.unsubscribeBeforeDeleteAccount")}
+              </p>
+            ) : (
+              <form
+                action={async () => {
+                  "use server";
+                  try {
+                    await api.user.deleteUser();
+                  } catch (error) {
+                    console.error("Error deleting user:", error);
+                    throw new Error("Error deleting user");
+                  }
+                  redirect("/");
+                }}
+              >
+                <FormDeleteButton
+                  isDisabled={ACTIVESTATUSES.some(
+                    (s) => s === subscription?.status,
+                  )}
+                >
+                  <span className="text-red-500">
+                    {t("settings.deleteAccountButton")}
+                  </span>
+                </FormDeleteButton>
+              </form>
+            )}
           </Card>
         </div>
       </main>
