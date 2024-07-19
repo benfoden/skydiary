@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
       const newTags = await getResponse({
         messageContent: prompts.tag({ content: post?.content }),
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
       });
 
       if (!newTags) {

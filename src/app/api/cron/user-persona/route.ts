@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
             ? 180
             : productPlan(user?.stripeProductId).memories,
         }),
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
       });
 
       if (!generatedPersona) {

@@ -6,7 +6,7 @@ const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
 export async function getResponse({
   messageContent,
   systemMessageContent = "",
-  model = "gpt-3.5-turbo",
+  model = "gpt-4o-mini",
 }: {
   messageContent: string;
   systemMessageContent?: string;
@@ -25,7 +25,7 @@ export async function getResponse({
 
 export async function getResponseJSON({
   messageContent,
-  model = "gpt-3.5-turbo",
+  model = "gpt-4o-mini",
 }: {
   messageContent: string;
   model?: string;
@@ -43,7 +43,7 @@ export async function getResponseFromChatMessages({
   messages,
   userPersonaId,
   aiPersonaId,
-  model = "gpt-3.5-turbo",
+  model = "gpt-4o-mini",
 }: {
   messages: { personaId: string | undefined | null; content: string }[];
   userPersonaId: string;
