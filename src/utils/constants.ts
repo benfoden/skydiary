@@ -57,7 +57,7 @@ export type UserPlanLimit = {
   comments: number;
   memories: number;
   characters: number;
-  model: "gpt-3.5-turbo" | "gpt-4o";
+  model: "gpt-4o-mini" | "gpt-4o";
 };
 
 const userplanDetails: Record<string, UserPlanLimit> = {
@@ -66,7 +66,7 @@ const userplanDetails: Record<string, UserPlanLimit> = {
     comments: 1,
     memories: 10,
     characters: 250,
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o-mini",
   },
   [env.PRODUCT_ID_PLUS !== "development"
     ? env.PRODUCT_ID_PLUS
@@ -93,7 +93,7 @@ export const productPlan = (stripeProductId?: string | null): UserPlanLimit => {
   return userplanDetails[stripeProductId ?? env.PRODUCT_ID_LITE]!;
 };
 
-export type OpenAIModels = ["gpt-4o", "gpt-3.5-turbo"];
+export type OpenAIModels = ["gpt-4o", "gpt-4o-mini"];
 
 export type PlanNames = "lite" | "plus" | "premium";
 
