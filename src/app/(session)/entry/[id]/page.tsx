@@ -102,11 +102,11 @@ export default async function Entry({
                     "use server";
                     try {
                       await api.post.delete({ postId: post?.id });
-                      revalidatePath("/home");
-                      redirect("/home");
                     } catch (error) {
                       throw new Error("Error deleting post");
                     }
+                    revalidatePath("/home");
+                    redirect("/home");
                   }}
                 >
                   <FormDeleteButton />
