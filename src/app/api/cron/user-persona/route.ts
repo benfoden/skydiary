@@ -93,12 +93,12 @@ export async function POST(request: NextRequest) {
         }),
       });
 
-      Response.json({
+      return Response.json({
         message: "Updated user persona in the queue.",
         status: 200,
       });
     }
-    return new Response(
+    return Response.json(
       "No out of date personas remain to update. Jobs done.",
       {
         status: 200,
