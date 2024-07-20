@@ -80,6 +80,7 @@ export async function GET(request: NextRequest) {
         status: 200,
       });
     }
+
     if (!postQueueOutput.length && !userPersonaQueueOutput.length) {
       return Response.json({
         message: "No unprocessed posts or user personas found.",
