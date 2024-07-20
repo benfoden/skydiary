@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     }
 
     for (const post of postQueue) {
-      if (!post?.id) {
+      if (!post?.id || post.tags.length > 0) {
         continue;
       }
       const postId = post.id;
