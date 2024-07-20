@@ -80,11 +80,14 @@ export async function POST(request: NextRequest) {
         }),
       });
 
-      Response.json({
+      return Response.json({
         message: "Tags added to a post in the queue.",
         status: 200,
       });
     }
+    return Response.json("No untagged posts remain to update. Jobs done.", {
+      status: 200,
+    });
   } catch (error) {
     console.error("Error in post-tags cron job:", error);
     const { message, stack } = error as Error;
