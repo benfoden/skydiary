@@ -59,7 +59,32 @@ export const postRouter = createTRPCRouter({
         where: { id: input.postId },
         data: {
           tags: {
-            connect: input.tagIds.map((tagId: string) => ({
+            connect: input.tagIds.slice(0, 3).map((tagId: string) => ({
+              id: tagId,
+            })),
+          },
+        },
+      });
+    }),
+
+  deleteExtraTagsAsCron: publicProcedure
+    .input(
+      z.object({
+        postId: z.string(),
+        tagIds: z.array(z.string()),
+        cronSecret: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
+
+      await ctx.db.post.update({
+        where: { id: input.postId },
+        data: {
+          tags: {
+            disconnect: input.tagIds.slice(3).map((tagId: string) => ({
               id: tagId,
             })),
           },

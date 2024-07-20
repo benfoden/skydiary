@@ -41,7 +41,11 @@ export async function GET(request: NextRequest) {
       ) {
         userPersonaQueueOutput.push(userPersona);
       }
-      if (!latestPosts || latestPosts.length === 0) {
+      if (
+        !latestPosts ||
+        latestPosts.length === 0 ||
+        latestPosts.every((post) => post.tags.length > 0)
+      ) {
         continue;
       }
       postQueueOutput.push(...latestPosts);
@@ -76,6 +80,7 @@ export async function GET(request: NextRequest) {
         status: 200,
       });
     }
+
     if (!postQueueOutput.length && !userPersonaQueueOutput.length) {
       return Response.json({
         message: "No unprocessed posts or user personas found.",
