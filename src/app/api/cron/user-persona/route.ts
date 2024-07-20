@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
         }),
       });
 
-      return Response.json({
+      Response.json({
         message: "Updated user persona in the queue.",
         status: 200,
       });
