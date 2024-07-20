@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
         }),
       });
 
-      return Response.json({
+      Response.json({
         message: "Tags added to a post in the queue.",
         status: 200,
       });
