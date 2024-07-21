@@ -29,6 +29,7 @@ const NewUserPage: React.FC = async () => {
                 const name: string = formData.get("name") as string;
                 const age = Number(formData.get("age"));
                 const gender: string = formData.get("gender") as string;
+                const isWorkFocused = formData.get("isWorkFocused") === "on";
 
                 const imageFile =
                   (formData.get("imageFile") as File) ?? undefined;
@@ -38,7 +39,7 @@ const NewUserPage: React.FC = async () => {
                 if (name) {
                   try {
                     // todo: add user locale to user profile
-                    await api.user.updateUser({ name });
+                    await api.user.updateUser({ name, isWorkFocused });
                     await api.persona.create({
                       name,
                       age: age ?? 0,
@@ -77,10 +78,22 @@ const NewUserPage: React.FC = async () => {
                 placeholder={t("new-user.placeholder identities")}
               />
               <Input
+                type="text"
+                id="occupation"
+                name="occupation"
+                label={t("new-user.occupation")}
+              />
+              <Input
                 type="file"
                 id="imageFile"
                 name="imageFile"
                 label={t("new-user.profilePicture")}
+              />
+              <Input
+                type="checkbox"
+                id="isWorkFocused"
+                name="isWorkFocused"
+                label={t("new-user.isWorkFocused")}
               />
               <FormButton variant="submit">
                 {t("auth.save and continue")}

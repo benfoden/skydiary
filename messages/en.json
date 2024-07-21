@@ -107,7 +107,9 @@
     "your age": "your age",
     "your identities": "your identities",
     "placeholder identities": "woman, daughter, mother, etc.",
-    "profilePicture": "profile picture"
+    "profilePicture": "profile picture",
+    "isWorkFocused": "is your goal a personal diary a work journal?",
+    "occupation": "occupation"
   },
   "home": {
     "whats happening": "What's happening today?",
