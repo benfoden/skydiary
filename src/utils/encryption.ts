@@ -1,16 +1,31 @@
 // Function to generate a strong encryption key
-export async function generateUserEncryptionKey(): Promise<string> {
-  const key = await crypto.subtle.generateKey(
+export async function generateUserEncryptionKey(
+  password: string,
+): Promise<CryptoKey> {
+  const encoder = new TextEncoder();
+  const passwordKey = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(password),
+    { name: "PBKDF2" },
+    false,
+    ["deriveKey"],
+  );
+
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const key = await crypto.subtle.deriveKey(
     {
-      name: "AES-GCM",
-      length: 256,
+      name: "PBKDF2",
+      salt: salt,
+      iterations: 100000,
+      hash: "SHA-256",
     },
+    passwordKey,
+    { name: "AES-GCM", length: 256 },
     true,
     ["encrypt", "decrypt"],
   );
 
-  const exportedKey = await crypto.subtle.exportKey("raw", key);
-  return btoa(String.fromCharCode(...new Uint8Array(exportedKey)));
+  return key;
 }
 
 // Function to generate a data encryption key that is itself encrypted with the user encryption key
