@@ -89,7 +89,7 @@ export default function Input({
         htmlFor={id}
       >
         <div className="flex flex-row items-center gap-1">
-          {props.required && (
+          {props.required && label?.length && (
             <span className="text-black dark:text-white">*</span>
           )}{" "}
           {label}
