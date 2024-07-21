@@ -201,7 +201,9 @@
     "preparingExport": "preparing export...",
     "checkDownloadsFolder": "export and download complete. check your downloads folder",
     "backToSettings": "back to settings",
-    "exportDataTitle": "skydiary user data export"
+    "exportDataTitle": "skydiary user data export",
+    "encryptionKeyTitle": "user encryption key",
+    "encryptionKeyDescription": "CAUTION: you need to save this key by yourself. we recommend storing it in a password manager or other secure method. we do not store it. this is the only key that can decrypt your data."
   },
   "form": {
     "save": "save",
@@ -213,7 +215,9 @@
     "optional": "optional",
     "or": "or",
     "try again": "try again",
-    "optionalInput": "(optional)"
+    "optionalInput": "(optional)",
+    "copy": "copy",
+    "copied": "copied!"
   },
   "status": {
     "loading": "loading...",

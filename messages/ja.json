@@ -212,7 +212,9 @@
     "optional": "任意",
     "or": "または",
     "try again": "再試行",
-    "optionalInput": "（任意）"
+    "optionalInput": "（任意）",
+    "copy": "コピー",
+    "copied": "コピーしました！"
   },
   "status": {
     "loading": "読み込み中...",

@@ -14,5 +14,6 @@ export default async function SessionLayout({ children }: Props) {
   if (!session.user.name) {
     redirect("/auth/new-user");
   }
+  console.log("session", session);
   return <div className="container mx-auto min-h-screen">{children}</div>;
 }
