@@ -62,7 +62,7 @@ export default function EmailSubmission({ signUpEmail, onSubmit }: Props) {
           required
         />
 
-        <FormButton variant="submit" isDisabled={isSubmitting}>
+        <FormButton variant="submit" isDisabled={isSubmitting} isSpecial>
           {isSubmitting ? t("auth.signing in") : t("auth.sign in")}
         </FormButton>
         <p className="text-xs opacity-70">
