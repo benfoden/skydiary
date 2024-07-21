@@ -13,7 +13,7 @@ const NewUserPage: React.FC = async () => {
   const session = await getServerAuthSession();
 
   if (!session) return redirect("/auth/signin");
-  if (session.user.name) return redirect("/home");
+  // if (session.user.name) return redirect("/home");
 
   return (
     <div className="relative flex h-full w-full overflow-hidden">
@@ -29,7 +29,7 @@ const NewUserPage: React.FC = async () => {
                 const name: string = formData.get("name") as string;
                 const age = Number(formData.get("age"));
                 const gender: string = formData.get("gender") as string;
-                const isWorkFocused = formData.get("isWorkFocused") === "on";
+                const isWorkFocused = formData.get("mainFocused") === "work";
 
                 const imageFile =
                   (formData.get("imageFile") as File) ?? undefined;
@@ -62,11 +62,25 @@ const NewUserPage: React.FC = async () => {
                 required
               />
               <Input
+                type="radio"
+                required
+                radioOptions={[
+                  {
+                    id: "personal",
+                    label: t("new-user.personal"),
+                    value: "personal",
+                    checked: true,
+                  },
+                  { id: "work", label: t("new-user.work"), value: "work" },
+                ]}
+                name="mainFocus"
+                label={t("new-user.mainFocus")}
+              />
+              <Input
                 type="number"
                 id="age"
                 name="age"
                 label={t("new-user.your age")}
-                placeholder="1"
                 min={13}
               />
 
@@ -88,13 +102,9 @@ const NewUserPage: React.FC = async () => {
                 id="imageFile"
                 name="imageFile"
                 label={t("new-user.profilePicture")}
+                fileSelectButtonLabel={t("new-user.chooseImage")}
               />
-              <Input
-                type="checkbox"
-                id="isWorkFocused"
-                name="isWorkFocused"
-                label={t("new-user.isWorkFocused")}
-              />
+
               <FormButton variant="submit">
                 {t("auth.save and continue")}
               </FormButton>

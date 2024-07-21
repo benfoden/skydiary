@@ -103,13 +103,16 @@
   },
   "new-user": {
     "title": "welcome to skydiary",
-    "yourName": "your first name (required)",
+    "yourName": "your first name",
     "your age": "your age",
     "your identities": "your identities",
     "placeholder identities": "woman, daughter, mother, etc.",
     "profilePicture": "profile picture",
-    "isWorkFocused": "is your goal a personal diary a work journal?",
-    "occupation": "occupation"
+    "mainFocus": "your main focus for skydiary",
+    "occupation": "your occupation",
+    "personal": "personal",
+    "work": "work",
+    "chooseImage": "choose image file"
   },
   "home": {
     "whats happening": "What's happening today?",
@@ -182,7 +185,7 @@
     "personal": "personal",
     "language": "language",
     "theme": "theme",
-    "description": "these details help to personalize your experience, privately.",
+    "description": "these details help to personalize your skydiary.",
     "your name": "your name",
     "placeholderName": "name",
     "your age": "your age",
@@ -215,7 +218,8 @@
     "optional": "optional",
     "or": "or",
     "try again": "try again",
-    "optionalInput": "(optional)"
+    "optionalInput": "(optional)",
+    "chooseFile": "choose file"
   },
   "status": {
     "loading": "loading...",
