@@ -206,7 +206,9 @@
     "preparingExport": "preparing export...",
     "checkDownloadsFolder": "export and download complete. check your downloads folder",
     "backToSettings": "back to settings",
-    "exportDataTitle": "skydiary user data export"
+    "exportDataTitle": "skydiary user data export",
+    "occupation": "occupation",
+    "placeholderOccupation": "job title, student, housewife, retiree, volunteer, etc."
   },
   "form": {
     "save": "save",

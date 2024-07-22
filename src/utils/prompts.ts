@@ -72,6 +72,7 @@ export const prompts = {
       "Tag list: " +
       TAGS.map((tag) => tag.content).join(", ") +
       " " +
+      "End of tag list. " +
       "Diary entry: " +
       content
     );
@@ -81,27 +82,34 @@ export const prompts = {
     persona,
     content,
     wordLimit = 10,
+    isWorkFocus = false,
   }: {
     persona: Persona | NewPersonaUser;
     content: string;
     wordLimit?: number;
+    isWorkFocus?: boolean;
   }) => {
-    return (
+    let result =
       "Update persona object to describe the author of the diary entry below as concisely as possible. " +
-      "Only add new information or update existing information that has changed. " +
-      "Do not add any redundant or duplicated information. " +
+      "Here are examples of information to add, listed in order of priority from high to low. ";
+
+    result += isWorkFocus
+      ? "description: major goals, major milestones, strategies, tactics, actions, and events. " +
+        "relationships: customers, partners, bosses, coworkers, staff, and suppliers " +
+        "traits: professional skills, working habits, and preferences "
+      : "description: major goals, major events, deep desires, main interests, and hobbies. " +
+        "relationships: significant others, spouses, children, parents, siblings, coworkers, and friends. " +
+        "traits: core values, morals, preferences. ";
+
+    result +=
       "Write as concisely as possible. This is for AI to read, not for humans. " +
-      "Low priority information should be truncated or deletedfirst when words are limited. " +
-      "Here are examples of information to add, listed in order of priority from high to low. " +
-      "description: major goals, deep desires, main interests, and hobbies. " +
-      "relationships: significant others, spouses, children, parents, siblings, coworkers, and friends." +
-      "occupation: profession, job title, and organization if working, else student, housewife, retiree, volunteer, etc. " +
-      "traits: core values, morals, preferences. " +
+      "Truncated or delete lower priority information when words are limited. " +
+      "Do not add any redundant or duplicated information. " +
       "Do not add any special characters or emoji. " +
+      "Only add new information or update existing information that has changed. " +
+      "Do not include any mundane information like regular daily life or minor events.  " +
+      "Only update values for description, relationship, and traits. " +
       "Return JSON with the updated object, keeping the same keys. " +
-      "If no text in diary entry, return unchanged object. " +
-      "Only update description, occupation, relationship, and traits values. " +
-      "Do not include any mundane details like regular daily life, unimportant activities, or other details. " +
       "Each value should not exceed" +
       wordLimit.toFixed(0).toString() +
       " words, except for the description value which has a maximum of " +
@@ -111,8 +119,8 @@ export const prompts = {
       JSON.stringify(persona) +
       " End author persona object. " +
       "Begin diary entry: " +
-      content
-    );
+      content;
+    return result;
   },
   chatStart: ({
     authorDetails,
