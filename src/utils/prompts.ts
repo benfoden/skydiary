@@ -72,6 +72,7 @@ export const prompts = {
       "Tag list: " +
       TAGS.map((tag) => tag.content).join(", ") +
       " " +
+      "End of tag list. " +
       "Diary entry: " +
       content
     );
@@ -81,38 +82,62 @@ export const prompts = {
     persona,
     content,
     wordLimit = 10,
+    isWorkFocus = false,
   }: {
     persona: Persona | NewPersonaUser;
     content: string;
     wordLimit?: number;
+    isWorkFocus?: boolean;
   }) => {
-    return (
+    const userPersonaObj = Object.fromEntries(
+      Object.entries(persona).filter(
+        ([key, value]) =>
+          ![
+            "id",
+            "image",
+            "createdAt",
+            "updatedAt",
+            "createdById",
+            "isUser",
+            "name",
+            "age",
+            "gender",
+            "occupation",
+          ].includes(key) && value,
+      ),
+    );
+
+    let result =
       "Update persona object to describe the author of the diary entry below as concisely as possible. " +
-      "Only add new information or update existing information that has changed. " +
-      "Do not add any redundant or duplicated information. " +
-      "Write as concisely as possible. This is for AI to read, not for humans. " +
-      "Low priority information should be truncated or deletedfirst when words are limited. " +
-      "Here are examples of information to add, listed in order of priority from high to low. " +
-      "description: major goals, deep desires, main interests, and hobbies. " +
-      "relationships: significant others, spouses, children, parents, siblings, coworkers, and friends." +
-      "occupation: profession, job title, and organization if working, else student, housewife, retiree, volunteer, etc. " +
-      "traits: core values, morals, preferences. " +
+      "Here are examples of information to add, listed in order of priority from high to low. ";
+
+    result += isWorkFocus
+      ? "description: major goals, major milestones, strategies, tactics, actions, and events. " +
+        "relationships: customers, partners, bosses, coworkers, staff, and suppliers " +
+        "traits: professional skills, working habits, and preferences "
+      : "description: major goals, major events, deep desires, main interests, and hobbies. " +
+        "relationships: significant others, spouses, children, parents, siblings, coworkers, and friends. " +
+        "traits: core values, morals, preferences. ";
+
+    result +=
+      "Write as concisely as possible. This is for an LLM AI to read, not for humans. " +
+      "Do not repeat any information. " +
       "Do not add any special characters or emoji. " +
-      "Return JSON with the updated object, keeping the same keys. " +
-      "If no text in diary entry, return unchanged object. " +
-      "Only update description, occupation, relationship, and traits values. " +
-      "Do not include any mundane details like regular daily life, unimportant activities, or other details. " +
+      "Only add new information or update existing information if it has changed. " +
+      "Do not include any mundane or unmemorable information like regular daily life or minor events.  " +
+      "Return JSON with the same keys. " +
       "Each value should not exceed" +
       wordLimit.toFixed(0).toString() +
       " words, except for the description value which has a maximum of " +
       (wordLimit * 3).toFixed(0).toString() +
       " words. " +
+      "Truncated or delete lower priority information when it would exceed the word limit. " +
       "Begin author persona object: " +
-      JSON.stringify(persona) +
+      JSON.stringify(userPersonaObj) +
       " End author persona object. " +
       "Begin diary entry: " +
-      content
-    );
+      content;
+    return result;
   },
   chatStart: ({
     authorDetails,

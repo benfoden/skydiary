@@ -44,7 +44,9 @@ export async function POST(request: NextRequest) {
         cronSecret,
       });
 
-      const latestPostWithContent = latestPosts.find((post) => post.content);
+      const latestPostWithContent = latestPosts.find(
+        (post) => post.content?.length > 5,
+      );
       if (!latestPostWithContent || !user) {
         continue;
       }
@@ -65,18 +67,11 @@ export async function POST(request: NextRequest) {
 
       const personaObject = JSON.parse(generatedPersona) as Persona;
       await api.persona.updateUserPersonaAsCron({
-        createdById: userPersona?.createdById,
         personaId: userPersona?.id ?? "",
-        name: userPersona?.name ?? "",
+        createdById: userPersona?.createdById,
         description: personaObject?.description ?? "",
-        image: userPersona?.image ?? "",
-        age: personaObject?.age ?? 0,
-        gender: personaObject?.gender ?? "",
         relationship: personaObject?.relationship ?? "",
-        occupation: personaObject?.occupation ?? "",
         traits: personaObject?.traits ?? "",
-        communicationStyle: personaObject?.communicationStyle ?? "",
-        communicationSample: personaObject?.communicationSample ?? "",
         cronSecret,
       });
 

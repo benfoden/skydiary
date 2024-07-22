@@ -103,11 +103,16 @@
   },
   "new-user": {
     "title": "welcome to skydiary",
-    "yourName": "your first name (required)",
+    "yourName": "your first name",
     "your age": "your age",
     "your identities": "your identities",
     "placeholder identities": "woman, daughter, mother, etc.",
-    "profilePicture": "profile picture"
+    "profilePicture": "profile picture",
+    "mainFocus": "your main focus for skydiary",
+    "occupation": "your occupation",
+    "personal": "personal",
+    "work": "work",
+    "chooseImage": "choose image file"
   },
   "home": {
     "whats happening": "What's happening today?",
@@ -180,7 +185,7 @@
     "personal": "personal",
     "language": "language",
     "theme": "theme",
-    "description": "these details help to personalize your experience, privately.",
+    "description": "these details help to personalize your skydiary.",
     "your name": "your name",
     "placeholderName": "name",
     "your age": "your age",
@@ -201,7 +206,9 @@
     "preparingExport": "preparing export...",
     "checkDownloadsFolder": "export and download complete. check your downloads folder",
     "backToSettings": "back to settings",
-    "exportDataTitle": "skydiary user data export"
+    "exportDataTitle": "skydiary user data export",
+    "occupation": "occupation",
+    "placeholderOccupation": "job title, student, housewife, retiree, volunteer, etc."
   },
   "form": {
     "save": "save",
@@ -213,7 +220,8 @@
     "optional": "optional",
     "or": "or",
     "try again": "try again",
-    "optionalInput": "(optional)"
+    "optionalInput": "(optional)",
+    "chooseFile": "choose file"
   },
   "status": {
     "loading": "loading...",

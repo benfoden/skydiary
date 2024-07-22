@@ -62,6 +62,7 @@ export default async function PersonaFormFields({
         type="file"
         id="imageFile"
         name="imageFile"
+        fileSelectButtonLabel={t("new-user.chooseImage")}
       />
       <Input
         label={t("personas.age")}

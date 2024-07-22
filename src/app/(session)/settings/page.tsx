@@ -134,6 +134,14 @@ export default async function Settings() {
                 defaultValue={userPersona?.gender ?? ""}
                 label={t("settings.your identities")}
               />
+              <Input
+                id="occupation"
+                name="occupation"
+                placeholder={t("settings.placeholderOccupation")}
+                required
+                label={t("settings.occupation")}
+                defaultValue={userPersona?.occupation ?? ""}
+              />
 
               <FormButton variant="submit">{t("form.save")}</FormButton>
             </form>

@@ -5,8 +5,10 @@ import { useEffect, useRef, useState } from "react";
 export default function Input({
   type,
   label,
+  fileSelectButtonLabel,
   defaultChecked,
   initialValue,
+  radioOptions,
   ...props
 }: {
   type?:
@@ -16,23 +18,33 @@ export default function Input({
     | "email"
     | "password"
     | "checkbox"
+    | "radio"
     | "file";
   label?: string;
+  fileSelectButtonLabel?: string;
   defaultChecked?: boolean;
+  radioOptions?: {
+    id: string;
+    label: string;
+    value: string | number;
+    checked?: boolean;
+  }[];
   initialValue?: string | number;
 } & React.InputHTMLAttributes<
   | HTMLInputElement
   | HTMLTextAreaElement
   | (HTMLInputElement & { type: "checkbox" })
 >) {
+  const t = useTranslations();
   if (!type) type = "text";
   const { id, value, defaultValue } = props;
   const ref = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
   const [isActive, setIsActive] = useState(false);
   const [valueLength, setValueLength] = useState<number | null>(null);
   const [isChecked, setIsChecked] = useState(defaultChecked ?? false);
-
-  const t = useTranslations();
+  const [radioChoices, setRadioChoices] = useState<
+    { id: string; label: string; value: string | number; checked?: boolean }[]
+  >(radioOptions ?? []);
 
   const handleFocus = () => {
     setIsActive(true);
@@ -84,43 +96,93 @@ export default function Input({
 
   return (
     <div className={`relative flex w-full flex-col items-start`}>
-      <label
-        className={`text-secondary flex w-full flex-row items-center justify-between gap-2 text-nowrap bg-transparent bg-none px-5 py-1 text-sm`}
-        htmlFor={id}
-      >
-        <div className="flex flex-row items-center gap-1">
-          {props.required && label?.length && (
-            <span className="text-black dark:text-white">*</span>
-          )}{" "}
-          {label}
-          {!props.required && label && <span>{t("form.optionalInput")}</span>}
-        </div>
-        {(type === "textarea" || type === "text") &&
-          props.maxLength &&
-          valueLength !== null &&
-          valueLength > 0.5 * (props.maxLength ?? 0) && (
-            <span
-              className={`text-xs ${valueLength !== null && valueLength > 0.85 * (props.maxLength ?? 0) ? (valueLength === props.maxLength ? "text-red-600" : "text-yellow-500") : "text-secondary"}`}
-            >
-              {valueLength ?? 0} / {props.maxLength ?? 0}
+      {type !== "radio" && (
+        <label
+          className={`text-secondary flex w-full flex-row items-center justify-start gap-2 bg-transparent bg-none px-5 py-1 text-sm`}
+          htmlFor={id}
+        >
+          <span>
+            {props.required && label?.length && (
+              <span className=" text-blue-600 dark:text-blue-400">∗</span>
+            )}{" "}
+            <span>{label}</span>
+          </span>
+          {(type === "textarea" || type === "text") &&
+            props.maxLength &&
+            valueLength !== null &&
+            valueLength > 0.5 * (props.maxLength ?? 0) && (
+              <span
+                className={`text-xs ${valueLength !== null && valueLength > 0.85 * (props.maxLength ?? 0) ? (valueLength === props.maxLength ? "text-red-600" : "text-yellow-500") : "text-secondary"}`}
+              >
+                {valueLength ?? 0} / {props.maxLength ?? 0}
+              </span>
+            )}
+        </label>
+      )}
+      {type !== "textarea" &&
+        type !== "checkbox" &&
+        type !== "file" &&
+        type !== "radio" && (
+          <input
+            type={type}
+            {...props}
+            value={initialValue ?? value}
+            className={`w-full rounded-md px-5 py-3 text-base outline-none transition placeholder:text-sm placeholder:font-light placeholder:text-black/60 placeholder:dark:text-white/80 ${isActive && "bg-white/80 transition dark:bg-white/[.18]"} bg-primary ${props.disabled && "opacity-60"}`}
+            ref={ref as React.RefObject<HTMLInputElement>}
+            onFocus={handleFocus}
+            onChange={(e) => {
+              if (props.onChange) {
+                props.onChange(e);
+              }
+              handleChange(e);
+            }}
+          />
+        )}
+      {type === "radio" && (
+        <fieldset className="flex w-full flex-col">
+          <legend
+            className={`text-secondary flex w-full flex-row items-center gap-2 px-5 py-1 text-sm`}
+          >
+            <span>
+              {props.required && label?.length && (
+                <span className=" text-blue-600 dark:text-blue-400">∗</span>
+              )}{" "}
+              <span>{label}</span>
             </span>
-          )}
-      </label>
-      {type !== "textarea" && type !== "checkbox" && type !== "file" && (
-        <input
-          type={type}
-          {...props}
-          value={initialValue ?? value}
-          className={`w-full rounded-md px-5 py-3 text-base outline-none transition placeholder:text-sm placeholder:font-light placeholder:text-black/60 placeholder:dark:text-white/80 ${isActive && "bg-white/80 transition dark:bg-white/[.18]"} bg-primary ${props.disabled && "opacity-60"}`}
-          ref={ref as React.RefObject<HTMLInputElement>}
-          onFocus={handleFocus}
-          onChange={(e) => {
-            if (props.onChange) {
-              props.onChange(e);
-            }
-            handleChange(e);
-          }}
-        />
+          </legend>
+          <div className="flex flex-row gap-2 text-sm">
+            {radioChoices?.map((option, index) => (
+              <label
+                key={index}
+                htmlFor={option.id}
+                className={`w-full cursor-pointer rounded-md px-4 py-2 text-center transition-opacity duration-200 ease-in-out hover:bg-white/80 hover:opacity-100 dark:bg-white/10 dark:hover:bg-white/30 ${!option.checked ? " opacity-60" : " bg-white/80 dark:bg-white/30"}`}
+              >
+                <input
+                  type="radio"
+                  id={option.id}
+                  {...props}
+                  ref={ref as React.RefObject<HTMLInputElement>}
+                  onFocus={handleFocus}
+                  value={option.value}
+                  checked={option.checked}
+                  className="hidden"
+                  onChange={(e) => {
+                    setRadioChoices((prevChoices) =>
+                      prevChoices.map((choice) =>
+                        choice.id === e.target.id
+                          ? { ...choice, checked: true }
+                          : { ...choice, checked: false },
+                      ),
+                    );
+                  }}
+                />
+                <span className="text-black dark:text-white">
+                  {option.label}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
       )}
       {type === "textarea" && (
         <textarea
@@ -149,14 +211,26 @@ export default function Input({
         />
       )}
       {type === "file" && (
-        <input
-          type={type ?? "file"}
-          {...props}
-          className={`bg-primary w-full rounded-md py-4 pl-5 pr-10 outline-none transition placeholder:text-sm placeholder:font-light`}
-          ref={ref as React.RefObject<HTMLInputElement>}
-          onFocus={handleFocus}
-          onChange={handleChange}
-        />
+        <label className="bg-primary w-full cursor-pointer rounded-md bg-white/60 py-4 pl-5 pr-10 text-center text-sm outline-none transition placeholder:text-sm placeholder:font-light hover:bg-white/90 dark:bg-white/20 dark:hover:bg-white/30">
+          <input
+            type="file"
+            {...props}
+            className="hidden"
+            ref={ref as React.RefObject<HTMLInputElement>}
+            onFocus={handleFocus}
+            onChange={(e) => {
+              handleChange(e);
+              if (props.onChange) {
+                props.onChange(e);
+              }
+              if (e.target.files && e.target.files.length > 0) {
+                const fileName = e.target.files[0]?.name ?? "";
+                e.target.nextElementSibling!.textContent = fileName;
+              }
+            }}
+          />
+          <span>{fileSelectButtonLabel ?? t("form.chooseFile")}</span>
+        </label>
       )}
     </div>
   );
