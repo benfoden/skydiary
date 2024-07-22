@@ -15,21 +15,23 @@ export default async function Secret() {
     personaId: "clxy6sprp000014e4dths21fv",
   });
 
+  const content =
+    "I have returned to the webmaster zone to continue my work on the app after a time away. I am tired, but determined.";
+
   const comment = prompts.comment({
     authorDetails: currentUserPersona!,
-    content:
-      "I have returned to the webmaster zone to continue my work on the app after a time away. I am tired, but determined.",
+    content,
     personaDetails: persona!,
   });
 
-  const summary = prompts.summary({
-    content:
-      "I have returned to the webmaster zone to continue my work on the app after a time away. I am tired, but determined.",
+  const tags = prompts.tag({
+    content,
   });
 
-  const tags = prompts.tag({
-    content:
-      "I have returned to the webmaster zone to continue my work on the app after a time away. I am tired, but determined.",
+  const userPersonaPrompt = prompts.userPersona({
+    persona: currentUserPersona!,
+    content,
+    wordLimit: 10,
   });
 
   const chat = prompts.chatStart({
@@ -37,11 +39,8 @@ export default async function Secret() {
     personaDetails: persona!,
   });
 
-  const userPersonaPrompt = prompts.userPersona({
-    persona: currentUserPersona!,
-    content:
-      "I have returned to the webmaster zone to continue my work on the app after a time away. I am tired, but determined.",
-    wordLimit: 10,
+  const summary = prompts.summary({
+    content,
   });
 
   return (
@@ -49,44 +48,39 @@ export default async function Secret() {
       <div className="flex w-full flex-col items-center gap-4">
         <h2>Prompts</h2>
         <Card isButton={false}>
-          <div className="flex flex-row gap-4">
+          <div className="flex w-full flex-row justify-between gap-4">
             <h3>Comment</h3>
-            Length:
-            {comment.length}
+            Length: {comment.length - content.length}
           </div>
           {comment}
         </Card>
 
         <Card isButton={false}>
-          <div className="flex flex-row gap-4">
+          <div className="flex w-full flex-row justify-between gap-4">
             <h3>Tags</h3>
-            Length:
-            {tags.length}
+            Length: {tags.length - content.length}
           </div>
           {tags}
         </Card>
 
         <Card isButton={false}>
-          <div className="flex flex-row gap-4">
+          <div className="flex w-full flex-row justify-between gap-4">
             <h3>User Persona</h3>
-            Length:
-            {userPersonaPrompt.length}
+            Length: {userPersonaPrompt.length - content.length}
           </div>
           {userPersonaPrompt}
         </Card>
         <Card isButton={false}>
-          <div className="flex flex-row gap-4">
+          <div className="flex w-full flex-row justify-between gap-4">
             <h3>Summary</h3>
-            Length:
-            {summary.length}
+            Length: {summary.length - content.length}
           </div>
           {summary}
         </Card>
         <Card isButton={false}>
-          <div className="flex flex-row gap-4">
+          <div className="flex w-full flex-row justify-between gap-4">
             <h3>Chat</h3>
-            Length:
-            {chat.length}
+            Length: {chat.length - content.length}
           </div>
           {chat}
         </Card>
