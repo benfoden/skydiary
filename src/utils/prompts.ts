@@ -89,6 +89,24 @@ export const prompts = {
     wordLimit?: number;
     isWorkFocus?: boolean;
   }) => {
+    const userPersonaObj = Object.fromEntries(
+      Object.entries(persona).filter(
+        ([key, value]) =>
+          ![
+            "id",
+            "image",
+            "createdAt",
+            "updatedAt",
+            "createdById",
+            "isUser",
+            "name",
+            "age",
+            "gender",
+            "occupation",
+          ].includes(key) && value,
+      ),
+    );
+
     let result =
       "Update persona object to describe the author of the diary entry below as concisely as possible. " +
       "Here are examples of information to add, listed in order of priority from high to low. ";
@@ -102,21 +120,20 @@ export const prompts = {
         "traits: core values, morals, preferences. ";
 
     result +=
-      "Write as concisely as possible. This is for AI to read, not for humans. " +
-      "Truncated or delete lower priority information when words are limited. " +
-      "Do not add any redundant or duplicated information. " +
+      "Write as concisely as possible. This is for an LLM AI to read, not for humans. " +
+      "Do not repeat any information. " +
       "Do not add any special characters or emoji. " +
-      "Only add new information or update existing information that has changed. " +
-      "Do not include any mundane information like regular daily life or minor events.  " +
-      "Only update values for description, relationship, and traits. " +
-      "Return JSON with the updated object, keeping the same keys. " +
+      "Only add new information or update existing information if it has changed. " +
+      "Do not include any mundane or unmemorable information like regular daily life or minor events.  " +
+      "Return JSON with the same keys. " +
       "Each value should not exceed" +
       wordLimit.toFixed(0).toString() +
       " words, except for the description value which has a maximum of " +
       (wordLimit * 3).toFixed(0).toString() +
       " words. " +
+      "Truncated or delete lower priority information when it would exceed the word limit. " +
       "Begin author persona object: " +
-      JSON.stringify(persona) +
+      JSON.stringify(userPersonaObj) +
       " End author persona object. " +
       "Begin diary entry: " +
       content;
