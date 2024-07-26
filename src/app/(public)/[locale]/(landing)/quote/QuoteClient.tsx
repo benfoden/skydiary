@@ -23,7 +23,7 @@ export default function QuoteClient() {
 
     if (typeof link.download === "string") {
       link.href = data;
-      link.download = `skydiary-quote-${new Date().toISOString()}.png`;
+      link.download = `skydiary-quote-${new Date().toISOString()}.jpg`;
 
       document.body.appendChild(link);
       link.click();
@@ -34,8 +34,8 @@ export default function QuoteClient() {
   };
   return (
     <>
-      <StarsBackground hidden={false} />
       <div className="flex w-full flex-row items-start justify-start gap-32 ">
+        <StarsBackground hidden={false} />
         <Card variant="narrow" isButton={false}>
           <div className="flex max-w-56 flex-col items-center justify-center gap-4 px-2 py-4">
             <Input
@@ -60,41 +60,44 @@ export default function QuoteClient() {
             <Button onClick={handleDownloadImage}>Download Image</Button>
           </div>
         </Card>
-        <div
-          ref={printRef as React.RefObject<HTMLDivElement>}
-          className="relative flex h-[1500px] w-[1000px] flex-col items-center justify-center p-16"
-        >
-          <div className="w-fit">
-            <Card isButton={false}>
-              <div className="p-12 text-center">
-                <div className="flex flex-col items-center justify-center gap-8 text-6xl font-light tracking-widest">
-                  {!quoteLine2 ? (
-                    <div>
-                      {hasQuoteMarks ? '"' : ""}
-                      {quote}
-                      {hasQuoteMarks ? '"' : ""}
-                    </div>
-                  ) : (
-                    <div>
+        <div className="border border-white/20 ">
+          <div
+            ref={printRef as React.RefObject<HTMLDivElement>}
+            className="relative z-[-20] flex h-[1500px] w-[1000px] flex-col items-center justify-center bg-gradient-to-b from-[#cce3f1] to-[#f3f6f6] p-16  dark:from-[#07090a] dark:to-[#171727]"
+          >
+            <StarsBackground hidden={false} />
+            <div className="w-fit">
+              <Card isButton={false}>
+                <div className="p-12 text-center">
+                  <div className="flex flex-col items-center justify-center gap-8 text-6xl font-light tracking-widest">
+                    {!quoteLine2 ? (
                       <div>
                         {hasQuoteMarks ? '"' : ""}
                         {quote}
+                        {hasQuoteMarks ? '"' : ""}
                       </div>
-                      <br />
-                      {quoteLine2}
-                      {hasQuoteMarks ? '"' : ""}
-                    </div>
-                  )}
-                  {author && (
-                    <span className="text-2xl font-bold">{author}</span>
-                  )}
+                    ) : (
+                      <div>
+                        <div>
+                          {hasQuoteMarks ? '"' : ""}
+                          {quote}
+                        </div>
+                        <br />
+                        {quoteLine2}
+                        {hasQuoteMarks ? '"' : ""}
+                      </div>
+                    )}
+                    {author && (
+                      <span className="text-2xl font-bold">{author}</span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+            </div>
+            <p className="absolute bottom-28 text-4xl font-light opacity-40">
+              <span>skydiary.app</span>
+            </p>
           </div>
-          <p className="absolute bottom-28 right-48 text-4xl font-light opacity-40">
-            <span>skydiary.app</span>
-          </p>
         </div>
       </div>
     </>
