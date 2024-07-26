@@ -21,6 +21,8 @@ export async function generateMetadata({ params }: Props) {
 
   return {
     title: postData.title,
+    description:
+      "skydiary is a journal where you get private comments to motivate and inspire you from custom AI personas",
   };
 }
 
@@ -29,11 +31,12 @@ export default async function Post({ params }: Props) {
   const postData: PostData = await getPostData(params.id);
 
   return (
-    <div className="flex w-full max-w-[600px] flex-col gap-4">
-      <h1 className="text-3xl font-light">{postData.title}</h1>
-
-      <div className="font-base mb-5">
-        {formattedTimeStampToDate(new Date(postData.date))}
+    <div className="flex w-full max-w-[600px] flex-col">
+      <div className="ml-8 flex flex-col">
+        <h1 className="text-3xl font-light">{postData.title}</h1>
+        <div className="font-base opacity-50">
+          {formattedTimeStampToDate(new Date(postData.date))}
+        </div>
       </div>
       <Card isButton={false}>
         <div id="blog">

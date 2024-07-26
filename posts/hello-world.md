@@ -1,6 +1,7 @@
 ---
 title: "Hello World"
 date: "2024-07-26"
+description: "skydiary is a journal where you get private comments to motivate and inspire you from custom AI personas"
 ---
 
 hello there person on the internet
