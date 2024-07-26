@@ -150,7 +150,7 @@ export default function Input({
               <span>{label}</span>
             </span>
           </legend>
-          <div className="flex flex-row gap-2 text-sm">
+          <div className="flex flex-row flex-wrap gap-2 text-sm">
             {radioChoices?.map((option, index) => (
               <label
                 key={index}

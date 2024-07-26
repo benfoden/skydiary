@@ -24,6 +24,15 @@ export default async function Terms() {
     <div className="flex w-full flex-col items-start justify-start gap-2 sm:max-w-[768px]">
       <Card variant="textBlock" isButton={false}>
         <h1 className="mb-4 text-lg font-medium">{t("terms.title")}</h1>
+        <div>
+          日本に住んでいる方ため:
+          <Link
+            href="/terms/specified-commercial-transaction-act"
+            className="underline"
+          >
+            特定商取引法に基づく表記
+          </Link>
+        </div>
         <div className="flex flex-col items-start justify-start gap-2">
           <p>Last updated: July 10, 2024 Version: 0.1</p>
           <p>

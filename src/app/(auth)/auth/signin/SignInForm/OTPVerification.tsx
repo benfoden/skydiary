@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Card } from "~/app/_components/Card";
 import FormButton from "~/app/_components/FormButton";
 import Input from "~/app/_components/Input";
 
@@ -39,29 +40,34 @@ export default function OTPVerification({ email }: Props) {
 
   return (
     <>
-      <form onSubmit={handleOTPVerification}>
-        <div className="my-8 flex w-full flex-col gap-4 rounded-lg bg-white/50 p-6 text-sm font-light shadow-lg dark:bg-black/60">
-          <Input
-            label={t("auth.passcode")}
-            name="code"
-            id="code"
-            required
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-          />
+      <Card variant="form">
+        <form onSubmit={handleOTPVerification}>
+          <div className="my-8 flex w-full flex-col gap-4 text-sm font-light">
+            <Input
+              label={t("auth.passcode")}
+              name="code"
+              id="code"
+              required
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+            />
 
-          <p>{t("auth.check your email")}</p>
-          <p>{t("auth.passcode expires")}</p>
+            <p>{t("auth.check your email")}</p>
+            <p>{t("auth.passcode expires")}</p>
 
-          <FormButton
-            variant="submit"
-            isDisabled={isSubmitting || !code || code.length !== 6}
-          >
-            {isSubmitting ? t("auth.verifying") : t("auth.verify and continue")}
-          </FormButton>
-        </div>
-      </form>
-      <p className="mb-4 text-sm font-light opacity-80">
+            <FormButton
+              variant="submit"
+              isSpecial
+              isDisabled={isSubmitting || !code || code.length !== 6}
+            >
+              {isSubmitting
+                ? t("auth.verifying")
+                : t("auth.verify and continue")}
+            </FormButton>
+          </div>
+        </form>
+      </Card>
+      <p className="mb-4 mt-6 text-sm font-light opacity-80">
         <em>{t("form.or")}</em>
       </p>
       <Link
