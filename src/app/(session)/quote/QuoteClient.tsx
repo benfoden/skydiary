@@ -37,7 +37,7 @@ export default function QuoteClient() {
             </Button>
           </div>
         </Card>
-        <div className="flex h-[1502px] w-[1002px] flex-col items-center justify-center border p-16">
+        <div className="relative flex h-[1502px] w-[1002px] flex-col items-center justify-center border border-white/20 p-16">
           <div className="w-fit">
             <Card isButton={false}>
               <div className="p-12 text-center">
