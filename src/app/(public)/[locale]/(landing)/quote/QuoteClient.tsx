@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import html2canvas from "html2canvas";
+import { useRef, useState } from "react";
 import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import Input from "~/app/_components/Input";
@@ -10,6 +11,27 @@ export default function QuoteClient() {
   const [quoteLine2, setQuoteLine2] = useState<string>("");
   const [author, setAuthor] = useState<string>("");
   const [hasQuoteMarks, setHasQuoteMarks] = useState<boolean>(false);
+  const printRef = useRef<HTMLElement | null>(null);
+
+  const handleDownloadImage = async () => {
+    const element = printRef.current;
+    if (!element) return; // Ensure element is not null
+    const canvas = await html2canvas(element);
+
+    const data = canvas.toDataURL("image/jpg");
+    const link = document.createElement("a");
+
+    if (typeof link.download === "string") {
+      link.href = data;
+      link.download = `skydiary-quote-${new Date().toISOString()}.png`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      window.open(data);
+    }
+  };
   return (
     <>
       <StarsBackground hidden={false} />
@@ -35,9 +57,13 @@ export default function QuoteClient() {
             <Button onClick={() => setHasQuoteMarks(!hasQuoteMarks)}>
               {hasQuoteMarks ? "Remove Quote Marks" : "Add Quote Marks"}
             </Button>
+            <Button onClick={handleDownloadImage}>Download Image</Button>
           </div>
         </Card>
-        <div className="relative flex h-[1502px] w-[1002px] flex-col items-center justify-center border border-white/20 p-16">
+        <div
+          ref={printRef as React.RefObject<HTMLDivElement>}
+          className="relative flex h-[1500px] w-[1000px] flex-col items-center justify-center p-16"
+        >
           <div className="w-fit">
             <Card isButton={false}>
               <div className="p-12 text-center">
