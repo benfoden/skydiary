@@ -51,4 +51,17 @@
   .theme-icon-light {
     @apply opacity-100 dark:hidden dark:opacity-0;
   }
+
+  #blog {
+    p {
+      @apply mb-4;
+    }
+
+    ul {
+      @apply mb-4;
+      li {
+        @apply ml-6 list-disc;
+      }
+    }
+  }
 }
