@@ -1,33 +1,30 @@
 import Link from "next/link";
 import { Card } from "~/app/_components/Card";
-import { getSortedPostsData } from "~/utils/posts";
+import { getSortedPostsData, type IndexPostData } from "~/utils/posts";
 import { formattedTimeStampToDate } from "~/utils/text";
 
-type AllPostsData = {
-  date: string;
-  title: string;
-  id: string;
-  content: string;
-}[];
-
-export default function Blog() {
-  const allPostsData: AllPostsData = getSortedPostsData();
+export default function BlogIndex() {
+  const allPostsData: IndexPostData[] = getSortedPostsData();
 
   return (
     <>
-      <h1 className="text-3xl font-light">skydiary blog</h1>
+      <h1 className="text-lg font-light">blog</h1>
 
-      <section>
+      <section className="mt-10 flex w-full max-w-[600px] flex-col gap-4">
         <ul>
           {allPostsData.map(({ id, date, title, content }) => (
             <li key={id}>
               <Link href={`/blog/${id}`}>
                 <Card>
-                  {title}
-                  {content}
-                  <span className="text-xs opacity-70">
-                    {formattedTimeStampToDate(new Date(date))}
-                  </span>
+                  <div className="flex w-full flex-col items-start">
+                    <h2 className="text-4xl font-light">{title}</h2>
+                    <span className="text-xs opacity-70">
+                      {formattedTimeStampToDate(new Date(date))}
+                    </span>
+                  </div>
+                  {content.length > 280
+                    ? content.slice(0, 280) + "..."
+                    : content}
                 </Card>
               </Link>
             </li>

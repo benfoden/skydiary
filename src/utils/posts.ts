@@ -16,37 +16,24 @@ interface PostData {
   id: string;
   title: string;
   date: string;
+  contentHtml: string;
+}
+
+export interface IndexPostData {
+  date: string;
+  title: string;
+  id: string;
   content: string;
 }
 
-// --------------------------------
-// GET THE PATH OF THE POSTS FOLDER
-const postsDirectory = path.join(process.cwd(), "posts"); // process.cwd() returns the absolute path of the current working directory
+const postsDirectory = path.join(process.cwd(), "posts");
 
-// -------------------------------------------------
-// GET THE DATA OF ALL POSTS IN SORTED ORDER BY DATE
-/*
-  Returns an array that looks like this:
-  [
-    {
-      id: 'ssg-ssr',
-      title: 'When to Use Static Generation v.s. Server-side Rendering',
-      date: '2020-01-01'
-    },
-    {
-      id: 'pre-rendering',
-      title: 'Two Forms of Pre-rendering',
-      date: '2020-01-02'
-    }
-  ]
-*/
-
-export function getSortedPostsData(): PostData[] {
+export function getSortedPostsData(): IndexPostData[] {
   // Get file names under /posts
   const fileNames = fs.readdirSync(postsDirectory); // [ 'pre-rendering.md', 'ssg-ssr.md' ]
 
   // Get the data from each file
-  const allPostsData: PostData[] = fileNames.map((filename) => {
+  const allPostsData: IndexPostData[] = fileNames.map((filename) => {
     // Remove ".md" from file name to get id
     const id = filename.replace(/\.md$/, ""); // id = 'pre-rendering', 'ssg-ssr'
 
@@ -79,24 +66,6 @@ export function getSortedPostsData(): PostData[] {
   });
 }
 
-// ------------------------------------------------
-// GET THE IDs OF ALL POSTS FOR THE DYNAMIC ROUTING
-/*
-  Returns an array that looks like this:
-  [
-    {
-      params: {
-        id: 'ssg-ssr'
-      }
-    },
-    {
-      params: {
-        id: 'pre-rendering'
-      }
-    }
-  ]
-  */
-
 export function getAllPostIds(): { params: { id: string } }[] {
   const fileNames = fs.readdirSync(postsDirectory);
 
@@ -109,10 +78,6 @@ export function getAllPostIds(): { params: { id: string } }[] {
   });
 }
 
-// The returned array must have the params key otherwise `getStaticPaths` will fail
-
-// --------------------------------
-// GET THE DATA OF A SINGLE POST FROM THE ID
 export async function getPostData(id: string): Promise<PostData> {
   const fullPath = path.join(postsDirectory, `${id}.md`);
   const fileContents = fs.readFileSync(fullPath, "utf8");
