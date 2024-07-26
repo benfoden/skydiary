@@ -22,7 +22,6 @@ export function middleware(request: NextRequest) {
     "/auth",
     "/api/auth",
     "/sd-admin",
-    "/quote",
   ];
 
   const unTranslatedAPIRoutes = [
