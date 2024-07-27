@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { stringToUrlStub } from "~/utils/text";
 
 export const blogPostRouter = createTRPCRouter({
   create: protectedProcedure
@@ -19,6 +20,7 @@ export const blogPostRouter = createTRPCRouter({
               isAdmin: ctx.session.user.isAdmin,
             },
           },
+          urlStub: stringToUrlStub(input.title),
         },
       });
     }),
@@ -32,6 +34,7 @@ export const blogPostRouter = createTRPCRouter({
         description: z.string().optional(),
         tag: z.string().optional(),
         isDraft: z.boolean().optional(),
+        urlStub: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -49,6 +52,9 @@ export const blogPostRouter = createTRPCRouter({
           description: input.description,
           tag: input.tag,
           isDraft: input.isDraft,
+          urlStub: input.urlStub
+            ? input.urlStub
+            : stringToUrlStub(input.title ?? "untitled"),
         },
       });
     }),
@@ -59,6 +65,16 @@ export const blogPostRouter = createTRPCRouter({
       return ctx.db.blogPost.findFirst({
         where: {
           id: input.postId,
+        },
+      });
+    }),
+
+  getByUrlStub: protectedProcedure
+    .input(z.object({ urlStub: z.string() }))
+    .query(({ ctx, input }) => {
+      return ctx.db.blogPost.findFirst({
+        where: {
+          urlStub: input.urlStub,
         },
       });
     }),

@@ -7,9 +7,15 @@ import { api } from "~/trpc/server";
 import { formatContent } from "~/utils/blog";
 import { formattedTimeStampToDate } from "~/utils/text";
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: { urlStub: string };
+}) {
   try {
-    const blogPost = await api.blogPost.getByPostId({ postId: params.id });
+    const blogPost = await api.blogPost.getByUrlStub({
+      urlStub: params.urlStub,
+    });
     if (!blogPost) {
       return {
         title: "Error",
@@ -30,9 +36,13 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   }
 }
 
-export default async function Post({ params }: { params: { id: string } }) {
+export default async function Post({
+  params,
+}: {
+  params: { urlStub: string };
+}) {
   const t = await getTranslations();
-  const blogPost = await api.blogPost.getByPostId({ postId: params.id });
+  const blogPost = await api.blogPost.getByUrlStub({ urlStub: params.urlStub });
   if (!blogPost) {
     notFound();
   }

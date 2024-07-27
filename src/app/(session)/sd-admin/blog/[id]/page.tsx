@@ -155,6 +155,9 @@ export default async function BlogEntry({
                 name="title"
                 defaultValue={blogPost?.title}
               />
+              <div>
+                Stub:<code>{blogPost?.urlStub}</code>
+              </div>
               <Input
                 label="description"
                 placeholder="for index and serp results"

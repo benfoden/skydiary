@@ -12,28 +12,6 @@ import { api } from "~/trpc/server";
 import { formattedTimeStampToDate } from "~/utils/text";
 export const dynamic = "force-dynamic";
 
-const filterPostsByDateRange = (
-  daysMin: number,
-  daysMax: number,
-  blogPosts: BlogPost[],
-) => {
-  const today = new Date();
-  const oneDay = 24 * 60 * 60 * 1000;
-  const startOfToday = new Date(today.setHours(0, 0, 0, 0));
-
-  return blogPosts.filter((post) => {
-    const postDate = new Date(post.createdAt);
-    const startOfPostDate = new Date(postDate.setHours(0, 0, 0, 0));
-    const timeDiff = today.getTime() - postDate.getTime();
-
-    return (
-      timeDiff > daysMin * oneDay &&
-      timeDiff <= daysMax * oneDay &&
-      startOfPostDate < startOfToday
-    );
-  });
-};
-
 function PostCard({
   post,
   locale,

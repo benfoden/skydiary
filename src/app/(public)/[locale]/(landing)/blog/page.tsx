@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Card } from "~/app/_components/Card";
 import { type Locale } from "~/config";
 import { api } from "~/trpc/server";
-import { formattedTimeStampToDate } from "~/utils/text";
+import { formatContent } from "~/utils/blog";
+import { formattedTimeStampToDate, stringToUrlStub } from "~/utils/text";
 
 export async function generateMetadata({
   params: { locale },
@@ -22,40 +23,50 @@ export async function generateMetadata({
 }
 
 export default async function BlogIndex() {
-  const blogPosts = (await api.blogPost.getAll()).filter(
-    (post) => !post.isDraft,
+  const allPosts = await api.blogPost.getAll();
+  const blogPosts = await Promise.all(
+    allPosts
+      .filter((post) => !post.isDraft)
+      .map(async (post) => ({
+        ...post,
+        content: await formatContent(post.content),
+      })),
   );
 
   return (
     <>
       <h1 className="text-lg font-light">blog</h1>
 
-      <section className="mt-10 flex w-full max-w-[600px] flex-col gap-4">
-        <ul>
-          {blogPosts.map(
-            ({ id, updatedAt, title, content, tag, description }) => (
-              <li key={id}>
-                <Link href={`/blog/${id}`}>
-                  <Card>
-                    <div className="flex w-full flex-col items-start">
-                      <h2 className="text-4xl font-light">{title}</h2>
-                      <span className="text-xs opacity-70">
-                        {formattedTimeStampToDate(new Date(updatedAt))}
-                      </span>
-                    </div>
-                    {description
-                      ? description
-                      : content.length > 140
-                        ? content.slice(0, 140) + "..."
-                        : content}
-                    {tag && <div className="text-xs opacity-70">{tag}</div>}
-                  </Card>
-                </Link>
-              </li>
-            ),
-          )}
-        </ul>
-      </section>
+      <ul className="mt-4 flex w-full  flex-col gap-4 md:w-1/3">
+        {blogPosts.map(
+          ({ id, updatedAt, title, content, tag, description }) => (
+            <li key={id}>
+              <Link href={`/blog/${stringToUrlStub(title)}`}>
+                <Card>
+                  <div className="flex w-full flex-col items-start">
+                    <h2 className="text-4xl font-light">{title}</h2>
+                    <span className="text-xs opacity-70">
+                      {formattedTimeStampToDate(new Date(updatedAt))}
+                    </span>
+                  </div>
+                  {description ? (
+                    description
+                  ) : content.length > 140 ? (
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: content.slice(0, 140) + "...",
+                      }}
+                    />
+                  ) : (
+                    <div dangerouslySetInnerHTML={{ __html: content }} />
+                  )}
+                  {tag && <div className="text-xs opacity-70">{tag}</div>}
+                </Card>
+              </Link>
+            </li>
+          ),
+        )}
+      </ul>
     </>
   );
 }
