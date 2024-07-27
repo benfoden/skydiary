@@ -24,27 +24,19 @@ function SignoutPageContent() {
   }, [callbackUrl]);
 
   return (
-    <div className="relative flex h-full w-full overflow-hidden">
-      <div className="z-20 flex h-dvh w-full items-center justify-center">
-        <div className="flex w-80 flex-col items-center justify-center">
-          <h1 className="mb-8 text-xl font-light">{t("auth.sign out")}</h1>
-          <Card variant="form">
-            <div className="mt-4 flex w-full flex-col gap-4 text-center">
-              <Link href="/home">
-                <Button variant="submit">{t("auth.back to home")}</Button>
-              </Link>
-              <div className="text-sm">{t("form.or")}</div>
-            </div>
-            <Button
-              variant="submit"
-              onClick={handleSignout}
-              disabled={isLoading}
-            >
-              {isLoading ? t("auth.signing out") : t("auth.sign out")}
-            </Button>
-          </Card>
+    <div className="flex w-full flex-col items-center justify-center sm:w-96">
+      <h1 className="mb-8 text-xl font-light">{t("auth.sign out")}</h1>
+      <Card variant="form">
+        <div className="mt-4 flex w-full flex-col gap-4 text-center">
+          <Link href="/home">
+            <Button variant="submit">{t("auth.back to home")}</Button>
+          </Link>
+          <div className="text-sm">{t("form.or")}</div>
         </div>
-      </div>
+        <Button variant="submit" onClick={handleSignout} disabled={isLoading}>
+          {isLoading ? t("auth.signing out") : t("auth.sign out")}
+        </Button>
+      </Card>
     </div>
   );
 }
