@@ -1,3 +1,4 @@
+"use server";
 import Link from "next/link";
 import { Card } from "~/app/_components/Card";
 import { api } from "~/trpc/server";

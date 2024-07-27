@@ -1,8 +1,10 @@
+"use server";
 import { getTranslations } from "next-intl/server";
+import { notFound } from "next/navigation";
 import { Card } from "~/app/_components/Card";
-import LoadingPageBody from "~/app/_components/LoadingPageBody";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { api } from "~/trpc/server";
+import { formatContent } from "~/utils/blog";
 import { formattedTimeStampToDate } from "~/utils/text";
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
@@ -32,8 +34,9 @@ export default async function Post({ params }: { params: { id: string } }) {
   const t = await getTranslations();
   const blogPost = await api.blogPost.getByPostId({ postId: params.id });
   if (!blogPost) {
-    return <LoadingPageBody />;
+    notFound();
   }
+  const content = await formatContent(blogPost.content);
 
   return (
     <>
@@ -48,7 +51,11 @@ export default async function Post({ params }: { params: { id: string } }) {
         </div>
         <Card isButton={false}>
           <div id="blog">
-            <div dangerouslySetInnerHTML={{ __html: blogPost.content }} />
+            <div
+              dangerouslySetInnerHTML={{
+                __html: content,
+              }}
+            />
           </div>
         </Card>
       </div>
