@@ -30,6 +30,7 @@ export const blogPostRouter = createTRPCRouter({
         content: z.string().optional(),
         title: z.string().optional(),
         tag: z.string().optional(),
+        isDraft: z.boolean().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -45,7 +46,7 @@ export const blogPostRouter = createTRPCRouter({
           content: input.content,
           title: input.title,
           tag: input.tag,
-          createdBy: { connect: { id: ctx.session.user.id } },
+          isDraft: input.isDraft,
         },
       });
     }),
@@ -62,6 +63,12 @@ export const blogPostRouter = createTRPCRouter({
 
   getAll: protectedProcedure.query(({ ctx }) => {
     return ctx.db.blogPost.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+  }),
+
+  getLatest: protectedProcedure.query(({ ctx }) => {
+    return ctx.db.blogPost.findFirst({
       orderBy: { createdAt: "desc" },
     });
   }),

@@ -20,7 +20,7 @@ export default function BlogEntryBody({ post }: { post: BlogPost }) {
     postId: post?.id,
   });
 
-  const updateBlogPost = api.post.update.useMutation({
+  const updateBlogPost = api.blogPost.update.useMutation({
     onMutate: () => {
       setIsSaving(true);
       router.replace(`${window.location.pathname}?s=1`, { scroll: false });
@@ -73,7 +73,7 @@ export default function BlogEntryBody({ post }: { post: BlogPost }) {
   }, []);
 
   return (
-    <div className="flex h-full w-full flex-col items-center pb-4">
+    <div className="flex h-full w-full flex-col pb-4">
       <textarea
         ref={textareaRef}
         value={content}
@@ -94,6 +94,7 @@ export default function BlogEntryBody({ post }: { post: BlogPost }) {
           </span>
         </div>
       )}
+
       <div className="fixed bottom-1 right-1">
         <div className="flex items-center justify-center">
           {isSaving ? (

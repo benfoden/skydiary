@@ -42,18 +42,20 @@ function PostCard({
   locale: Locale;
 }): JSX.Element {
   return (
-    <Link key={post.id} href={`/entry/${post.id}`} className="w-full">
+    <Link key={post.id} href={`/sd-admin/blog/${post.id}`} className="w-full">
       <Card>
         <div className="flex w-full flex-col items-start justify-between gap-2 py-2">
+          <div>{post.title}</div>
           {post.content.length > 280
             ? post.content.slice(0, 280) + "..."
             : post.content}
 
           <div className="flex w-full flex-row items-center justify-between gap-2 text-xs opacity-70">
-            <div className="flex flex-col items-start justify-start gap-1">
+            <div className="flex w-full flex-row items-start justify-between gap-1">
               <div className="flex min-w-fit">
                 {formattedTimeStampToDate(post.createdAt, locale)}
               </div>
+              <div>{post.tag}</div>
             </div>
           </div>
         </div>
@@ -90,23 +92,9 @@ export default async function BlogAdmin() {
               <Link href="/sd-admin/blog/new" className="w-full">
                 <Button>Write now</Button>
               </Link>
-
-              {filterPostsByDateRange(0, 7, blogPosts).length > 0 && (
-                <>
-                  <div className="ml-4">{t("home.last7Days")}</div>
-                  {filterPostsByDateRange(0, 6, blogPosts).map((post) => (
-                    <PostCard key={post.id} post={post} locale={locale} />
-                  ))}
-                </>
-              )}
-              {filterPostsByDateRange(8, 30, blogPosts).length > 0 && (
-                <>
-                  <div className="ml-4">{t("home.last30Days")}</div>
-                  {filterPostsByDateRange(8, 30, blogPosts).map((post) => (
-                    <PostCard key={post.id} post={post} locale={locale} />
-                  ))}
-                </>
-              )}
+              {blogPosts.map((post) => (
+                <PostCard key={post.id} post={post} locale={locale} />
+              ))}
             </div>
           </Suspense>
         </div>
