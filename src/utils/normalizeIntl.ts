@@ -6,8 +6,8 @@ function readJSONFile(filePath: string): Record<string, unknown> {
   return JSON.parse(data) as Record<string, unknown>;
 }
 
-// Read all JSON files in the ~/messages folder
-const messagesDir = path.join(__dirname, "..", "messages");
+// Read all JSON files in the ~/i18n folder
+const messagesDir = path.join(__dirname, "..", "i18n");
 const files = fs
   .readdirSync(messagesDir)
   .filter((file) => file.endsWith(".json"));

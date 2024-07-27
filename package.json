@@ -11,7 +11,7 @@
     "postinstall": "prisma generate",
     "lint": "next lint",
     "start": "next start",
-    "intldiff": "npx json-diff -k ./messages/en.json ./messages/ja.json"
+    "intldiff": "npx json-diff -k ./i18n/en.json ./i18n/ja.json"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^1.6.0",
@@ -30,7 +30,6 @@
     "@uploadthing/react": "^6.7.2",
     "@vercel/analytics": "^1.3.1",
     "@vercel/speed-insights": "^1.0.12",
-    "gray-matter": "^4.0.3",
     "html2canvas": "^1.4.1",
     "jose": "^5.6.3",
     "json-diff": "^1.0.6",

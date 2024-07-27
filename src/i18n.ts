@@ -10,7 +10,7 @@ async function getConfig(locale: string) {
   if (!locales.includes(locale as Locales)) notFound();
 
   return {
-    messages: (await import(`../messages/${locale}.json`)).default,
+    messages: (await import(`../i18n/${locale}.json`)).default,
   };
 }
 
