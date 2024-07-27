@@ -21,7 +21,7 @@ model Post {
   createdBy      User      @relation(fields: [createdById], references: [id])
   tags           Tag[]     @relation("PostTags")
 
-  @@index([title])
+  @@index([createdById])
 }
 
 model Tag {
@@ -46,6 +46,7 @@ model Comment {
   postId             String
   post               Post     @relation("PostComments", fields: [postId], references: [id], onDelete: Cascade)
   createdByPersona   Persona? @relation(fields: [createdByPersonaId], references: [id])
+  @@index([postId])
 }
 
 model Account {
@@ -94,6 +95,7 @@ model User {
   accounts      Account[]
   personas      Persona[]
   posts         Post[]
+  blogPosts     BlogPost[]
   sessions      Session[]
   tags          Tag[]     @relation("UserTags")
   subscriptions Subscription[] @relation("UserSubscriptions")
@@ -118,6 +120,7 @@ model Persona {
   isFavorite          Boolean   @default(false)
   isUser              Boolean   @default(false)
   createdBy           User      @relation(fields: [createdById], references: [id])
+  @@index([createdById])
 }
 
 model VerificationToken {
@@ -182,4 +185,16 @@ model Event {
   ipAddress String
   userAgent String
   createdAt DateTime @default(now())
+}
+
+model BlogPost {
+  id           String   @id @default(cuid())
+  title        String
+  content      String
+  description  String?
+  tag          String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdById String
+  createdBy User     @relation(fields: [createdById], references: [id])
 }
