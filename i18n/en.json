@@ -111,6 +111,7 @@
     "profilePicture": "profile picture",
     "mainFocus": "your main focus for skydiary",
     "occupation": "your occupation",
+    "occupationPlaceholder": "student, coach, teacher...",
     "personal": "personal",
     "work": "work",
     "chooseImage": "choose image file"
