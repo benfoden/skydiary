@@ -124,7 +124,7 @@ export default async function Home() {
               )}
               {filterPostsByDateRange(0, 6, userPosts).length > 0 && (
                 <>
-                  <div className="ml-4">{t("home.last7Days")}</div>
+                  <div className="pl-4 pt-4">{t("home.last7Days")}</div>
                   {filterPostsByDateRange(0, 6, userPosts).map((post) => (
                     <PostCard
                       key={post.id}
@@ -140,7 +140,7 @@ export default async function Home() {
               )}
               {filterPostsByDateRange(8, 30, userPosts).length > 0 && (
                 <>
-                  <div className="ml-4">{t("home.last30Days")}</div>
+                  <div className="pl-4 pt-4">{t("home.last30Days")}</div>
                   {filterPostsByDateRange(8, 30, userPosts).map((post) => (
                     <PostCard
                       key={post.id}
@@ -151,6 +151,39 @@ export default async function Home() {
                       }
                       locale={locale}
                     />
+                  ))}
+                </>
+              )}
+              {userPosts && userPosts.length > 0 && (
+                <>
+                  {Array.from(
+                    new Set(
+                      userPosts.map((post) => {
+                        const date = new Date(post.createdAt);
+                        return `${date.getFullYear()} ${date.toLocaleString("default", { month: "long" })}`;
+                      }),
+                    ),
+                  ).map((monthYear) => (
+                    <div key={monthYear} className="flex flex-col gap-4 pt-4">
+                      <div className="ml-4">{monthYear}</div>
+                      {userPosts
+                        .filter((post) => {
+                          const date = new Date(post.createdAt);
+                          const postMonthYear = `${date.getFullYear()} ${date.toLocaleString("default", { month: "long" })}`;
+                          return postMonthYear === monthYear;
+                        })
+                        .map((post) => (
+                          <PostCard
+                            key={post.id}
+                            post={
+                              post as Post & {
+                                tags: { content: string; id: string }[];
+                              }
+                            }
+                            locale={locale}
+                          />
+                        ))}
+                    </div>
                   ))}
                 </>
               )}
