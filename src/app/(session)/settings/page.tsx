@@ -135,7 +135,7 @@ export default async function Settings() {
               <Input
                 id="occupation"
                 name="occupation"
-                placeholder={t("settings.placeholderOccupation")}
+                placeholder={t("settings.occupationPlaceholder")}
                 label={t("settings.occupation")}
                 defaultValue={userPersona?.occupation ?? ""}
               />

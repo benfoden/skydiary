@@ -210,7 +210,7 @@
     "backToSettings": "back to settings",
     "exportDataTitle": "skydiary user data export",
     "occupation": "occupation",
-    "placeholderOccupation": "job title, student, housewife, retiree, volunteer, etc."
+    "occupationPlaceholder": "job title, student, housewife, retiree, volunteer, etc."
   },
   "form": {
     "save": "save",

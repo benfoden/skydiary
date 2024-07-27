@@ -207,6 +207,7 @@
     "exportData": "データをエクスポート",
     "exportDataDescription": "これは時間がかかる場合があります。",
     "exportDataButton": "今すぐエクスポート",
+    "exportDataTitle": "skydiaryユーザーデータエクスポート",
     "preparingExport": "エクスポートの準備中...",
     "checkDownloadsFolder": "エクスポートとダウンロードが完了しました。ダウンロードフォルダを確認してください",
     "backToSettings": "設定に戻る"
