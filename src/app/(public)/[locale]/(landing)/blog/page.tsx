@@ -1,8 +1,25 @@
 "use server";
+import { type Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Card } from "~/app/_components/Card";
+import { type Locale } from "~/config";
 import { api } from "~/trpc/server";
 import { formattedTimeStampToDate } from "~/utils/text";
+
+export async function generateMetadata({
+  params: { locale },
+}: {
+  params: { locale: Locale };
+}): Promise<Metadata> {
+  const t = await getTranslations({ locale, namespace: "metadata" });
+
+  return {
+    title: t("blog.index.title"),
+    description: t("blog.index.description"),
+    icons: [{ rel: "icon", url: "/favicon.ico" }],
+  };
+}
 
 export default async function BlogIndex() {
   const blogPosts = (await api.blogPost.getAll()).filter(

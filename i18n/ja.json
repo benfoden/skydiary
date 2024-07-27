@@ -363,6 +363,12 @@
     "terms": {
       "title": "利用規約",
       "description": "これがskydiaryの利用規約です。"
+    },
+    "blog": {
+      "index": {
+        "title": "blog",
+        "description": "blog"
+      }
     }
   }
 }
