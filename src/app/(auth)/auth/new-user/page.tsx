@@ -107,7 +107,7 @@ const NewUserPage: React.FC = async () => {
             fileSelectButtonLabel={t("new-user.chooseImage")}
           />
 
-          <FormButton variant="submit">
+          <FormButton isSpecial variant="submit">
             {t("auth.save and continue")}
           </FormButton>
         </form>
