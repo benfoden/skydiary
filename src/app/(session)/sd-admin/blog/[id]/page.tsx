@@ -131,11 +131,14 @@ export default async function BlogEntry({
                 try {
                   const tag = (formData.get("tag") as string) ?? "";
                   const title = (formData.get("title") as string) ?? "";
+                  const description =
+                    (formData.get("description") as string) ?? "";
                   const isDraft = formData.get("publish") !== "on";
                   await api.blogPost.update({
                     postId: params.id,
                     title,
                     tag,
+                    description,
                     isDraft,
                   });
                 } catch (error) {
@@ -151,6 +154,12 @@ export default async function BlogEntry({
                 placeholder="a title"
                 name="title"
                 defaultValue={blogPost?.title}
+              />
+              <Input
+                label="description"
+                placeholder="for index and serp results"
+                name="description"
+                defaultValue={blogPost?.description ?? ""}
               />
               <Input
                 label="tag"

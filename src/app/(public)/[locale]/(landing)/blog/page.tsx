@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { Card } from "~/app/_components/Card";
-import { getSortedPostsData, type IndexPostData } from "~/utils/posts";
+import { api } from "~/trpc/server";
 import { formattedTimeStampToDate } from "~/utils/text";
 
-export default function BlogIndex() {
-  const allPostsData: IndexPostData[] = getSortedPostsData();
+export default async function BlogIndex() {
+  const blogPosts = (await api.blogPost.getAll()).filter(
+    (post) => !post.isDraft,
+  );
 
   return (
     <>
@@ -12,23 +14,28 @@ export default function BlogIndex() {
 
       <section className="mt-10 flex w-full max-w-[600px] flex-col gap-4">
         <ul>
-          {allPostsData.map(({ id, date, title, content }) => (
-            <li key={id}>
-              <Link href={`/blog/${id}`}>
-                <Card>
-                  <div className="flex w-full flex-col items-start">
-                    <h2 className="text-4xl font-light">{title}</h2>
-                    <span className="text-xs opacity-70">
-                      {formattedTimeStampToDate(new Date(date))}
-                    </span>
-                  </div>
-                  {content.length > 280
-                    ? content.slice(0, 280) + "..."
-                    : content}
-                </Card>
-              </Link>
-            </li>
-          ))}
+          {blogPosts.map(
+            ({ id, updatedAt, title, content, tag, description }) => (
+              <li key={id}>
+                <Link href={`/blog/${id}`}>
+                  <Card>
+                    <div className="flex w-full flex-col items-start">
+                      <h2 className="text-4xl font-light">{title}</h2>
+                      <span className="text-xs opacity-70">
+                        {formattedTimeStampToDate(new Date(updatedAt))}
+                      </span>
+                    </div>
+                    {description
+                      ? description
+                      : content.length > 140
+                        ? content.slice(0, 140) + "..."
+                        : content}
+                    {tag && <div className="text-xs opacity-70">{tag}</div>}
+                  </Card>
+                </Link>
+              </li>
+            ),
+          )}
         </ul>
       </section>
     </>

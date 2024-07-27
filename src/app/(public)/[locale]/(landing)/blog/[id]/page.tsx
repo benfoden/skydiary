@@ -1,48 +1,57 @@
+import { getTranslations } from "next-intl/server";
 import { Card } from "~/app/_components/Card";
-import { getPostData } from "~/utils/posts";
+import LoadingPageBody from "~/app/_components/LoadingPageBody";
+import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
+import { api } from "~/trpc/server";
 import { formattedTimeStampToDate } from "~/utils/text";
 
-type Params = {
-  id: string;
-};
+export async function generateMetadata({ params }: { params: { id: string } }) {
+  try {
+    const blogPost = await api.blogPost.getByPostId({ postId: params.id });
+    if (!blogPost) {
+      return {
+        title: "Error",
+        description: "Could not fetch blog post metadata",
+      };
+    }
 
-type Props = {
-  params: Params;
-};
-
-type PostData = {
-  title: string;
-  date: string;
-  contentHtml: string;
-};
-
-export async function generateMetadata({ params }: Props) {
-  const postData: PostData = await getPostData(params.id);
-
-  return {
-    title: postData.title,
-    description:
-      "skydiary is a journal where you get private comments to motivate and inspire you from custom AI personas",
-  };
+    return {
+      title: blogPost.title,
+      description: blogPost.description,
+    };
+  } catch (error) {
+    console.error("Error fetching blog post metadata:", error);
+    return {
+      title: "Error",
+      description: "Could not fetch blog post metadata",
+    };
+  }
 }
 
-// -< Post >-
-export default async function Post({ params }: Props) {
-  const postData: PostData = await getPostData(params.id);
+export default async function Post({ params }: { params: { id: string } }) {
+  const t = await getTranslations();
+  const blogPost = await api.blogPost.getByPostId({ postId: params.id });
+  if (!blogPost) {
+    return <LoadingPageBody />;
+  }
 
   return (
-    <div className="flex w-full max-w-[600px] flex-col">
-      <div className="ml-8 flex flex-col">
-        <h1 className="text-3xl font-light">{postData.title}</h1>
-        <div className="font-base opacity-50">
-          {formattedTimeStampToDate(new Date(postData.date))}
+    <>
+      <NavChevronLeft targetPathname={"/blog"} label={t("nav.blog")} />
+
+      <div className="flex w-full max-w-[600px] flex-col">
+        <div className="ml-8 flex flex-col">
+          <h1 className="text-3xl font-light">{blogPost.title}</h1>
+          <div className="font-base opacity-50">
+            {formattedTimeStampToDate(new Date(blogPost.createdAt))}
+          </div>
         </div>
+        <Card isButton={false}>
+          <div id="blog">
+            <div dangerouslySetInnerHTML={{ __html: blogPost.content }} />
+          </div>
+        </Card>
       </div>
-      <Card isButton={false}>
-        <div id="blog">
-          <div dangerouslySetInnerHTML={{ __html: postData.contentHtml }} />
-        </div>
-      </Card>
-    </div>
+    </>
   );
 }

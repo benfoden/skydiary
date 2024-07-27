@@ -29,6 +29,7 @@ export const blogPostRouter = createTRPCRouter({
         postId: z.string(),
         content: z.string().optional(),
         title: z.string().optional(),
+        description: z.string().optional(),
         tag: z.string().optional(),
         isDraft: z.boolean().optional(),
       }),
@@ -45,6 +46,7 @@ export const blogPostRouter = createTRPCRouter({
         data: {
           content: input.content,
           title: input.title,
+          description: input.description,
           tag: input.tag,
           isDraft: input.isDraft,
         },
