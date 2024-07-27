@@ -99,7 +99,8 @@
     "plus": "plus",
     "premium": "premium",
     "topPage": "top page",
-    "userHome": "your homepage"
+    "userHome": "your homepage",
+    "blog": "blog"
   },
   "new-user": {
     "title": "welcome to skydiary",
@@ -365,6 +366,12 @@
     },
     "settings": {
       "title": "settings"
+    },
+    "blog": {
+      "index": {
+        "title": "blog",
+        "description": "blog"
+      }
     }
   }
 }

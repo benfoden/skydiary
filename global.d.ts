@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
-import type en from "messages/en.json";
+import type en from "i18n/en.json";
 
 type Messages = typeof en;
 

@@ -28,6 +28,7 @@ export default async function AdminLayout({
         <div className="container flex flex-col items-start justify-start gap-12 px-8  py-16 ">
           <div className="flex flex-col gap-4 md:flex-row">
             <Link href={"/sd-admin"}>webmaster home</Link>
+            <Link href={"/sd-admin/blog"}>blog</Link>
             <Link href={"/sd-admin/user"}>user</Link>
             <Link href={"/sd-admin/tags"}>tags</Link>
             <Link href={"/sd-admin/prompts"}>prompts</Link>

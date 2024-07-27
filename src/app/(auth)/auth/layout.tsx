@@ -5,5 +5,9 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <div className="flex min-h-dvh w-full flex-col items-center justify-center px-2 py-12">
+      {children}
+    </div>
+  );
 }

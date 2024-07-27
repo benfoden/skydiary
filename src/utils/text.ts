@@ -114,3 +114,10 @@ export const cleanStringForEntry = (input?: string): string | undefined => {
   if (!input) return undefined;
   return input.replace(/[~`&$#[\]{}]/g, "");
 };
+
+export function stringToUrlStub(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
