@@ -197,4 +197,5 @@ model BlogPost {
   updatedAt DateTime @updatedAt
   createdById String
   createdBy User     @relation(fields: [createdById], references: [id])
+  isDraft Boolean @default(true)
 }
