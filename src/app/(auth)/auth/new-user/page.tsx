@@ -98,6 +98,7 @@ const NewUserPage: React.FC = async () => {
             id="occupation"
             name="occupation"
             label={t("new-user.occupation")}
+            placeholder={t("new-user.occupationPlaceholder")}
           />
           <Input
             type="file"

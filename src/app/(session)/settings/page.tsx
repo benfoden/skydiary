@@ -108,7 +108,6 @@ export default async function Settings() {
                 type="number"
                 id="age"
                 name="age"
-                required
                 placeholder="1"
                 defaultValue={userPersona?.age ?? 0}
                 label={t("settings.your age")}
@@ -129,7 +128,6 @@ export default async function Settings() {
               <Input
                 id="gender"
                 name="gender"
-                required
                 placeholder={t("settings.placeholder identities")}
                 defaultValue={userPersona?.gender ?? ""}
                 label={t("settings.your identities")}
@@ -137,8 +135,7 @@ export default async function Settings() {
               <Input
                 id="occupation"
                 name="occupation"
-                placeholder={t("settings.placeholderOccupation")}
-                required
+                placeholder={t("settings.occupationPlaceholder")}
                 label={t("settings.occupation")}
                 defaultValue={userPersona?.occupation ?? ""}
               />

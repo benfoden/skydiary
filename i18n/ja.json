@@ -111,6 +111,7 @@
     "profilePicture": "プロフィール画像",
     "mainFocus": "skydiaryの主な焦点",
     "occupation": "勤務",
+    "occupationPlaceholder": "サラリーマン、専業主婦、学生...",
     "personal": "個人",
     "work": "仕事",
     "chooseImage": "画像ファイルを選択"
@@ -195,6 +196,8 @@
     "en": "English(英語)",
     "ja": "日本語",
     "billing": "請求",
+    "occupation": "職業",
+    "occupationPlaceholder": "サラリーマン、専業主婦、学生...",
     "editBilling": "請求情報を編集",
     "deleteAccount": "アカウントを削除",
     "deleteAccountDescription": "このアクションは取り消しできません。すべてのデータを永久に失います。",
@@ -204,6 +207,7 @@
     "exportData": "データをエクスポート",
     "exportDataDescription": "これは時間がかかる場合があります。",
     "exportDataButton": "今すぐエクスポート",
+    "exportDataTitle": "skydiaryユーザーデータエクスポート",
     "preparingExport": "エクスポートの準備中...",
     "checkDownloadsFolder": "エクスポートとダウンロードが完了しました。ダウンロードフォルダを確認してください",
     "backToSettings": "設定に戻る"
