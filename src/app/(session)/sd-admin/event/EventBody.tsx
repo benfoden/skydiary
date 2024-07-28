@@ -112,6 +112,9 @@ export default function EventBody({
     <div className="flex flex-row gap-4">
       <div className="flex w-full flex-col gap-4">
         <p className="text-2xl">Total Users: {userCount}</p>
+        <p> target comments / user / day: 1+</p>
+        <p> target posts / user / day: 0.5</p>
+        <p> target personas / user : 1+</p>
         <div>
           <h2 className="text-xl">average by type</h2>
           {eventStats.typeAverages &&
