@@ -15,6 +15,14 @@ export async function generateMetadata({
   return {
     title: t("about.title"),
     description: t("about.description"),
+    openGraph: {
+      title: t("about.title"),
+      description: t("about.description"),
+      url: "https://skydiary.app/about",
+      siteName: "skydiary",
+      locale,
+      type: "website",
+    },
   };
 }
 

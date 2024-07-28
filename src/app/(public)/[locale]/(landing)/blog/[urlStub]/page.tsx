@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Card } from "~/app/_components/Card";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
+import { type Locale } from "~/config";
 import { api } from "~/trpc/server";
 import { formatContent } from "~/utils/blog";
 import { formattedTimeStampToDate } from "~/utils/text";
@@ -10,7 +11,7 @@ import { formattedTimeStampToDate } from "~/utils/text";
 export async function generateMetadata({
   params,
 }: {
-  params: { urlStub: string };
+  params: { locale: Locale; urlStub: string };
 }) {
   try {
     const blogPost = await api.blogPost.getByUrlStub({
@@ -26,6 +27,14 @@ export async function generateMetadata({
     return {
       title: blogPost.title,
       description: blogPost.description,
+      openGraph: {
+        title: blogPost.title,
+        description: blogPost.description,
+        url: `https://skydiary.app/blog/${params.urlStub}`,
+        siteName: "skydiary",
+        locale: params.locale,
+        type: "website",
+      },
     };
   } catch (error) {
     console.error("Error fetching blog post metadata:", error);

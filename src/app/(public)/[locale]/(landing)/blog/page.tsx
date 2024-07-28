@@ -18,7 +18,14 @@ export async function generateMetadata({
   return {
     title: t("blog.index.title"),
     description: t("blog.index.description"),
-    icons: [{ rel: "icon", url: "/favicon.ico" }],
+    openGraph: {
+      title: t("blog.index.title"),
+      description: t("blog.index.description"),
+      url: "https://skydiary.app/blog",
+      siteName: "skydiary",
+      locale,
+      type: "website",
+    },
   };
 }
 
