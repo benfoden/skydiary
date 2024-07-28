@@ -3,6 +3,7 @@ import { postRouter } from "~/server/api/routers/post";
 import { tagRouter } from "~/server/api/routers/tag";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { blogPostRouter } from "./routers/blogPost";
+import { eventRouter } from "./routers/event";
 import { personaRouter } from "./routers/persona";
 import { stripeRouter } from "./routers/stripe";
 import { userRouter } from "./routers/user";
@@ -20,6 +21,7 @@ export const appRouter = createTRPCRouter({
   user: userRouter,
   stripe: stripeRouter,
   blogPost: blogPostRouter,
+  event: eventRouter,
 });
 
 // export type definition of API
