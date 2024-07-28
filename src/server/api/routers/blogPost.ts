@@ -38,6 +38,25 @@ export const blogPostRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const updateData: {
+        content?: string;
+        title?: string;
+        description?: string;
+        tag?: string;
+        isDraft?: boolean;
+        urlStub?: string;
+      } = {
+        content: input.content,
+        title: input.title,
+        description: input.description,
+        tag: input.tag,
+        isDraft: input.isDraft,
+      };
+
+      if (input.title) {
+        updateData.urlStub = stringToUrlStub(input.title);
+      }
+
       return ctx.db.blogPost.update({
         where: {
           id: input.postId,
@@ -46,16 +65,7 @@ export const blogPostRouter = createTRPCRouter({
             isAdmin: ctx.session.user.isAdmin,
           },
         },
-        data: {
-          content: input.content,
-          title: input.title,
-          description: input.description,
-          tag: input.tag,
-          isDraft: input.isDraft,
-          urlStub: input.urlStub
-            ? input.urlStub
-            : stringToUrlStub(input.title ?? "untitled"),
-        },
+        data: updateData,
       });
     }),
 
