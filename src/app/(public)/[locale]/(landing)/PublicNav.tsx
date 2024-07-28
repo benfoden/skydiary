@@ -6,6 +6,7 @@ import LocaleSwitcher from "../../../_components/LocaleSwitcher";
 
 import dynamic from "next/dynamic";
 import DropDownMenu from "~/app/_components/DropDown";
+import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { ThemeToggle } from "~/app/_components/ToggleTheme";
 
 const SetThemeButton = dynamic(
@@ -61,11 +62,7 @@ export async function PublicNav() {
             </Link>
           </>
         ) : (
-          <Link href={"/home"}>
-            <Button variant="chip">
-              <span className="text-nowrap">{t("nav.home")}</span>
-            </Button>
-          </Link>
+          <NavChevronLeft targetPathname="/home" label={t("nav.home")} />
         )}
         <span> · </span>
         <LocaleSwitcher />
