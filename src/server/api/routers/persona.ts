@@ -31,7 +31,7 @@ export const personaRouter = createTRPCRouter({
         where: { id: ctx.session.user.id },
         data: { personasUsed: { increment: 1 } },
       });
-      return ctx.db.persona.create({
+      const persona = await ctx.db.persona.create({
         data: {
           name: cleanStringForInput(input.name),
           description: cleanStringForInput(input.description ?? ""),
@@ -52,6 +52,16 @@ export const personaRouter = createTRPCRouter({
           isFavorite: input.isFavorite,
         },
       });
+
+      if (persona) {
+        await ctx.db.event.create({
+          data: {
+            type: "persona",
+            userId: ctx.session.user.id,
+          },
+        });
+      }
+      return null;
     }),
   update: protectedProcedure
     .input(

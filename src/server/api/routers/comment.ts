@@ -31,7 +31,7 @@ export const commentRouter = createTRPCRouter({
         data: { commentsUsed: { increment: 1 } },
       });
 
-      return ctx.db.comment.create({
+      const comment = await ctx.db.comment.create({
         data: {
           content: input.content,
           postId: input.postId,
@@ -39,6 +39,17 @@ export const commentRouter = createTRPCRouter({
           createdByPersonaId: input.createdByPersonaId ?? undefined,
         },
       });
+
+      if (comment) {
+        await ctx.db.event.create({
+          data: {
+            value: input.coachVariant,
+            type: "comment",
+            userId: ctx.session.user.id,
+          },
+        });
+      }
+      return null;
     }),
 
   delete: protectedProcedure

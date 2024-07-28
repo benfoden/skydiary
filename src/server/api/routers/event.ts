@@ -7,8 +7,8 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 //   type      String
 //   value     String?
 //   userId    String
-//   ipAddress String
-//   userAgent String
+//   ipAddress String?
+//   userAgent String?
 //   createdAt DateTime @default(now())
 // }
 
@@ -18,8 +18,8 @@ export const eventRouter = createTRPCRouter({
       z.object({
         value: z.string(),
         type: z.string(),
-        ipAddress: z.string(),
-        userAgent: z.string(),
+        ipAddress: z.string().optional(),
+        userAgent: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
