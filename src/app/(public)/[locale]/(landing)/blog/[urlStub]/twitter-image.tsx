@@ -1,5 +1,4 @@
 import { ImageResponse } from "next/og";
-import { api } from "~/trpc/server";
 
 export const runtime = "edge";
 
@@ -10,18 +9,16 @@ export const size = {
 };
 export const contentType = "image/png";
 
-export default async function Image({
-  params,
-}: {
-  params: { urlStub: string };
-}) {
-  const post = await api.blogPost.getByUrlStub({ urlStub: params.urlStub });
+export default async function Image() {
+  const interExtraLight = fetch(new URL("/Inter-ExtraLight.ttf")).then((res) =>
+    res.arrayBuffer(),
+  );
 
   return new ImageResponse(
     (
       <div
         style={{
-          fontSize: 48,
+          fontSize: 96,
           background: "linear-gradient(to bottom, #cce3f1, #f3f6f6)",
           width: "100%",
           height: "100%",
@@ -30,11 +27,19 @@ export default async function Image({
           justifyContent: "center",
         }}
       >
-        {post?.title ?? "skydiary blog"}
+        skydiary blog
       </div>
     ),
     {
       ...size,
+      fonts: [
+        {
+          name: "Inter",
+          data: await interExtraLight,
+          style: "normal",
+          weight: 200,
+        },
+      ],
     },
   );
 }
