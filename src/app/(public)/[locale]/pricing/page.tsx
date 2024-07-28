@@ -2,8 +2,10 @@
 import { ArrowRightIcon, CheckCircledIcon } from "@radix-ui/react-icons";
 import { type Session } from "next-auth";
 import { useLocale, useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { type Metadata } from "next/types";
 import { env } from "process";
 import { useEffect, useState, type FormEvent } from "react";
 import Button from "~/app/_components/Button";
@@ -14,6 +16,27 @@ import StarsBackground from "~/app/_components/StarsBackground";
 import { type Locale } from "~/config";
 import { api } from "~/trpc/react";
 import { type PlanNames } from "~/utils/constants";
+
+export async function generateMetadata({
+  params: { locale },
+}: {
+  params: { locale: Locale };
+}): Promise<Metadata> {
+  const t = await getTranslations({ locale, namespace: "metadata" });
+
+  return {
+    title: t("pricing.title"),
+    description: t("pricing.description"),
+    openGraph: {
+      title: t("pricing.title"),
+      description: t("pricing.description"),
+      url: "https://skydiary.app/pricing",
+      siteName: "skydiary",
+      locale,
+      type: "website",
+    },
+  };
+}
 
 export default function Pricing({
   user,
