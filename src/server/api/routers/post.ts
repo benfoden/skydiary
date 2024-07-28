@@ -14,82 +14,22 @@ export const postRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({ content: z.string().max(25000) }))
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.post.create({
+      const post = await ctx.db.post.create({
         data: {
           content: input.content,
           createdBy: { connect: { id: ctx.session.user.id } },
         },
       });
-    }),
 
-  addTags: protectedProcedure
-    .input(
-      z.object({
-        postId: z.string(),
-        tagIds: z.array(z.string()),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      await ctx.db.post.update({
-        where: { id: input.postId },
-        data: {
-          tags: {
-            connect: input.tagIds.map((tagId: string) => ({
-              id: tagId,
-            })),
+      if (post) {
+        await ctx.db.event.create({
+          data: {
+            type: "post",
+            userId: ctx.session.user.id,
           },
-        },
-      });
-    }),
-
-  addTagsAsCron: publicProcedure
-    .input(
-      z.object({
-        postId: z.string(),
-        tagIds: z.array(z.string()),
-        cronSecret: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      if (input.cronSecret !== env.CRON_SECRET) {
-        throw new Error("Unauthorized");
+        });
       }
-
-      await ctx.db.post.update({
-        where: { id: input.postId },
-        data: {
-          tags: {
-            connect: input.tagIds.slice(0, 3).map((tagId: string) => ({
-              id: tagId,
-            })),
-          },
-        },
-      });
-    }),
-
-  deleteExtraTagsAsCron: publicProcedure
-    .input(
-      z.object({
-        postId: z.string(),
-        tagIds: z.array(z.string()),
-        cronSecret: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      if (input.cronSecret !== env.CRON_SECRET) {
-        throw new Error("Unauthorized");
-      }
-
-      await ctx.db.post.update({
-        where: { id: input.postId },
-        data: {
-          tags: {
-            disconnect: input.tagIds.slice(3).map((tagId: string) => ({
-              id: tagId,
-            })),
-          },
-        },
-      });
+      return null;
     }),
 
   update: protectedProcedure
@@ -293,6 +233,56 @@ export const postRouter = createTRPCRouter({
     .query(({ ctx, input }) => {
       return ctx.db.post.findFirst({
         where: { id: input.postId },
+      });
+    }),
+
+  addTagsAsCron: publicProcedure
+    .input(
+      z.object({
+        postId: z.string(),
+        tagIds: z.array(z.string()),
+        cronSecret: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
+
+      await ctx.db.post.update({
+        where: { id: input.postId },
+        data: {
+          tags: {
+            connect: input.tagIds.slice(0, 3).map((tagId: string) => ({
+              id: tagId,
+            })),
+          },
+        },
+      });
+    }),
+
+  deleteExtraTagsAsCron: publicProcedure
+    .input(
+      z.object({
+        postId: z.string(),
+        tagIds: z.array(z.string()),
+        cronSecret: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
+
+      await ctx.db.post.update({
+        where: { id: input.postId },
+        data: {
+          tags: {
+            disconnect: input.tagIds.slice(3).map((tagId: string) => ({
+              id: tagId,
+            })),
+          },
+        },
       });
     }),
 

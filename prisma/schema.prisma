@@ -182,8 +182,8 @@ model Event {
   type      String
   value     String?
   userId    String
-  ipAddress String
-  userAgent String
+  ipAddress String?
+  userAgent String?
   createdAt DateTime @default(now())
 }
 
