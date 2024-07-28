@@ -11,6 +11,7 @@ import Input from "~/app/_components/Input";
 import LoadingPageBody from "~/app/_components/LoadingPageBody";
 import { type Locale } from "~/config";
 import { api } from "~/trpc/server";
+import { getNewImageUrl } from "~/utils/_uploads";
 import BlogEntryBody from "./BlogEntryBody";
 
 export async function generateMetadata({
@@ -125,6 +126,28 @@ export default async function BlogEntry({
                 ></path>
               </svg>
             </summary>
+            <form
+              action={async (formData) => {
+                "use server";
+                const imageFile = formData.get("imageFile") as File;
+                const imageUrl = await getNewImageUrl({ imageFile });
+                await api.blogPost.update({
+                  postId: params.id,
+                  content: blogPost.content + ` ![AltTextHere](${imageUrl})`,
+                });
+              }}
+            >
+              <Input
+                label="image"
+                type="file"
+                id="imageFile"
+                name="imageFile"
+                fileSelectButtonLabel="choose image"
+              />
+              <FormButton isSpecial variant="submit">
+                upload and add md
+              </FormButton>
+            </form>
             <form
               action={async (formData) => {
                 "use server";
