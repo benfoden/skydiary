@@ -55,20 +55,17 @@ export async function generateMetadata({
 }
 
 export default async function BlogAdmin() {
-  const t = await getTranslations();
   const locale = (await getUserLocale()) as Locale;
   const blogPosts = await api.blogPost.getAll();
 
   return (
     <>
-      <main className="flex min-h-screen flex-col items-start">
+      <main className="mt-2 flex min-h-screen flex-col items-start">
         <div className="container flex flex-col items-center justify-start px-2 pb-12">
           <Suspense fallback={<Spinner />}>
             <div className="flex w-full flex-col items-start justify-center gap-4 md:max-w-3xl">
-              <div className="ml-4">{t("home.today")}</div>
-
               <Link href="/sd-admin/blog/new" className="w-full">
-                <Button>Write now</Button>
+                <Button>write right now</Button>
               </Link>
               {blogPosts.map((post) => (
                 <PostCard key={post.id} post={post} locale={locale} />

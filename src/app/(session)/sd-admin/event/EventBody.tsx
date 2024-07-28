@@ -26,31 +26,35 @@ export default function EventBody({
       throw new Error("No events found.");
     }
 
-    const eventMap = events.reduce(
-      (
-        acc: Record<string, { total: number; types: Record<string, number> }>,
-        event,
-      ) => {
-        if (!event) {
-          return acc;
-        }
-        const date = format(new Date(event.createdAt), "yyyy-MM-dd");
-        if (!acc[date]) {
-          acc[date] = { total: 0, types: {} };
-        }
-        acc[date].total += 1;
-        if (!acc[date].types) {
-          acc[date].types = {};
-        }
-        if (!acc[date].types[event.type]) {
-          acc[date].types[event.type] = 0;
-        }
+    console.log("events", events);
 
-        acc[date].types[event.type] = (acc[date].types[event.type] ?? 0) + 1;
-        return acc;
-      },
-      {} as Record<string, { total: number; types: Record<string, number> }>,
-    );
+    const eventMap = events
+      .filter((event) => event.userId !== "clwaeilcb0000j405ba96cc5p")
+      .reduce(
+        (
+          acc: Record<string, { total: number; types: Record<string, number> }>,
+          event,
+        ) => {
+          if (!event) {
+            return acc;
+          }
+          const date = format(new Date(event.createdAt), "yyyy-MM-dd");
+          if (!acc[date]) {
+            acc[date] = { total: 0, types: {} };
+          }
+          acc[date].total += 1;
+          if (!acc[date].types) {
+            acc[date].types = {};
+          }
+          if (!acc[date].types[event.type]) {
+            acc[date].types[event.type] = 0;
+          }
+
+          acc[date].types[event.type] = (acc[date].types[event.type] ?? 0) + 1;
+          return acc;
+        },
+        {} as Record<string, { total: number; types: Record<string, number> }>,
+      );
 
     console.log("eventMap", eventMap);
 
@@ -109,78 +113,50 @@ export default function EventBody({
   }
 
   return (
-    <div className="flex flex-row gap-4">
-      <div className="flex w-full flex-col gap-4">
+    <div className="flex flex-col gap-4">
+      <div className="flex w-full flex-row flex-wrap gap-4 md:mt-4">
         <p className="text-2xl">Total Users: {userCount}</p>
         <p> target comments / user / day: 1+</p>
         <p> target posts / user / day: 0.5</p>
         <p> target personas / user : 1+</p>
-        <div>
-          <h2 className="text-xl">average by type</h2>
-          {eventStats.typeAverages &&
-            Object.entries(eventStats.typeAverages).map(([type, averages]) => (
-              <div key={type}>
-                <h3>{type}</h3>
-                <p>
-                  Daily Average:{" "}
-                  {(averages as { dailyAverage: number }).dailyAverage.toFixed(
-                    2,
-                  )}
-                </p>
-                <p>
-                  Weekly Average:{" "}
-                  {(averages as { weeklyAverage: number }).weeklyAverage}
-                </p>
-              </div>
-            ))}
-        </div>
-        <div>
-          <h2 className="text-xl">average per user by type</h2>
-          {eventStats.typeAverages &&
-            Object.entries(eventStats.typeAverages).map(([type, averages]) => (
-              <div key={type}>
-                <h3>{type}</h3>
-                <p>
-                  Daily Average:{" "}
-                  {(
-                    (averages as { dailyAverage: number }).dailyAverage /
-                    userCount
-                  ).toFixed(2)}
-                </p>
-                <p>
-                  Weekly Average:{" "}
-                  {(
-                    (averages as { weeklyAverage: number }).weeklyAverage /
-                    userCount
-                  ).toFixed(2)}
-                </p>
-              </div>
-            ))}
-        </div>
       </div>
       <div className="flex w-full flex-col gap-4">
         <Card isButton={false}>
           <table>
             <thead>
-              <tr>
-                <th>Date</th>
-                <th>Total Events</th>
-                <th>Event Types</th>
+              <tr className="flex w-full flex-row gap-4">
+                <th className="w-20 text-start">Date</th>
+                <th className="w-20 text-start">Total</th>
+                <th className="w-20 text-start">Comments</th>
+                <th className="w-20 text-start">Posts</th>
+                <th className="w-20 text-start">Personas</th>
               </tr>
             </thead>
             <tbody>
               {eventStats.weeklyStats.map((day: any) => (
-                <tr key={day.date}>
-                  <td>{day.date}</td>
-                  <td>{day.total}</td>
-                  <td>
-                    {Object.entries(day.types).map(
-                      ([type, count]: [string, any]) => (
-                        <div key={type}>
-                          {type}: {count}
-                        </div>
-                      ),
-                    )}
+                <tr className="flex w-full flex-row gap-4" key={day.date}>
+                  <td className="w-20 text-start">{day.date}</td>
+                  <td className="w-20 text-start">{day.total}</td>
+                  <td className="w-20 text-start">
+                    {Object.entries(day.types)
+                      .filter(([type]) => type === "comment")
+                      .map(([type, count]: [string, any]) => (
+                        <span key={type}>{count}</span>
+                      ))}
+                  </td>
+                  <td className="w-20 text-start">
+                    {Object.entries(day.types)
+                      .filter(([type]) => type === "post")
+                      .map(([type, count]: [string, any]) => (
+                        <span key={type}>{count}</span>
+                      ))}
+                  </td>
+                  <td className="w-20 text-start">
+                    {Object.entries(day.types)
+                      .filter(([type]) => type === "persona")
+                      .map(([type, count]: [string, any]) => (
+                        <span key={type}>{count}</span>
+                      ))}
                   </td>
                 </tr>
               ))}
