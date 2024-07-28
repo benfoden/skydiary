@@ -16,6 +16,9 @@ export default async function Image({
   params: { urlStub: string };
 }) {
   const post = await api.blogPost.getByUrlStub({ urlStub: params.urlStub });
+  const interExtraLight = fetch(new URL("/Inter-ExtraLight.ttf")).then((res) =>
+    res.arrayBuffer(),
+  );
 
   return new ImageResponse(
     (
@@ -35,6 +38,14 @@ export default async function Image({
     ),
     {
       ...size,
+      fonts: [
+        {
+          name: "Inter",
+          data: await interExtraLight,
+          style: "normal",
+          weight: 200,
+        },
+      ],
     },
   );
 }
