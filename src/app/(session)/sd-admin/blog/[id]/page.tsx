@@ -39,7 +39,7 @@ export default async function BlogEntry({
 
   return (
     <>
-      <div className="flex h-full w-full flex-col items-start px-2 pb-4 sm:px-8">
+      <div className="flex h-full w-full flex-col items-start pb-4">
         write a post
         <BlogEntryBody post={blogPost} />
         <div className="flex w-full max-w-5xl flex-row items-start justify-center gap-4">
@@ -170,7 +170,7 @@ export default async function BlogEntry({
                 revalidatePath("/sd-admin/blog");
                 redirect("/sd-admin/blog");
               }}
-              className="flex w-full flex-col gap-4 px-4 pt-4"
+              className="flex w-full flex-col gap-4 px-2 pt-4 md:px-4"
             >
               <Input
                 label="title"

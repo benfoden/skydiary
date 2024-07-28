@@ -85,21 +85,9 @@ export default function ChatThread({
   }, [personasData, isSuccess]);
 
   return (
-    <>
-      <details>
-        <summary>personas</summary>
-        <Card isButton={false}>
-          <div>
-            {personas.map((persona) => (
-              <div key={persona.id}>
-                {persona.name} /{persona.id}
-              </div>
-            ))}
-          </div>
-        </Card>
-      </details>
+    <div className="my-4 w-full md:max-w-2xl">
       <Card isButton={false}>
-        <div className="w-full md:max-w-3xl">
+        <div className="w-full">
           {messages.slice(1).map((message, index) => (
             <Card key={index} isButton={false}>
               <div
@@ -138,6 +126,6 @@ export default function ChatThread({
           </form>
         </div>
       </Card>
-    </>
+    </div>
   );
 }

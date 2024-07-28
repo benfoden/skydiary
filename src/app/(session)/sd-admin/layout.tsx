@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import Button from "~/app/_components/Button";
+import DropDownMenu from "~/app/_components/DropDown";
 import DropDownUser from "~/app/_components/DropDownUser";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { SessionNav } from "~/app/_components/SessionNav";
@@ -24,24 +26,83 @@ export default async function AdminLayout({
         <DropDownUser />
       </SessionNav>
 
-      <div className="flex min-h-screen w-full flex-col items-center justify-start">
-        <div className="container flex flex-col items-start justify-start gap-12 px-8  py-16 ">
-          <div className="flex flex-col gap-4 md:flex-row">
-            <Link href={"/sd-admin"}>webmaster home</Link>
-            <Link href={"/sd-admin/blog"}>blog</Link>
-            <Link href={"/sd-admin/image"}>image</Link>
-            <Link href={"/sd-admin/event"}>event</Link>
-            <Link href={"/sd-admin/user"}>user</Link>
-            <Link href={"/sd-admin/tags"}>tags</Link>
-            <Link href={"/sd-admin/prompts"}>prompts</Link>
-            <Link href={"/sd-admin/sandbox"}>sandbox</Link>
-            <Link href={"/sd-admin/subscriptions"}>subs</Link>
-            <Link href={"/sd-admin/email"}>email</Link>
-            <Link href={"/sd-admin/cron"}>cron</Link>
+      <div className="flex min-h-screen w-full flex-col items-center justify-start px-2 py-4 md:px-8">
+        <div className="container flex flex-col items-end justify-start">
+          <div className="hidden flex-row flex-wrap rounded bg-white/10 md:mb-4 md:flex">
+            <Link href={"/sd-admin"}>
+              <Button variant="menuElement">home</Button>
+            </Link>
+            <Link href={"/sd-admin/blog"}>
+              <Button variant="menuElement">blog</Button>
+            </Link>
+            <Link href={"/sd-admin/image"}>
+              <Button variant="menuElement">image</Button>
+            </Link>
+            <Link href={"/sd-admin/event"}>
+              <Button variant="menuElement">event</Button>
+            </Link>
+            <Link href={"/sd-admin/user"}>
+              <Button variant="menuElement">user</Button>
+            </Link>
+            <Link href={"/sd-admin/tags"}>
+              <Button variant="menuElement">tags</Button>
+            </Link>
+            <Link href={"/sd-admin/prompts"}>
+              <Button variant="menuElement">prompts</Button>
+            </Link>
+            <Link href={"/sd-admin/sandbox"}>
+              <Button variant="menuElement">sandbox</Button>
+            </Link>
+            <Link href={"/sd-admin/subscriptions"}>
+              <Button variant="menuElement">subs</Button>
+            </Link>
+            <Link href={"/sd-admin/email"}>
+              <Button variant="menuElement">email</Button>
+            </Link>
+            <Link href={"/sd-admin/cron"}>
+              <Button variant="menuElement">cron</Button>
+            </Link>
           </div>
-
-          {children}
+          <div className="flex flex-row flex-wrap gap-4 md:hidden">
+            <DropDownMenu>
+              <Link href={"/sd-admin"}>
+                <Button variant="menuElement">home</Button>
+              </Link>
+              <Link href={"/sd-admin/blog"}>
+                <Button variant="menuElement">blog</Button>
+              </Link>
+              <Link href={"/sd-admin/image"}>
+                <Button variant="menuElement">image</Button>
+              </Link>
+              <Link href={"/sd-admin/event"}>
+                <Button variant="menuElement">event</Button>
+              </Link>
+              <Link href={"/sd-admin/user"}>
+                <Button variant="menuElement">user</Button>
+              </Link>
+              <Link href={"/sd-admin/tags"}>
+                <Button variant="menuElement">tags</Button>
+              </Link>
+              <Link href={"/sd-admin/prompts"}>
+                <Button variant="menuElement">prompts</Button>
+              </Link>
+              <Link href={"/sd-admin/sandbox"}>
+                <Button variant="menuElement">sandbox</Button>
+              </Link>
+              <Link href={"/sd-admin/subscriptions"}>
+                <Button variant="menuElement">subs</Button>
+              </Link>
+              <Link href={"/sd-admin/email"}>
+                <Button variant="menuElement">email</Button>
+              </Link>
+              <Link href={"/sd-admin/cron"}>
+                <Button variant="menuElement">cron</Button>
+              </Link>
+            </DropDownMenu>
+          </div>
         </div>
+
+        {children}
       </div>
     </>
   );
