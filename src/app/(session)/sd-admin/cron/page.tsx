@@ -8,14 +8,17 @@ import { api } from "~/trpc/server";
 import { getBaseUrl } from "~/utils/clientConstants";
 export default async function TheCronic() {
   const session = await getServerAuthSession();
-  const unProcessedPosts = await api.post.getAllUntaggedByInputUserIdAsCron({
+  const posts = await api.post.getAllByUserIdAsCron({
     userId: session?.user.id,
     cronSecret: env.CRON_SECRET,
   });
-  const processedPosts = await api.post.getAllTaggedByInputUserIdAsCron({
-    userId: session?.user.id,
-    cronSecret: env.CRON_SECRET,
-  });
+
+  const processedPosts = posts.filter(
+    (post) => post.content && post.tags.length > 0,
+  );
+  const unProcessedPosts = posts.filter(
+    (post) => post.content && post.tags.length === 0,
+  );
 
   return (
     <div className="container mx-auto p-4">
@@ -26,7 +29,8 @@ export default async function TheCronic() {
         {unProcessedPosts.map((post, index) => (
           <div key={post.id}>
             <p>
-              {index}. {JSON.stringify(post.tags.map((tag) => tag.content))}
+              {index}. {post.id} {post.content.slice(0, 10)}{" "}
+              {JSON.stringify(post.tags.map((tag) => tag.content))}
             </p>
           </div>
         ))}

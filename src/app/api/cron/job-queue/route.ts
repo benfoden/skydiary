@@ -48,10 +48,11 @@ export async function GET(request: NextRequest) {
       ) {
         continue;
       }
-      postQueueOutput.push(...latestPosts);
+      postQueueOutput.push(...latestPosts.filter((post) => post.content));
     }
 
     if (postQueueOutput.length) {
+      console.log("postQueueOutput length", postQueueOutput.length);
       await fetch(`${getBaseUrl()}/api/cron/post-tags`, {
         method: "POST",
         headers: {

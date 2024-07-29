@@ -26,9 +26,7 @@ export async function POST(request: NextRequest) {
         }[];
       })[];
     };
-    const postQueue = body.postQueueOutput.filter(
-      (post) => post.tags.length === 0,
-    );
+    const postQueue = body.postQueueOutput;
 
     if (!postQueue.length) {
       return Response.json({
