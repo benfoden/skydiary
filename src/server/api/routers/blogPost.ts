@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
 import { stringToUrlStub } from "~/utils/text";
 
 export const blogPostRouter = createTRPCRouter({
@@ -69,7 +73,7 @@ export const blogPostRouter = createTRPCRouter({
       });
     }),
 
-  getByPostId: protectedProcedure
+  getByPostId: publicProcedure
     .input(z.object({ postId: z.string() }))
     .query(({ ctx, input }) => {
       return ctx.db.blogPost.findFirst({
@@ -79,7 +83,7 @@ export const blogPostRouter = createTRPCRouter({
       });
     }),
 
-  getByUrlStub: protectedProcedure
+  getByUrlStub: publicProcedure
     .input(z.object({ urlStub: z.string() }))
     .query(({ ctx, input }) => {
       return ctx.db.blogPost.findFirst({
@@ -89,19 +93,19 @@ export const blogPostRouter = createTRPCRouter({
       });
     }),
 
-  getAll: protectedProcedure.query(({ ctx }) => {
+  getAll: publicProcedure.query(({ ctx }) => {
     return ctx.db.blogPost.findMany({
       orderBy: { createdAt: "desc" },
     });
   }),
 
-  getLatest: protectedProcedure.query(({ ctx }) => {
+  getLatest: publicProcedure.query(({ ctx }) => {
     return ctx.db.blogPost.findFirst({
       orderBy: { createdAt: "desc" },
     });
   }),
 
-  getAllByTag: protectedProcedure
+  getAllByTag: publicProcedure
     .input(z.object({ tag: z.string() }))
     .query(({ ctx, input }) => {
       return ctx.db.blogPost.findMany({
