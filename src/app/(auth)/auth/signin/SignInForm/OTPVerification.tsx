@@ -64,7 +64,7 @@ export default function OTPVerification({ email }: Props) {
             isSpecial
             isDisabled={isSubmitting || !code || code.length !== 6}
           >
-            {isSubmitting ? t("auth.verifying") : t("auth.continue")}
+            {!isSubmitting && t("auth.continue")}
           </FormButton>
         </form>
       </Card>
