@@ -107,7 +107,7 @@ export const authOptions = (emailDetails: EmailDetails): NextAuthOptions => {
         generateVerificationToken() {
           return randomInt(100000, 999999).toString();
         },
-        maxAge: 5 * 60,
+        maxAge: 11 * 60,
         async sendVerificationRequest(params) {
           const { identifier: to, provider, token } = params;
           const { server, from } = provider;

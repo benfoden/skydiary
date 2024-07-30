@@ -108,6 +108,7 @@ export const userRouter = createTRPCRouter({
   }),
 
   resetDailyUsage: protectedProcedure.mutation(async ({ ctx }) => {
+    console.log("reset daily usage");
     const now = new Date();
     const lastResetAt = new Date(
       ctx.session.user.resetAt as string | number | Date,
