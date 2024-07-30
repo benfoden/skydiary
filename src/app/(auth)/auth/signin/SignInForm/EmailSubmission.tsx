@@ -49,37 +49,40 @@ export default function EmailSubmission({ signUpEmail, onSubmit }: Props) {
   }, []);
 
   return (
-    <Card variant="form">
-      <form onSubmit={handleEmailSubmission} className="flex flex-col gap-4">
-        <Input
-          label={t("auth.email")}
-          type="email"
-          placeholder="email@example.com"
-          name="email"
-          id="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+    <>
+      <h1 className="mb-8 text-xl font-light">{t("auth.continueWithEmail")}</h1>
+      <Card variant="form">
+        <form onSubmit={handleEmailSubmission} className="flex flex-col gap-4">
+          <Input
+            label={t("auth.email")}
+            type="email"
+            placeholder="email@example.com"
+            name="email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-        <FormButton variant="submit" isSpecial isDisabled={isSubmitting}>
-          {isSubmitting ? t("auth.signing in") : t("auth.sign in")}
-        </FormButton>
-        <p className="text-xs opacity-70">
-          {t.rich("auth.privacyAndTerms", {
-            privacyLink: (chunks) => (
-              <Link href="/privacy" className="font-bold">
-                {chunks}
-              </Link>
-            ),
-            termsLink: (chunks) => (
-              <Link href="/terms" className="font-bold">
-                {chunks}
-              </Link>
-            ),
-          })}
-        </p>
-      </form>
-    </Card>
+          <FormButton variant="submit" isSpecial isDisabled={isSubmitting}>
+            {!isSubmitting && t("auth.continue")}
+          </FormButton>
+          <p className="text-xs opacity-70">
+            {t.rich("auth.privacyAndTerms", {
+              privacyLink: (chunks) => (
+                <Link href="/privacy" className="font-bold">
+                  {chunks}
+                </Link>
+              ),
+              termsLink: (chunks) => (
+                <Link href="/terms" className="font-bold">
+                  {chunks}
+                </Link>
+              ),
+            })}
+          </p>
+        </form>
+      </Card>
+    </>
   );
 }

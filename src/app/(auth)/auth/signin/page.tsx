@@ -12,7 +12,6 @@ export default async function SignIn() {
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center px-2 text-xl sm:w-96">
-      <h1 className="mb-8 text-xl font-light">skydiary</h1>
       <VerificationAlert />
       <SignInForm signUpEmail={signUpEmail} />
     </div>

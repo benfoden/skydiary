@@ -108,6 +108,7 @@ export const userRouter = createTRPCRouter({
   }),
 
   resetDailyUsage: protectedProcedure.mutation(async ({ ctx }) => {
+    console.log("reset daily usage");
     const now = new Date();
     const lastResetAt = new Date(
       ctx.session.user.resetAt as string | number | Date,
@@ -116,13 +117,12 @@ export const userRouter = createTRPCRouter({
       ? now.getTime() >= lastResetAt.getTime() + 24 * 60 * 60 * 1000
       : true;
 
-    return (
-      shouldReset &&
-      ctx.db.user.update({
-        where: { id: ctx?.session?.user?.id },
-        data: { commentsUsed: 0, resetAt: now },
-      })
-    );
+    return shouldReset
+      ? await ctx.db.user.update({
+          where: { id: ctx?.session?.user?.id },
+          data: { commentsUsed: 0, resetAt: now },
+        })
+      : null;
   }),
 
   getById: protectedProcedure

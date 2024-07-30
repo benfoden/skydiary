@@ -9,9 +9,7 @@ import { type Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { type Locale } from "node_modules/next/dist/compiled/@vercel/og/satori";
-import { getServerAuthSession } from "~/server/auth";
 import { TRPCReactProvider } from "~/trpc/react";
-import { api } from "~/trpc/server";
 
 export const siteTitle = "skydiary";
 export async function generateMetadata({
@@ -49,10 +47,6 @@ export default async function RootLayout({
   const locale = await getLocale();
   const messages = await getMessages();
 
-  const session = await getServerAuthSession();
-  if (session) {
-    await api.user.resetDailyUsage();
-  }
 
   return (
     <html lang={locale}>

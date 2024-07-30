@@ -10,9 +10,11 @@ export default function SignInForm({ signUpEmail }: { signUpEmail: string }) {
   return verificationEmail ? (
     <OTPVerification email={verificationEmail} />
   ) : (
-    <EmailSubmission
-      signUpEmail={signUpEmail}
-      onSubmit={setVerificationEmail}
-    />
+    <>
+      <EmailSubmission
+        signUpEmail={signUpEmail}
+        onSubmit={setVerificationEmail}
+      />
+    </>
   );
 }

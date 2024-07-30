@@ -40,31 +40,32 @@ export default function OTPVerification({ email }: Props) {
 
   return (
     <>
+      <h1 className="mb-8 text-xl font-light">{t("auth.almostSignedUp")}</h1>
+
       <Card variant="form">
-        <form onSubmit={handleOTPVerification}>
-          <div className="my-8 flex w-full flex-col gap-4 text-sm font-light">
-            <Input
-              label={t("auth.passcode")}
-              name="code"
-              id="code"
-              required
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-            />
+        <form
+          onSubmit={handleOTPVerification}
+          className="flex flex-col gap-4 text-sm"
+        >
+          <Input
+            label={t("auth.passcode")}
+            name="code"
+            id="code"
+            required
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+          />
 
-            <p>{t("auth.check your email")}</p>
-            <p>{t("auth.passcode expires")}</p>
+          <p>{t("auth.check your email", { email })}</p>
+          <p>{t("auth.passcode expires")}</p>
 
-            <FormButton
-              variant="submit"
-              isSpecial
-              isDisabled={isSubmitting || !code || code.length !== 6}
-            >
-              {isSubmitting
-                ? t("auth.verifying")
-                : t("auth.verify and continue")}
-            </FormButton>
-          </div>
+          <FormButton
+            variant="submit"
+            isSpecial
+            isDisabled={isSubmitting || !code || code.length !== 6}
+          >
+            {!isSubmitting && t("auth.continue")}
+          </FormButton>
         </form>
       </Card>
       <p className="mb-4 mt-6 text-sm font-light opacity-80">
