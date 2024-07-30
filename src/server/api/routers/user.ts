@@ -116,13 +116,12 @@ export const userRouter = createTRPCRouter({
       ? now.getTime() >= lastResetAt.getTime() + 24 * 60 * 60 * 1000
       : true;
 
-    return (
-      shouldReset &&
-      ctx.db.user.update({
-        where: { id: ctx?.session?.user?.id },
-        data: { commentsUsed: 0, resetAt: now },
-      })
-    );
+    return shouldReset
+      ? await ctx.db.user.update({
+          where: { id: ctx?.session?.user?.id },
+          data: { commentsUsed: 0, resetAt: now },
+        })
+      : null;
   }),
 
   getById: protectedProcedure
