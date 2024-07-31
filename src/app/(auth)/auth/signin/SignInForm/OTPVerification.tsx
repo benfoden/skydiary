@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import ButtonSpinner from "~/app/_components/ButtonSpinner";
 import { Card } from "~/app/_components/Card";
 import FormButton from "~/app/_components/FormButton";
 import Input from "~/app/_components/Input";
@@ -64,7 +65,7 @@ export default function OTPVerification({ email }: Props) {
             isSpecial
             isDisabled={isSubmitting || !code || code.length !== 6}
           >
-            {!isSubmitting && t("auth.continue")}
+            {!isSubmitting ? t("auth.continue") : <ButtonSpinner />}
           </FormButton>
         </form>
       </Card>

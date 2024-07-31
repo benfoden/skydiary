@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import ButtonSpinner from "~/app/_components/ButtonSpinner";
 import { Card } from "~/app/_components/Card";
 import FormButton from "~/app/_components/FormButton";
 import Input from "~/app/_components/Input";
@@ -65,7 +66,7 @@ export default function EmailSubmission({ signUpEmail, onSubmit }: Props) {
           />
 
           <FormButton variant="submit" isSpecial isDisabled={isSubmitting}>
-            {!isSubmitting && t("auth.continue")}
+            {!isSubmitting ? t("auth.continue") : <ButtonSpinner />}
           </FormButton>
           <p className="text-xs opacity-70">
             {t.rich("auth.privacyAndTerms", {
