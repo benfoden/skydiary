@@ -4,6 +4,7 @@ import React from "react";
 import { Card } from "~/app/_components/Card";
 import FormButton from "~/app/_components/FormButton";
 import Input from "~/app/_components/Input";
+import { env } from "~/env";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { getNewImageUrl } from "~/utils/_uploads";
@@ -41,7 +42,11 @@ const NewUserPage: React.FC = async () => {
 
             if (name) {
               try {
-                await api.user.updateUser({ name, isWorkFocused });
+                await api.user.updateUser({
+                  name,
+                  isWorkFocused,
+                  stripeProductId: env.PRODUCT_ID_LITE,
+                });
                 await api.persona.create({
                   name,
                   age: age ?? 0,

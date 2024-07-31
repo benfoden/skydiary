@@ -17,6 +17,7 @@ export const userRouter = createTRPCRouter({
         email: z.string().email().optional(),
         image: z.string().url().optional(),
         isWorkFocused: z.boolean().optional(),
+        stripeProductId: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -27,6 +28,7 @@ export const userRouter = createTRPCRouter({
           email: input.email,
           image: input.image,
           isWorkFocused: input.isWorkFocused,
+          stripeProductId: input.stripeProductId,
         },
       });
     }),
