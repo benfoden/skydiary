@@ -293,7 +293,7 @@
       "title": "lite",
       "entries": "unlimited daily entries",
       "personas": "one custom persona",
-      "comments": "one comment per day",
+      "comments": "three comments per day",
       "commentLength": "comments up to 250 characters",
       "featureAccess": "default access to new features",
       "memory": "short-term persona memory"
