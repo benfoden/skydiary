@@ -63,7 +63,7 @@ export type UserPlanLimit = {
 const userplanDetails: Record<string, UserPlanLimit> = {
   [env.PRODUCT_ID_LITE]: {
     personas: 1,
-    comments: 1,
+    comments: 3,
     memories: 10,
     characters: 250,
     model: "gpt-4o-mini",
