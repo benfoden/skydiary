@@ -80,8 +80,8 @@ export default async function Features() {
           </Card>
         ))}
       </section>
-      <section className="mt-16 flex w-full flex-col items-start justify-start gap-16">
-        <h2 className="mb-4 text-4xl font-extralight">
+      <section className="mt-16 flex w-full flex-col items-start justify-start">
+        <h2 className="mb-4 text-2xl font-extralight">
           {t("features.miniFeaturesTitle")}
         </h2>
         <Card isButton={false}>
