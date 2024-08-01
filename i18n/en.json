@@ -46,28 +46,28 @@
     "heroTitle": "what can you do with skydiary?",
     "feature1": {
       "title": "get personalized comments",
-      "description": "get motivated to write with personalized, private comments from personas you create."
+      "description": "get motivated to write with personalized, private comments from personas you create. learn new things, get new ideas, and see your life from many different points of view."
     },
     "feature2": {
-      "title": "you secure your data",
-      "description": "your data is encrypted in transit and at rest. you set your own encryption key you control. we can't read, sell, or mine your personal data. <privacy>read our privacy pledge</privacy>"
+      "title": "express yourself in privacy",
+      "description": "your data is encrypted in transit and at rest. we don't read, sell, or mine your personal data. you can set your own encryption key we don't control. <privacy>read our privacy pledge</privacy>"
     },
     "feature3": {
       "title": "create custom personas",
       "description": "want to talk to Caesar? want feedback from Cleopatra? how about an expert coach? create your own AI-powered personas and get personalized feedback."
     },
-    "miniFeaturesTitle": "and you get more features like...",
+    "miniFeaturesTitle": "and use more features like...",
     "miniFeature1": {
       "title": "unlimited daily entries for free"
     },
     "miniFeature2": {
-      "title": "export your data any time"
+      "title": "free data export at any time"
     },
     "miniFeature3": {
       "title": "dark mode for late night journaling"
     },
     "miniFeature4": {
-      "title": "automatic backups are saved for you"
+      "title": "automatic backups saved for you"
     }
   },
   "privacyPledge": {
