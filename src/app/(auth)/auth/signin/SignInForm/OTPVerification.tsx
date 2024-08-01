@@ -31,7 +31,7 @@ export default function OTPVerification({ email }: Props) {
 
     //todo: why is this required?
     if (response.url.includes("/auth/verified")) {
-      router.replace("/home");
+      router.replace("/auth/new-user");
     }
     if (!response) {
       setIsSubmitting(false);
