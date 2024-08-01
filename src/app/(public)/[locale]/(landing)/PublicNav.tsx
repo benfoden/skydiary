@@ -35,10 +35,10 @@ export async function PublicNav() {
         </h1>
         <div className="hidden md:block">
           <Link
-            href="/about"
+            href="/features"
             className="rounded-full px-4 py-2 no-underline transition hover:bg-white/30"
           >
-            {t("nav.about")}
+            {t("nav.features")}
           </Link>
           <Link
             href="/blog"
@@ -77,14 +77,17 @@ export async function PublicNav() {
               <Button variant="menuElement">{t("nav.userHome")}</Button>
             </Link>
           )}
-          <Link href={"/about"}>
-            <Button variant="menuElement">{t("nav.about")}</Button>
+          <Link href={"/features"}>
+            <Button variant="menuElement">{t("nav.features")}</Button>
+          </Link>
+          <Link href={"/pricing"}>
+            <Button variant="menuElement">{t("nav.pricing")}</Button>
           </Link>
           <Link href={"/blog"}>
             <Button variant="menuElement"> {t("nav.blog")}</Button>
           </Link>
-          <Link href={"/pricing"}>
-            <Button variant="menuElement">{t("nav.pricing")}</Button>
+          <Link href={"/about"}>
+            <Button variant="menuElement">{t("nav.about")}</Button>
           </Link>
           <Link href={"/contact"}>
             <Button variant="menuElement">{t("nav.contactUs")}</Button>
