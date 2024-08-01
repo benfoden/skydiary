@@ -94,10 +94,26 @@ export default function Pricing({
               <p>{t("emailWithDetails")}</p>
             </div>
           )}
-          {user?.isSpecial && (
-            <Card isButton={false}>
-              as a special user, you are on the premium plan for free
+          {!user?.isSpecial ? (
+            <Card variant="hero" isButton={false}>
+              <div className="flex flex-col items-center gap-4">
+                as a special user, you are on the premium plan for free!{" "}
+                <Link href="/contact">
+                  <Button variant="cta">share your feedback</Button>
+                </Link>
+              </div>
             </Card>
+          ) : user ? (
+            <Card variant="hero" isButton={false}>
+              <div className="flex flex-col items-center gap-4">
+                {t("gettingReady")}
+                <Link href="/contact">
+                  <Button variant="cta">{t("getNotified")}</Button>
+                </Link>
+              </div>
+            </Card>
+          ) : (
+            <></>
           )}
           {checkoutStatus !== SUCCESS && (
             <div className="flex w-full flex-col items-center justify-center gap-8">
