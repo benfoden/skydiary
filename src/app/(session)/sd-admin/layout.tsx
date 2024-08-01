@@ -62,6 +62,9 @@ export default async function AdminLayout({
             <Link href={"/sd-admin/cron"}>
               <Button variant="menuElement">cron</Button>
             </Link>
+            <Link href={"/sd-admin/crypto"}>
+              <Button variant="menuElement">crypto</Button>
+            </Link>
           </div>
           <div className="flex flex-row flex-wrap gap-4 md:hidden">
             <DropDownMenu>
@@ -97,6 +100,9 @@ export default async function AdminLayout({
               </Link>
               <Link href={"/sd-admin/cron"}>
                 <Button variant="menuElement">cron</Button>
+              </Link>
+              <Link href={"/sd-admin/crypto"}>
+                <Button variant="menuElement">crypto</Button>
               </Link>
             </DropDownMenu>
           </div>

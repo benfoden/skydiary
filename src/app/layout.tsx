@@ -20,6 +20,14 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "metadata" });
 
   return {
+    metadataBase: new URL("https://skydiary.app"),
+    alternates: {
+      canonical: "/",
+      languages: {
+        en: "/en",
+        ja: "/ja",
+      },
+    },
     title: { template: "%s · skydiary", default: "skydiary" },
     description: t("top.description"),
     icons: [{ rel: "icon", url: "/favicon.ico" }],
@@ -46,7 +54,6 @@ export default async function RootLayout({
 }) {
   const locale = await getLocale();
   const messages = await getMessages();
-
 
   return (
     <html lang={locale}>
