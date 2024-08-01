@@ -1,11 +1,12 @@
 // Function to generate a strong encryption key
 export async function generateEncryptionKeyFromPassword({
   password,
-  returnType = "base64",
 }: {
   password: string;
-  returnType?: string;
-}): Promise<string | ArrayBuffer> {
+}): Promise<CryptoKey> {
+  if (password.length < 16) {
+    throw new Error("Password must be at least 16 characters long");
+  }
   const encoder = new TextEncoder();
   const passwordKey = await crypto.subtle.importKey(
     "raw",
@@ -16,7 +17,7 @@ export async function generateEncryptionKeyFromPassword({
   );
 
   const salt = crypto.getRandomValues(new Uint8Array(16));
-  const key = await crypto.subtle.deriveKey(
+  return await crypto.subtle.deriveKey(
     {
       name: "PBKDF2",
       salt: salt,
@@ -28,21 +29,14 @@ export async function generateEncryptionKeyFromPassword({
     true,
     ["encrypt", "decrypt"],
   );
-
-  const exportedKey = await crypto.subtle.exportKey("raw", key);
-  return returnType === "base64"
-    ? Buffer.from(exportedKey).toString("base64")
-    : exportedKey;
 }
 
-// Function to generate a data encryption key that is itself encrypted with the user encryption key
+// Function to return create a data encryption key and return it encrypted with the user encryption key
 export async function generateDataEncryptionKey({
   encryptionKey,
-  returnType = "base64",
 }: {
   encryptionKey: CryptoKey;
-  returnType?: string;
-}): Promise<string | ArrayBuffer> {
+}): Promise<ArrayBuffer> {
   const dataEncryptionKey = await crypto.subtle.generateKey(
     {
       name: "AES-GCM",
@@ -51,14 +45,13 @@ export async function generateDataEncryptionKey({
     true,
     ["encrypt", "decrypt"],
   );
-
   const exportedDataEncryptionKey = await crypto.subtle.exportKey(
     "raw",
     dataEncryptionKey,
   );
   const iv = crypto.getRandomValues(new Uint8Array(12));
 
-  const encryptedDataEncryptionKey = await crypto.subtle.encrypt(
+  return await crypto.subtle.encrypt(
     {
       name: "AES-GCM",
       iv: iv,
@@ -66,22 +59,12 @@ export async function generateDataEncryptionKey({
     encryptionKey,
     exportedDataEncryptionKey,
   );
-
-  const combinedArray = new Uint8Array(
-    iv.length + encryptedDataEncryptionKey.byteLength,
-  );
-  combinedArray.set(iv, 0);
-  combinedArray.set(new Uint8Array(encryptedDataEncryptionKey), iv.length);
-
-  return returnType === "base64"
-    ? Buffer.from(combinedArray).toString("base64")
-    : combinedArray.buffer;
 }
 
 // Function to decrypt the data encryption key using the user encryption key
 export async function decryptDataEncryptionKey(
   encryptedDataEncryptionKey: ArrayBuffer,
-  userEncryptionKey: CryptoKey,
+  encryptionKey: CryptoKey,
 ): Promise<CryptoKey> {
   const encryptedDataEncryptionKeyArray = new Uint8Array(
     encryptedDataEncryptionKey,
@@ -94,7 +77,7 @@ export async function decryptDataEncryptionKey(
       name: "AES-GCM",
       iv: iv,
     },
-    userEncryptionKey,
+    encryptionKey,
     encryptedKey,
   );
 
@@ -110,10 +93,22 @@ export async function decryptDataEncryptionKey(
 }
 
 // Function to encrypt a string with the user encryption key
-export async function encryptString(
-  plainText: string,
-  encryptionKey: CryptoKey,
-): Promise<string> {
+export async function encryptString({
+  plainText,
+  encryptionKey,
+}: {
+  plainText: string;
+  encryptionKey: string;
+}): Promise<string> {
+  const currentCryptokey = await crypto.subtle.importKey(
+    "raw",
+    Buffer.from(encryptionKey, "base64"),
+    {
+      name: "AES-GCM",
+    },
+    true,
+    ["encrypt", "decrypt"],
+  );
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const encodedText = new TextEncoder().encode(plainText);
 
@@ -122,7 +117,7 @@ export async function encryptString(
       name: "AES-GCM",
       iv: iv,
     },
-    encryptionKey,
+    currentCryptokey,
     encodedText,
   );
 
@@ -134,24 +129,47 @@ export async function encryptString(
 }
 
 // Function to decrypt a string with the user encryption key
-export async function decryptString(
-  encryptedText: string,
-  encryptionKey: CryptoKey,
-): Promise<string> {
-  const encryptedTextArray = Uint8Array.from(
-    Buffer.from(encryptedText, "base64"),
-  );
-  const iv = encryptedTextArray.slice(0, 12);
-  const encryptedData = encryptedTextArray.slice(12);
+export async function decryptString({
+  encryptedText,
+  encryptionKey,
+}: {
+  encryptedText: string;
+  encryptionKey: string;
+}): Promise<string> {
+  try {
+    const currentCryptokey = await crypto.subtle.importKey(
+      "raw",
+      Buffer.from(encryptionKey, "base64"),
+      {
+        name: "AES-GCM",
+      },
+      true,
+      ["encrypt", "decrypt"],
+    );
+    const encryptedTextArray = Uint8Array.from(
+      Buffer.from(encryptedText, "base64"),
+    );
+    const iv = encryptedTextArray.slice(0, 12);
+    const encryptedData = encryptedTextArray.slice(12);
 
-  const decryptedText = await crypto.subtle.decrypt(
-    {
-      name: "AES-GCM",
-      iv: iv,
-    },
-    encryptionKey,
-    encryptedData,
-  );
+    const decryptedText = await crypto.subtle.decrypt(
+      {
+        name: "AES-GCM",
+        iv: iv,
+      },
+      currentCryptokey,
+      encryptedData,
+    );
 
-  return new TextDecoder().decode(decryptedText);
+    return new TextDecoder().decode(decryptedText);
+  } catch (error) {
+    console.error("Error decrypting string:", error);
+    throw new Error(
+      "Failed to decrypt string. Please check the encryption key and try again.",
+    );
+  }
 }
+
+// how to store th ekey locally
+// window.crypto.subtle.exportKey("jwk", key)
+// .then(e=>localStorage.setItem("webkey",JSON.stringify(e)));
