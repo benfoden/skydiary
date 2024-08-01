@@ -42,7 +42,57 @@
     "try it": "try it for free"
   },
   "features": {
-    "title": "features"
+    "title": "features",
+    "heroTitle": "what can you do with skydiary?",
+    "feature1": {
+      "title": "get personalized comments",
+      "description": "get motivated to write with personalized, private comments from personas you create."
+    },
+    "feature2": {
+      "title": "you secure your data",
+      "description": "your data is encrypted in transit and at rest. you set your own encryption key you control. we can't read, sell, or mine your personal data. <privacy>read our privacy pledge</privacy>"
+    },
+    "feature3": {
+      "title": "create custom personas",
+      "description": "want to talk to Caesar? want feedback from Cleopatra? how about an expert coach? create your own AI-powered personas and get personalized feedback."
+    },
+    "miniFeaturesTitle": "and you get more features like...",
+    "miniFeature1": {
+      "title": "unlimited daily entries for free"
+    },
+    "miniFeature2": {
+      "title": "export your data any time"
+    },
+    "miniFeature3": {
+      "title": "dark mode for late night journaling"
+    },
+    "miniFeature4": {
+      "title": "automatic backups are saved for you"
+    }
+  },
+  "privacyPledge": {
+    "title": "privacy pledge",
+    "description": "whether you call it a diary or a journal, it can become home to your innermost thoughts and feelings. we use skydiary ourselves, and we want privacy too. your privacy is the base on which all our decisions are made.",
+    "detail1": {
+      "title": "modern, strong encryption",
+      "description": "your data is transmitted to our servers and stored with the strongest available modern encryption. you can enable your own encryption key you control for next level security."
+    },
+    "detail2": {
+      "title": "passcode keys",
+      "description": "passwords are generally not a very secure way to protect your data. we send a new passcode that expires on every login. there's no password to steal and access your account."
+    },
+    "detail3": {
+      "title": "no shoulder surfing",
+      "description": "turn on no peeking mode to hide your journal entries by default, until you click or tap."
+    },
+    "detail4": {
+      "title": "independent by design",
+      "description": "we don't use third party providers for authentication. we aren't affiliated with large tech companies. our incentive is to help you, not shareholders."
+    },
+    "detail5": {
+      "title": "minimum legal compliance",
+      "description": "we review any law enforcment requests and push back if it is too expansive or intrusive. we require valid legal process before producing information, with one exception: if there is an immediate threat of serious physical injury or worse. in this case, we still only share your email address and device."
+    }
   },
   "contact": {
     "title": "contact us",
