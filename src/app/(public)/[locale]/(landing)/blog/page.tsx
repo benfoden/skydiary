@@ -41,10 +41,10 @@ export default async function BlogIndex() {
   );
 
   return (
-    <>
-      <h1 className="text-lg font-light">blog</h1>
+    <div className="flex w-full flex-col items-start justify-start gap-2 sm:max-w-[768px]">
+      <h1 className="text-3xl font-light">blog</h1>
 
-      <ul className="mt-4 flex w-full  flex-col gap-4 md:w-1/3">
+      <ul className="mt-4 flex w-full flex-col gap-4">
         {blogPosts.map(
           ({ id, updatedAt, title, content, tag, description }) => (
             <li key={id}>
@@ -74,6 +74,6 @@ export default async function BlogIndex() {
           ),
         )}
       </ul>
-    </>
+    </div>
   );
 }

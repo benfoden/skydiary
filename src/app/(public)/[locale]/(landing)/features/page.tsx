@@ -28,8 +28,9 @@ export default async function Features() {
   const t = await getTranslations();
   return (
     <div className="flex w-full flex-col items-start justify-start gap-2 sm:max-w-[768px]">
+      <h1 className="mb-4 text-3xl font-light">{t("features.title")}</h1>
       <Card variant="textBlock" isButton={false}>
-        <h1 className="mb-4 text-lg font-medium">{t("features.title")}</h1>
+        yo
       </Card>
     </div>
   );
