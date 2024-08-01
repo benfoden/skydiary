@@ -41,6 +41,9 @@
     },
     "try it": "try it for free"
   },
+  "features": {
+    "title": "features"
+  },
   "contact": {
     "title": "contact us",
     "description": "questions? feedback? we'd love to hear from you.",
@@ -83,6 +86,7 @@
   "nav": {
     "home": "home",
     "about": "about",
+    "features": "features",
     "pricing": "pricing",
     "privacy": "privacy",
     "terms": "terms",
@@ -339,6 +343,10 @@
     "about": {
       "title": "about us",
       "description": "we're a husband and wife team based in Japan. we craved feedback to keep us writing our journals daily because we know it helps in so many ways."
+    },
+    "features": {
+      "title": "features",
+      "description": "skydiary is a journal that helps you write a daily entry and get personalized feedback. it's private, totally secure, and totally free."
     },
     "pricing": {
       "title": "pricing",
