@@ -72,7 +72,7 @@
   },
   "privacyPledge": {
     "title": "privacy pledge",
-    "description": "whether you call it a diary or a journal, it can become home to your innermost thoughts and feelings. we use skydiary ourselves, and we want privacy too. your privacy is the base on which all our decisions are made.",
+    "description": "whether you call it a diary or a journal, it can become home to your innermost thoughts and feelings. your privacy is the base on which all our decisions are made.",
     "detail1": {
       "title": "modern, strong encryption",
       "description": "your data is transmitted to our servers and stored with the strongest available modern encryption. you can enable your own encryption key you control for next level security."
@@ -397,6 +397,10 @@
     "features": {
       "title": "features",
       "description": "skydiary is a journal that helps you write a daily entry and get personalized feedback. it's private, totally secure, and totally free."
+    },
+    "privacyPledge": {
+      "title": "privacy pledge",
+      "description": "whether you call it a diary or a journal, it can become home to your innermost thoughts and feelings. we use skydiary ourselves, and we want privacy too. your privacy is the base on which all our decisions are made."
     },
     "pricing": {
       "title": "pricing",
