@@ -232,7 +232,8 @@
     "loading": "loading...",
     "deleting": "deleting...",
     "error": "error",
-    "success": "success"
+    "success": "success",
+    "comingSoon": "coming soon"
   },
   "error": {
     "configuration": {

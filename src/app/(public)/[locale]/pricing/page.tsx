@@ -4,7 +4,6 @@ import { type Session } from "next-auth";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { env } from "process";
 import { useEffect, useState, type FormEvent } from "react";
 import Button from "~/app/_components/Button";
 import ButtonSpinner from "~/app/_components/ButtonSpinner";
@@ -94,6 +93,11 @@ export default function Pricing({
               <p className="text-4xl font-light">{t("thankYou")}</p>
               <p>{t("emailWithDetails")}</p>
             </div>
+          )}
+          {user?.isSpecial && (
+            <Card isButton={false}>
+              as a special user, you are on the premium plan for free
+            </Card>
           )}
           {checkoutStatus !== SUCCESS && (
             <div className="flex w-full flex-col items-center justify-center gap-8">
@@ -202,15 +206,14 @@ export default function Pricing({
                               <FormButton
                                 variant="submit"
                                 isSpecial={true}
-                                isDisabled={
-                                  isLoading ||
-                                  user?.isSpecial ||
-                                  (env.PRODUCT_ID_PLUS !== "development" &&
-                                    user?.stripeProductId ===
-                                      env.PRODUCT_ID_PLUS) ||
-                                  user?.stripeProductId ===
-                                    env.PRODUCT_ID_PLUS_TEST
-                                }
+                                isDisabled={true}
+                                // isLoading ||
+                                // user?.isSpecial ||
+                                // (env.PRODUCT_ID_PLUS !== "development" &&
+                                //   user?.stripeProductId ===
+                                //     env.PRODUCT_ID_PLUS) ||
+                                // user?.stripeProductId ===
+                                //   env.PRODUCT_ID_PLUS_TEST
                               >
                                 <div className="flex items-center gap-2 text-lg font-light">
                                   {!isLoading ? (
@@ -218,10 +221,11 @@ export default function Pricing({
                                       {userPlan === "plus" ? (
                                         <>{t("yourPlan")}</>
                                       ) : (
-                                        <>
-                                          {t("subscribe")}
-                                          <ArrowRightIcon className="h-3 w-3 animate-ping" />
-                                        </>
+                                        <>{t("comingSoon")}</>
+                                        // <>
+                                        //   {t("subscribe")}
+                                        //   <ArrowRightIcon className="h-3 w-3 animate-ping" />
+                                        // </>
                                       )}
                                     </>
                                   ) : (
@@ -297,27 +301,26 @@ export default function Pricing({
                               <FormButton
                                 variant="submit"
                                 isSpecial={true}
-                                isDisabled={
-                                  isLoading ||
-                                  user?.isSpecial ||
-                                  (env.PRODUCT_ID_PREMIUM !== "development" &&
-                                    user?.stripeProductId ===
-                                      env.PRODUCT_ID_PREMIUM) ||
-                                  user?.stripeProductId ===
-                                    env.PRODUCT_ID_PREMIUM_TEST
-                                }
+                                isDisabled={true}
+                                // isLoading ||
+                                // user?.isSpecial ||
+                                // (env.PRODUCT_ID_PREMIUM !== "development" &&
+                                //   user?.stripeProductId ===
+                                //     env.PRODUCT_ID_PREMIUM) ||
+                                // user?.stripeProductId ===
+                                //   env.PRODUCT_ID_PREMIUM_TEST
                               >
                                 <div className="flex items-center gap-2 text-lg font-light">
                                   {!isLoading ? (
                                     <>
-                                      {userPlan === "premium" ||
-                                      user?.isSpecial ? (
+                                      {userPlan === "premium" ? (
                                         <>{t("yourPlan")}</>
                                       ) : (
-                                        <>
-                                          {t("subscribe")}
-                                          <ArrowRightIcon className="h-3 w-3 animate-ping" />
-                                        </>
+                                        <>{t("comingSoon")}</>
+                                        // <>
+                                        //   {t("subscribe")}
+                                        //   <ArrowRightIcon className="h-3 w-3 animate-ping" />
+                                        // </>
                                       )}
                                     </>
                                   ) : (
