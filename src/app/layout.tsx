@@ -8,7 +8,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { type Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
-import { type Locale } from "node_modules/next/dist/compiled/@vercel/og/satori";
+import { type Locale } from "~/config";
 import { TRPCReactProvider } from "~/trpc/react";
 
 export const siteTitle = "skydiary";
