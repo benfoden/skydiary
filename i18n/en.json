@@ -286,7 +286,8 @@
     "loading": "loading...",
     "deleting": "deleting...",
     "error": "error",
-    "success": "success"
+    "success": "success",
+    "comingSoon": "coming soon"
   },
   "error": {
     "configuration": {
@@ -343,6 +344,9 @@
     "checkingOut": "checking out...",
     "yourPlan": "subscribed",
     "yearlyPriceDetail0": "get 2+ months free",
+    "gettingReady": "subscription plans are coming soon.",
+    "getNotified": "contact us to get notified",
+
     "lite": {
       "title": "lite",
       "entries": "unlimited daily entries",

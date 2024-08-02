@@ -286,7 +286,8 @@
     "loading": "読み込み中...",
     "deleting": "削除中...",
     "error": "エラー",
-    "success": "成功"
+    "success": "成功",
+    "comingSoon": "近日公開"
   },
   "error": {
     "configuration": {
@@ -343,6 +344,8 @@
     "checkingOut": "チェックアウト中...",
     "yourPlan": "登録済み",
     "yearlyPriceDetail0": "2ヶ月以上無料",
+    "gettingReady": "サブスクリプションプランは近日公開予定です。",
+    "getNotified": "通知を受け取るにはお問い合わせください",
     "lite": {
       "title": "ライト",
       "entries": "無制限の日常エントリ",

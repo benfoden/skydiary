@@ -14,11 +14,7 @@ const NewUserPage: React.FC = async () => {
   const session = await getServerAuthSession();
 
   if (!session) return redirect("/auth/signin");
-  if (
-    session.user.name &&
-    session.user.isWorkFocused !== undefined &&
-    session.user.isWorkFocused !== null
-  ) {
+  if (session.user.name) {
     return redirect("/home");
   }
 

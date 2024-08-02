@@ -12,9 +12,6 @@ export default async function SessionLayout({ children }: Props) {
   if (!session) {
     redirect("/auth/signin");
   }
-  if (!session.user.name) {
-    redirect("/auth/new-user");
-  }
 
   await api.user.resetDailyUsage();
   return <div className="container mx-auto min-h-screen">{children}</div>;
