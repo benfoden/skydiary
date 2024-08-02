@@ -31,8 +31,11 @@ export async function generateEncryptionKeyFromPassword({
   );
 }
 
-export async function generateKeyPair(): Promise<CryptoKeyPair> {
-  return await crypto.subtle.generateKey(
+export async function generateKeyPair(): Promise<{
+  publicKey: string;
+  privateKey: string;
+}> {
+  const keyPair = await crypto.subtle.generateKey(
     {
       name: "ECDH",
       namedCurve: "P-384",
@@ -40,6 +43,14 @@ export async function generateKeyPair(): Promise<CryptoKeyPair> {
     true,
     ["deriveKey", "deriveBits"],
   );
+
+  const publicKey = await crypto.subtle.exportKey("spki", keyPair.publicKey);
+  const privateKey = await crypto.subtle.exportKey("pkcs8", keyPair.privateKey);
+
+  return {
+    publicKey: Buffer.from(publicKey).toString("base64"),
+    privateKey: Buffer.from(privateKey).toString("base64"),
+  };
 }
 
 // Function to return create a data encryption key and return it encrypted with the user encryption key

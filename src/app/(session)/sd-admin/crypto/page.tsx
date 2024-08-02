@@ -6,6 +6,7 @@ import {
   decryptString,
   encryptString,
   generateEncryptionKeyFromPassword,
+  generateKeyPair,
 } from "~/utils/encryption";
 
 export default function CryptoPage() {
@@ -13,7 +14,13 @@ export default function CryptoPage() {
   const [input, setInput] = useState("");
   const [encryptedText, setEncryptedText] = useState("");
   const [encryptionKey, setEncryptionKey] = useState<string>("");
+  const [privateKey, setSetPrivateKey] = useState<string>("");
+  const [publicKey, setSetPublicKey] = useState<string>("");
 
+  const handleCreateKeyPair = async () => {
+    const keyPair = await generateKeyPair();
+    console.log("keyPair", keyPair);
+  };
   const handleCreateKey = async () => {
     const key = await generateEncryptionKeyFromPassword({
       password: "1234567890123456",
@@ -60,6 +67,7 @@ export default function CryptoPage() {
       <div>
         <Button onClick={handleReset}>Reset</Button>
         <Button onClick={handleCreateKey}>Create Key</Button>
+        <Button onClick={handleCreateKeyPair}>Create Key Pair</Button>
         <input
           className="rounded border bg-white/20 p-4"
           type="text"
