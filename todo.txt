@@ -52,18 +52,18 @@ End to End Encryption Strategy
 
 2.  
 •   The user enters a password.
-•   On their device, the password is used with a random salt to return a user local key (ULK).
-•   A user remote key (URK) is also derived from the password with a random salt and stored in the DB.
-•   Both salts are encrypted on the server with a master salt key (loaded from ENV) and stored in the DB.
-•   A public/ private keypair is generated on the user's device.
-•   The ULK is used to encrypt the private key, creating an encrypted private key(EPK).
-•   The EPK is stored locally in JWK format, using the secure IndexedDB API.
-•   A random UUID is generated and stored on the server as a device ID, together with a label for the device, various metadata about the device, and the public key. The deviceID is also stored locally.
+•   On their device, the password is used with a random salt to derive a user remote key (URK)
+•   The salt is encrypted on the server with a master salt key (loaded from ENV) and the encrypted salt is stored in the DB.
+•   A public/ private keypair is generated on the user's device along with a data encryption key (DEK)
+•   The URK is used to create an encrypted private key.
+•   The URK is stored locally in JWK format, using the IndexedDB API.
+•   The DEK is encrypted with the public key.
+•   The public key, encrypted private key, and encrypted DEK are stored on the server.
 •   The user is responsible for securely storing their data password. It can be backed up or stored in a secure location accessible only to the user.
-•   If the user logs out, the UMK is deleted from the device.
+•   If the user logs out, the URK is deleted from the device.
 
 3. 
-•   The UMK is used to decrypt the private key and that is used to encrypt / decrypt data locally as needed.
+•   The URK is used to decrypt the private key and that is used to encrypt / decrypt data locally as needed.
 
 
 4.  
