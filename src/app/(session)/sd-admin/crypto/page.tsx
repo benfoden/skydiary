@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "~/app/_components/Button";
 import {
   decryptString,
   encryptString,
   generateEncryptionKeyFromPassword,
-  generateKeyPair,
 } from "~/utils/encryption";
 
 export default function CryptoPage() {
@@ -14,18 +13,28 @@ export default function CryptoPage() {
   const [input, setInput] = useState("");
   const [encryptedText, setEncryptedText] = useState("");
   const [encryptionKey, setEncryptionKey] = useState<string>("");
-  const [privateKey, setSetPrivateKey] = useState<string>("");
-  const [publicKey, setSetPublicKey] = useState<string>("");
+  const [password, setPassword] = useState("");
 
-  const handleCreateKeyPair = async () => {
-    const keyPair = await generateKeyPair();
-    console.log("keyPair", keyPair);
-  };
-  const handleCreateKey = async () => {
+  /*
+todo: 
+generate user key from password with random salt
+generate raw data key
+
+
+
+
+
+*/
+
+  const handleCreateKeyFromPassword = async (password: string) => {
     const key = await generateEncryptionKeyFromPassword({
-      password: "1234567890123456",
+      password,
     });
+
+    const exportedJWK = await crypto.subtle.exportKey("jwk", key);
+    localStorage.setItem("exportedJWK", JSON.stringify(exportedJWK));
     const exportedKey = await crypto.subtle.exportKey("raw", key);
+
     const keyString = Buffer.from(exportedKey).toString("base64");
     setEncryptionKey(keyString);
   };
@@ -55,6 +64,8 @@ export default function CryptoPage() {
     setEncryptionKey("");
   };
 
+  useEffect(() => {}, [encryptionKey]);
+
   return (
     <div className="container mx-auto flex w-full flex-col gap-4 p-4">
       <div>Crypto</div>
@@ -66,8 +77,17 @@ export default function CryptoPage() {
       </div>
       <div>
         <Button onClick={handleReset}>Reset</Button>
-        <Button onClick={handleCreateKey}>Create Key</Button>
-        <Button onClick={handleCreateKeyPair}>Create Key Pair</Button>
+        <Button onClick={() => handleCreateKeyFromPassword(password)}>
+          Create Key from Password
+        </Button>
+        pass
+        <input
+          className="rounded border bg-white/20 p-4"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        text
         <input
           className="rounded border bg-white/20 p-4"
           type="text"

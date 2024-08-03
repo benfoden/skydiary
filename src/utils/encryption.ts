@@ -1,12 +1,11 @@
 // Function to generate a strong encryption key
-export async function generateEncryptionKeyFromPassword({
+export async function generateEncryptionKeyFromPasswordWithSalt({
   password,
+  salt,
 }: {
   password: string;
+  salt: Uint8Array;
 }): Promise<CryptoKey> {
-  if (password.length < 16) {
-    throw new Error("Password must be at least 16 characters long");
-  }
   const encoder = new TextEncoder();
   const passwordKey = await crypto.subtle.importKey(
     "raw",
@@ -15,12 +14,10 @@ export async function generateEncryptionKeyFromPassword({
     false,
     ["deriveKey"],
   );
-
-  const salt = crypto.getRandomValues(new Uint8Array(16));
   return await crypto.subtle.deriveKey(
     {
       name: "PBKDF2",
-      salt: salt,
+      salt,
       iterations: 310000,
       hash: "SHA-256",
     },

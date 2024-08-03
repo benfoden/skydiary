@@ -6,11 +6,11 @@ login with email address and enter passcode from email --> user is logged in
 
 data password input UI -- lock and key, etc. to make it clear this is separate from user account
 
-user encryption key derived from password on client (consistent result!)
+user inputs a password and PBKDF2 user encryption key derived (with a consistent result!)
 
 randomly generate salt when password is created, save in user table, and send it to user when they are deriving keys locally
 
-user encryption key is encrypted via the server, and then stored in local storage
+user encryption key is encrypted via the server, and then stored in local storage ??
 
 data encryption key is generated randomly on client
 
@@ -43,35 +43,35 @@ when client tries to decrypt locally stored user encryption key,
 request is sent to server with userID, deviceID, session token, then conditionals are run,
 and session encryption key is returned or not
 
-Key Management Strategy
+End to End Encryption Strategy
 
-1.  User Authentication:
-•   Each user has a unique account protected by strong authentication mechanisms (e.g., multi-factor authentication).
+
+1. 
+•   Each user has a unique account protected by strong authentication mechanisms (e.g., password and TOTP).
 •   Upon successful authentication, the user receives a session token to communicate with the server.
 
-2.  User-Side Key Generation:
-•   Each user generates their own encryption key on their device upon first use. This key is never transmitted to or stored on the server.
-•   The user is responsible for securely storing this key. It can be backed up or stored in a secure location accessible only to the user.
+2.  
+•   The user enters a password.
+•   On their device, the password is used with a random salt to return a user local key (ULK).
+•   A user remote key (URK) is also derived from the password with a random salt and stored in the DB.
+•   Both salts are encrypted on the server with a master salt key (loaded from ENV) and stored in the DB.
+•   A public/ private keypair is generated on the user's device.
+•   The ULK is used to encrypt the private key, creating an encrypted private key(EPK).
+•   The EPK is stored locally in JWK format, using the secure IndexedDB API.
+•   A random UUID is generated and stored on the server as a device ID, together with a label for the device, various metadata about the device, and the public key. The deviceID is also stored locally.
+•   The user is responsible for securely storing their data password. It can be backed up or stored in a secure location accessible only to the user.
+•   If the user logs out, the UMK is deleted from the device.
 
-3.  Encryption and Decryption Process:
-•   Initial Setup:
-•   When the user first registers or sets up their account, they generate a strong encryption key locally on their device.
-•   This key is used to encrypt a second key (the data encryption key) which is then used for all data encryption.
-•   The encrypted data encryption key is uploaded to the server, but the user’s encryption key (used for encrypting the data encryption key) is never transmitted.
+3. 
+•   The UMK is used to decrypt the private key and that is used to encrypt / decrypt data locally as needed.
 
-4.  Access from Multiple Devices:
+
+4.  
 •   When the user logs in from a new device, they authenticate using their credentials and a multi-factor authentication process.
-•   The server provides the encrypted data encryption key to the new device.
-•   The user is prompted to enter their encryption key, which is used to decrypt the data encryption key locally.
-•   The decrypted data encryption key is then used for encrypting/decrypting data on the new device.
-
-5.  Data Encryption/Decryption:
-•   The client uses the decrypted data encryption key to encrypt/decrypt data locally.
-•   Encrypted data is stored or transmitted as needed, but the data encryption key itself is never stored persistently on the client device after use.
-
-6.  Backup and Recovery:
-•   Users should be prompted to back up their encryption key securely (e.g., writing it down and storing it in a safe place).
-•   If the user loses their encryption key, they cannot decrypt their data, emphasizing the importance of secure key management by the user.
+•   When the user enters their data password on a new device, the salt is decrypted and sent from the server to be used to derive the same user key again and then it is stored locally.
+•   A random UUID is generated and stored on the server as a device ID, together with a label for the device, various metadata about the device. The deviceID is also stored locally.
+•   The data encryption key can then be decrypted on the new deviice and used for encrypting/decrypting data on the new device.
+•   If the user revokes a device, when a PUT or GET request comes from that revoked device, the server returns an error response and invalidates the relevant session token immediately.
 
 Workflow for Multiple Devices
 

@@ -20,6 +20,7 @@ model Post {
   comments       Comment[] @relation("PostComments")
   createdBy      User      @relation(fields: [createdById], references: [id])
   tags           Tag[]     @relation("PostTags")
+  iv             String?
 
   @@index([createdById])
 }
@@ -44,6 +45,7 @@ model Comment {
   coachVariant       String?
   coachName          String?
   postId             String
+  iv                 String?
   post               Post     @relation("PostComments", fields: [postId], references: [id], onDelete: Cascade)
   createdByPersona   Persona? @relation(fields: [createdByPersonaId], references: [id])
   @@index([postId])
@@ -92,7 +94,6 @@ model User {
   personasUsed   Int?
   memoryUsed     Int?
   resetAt        DateTime?
-  isSelfEncrypted Boolean @default(false)
   accounts      Account[]
   personas      Persona[]
   posts         Post[]
