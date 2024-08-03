@@ -56,7 +56,7 @@ User signs up on device A
   client: private key A is saved as JWK with IndexedDB
   server: new device UUID, device A metadata, userID, and public key A are saved to db
   - all relevant data sent to/from server from now on is encrypted/decrypted with keypair A
-  server: salt is decrypted with private key a then encrypted with master salt key (loaded from env) then saved to db
+  server: salt is decrypted with private key A then encrypted with master salt key (loaded from env) then saved to db
   client: data encryption key is generated (DEK)
   client: DEK is saved as JWK with IndexedDB
   client: SUK is used to encrypt DEK, resulting in SUKEDEK
@@ -85,11 +85,25 @@ User logs in on a new device B
 User logs out on device A
   client: private key A is encrypted with DEK
   server: DEK encrypted private key A is stored under device A record
-  client: private key A and DEK are deleted from indexedDB
+  client: private key A and DEK are deleted from IndexedDB
   client: session is ended
   server: session metadata is deleted
 
-  
+User logs back in on the same device
+  client: user authenticates with TOTP
+  client: user enters password
+  server: salt, SUKEDEK, and encrypted private key A are sent to client
+  client: password and salt used to derive secret user key (SUK)
+  client: SUK is used to decrypt the SUKEDEK
+  client: DEK is saved as JWK with IndexedDB
+  client: private key A is decrypted using DEK and saved as JWK with IndexedDB
+
+Revoking devices
+  client: user initiates device revocation
+  server: device UUID is marked as revoked in the db
+  server: any active sessions for the revoked device are terminated
+  client: user is notified of successful revocation
+
 
 
 1. 
