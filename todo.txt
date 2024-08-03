@@ -46,24 +46,73 @@ and session encryption key is returned or not
 End to End Encryption Strategy
 
 
+
+User signs up on device A
+  client: new user authenticates for first time with TOTP
+  client: user enters password
+  client: random salt is generated
+  client: password and salt used to derive secret user key (SUK)
+  client: keypair A is generated
+  client: private key A is saved as JWK with IndexedDB
+  server: new device UUID, device A metadata, userID, and public key A are saved to db
+  - all relevant data sent to/from server from now on is encrypted/decrypted with keypair A
+  server: salt is decrypted with private key a then encrypted with master salt key (loaded from env) then saved to db
+  client: data encryption key is generated (DEK)
+  client: DEK is saved as JWK with IndexedDB
+  client: SUK is used to encrypt DEK, resulting in SUKEDEK
+  server: SUKEDEK is saved to db
+
+Secure handling of user generated content
+  client: user types a new post
+  client: new post plain text is encrypted with DEK, then encrypted with private key A
+  server: new post cipher text is decrypted with public key A and saved to DB
+  client: user opens an old post (request to server)
+  server: old post cipher text is encrypted with public key A
+  client: old post cipher text is decrypted with private key A, then decrypted with DEK, then displayed in the UI
+
+User logs in on a new device B
+  client: user authenticates with TOTP
+  client: user enters password
+  client: keypair B is generated
+  client: private key B is saved as JWK with IndexedDB
+  server: new device UUID, device B metadata, userID, and public key B are saved to db
+  - all relevant data sent to/from server from now on is encrypted/decrypted with keypair B
+  server: salt is decrypted with master salt key (loaded from env) and together with SUKEDEK sent to the client
+  client: password and salt used to derive secret user key (SUK)
+  client: SUKEDEK is decrypted using SUK
+  client: DEK is saved as JWK with IndexedDB for future use
+
+User logs out on device A
+  client: private key A is encrypted with DEK
+  server: DEK encrypted private key A is stored under device A record
+  client: private key A and DEK are deleted from indexedDB
+  client: session is ended
+  server: session metadata is deleted
+
+  
+
+
 1. 
 •   Each user has a unique account protected by strong authentication mechanisms (e.g., password and TOTP).
 •   Upon successful authentication, the user receives a session token to communicate with the server.
 
 2.  
 •   The user enters a password.
-•   On their device, the password is used with a random salt to derive a user remote key (URK)
-•   The salt is encrypted on the server with a master salt key (loaded from ENV) and the encrypted salt is stored in the DB.
-•   A public/ private keypair is generated on the user's device along with a data encryption key (DEK)
-•   The URK is used to create an encrypted private key.
-•   The URK is stored locally in JWK format, using the IndexedDB API.
-•   The DEK is encrypted with the public key.
-•   The public key, encrypted private key, and encrypted DEK are stored on the server.
-•   The user is responsible for securely storing their data password. It can be backed up or stored in a secure location accessible only to the user.
-•   If the user logs out, the URK is deleted from the device.
+•   A random salt is generated.
+•   A user password key (UPK) is derived from the password and the salt on the client.
+•   The salt is encrypted with a master salt key (loaded from ENV) and stored in the DB.
+•   SKIP A data encryption key (DEK) is generated on the client.
+•   SKIP The UPK is used to encrypt the DEK on the client.
+•   A public/ private keypair is generated on the client.
+•   SKIP The public key, and encrypted DEK are stored in the DB.
+•   The public key is stored in the DB.
+•   The private key is used to create an encrypted UPK (EUPK).
+•   The UPK and private key are stored locally in JWK format, using the IndexedDB API.
+•   The user is responsible for securely storing their password. It can be backed up or stored in a secure location accessible only to the user.
+•   If the user logs out, the EPK is deleted from the device.
 
 3. 
-•   The URK is used to decrypt the private key and that is used to encrypt / decrypt data locally as needed.
+•   The UPK is used to decrypt the private key and that is used to encrypt / decrypt data locally as needed.
 
 
 4.  
