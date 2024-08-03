@@ -37,11 +37,7 @@ export default function DataSecurityCard() {
     // generate key pair
     const { publicKey, privateKey } = await generateKeyPair();
 
-    // send public key to the server
-    // encrypt private key with user key derived from password
-    // store encrypted private key in local storage, with the salt
-
-    // const exportedJWK = await crypto.subtle.exportKey("jwk", key);
+    const exportedJWK = await crypto.subtle.exportKey("jwk", key);
     // localStorage.setItem("exportedJWK", JSON.stringify(exportedJWK));
     // const exportedKey = await crypto.subtle.exportKey("raw", key);
 
