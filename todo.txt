@@ -155,7 +155,7 @@ Notes
 User signs up on device A
   client: new user authenticates for first time with TOTP, session is created
   server: session is created
-  client: user enters a password and is prompted to save it securely in a password manager and save another copy another place
+  client: on auth/new-user page the user enters a password and is prompted to save it securely in a password manager and save another copy another place
   client: random salt is generated
   client: PBKDF2 is used to derive secret user key (SUK) from user key and salt
   client: IndexedDB encryption key (IEK) is generated
