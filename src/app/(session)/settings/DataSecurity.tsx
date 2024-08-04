@@ -4,10 +4,7 @@ import { useState } from "react";
 import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import Input from "~/app/_components/Input";
-import {
-  generateEncryptionKeyFromPasswordWithSalt,
-  generateKeyPair,
-} from "~/utils/encryption";
+import { generateKeyPair } from "~/utils/crypto";
 
 export default function DataSecurityCard() {
   const [output, setOutput] = useState("");
@@ -29,15 +26,15 @@ export default function DataSecurityCard() {
   const handleCreateKeyFromPassword = async (password: string) => {
     // derive user key from password
     const salt = crypto.getRandomValues(new Uint8Array(16));
-    const key = await generateEncryptionKeyFromPasswordWithSalt({
-      password,
-      salt,
-    });
+    // const key = await generateEncryptionKeyFromPasswordWithSalt({
+    //   password,
+    //   salt,
+    // });
 
     // generate key pair
     const { publicKey, privateKey } = await generateKeyPair();
 
-    const exportedJWK = await crypto.subtle.exportKey("jwk", key);
+    // const exportedJWK = await crypto.subtle.exportKey("jwk", key);
     // localStorage.setItem("exportedJWK", JSON.stringify(exportedJWK));
     // const exportedKey = await crypto.subtle.exportKey("raw", key);
 

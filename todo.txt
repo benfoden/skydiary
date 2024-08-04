@@ -154,9 +154,9 @@ Notes
 
 User signs up on device A
   client: new user authenticates for first time with TOTP
-  client: user gets a new password generated
+  client: a user key is generated and the user is prompted to save it securely
   client: random salt is generated
-  client: password and salt are used with PBKDF2 to derive secret user key (SUK)
+  client: PBKDF2 is used to derive secret user key (SUK) from user key and salt
   client: IndexedDB encryption key (IEK) is generated
   server: IEK is saved in the db
   server: IEK is made available in the user session object context
@@ -185,7 +185,7 @@ User logs out on device A
 
 User logs back in on device A
   client: user authenticates with TOTP
-  client: user enters password
+  client: user enters user key
   server: salt, SUKEDEK, IEK are made available to client
   server: after this step, all data in IndexedDB on the client is always encrypted before storage and decrypted before usage with the IEK, which is made available in the session user object
   client: password and salt used to derive secret user key (SUK)
@@ -194,14 +194,14 @@ User logs back in on device A
 
 User logs in on a new device B
   client: user authenticates with TOTP
-  client: user enters password
+  client: user enters user key
   server: after this step, all data in IndexedDB on the client is always encrypted before storage and decrypted before usage with the IEK, which is made available in the session user object
   client: keypair B is generated
   client: private key B is encrypted with IEK and saved as JWK with IndexedDB
   server: new device UUID, device B metadata, userID, and public key B are saved to db
   client and server: all relevant data transferred to/from server from now on is encrypted/decrypted with keypair B
   server: salt is decrypted with master salt key (loaded from env) and together with SUKEDEK sent to the client
-  client: password and salt used to derive secret user key (SUK)
+  client: user key and salt used to derive secret user key (SUK)
   client: SUKEDEK is decrypted using SUK
   client: DEK is encrypted with IEK and saved as JWK with IndexedDB
 

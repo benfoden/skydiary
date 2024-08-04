@@ -1,32 +1,5 @@
-// Function to generate a strong encryption key
-export async function generateEncryptionKeyFromPasswordWithSalt({
-  password,
-  salt,
-}: {
-  password: string;
-  salt: Uint8Array;
-}): Promise<CryptoKey> {
-  const encoder = new TextEncoder();
-  const passwordKey = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(password),
-    { name: "PBKDF2" },
-    false,
-    ["deriveKey"],
-  );
-  return await crypto.subtle.deriveKey(
-    {
-      name: "PBKDF2",
-      salt,
-      iterations: 310000,
-      hash: "SHA-256",
-    },
-    passwordKey,
-    { name: "AES-GCM", length: 256 },
-    true,
-    ["encrypt", "decrypt"],
-  );
-}
+
+
 
 export async function generateKeyPair(): Promise<{
   publicKey: string;

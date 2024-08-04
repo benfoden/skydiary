@@ -1,108 +1,117 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Button from "~/app/_components/Button";
+import Input from "~/app/_components/Input";
 import {
-  decryptString,
-  encryptString,
-  generateEncryptionKeyFromPassword,
-} from "~/utils/encryption";
+  decryptDataWithKey,
+  deriveSecretUserKey,
+  encryptDataWithKey,
+  type EncryptedData,
+  exportKeyToJWK,
+  generateAsymmetricKeyPair,
+  genRandomSalt,
+  genSymmetricKey,
+  genUserKey,
+  importKeyFromJWK,
+} from "~/utils/cryptoA1";
 
 export default function CryptoPage() {
-  const [output, setOutput] = useState("");
-  const [input, setInput] = useState("");
-  const [encryptedText, setEncryptedText] = useState("");
-  const [encryptionKey, setEncryptionKey] = useState<string>("");
-  const [password, setPassword] = useState("");
+  const [userKey, setUserKey] = useState("");
+  const [salt, setSalt] = useState("");
+  const [secretUserKey, setSecretUserKey] = useState<JsonWebKey>();
+  const [dataEncryptionKey, setDataEncryptionKey] = useState<JsonWebKey>();
+  const [publicKey, setPublicKey] = useState<JsonWebKey>();
+  const [privateKey, setPrivateKey] = useState<JsonWebKey>();
+  const [encryptedData, setEncryptedData] = useState<EncryptedData>();
+  const [decryptedData, setDecryptedData] = useState<string>();
+  const [plainText, setPlainText] = useState("");
 
   /*
 todo: 
-generate user key from password with random salt
-generate raw data key
-
-
-
-
+generate user-held user key
+generate random salt
+generate secret user key from user key with random salt
+generate data encryption key as jwk
+save data encryption key as jwk in indexeddb 
+encrypt data encryption key with secret user key
 
 */
-
-  const handleCreateKeyFromPassword = async (password: string) => {
-    const key = await generateEncryptionKeyFromPassword({
-      password,
-    });
-
-    const exportedJWK = await crypto.subtle.exportKey("jwk", key);
-    localStorage.setItem("exportedJWK", JSON.stringify(exportedJWK));
-    const exportedKey = await crypto.subtle.exportKey("raw", key);
-
-    const keyString = Buffer.from(exportedKey).toString("base64");
-    setEncryptionKey(keyString);
-  };
-
-  const handleEncrypt = async (input: string, encryptionKey: string) => {
-    const encrypted = await encryptString({
-      plainText: input,
-      encryptionKey,
-    });
-    setEncryptedText(encrypted);
-  };
-  const handleDecrypt = async (
-    encryptedText: string,
-    encryptionKey: string,
-  ) => {
-    const decrypted = await decryptString({
-      encryptedText,
-      encryptionKey,
-    });
-    setOutput(decrypted);
-  };
-
-  const handleReset = async () => {
-    setInput("");
-    setOutput("");
-    setEncryptedText("");
-    setEncryptionKey("");
-  };
-
-  useEffect(() => {}, [encryptionKey]);
 
   return (
     <div className="container mx-auto flex w-full flex-col gap-4 p-4">
       <div>Crypto</div>
       <div className="flex flex-col items-start gap-4">
-        <p>encryptionKey: {encryptionKey}</p>
-        <p>input: {input}</p>
-        <p>encryptedText: {encryptedText}</p>
-        <p>output: {output}</p>
+        <p>userKey: {userKey}</p>
+        <p>salt: {salt}</p>
+        <p>secretUserKey: {JSON.stringify(secretUserKey)}</p>
+        <p>dataEncryptionKey: {JSON.stringify(dataEncryptionKey)}</p>
+        <p>publicKey: {JSON.stringify(publicKey)}</p>
+        <p>privateKey: {JSON.stringify(privateKey)}</p>
+        <p>encryptedData: {JSON.stringify(encryptedData)}</p>
+        <p>decryptedData: {decryptedData}</p>
       </div>
       <div>
-        <Button onClick={handleReset}>Reset</Button>
-        <Button onClick={() => handleCreateKeyFromPassword(password)}>
-          Create Key from Password
+        <Button onClick={async () => setUserKey(await genUserKey())}>
+          Generate User Key
         </Button>
-        pass
-        <input
-          className="rounded border bg-white/20 p-4"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        text
-        <input
-          className="rounded border bg-white/20 p-4"
-          type="text"
-          value={input}
-          defaultValue="hello world"
-          onChange={(e) => setInput(e.target.value)}
-        />
-        <Button onClick={() => handleEncrypt(input, encryptionKey)}>
-          Encrypt
+        <Button onClick={async () => setSalt(await genRandomSalt())}>
+          Generate Random Salt
         </Button>
-        <Button onClick={() => handleDecrypt(encryptedText, encryptionKey)}>
-          Decrypt
+        <Button
+          onClick={async () => {
+            const derivedKey = await deriveSecretUserKey({ userKey, salt });
+            setSecretUserKey(derivedKey);
+          }}
+        >
+          Derive Secret User Key
+        </Button>
+        <Button
+          onClick={async () =>
+            setDataEncryptionKey(await exportKeyToJWK(await genSymmetricKey()))
+          }
+        >
+          Generate Data Encryption Key
+        </Button>
+        <Button
+          onClick={async () => {
+            const { publicKey, privateKey } = await generateAsymmetricKeyPair();
+            setPublicKey(await exportKeyToJWK(publicKey));
+            setPrivateKey(await exportKeyToJWK(privateKey));
+          }}
+        >
+          Generate Asymmetric Key Pair
+        </Button>
+        <Button
+          onClick={async () => {
+            const encryptedData = await encryptDataWithKey(
+              plainText,
+              await importKeyFromJWK(dataEncryptionKey!),
+            );
+            setEncryptedData(encryptedData);
+          }}
+        >
+          Encrypt Data
+        </Button>
+        <Button
+          onClick={async () => {
+            const decryptedData = await decryptDataWithKey(
+              encryptedData!,
+              await importKeyFromJWK(dataEncryptionKey!),
+            );
+            setDecryptedData(decryptedData);
+          }}
+        >
+          Decrypt Data
         </Button>
       </div>
-      <div></div>
+      <div className="mb-8 flex w-full flex-col gap-4">
+        <Input
+          label="input plain text"
+          value={plainText}
+          onChange={(e) => setPlainText(e.target.value)}
+        />
+      </div>
     </div>
   );
 }
