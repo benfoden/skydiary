@@ -43,8 +43,7 @@ when client tries to decrypt locally stored user encryption key,
 request is sent to server with userID, deviceID, session token, then conditionals are run,
 and session encryption key is returned or not
 
-End to End Encryption Strategy
-
+End to End Encryption Strategy 1
 
 
 User signs up on device A
@@ -103,6 +102,71 @@ Revoking devices
   server: device UUID is marked as revoked in the db
   server: any active sessions for the revoked device are terminated
   client: user is notified of successful revocation
+
+
+
+End to End Encryption Strategy 2 (encrypted indexedDB entries)
+
+User signs up on device A
+  client: new user authenticates for first time with TOTP
+  client: user enters password
+  client: random salt is generated
+  client: password and salt used to derive secret user key (SUK)
+  client: IndexedDB encryption key (IEK) is generated
+  server: IEK is saved with user details in the db
+  server: after this step, all data in IndexedDB on the client is encrypted/ decrypted with the IEK, made available in the session user object
+  client: keypair A is generated
+  client: private key A is saved as JWK in IndexedDB
+  server: new device UUID, device A metadata, userID, and public key A are saved to db
+  client and server: all relevant data transferred to/from server from now on is encrypted/decrypted with keypair A
+  server: salt is decrypted with private key A then encrypted with master salt key (loaded from env) then saved to db
+  client: data encryption key is generated (DEK)
+  client: DEK is saved as JWK in IndexedDB
+  client: SUK is used to encrypt DEK, resulting in SUKEDEK
+  server: SUKEDEK is saved to db
+  client: user is ready to securely use the service for duration of their session
+
+Secure handling of user generated content
+  client: user types new plain text in a new post
+  client: new post plain text is encrypted with DEK, then encrypted with private key A
+  server: new post cipher text is decrypted with public key A and saved to DB
+  client: user opens an old post (request to server)
+  server: old post cipher text is encrypted with public key A
+  client: old post cipher text is decrypted with private key A, then decrypted with DEK, then displayed in the UI
+
+User logs out on device A
+  client: user logs out, DEK is deleted from IndexedDB, session token is deleted, etc.
+  server: session token is deleted
+
+User logs back in on device A
+  client: user authenticates with TOTP
+  client: user enters password
+  server: salt, SUKEDEK, IEK are made available to client
+  server: after this step, all data in IndexedDB is encrypted/ decrypted with the IEK, made available in the session user object
+  client: password and salt used to derive secret user key (SUK)
+  client: SUK is used to decrypt the SUKEDEK
+  client: DEK is saved as JWK with IndexedDB
+
+  User logs in on a new device B
+  client: user authenticates with TOTP
+  client: user enters password
+  server: after this step, all data in IndexedDB on the client is encrypted/ decrypted with the IEK, made available in the session user object
+  client: keypair B is generated
+  client: private key B is saved as JWK with IndexedDB
+  server: new device UUID, device B metadata, userID, and public key B are saved to db
+  client and server: all relevant data transferred to/from server from now on is encrypted/decrypted with keypair B
+  server: salt is decrypted with master salt key (loaded from env) and together with SUKEDEK sent to the client
+  client: password and salt used to derive secret user key (SUK)
+  client: SUKEDEK is decrypted using SUK
+  client: DEK is saved as JWK with IndexedDB for future use
+
+Revoking devices
+  client: user initiates device revocation
+  server: device UUID is marked as revoked in the db
+  server: any active sessions for the revoked device are terminated
+  client: user is notified of successful revocation
+
+
 
 
 
