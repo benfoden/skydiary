@@ -205,7 +205,7 @@ export async function getJWKFromIndexedDB(
       };
     };
 
-    request.onerror = (event) => {
+    request.onerror = () => {
       reject(new Error("Failed to open IndexedDB"));
     };
   });
