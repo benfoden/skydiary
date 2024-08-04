@@ -14,7 +14,7 @@ export const personaRouter = createTRPCRouter({
       z.object({
         name: z.string().max(140),
         traits: z.string().max(140),
-        description: z.string().max(700).optional(),
+        description: z.string().max(1700).optional(),
         image: z.string().optional(),
         age: z.number().max(10000).optional(),
         gender: z.string().max(140).optional(),
@@ -69,7 +69,7 @@ export const personaRouter = createTRPCRouter({
         personaId: z.string(),
         name: z.string().max(140),
         traits: z.string().max(140),
-        description: z.string().max(700).optional(),
+        description: z.string().max(1700).optional(),
         image: z.string().optional(),
         age: z.number().max(10000).optional(),
         gender: z.string().max(140).optional(),
