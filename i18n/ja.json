@@ -280,7 +280,19 @@
     "or": "または",
     "try again": "再試行",
     "optionalInput": "（任意）",
-    "chooseFile": "ファイルを選択"
+    "chooseFile": "ファイルを選択",
+    "password": "パスワード",
+    "passwordStrength": "強度",
+    "confirmPassword": "パスワードを確認",
+    "passwordsDoNotMatch": "パスワードが一致しません",
+    "weak": "弱い",
+    "medium": "中",
+    "strong": "強い",
+    "useAtLeast16Characters": "少なくとも16文字を使用してください",
+    "useAtLeastOneUppercaseLetter": "少なくとも1つの大文字を使用してください",
+    "useAtLeastOneLowercaseLetter": "少なくとも1つの小文字を使用してください",
+    "useAtLeastOneNumber": "少なくとも1つの数字を使用してください",
+    "useAtLeastOneSpecialCharacter": "少なくとも1つの特殊文字を使用してください"
   },
   "status": {
     "loading": "読み込み中...",

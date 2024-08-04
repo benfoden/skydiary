@@ -3,26 +3,6 @@ export interface EncryptedData {
   iv: Uint8Array;
 }
 
-export async function genUserKey() {
-  const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  const passwordLength = 36; // 6 sets of 6 characters
-  const randomValues = new Uint8Array(passwordLength);
-  crypto.getRandomValues(randomValues);
-
-  let userKeyBase = "";
-  for (let i = 0; i < passwordLength; i++) {
-    const randomValue = randomValues[i];
-    if (randomValue === undefined) {
-      throw new Error("Failed to gen random values");
-    }
-    userKeyBase += charset[randomValue % charset.length];
-    if ((i + 1) % 6 === 0 && i < passwordLength - 1) {
-      userKeyBase += "-";
-    }
-  }
-  return "A1-" + userKeyBase;
-}
-
 export async function genRandomSalt(): Promise<string> {
   const salt = new Uint8Array(16);
   crypto.getRandomValues(salt);
@@ -169,7 +149,7 @@ export async function saveJWKToIndexedDB(
       };
 
       putRequest.onerror = () => {
-        reject(new Error("Failed to save JWK to IndexedDB"));
+        reject(new Error("Failed to save to IndexedDB"));
       };
     };
 
@@ -201,7 +181,7 @@ export async function getJWKFromIndexedDB(
       };
 
       getRequest.onerror = () => {
-        reject(new Error("Failed to retrieve JWK from IndexedDB"));
+        reject(new Error("Failed to retrieve from IndexedDB"));
       };
     };
 
@@ -210,3 +190,23 @@ export async function getJWKFromIndexedDB(
     };
   });
 }
+
+// export async function genUserKey() {
+//   const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+//   const passwordLength = 36; // 6 sets of 6 characters
+//   const randomValues = new Uint8Array(passwordLength);
+//   crypto.getRandomValues(randomValues);
+
+//   let userKeyBase = "";
+//   for (let i = 0; i < passwordLength; i++) {
+//     const randomValue = randomValues[i];
+//     if (randomValue === undefined) {
+//       throw new Error("Failed to gen random values");
+//     }
+//     userKeyBase += charset[randomValue % charset.length];
+//     if ((i + 1) % 6 === 0 && i < passwordLength - 1) {
+//       userKeyBase += "-";
+//     }
+//   }
+//   return "A1-" + userKeyBase;
+// }

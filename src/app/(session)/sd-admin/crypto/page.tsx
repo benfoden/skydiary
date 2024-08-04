@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Button from "~/app/_components/Button";
 import Input from "~/app/_components/Input";
+import PasswordInput from "~/app/_components/PasswordInput";
 import {
   decryptDataWithKey,
   deriveSecretUserKey,
@@ -12,7 +13,6 @@ import {
   generateAsymmetricKeyPair,
   genRandomSalt,
   genSymmetricKey,
-  genUserKey,
   importKeyFromJWK,
 } from "~/utils/cryptoA1";
 
@@ -26,6 +26,7 @@ export default function CryptoPage() {
   const [encryptedData, setEncryptedData] = useState<EncryptedData>();
   const [decryptedData, setDecryptedData] = useState<string>();
   const [plainText, setPlainText] = useState("");
+  const [password, setPassword] = useState("");
 
   /*
 todo: 
@@ -42,7 +43,6 @@ encrypt data encryption key with secret user key
     <div className="container mx-auto flex w-full flex-col gap-4 p-4">
       <div>Crypto</div>
       <div className="flex flex-col items-start gap-4">
-        <p>userKey: {userKey}</p>
         <p>salt: {salt}</p>
         <p>secretUserKey: {JSON.stringify(secretUserKey)}</p>
         <p>dataEncryptionKey: {JSON.stringify(dataEncryptionKey)}</p>
@@ -52,9 +52,7 @@ encrypt data encryption key with secret user key
         <p>decryptedData: {decryptedData}</p>
       </div>
       <div>
-        <Button onClick={async () => setUserKey(await genUserKey())}>
-          Generate User Key
-        </Button>
+        <PasswordInput password={password} setPassword={setPassword} />
         <Button onClick={async () => setSalt(await genRandomSalt())}>
           Generate Random Salt
         </Button>

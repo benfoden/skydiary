@@ -280,7 +280,19 @@
     "or": "or",
     "try again": "try again",
     "optionalInput": "(optional)",
-    "chooseFile": "choose file"
+    "chooseFile": "choose file",
+    "password": "password",
+    "passwordStrength": "strength",
+    "confirmPassword": "confirm password",
+    "passwordsDoNotMatch": "passwords do not match",
+    "weak": "weak",
+    "medium": "medium",
+    "strong": "strong",
+    "useAtLeast16Characters": "use at least 16 characters",
+    "useAtLeastOneUppercaseLetter": "use at least one uppercase letter",
+    "useAtLeastOneLowercaseLetter": "use at least one lowercase letter",
+    "useAtLeastOneNumber": "use at least one number",
+    "useAtLeastOneSpecialCharacter": "use at least one special character"
   },
   "status": {
     "loading": "loading...",
