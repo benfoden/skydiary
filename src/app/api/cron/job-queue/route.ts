@@ -44,7 +44,8 @@ export async function GET(request: NextRequest) {
       if (
         !latestPosts ||
         latestPosts.length === 0 ||
-        latestPosts.every((post) => post.tags.length > 0)
+        latestPosts.every((post) => post.tags.length > 0) ||
+        latestPosts.every((post) => post.content.length < 4)
       ) {
         continue;
       }

@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
           persona: userPersona ?? NEWPERSONAUSER,
           content: latestPostWithContent.content,
           wordLimit: user?.isSpecial
-            ? 180
+            ? 150
             : productPlan(user?.stripeProductId).memories,
         }),
         model: "gpt-4o-mini",
