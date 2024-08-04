@@ -10,31 +10,32 @@ export async function genRandomSalt(): Promise<string> {
 }
 
 export async function deriveSecretUserKey({
-  userKey,
+  password,
   salt,
 }: {
-  userKey: string;
+  password: string;
   salt: string;
 }): Promise<JsonWebKey> {
   const encoder = new TextEncoder();
-  const passwordKey = await crypto.subtle.importKey(
+  const passwordBuffer = encoder.encode(password);
+  const saltBuffer = Buffer.from(salt, "base64");
+
+  const keyMaterial = await crypto.subtle.importKey(
     "raw",
-    encoder.encode(userKey),
+    passwordBuffer,
     { name: "PBKDF2" },
     false,
     ["deriveKey"],
   );
 
-  const saltArray = Uint8Array.from(Buffer.from(salt, "base64"));
-
   const derivedKey = await crypto.subtle.deriveKey(
     {
       name: "PBKDF2",
-      salt: saltArray,
-      iterations: 310000,
+      salt: saltBuffer,
+      iterations: 100000,
       hash: "SHA-256",
     },
-    passwordKey,
+    keyMaterial,
     { name: "AES-GCM", length: 256 },
     true,
     ["encrypt", "decrypt"],

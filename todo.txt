@@ -145,16 +145,17 @@ GOAL
 
 
 Notes
-  All transfers between client and server are protected with SSL / TLS
-  Web Crypto API (subtle) is used for generating all symmetric and assymetric keys
+  All transfers between client and server are protected with SSL / TLS, but it should be considered useless / broken for this strategy
+  Web Crypto API (subtle) is used for generating all symmetric (AES-GCM) and assymetric (RSA-OAEP) keys
   Sessions expire after two weeks
-  Long, strong passwords are auto-generated for the user
+  Long, strong passwords are required
   The user is suggested multiple backup methods for their password
 
 
 User signs up on device A
-  client: new user authenticates for first time with TOTP
-  client: a user key is generated and the user is prompted to save it securely
+  client: new user authenticates for first time with TOTP, session is created
+  server: session is created
+  client: user enters a password and is prompted to save it securely in a password manager and save another copy another place
   client: random salt is generated
   client: PBKDF2 is used to derive secret user key (SUK) from user key and salt
   client: IndexedDB encryption key (IEK) is generated
@@ -163,7 +164,7 @@ User signs up on device A
   client: keypair A is generated
   client: private key A is encrypted with IEK and saved as JWK in IndexedDB
   server: new device UUID, device A metadata, userID, and public key A are saved to db
-  client and server: all relevant data transferred to/from server from now on is encrypted/decrypted with keypair A
+  client and server: except for user generated content, all keys, metadata, etc. transferred to/from server from now on is encrypted/decrypted with keypair A
   server: salt is decrypted with private key A then encrypted with master salt key (loaded from env) then saved to db
   client: data encryption key is generated (DEK)
   client: DEK is encrypted with IEK and saved as JWK in IndexedDB
@@ -185,7 +186,7 @@ User logs out on device A
 
 User logs back in on device A
   client: user authenticates with TOTP
-  client: user enters user key
+  client: user enters password
   server: salt, SUKEDEK, IEK are made available to client
   server: after this step, all data in IndexedDB on the client is always encrypted before storage and decrypted before usage with the IEK, which is made available in the session user object
   client: password and salt used to derive secret user key (SUK)
@@ -194,12 +195,12 @@ User logs back in on device A
 
 User logs in on a new device B
   client: user authenticates with TOTP
-  client: user enters user key
+  client: user enters password
   server: after this step, all data in IndexedDB on the client is always encrypted before storage and decrypted before usage with the IEK, which is made available in the session user object
   client: keypair B is generated
   client: private key B is encrypted with IEK and saved as JWK with IndexedDB
   server: new device UUID, device B metadata, userID, and public key B are saved to db
-  client and server: all relevant data transferred to/from server from now on is encrypted/decrypted with keypair B
+  client and server: except for user generated content, all keys, metadata, etc. transferred to/from server from now on is encrypted/decrypted with keypair B
   server: salt is decrypted with master salt key (loaded from env) and together with SUKEDEK sent to the client
   client: user key and salt used to derive secret user key (SUK)
   client: SUKEDEK is decrypted using SUK

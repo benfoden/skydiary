@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "~/app/_components/Button";
 import Input from "~/app/_components/Input";
-import PasswordInput from "~/app/_components/PasswordInput";
 import {
   decryptDataWithKey,
   deriveSecretUserKey,
@@ -17,7 +16,6 @@ import {
 } from "~/utils/cryptoA1";
 
 export default function CryptoPage() {
-  const [userKey, setUserKey] = useState("");
   const [salt, setSalt] = useState("");
   const [secretUserKey, setSecretUserKey] = useState<JsonWebKey>();
   const [dataEncryptionKey, setDataEncryptionKey] = useState<JsonWebKey>();
@@ -27,6 +25,8 @@ export default function CryptoPage() {
   const [decryptedData, setDecryptedData] = useState<string>();
   const [plainText, setPlainText] = useState("");
   const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("");
+  const [message, setMessage] = useState("");
 
   /*
 todo: 
@@ -38,6 +38,15 @@ save data encryption key as jwk in indexeddb
 encrypt data encryption key with secret user key
 
 */
+
+  useEffect(() => {
+    if (password && password2 && password !== password2) {
+      setMessage("Passwords do not match");
+    }
+    if (password === password2) {
+      setMessage("");
+    }
+  }, [password, password2]);
 
   return (
     <div className="container mx-auto flex w-full flex-col gap-4 p-4">
@@ -52,13 +61,30 @@ encrypt data encryption key with secret user key
         <p>decryptedData: {decryptedData}</p>
       </div>
       <div>
-        <PasswordInput password={password} setPassword={setPassword} />
+        {message && <p className="text-red-600">{message}</p>}
+        <Input
+          type="password"
+          label="password"
+          value={password}
+          minLength={16}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          showHidePassword
+        />
+        <Input
+          type="password"
+          label="confirm password"
+          value={password2}
+          minLength={16}
+          onChange={(e) => setPassword2(e.target.value)}
+          required
+        />
         <Button onClick={async () => setSalt(await genRandomSalt())}>
           Generate Random Salt
         </Button>
         <Button
           onClick={async () => {
-            const derivedKey = await deriveSecretUserKey({ userKey, salt });
+            const derivedKey = await deriveSecretUserKey({ password, salt });
             setSecretUserKey(derivedKey);
           }}
         >
@@ -80,6 +106,13 @@ encrypt data encryption key with secret user key
         >
           Generate Asymmetric Key Pair
         </Button>
+        <div className="mb-8 flex w-full flex-col gap-4">
+          <Input
+            label="input plain text"
+            value={plainText}
+            onChange={(e) => setPlainText(e.target.value)}
+          />
+        </div>
         <Button
           onClick={async () => {
             const encryptedData = await encryptDataWithKey(
@@ -102,13 +135,6 @@ encrypt data encryption key with secret user key
         >
           Decrypt Data
         </Button>
-      </div>
-      <div className="mb-8 flex w-full flex-col gap-4">
-        <Input
-          label="input plain text"
-          value={plainText}
-          onChange={(e) => setPlainText(e.target.value)}
-        />
       </div>
     </div>
   );
