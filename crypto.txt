@@ -1,0 +1,74 @@
+goal: end to end encryption of user data across multiple devices such that the the business can't decrypt the data, except on user's request, and user data security is maximized overall
+
+----------------------------------
+End to End Encryption Strategy 3
+GOAL
+  end to end encryption of user data across multiple devices, and encryption at rest. The business and any third parties can't decrypt the user generated content yet high performance is maintained
+
+
+Notes
+  All transfers between client and server are protected with SSL / TLS, but it should be considered useless / broken for this strategy
+  Web Crypto API (subtle) is used for generating all symmetric (AES-GCM) and assymetric (RSA-OAEP) key pairs
+  Sessions expire after two weeks
+  Long, strong passwords are required and the business can't see or reset them
+  The user is suggested multiple backup methods for their password
+
+
+New user sign up
+  client: new user authenticates for first time with TOTP, session is opened
+  server: session is opened
+  client: on auth/new-user page the user enters a password and is prompted to save it securely in a password manager or otherwise save a copy
+  client: random salt is generated
+  client: PBKDF2 is used to derive secret user key (SUK) from user key and salt
+  client: data encryption key is generated (DEK)
+  client: DEK is saved as JWK in local IndexedDB
+  client: SUK is used to encrypt DEK, resulting in SUKEDEK
+  client: keypair A is generated and public key A sent to server
+  client: private key A is saved as JWK in local IndexedDB
+  server: keypair S (server) is generated and public key S sent to client
+  server: private key S is added to user record and saved to db
+  client and server: shared secrets are derived from each other's public and private keys, then compared to ensure match
+  client and server: except for user generated content, all raw data transferred to/from server from now on is encrypted/decrypted with keypair A and keypair S
+  server: new device A record with UUID, device A metadata, userID, and public key A is saved to db
+  server: user record updated with SUKEDEK and salt is saved to db
+  server: public key S are made available in the active user session object context for regular use
+  client: user is ready to securely use the service for duration of their session
+
+Secure handling of user generated content
+  client: user types new plain text (any user-generated content)
+  client: new plain text is encrypted with DEK
+  server: new DEK-encrypted cipher text is saved to DB
+  client: user requests some cipher text from server
+  server: cipher text is sent to the client
+  client: cipher text is decrypted with DEK, then displayed in the UI
+
+User logs out on device A
+  client: user logs out, DEK is deleted from local IndexedDB, session token is deleted, etc.
+  server: session token is deleted
+
+User logs back in on device A
+  client: user authenticates with TOTP
+  client: user enters password
+  server: salt, SUKEDEK are made available to client in active session user object context
+  client: password and salt used to derive secret user key (SUK)
+  client: SUK is used to decrypt the SUKEDEK
+  client: DEK is saved as JWK in local IndexedDB
+
+User logs in on a new device B
+  client: user authenticates with TOTP
+  client: user enters password
+  client: keypair B is generated
+  client: private key B is saved as JWK in local IndexedDB
+  server: new device UUID, device B metadata, userID, and public key B are saved to db
+  client and server: except for user generated content, all keys, metadata, etc. transferred to/from server from now on is encrypted/decrypted with keypair B
+  server: salt is decrypted with master salt key (loaded from env) and together with SUKEDEK sent to the client
+  client: user key and salt used to derive secret user key (SUK)
+  client: SUKEDEK is decrypted using SUK
+  client: DEK is saved as JWK in local IndexedDB
+
+Revoking devices
+  client: user initiates device revocation
+  server: device UUID is marked as revoked in the db
+  server: any active sessions for the revoked device are terminated
+  client: user is notified of successful revocation
+
