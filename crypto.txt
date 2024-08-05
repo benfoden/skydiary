@@ -8,7 +8,6 @@ Notes
   Long, strong passwords are required. The business can't see them. They can't be reset, only updated by providing the original password (all on the client.)
   The user is suggested multiple backup methods for their password
   The DB on the server side is encrypted at rest
-  The local indexedDB on the client side is encrypted at rest
   All exchanges except for initial public key exchange are encrypted with assymetric keys
   CD is the client device, S is the server (or serverless function etc)
 
