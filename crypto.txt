@@ -2,11 +2,12 @@ Encryption Strategy for Robust User Data Privacy (from the business) and Securit
 
 
 Notes
-  All transfers between client and server are protected with TLS
+  All transfers between client and server are encrypted with TLS
   Web Crypto API (subtle) is used for generating all symmetric keys wit (AES-GCM) 
   Sessions expire after two weeks
   Long, strong passwords are required. The business can't see them. They can't be reset, only updated by providing the original password (all on the client.)
   The DB on the server side is encrypted at rest
+  The local IndexedDB is considered secure
   CD is the client device, S is the server (or serverless function etc)
 
 New user sign up
