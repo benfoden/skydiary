@@ -1,74 +1,75 @@
-goal: end to end encryption of user data across multiple devices such that the the business can't decrypt the data, except on user's request, and user data security is maximized overall
+End to End Encryption Strategy
 
-----------------------------------
-End to End Encryption Strategy 3
-GOAL
-  end to end encryption of user data across multiple devices, and encryption at rest. The business and any third parties can't decrypt the user generated content yet high performance is maintained
+Goals: end to end encryption of user data across multiple devices, and encryption at rest. The business and any third parties can't decrypt the user generated content yet high performance is maintained
 
 
 Notes
   All transfers between client and server are protected with SSL / TLS, but it should be considered useless / broken for this strategy
   Web Crypto API (subtle) is used for generating all symmetric (AES-GCM) and assymetric (RSA-OAEP) key pairs
   Sessions expire after two weeks
-  Long, strong passwords are required and the business can't see or reset them
+  Long, strong passwords are required. The business can't see them. They can't be reset, only updated by providing the original password (all on the client.)
   The user is suggested multiple backup methods for their password
-
+  CD is the client device, S is the server (or serverless function etc)
 
 New user sign up
-  client: new user authenticates for first time with TOTP, session is opened
-  server: session is opened
-  client: on auth/new-user page the user enters a password and is prompted to save it securely in a password manager or otherwise save a copy
-  client: random salt is generated
-  client: PBKDF2 is used to derive secret user key (SUK) from user key and salt
-  client: data encryption key is generated (DEK)
-  client: DEK is saved as JWK in local IndexedDB
-  client: SUK is used to encrypt DEK, resulting in SUKEDEK
-  client: keypair A is generated and public key A sent to server
-  client: private key A is saved as JWK in local IndexedDB
-  server: keypair S (server) is generated and public key S sent to client
-  server: private key S is added to user record and saved to db
-  client and server: shared secrets are derived from each other's public and private keys, then compared to ensure match
-  client and server: except for user generated content, all raw data transferred to/from server from now on is encrypted/decrypted with keypair A and keypair S
-  server: new device A record with UUID, device A metadata, userID, and public key A is saved to db
-  server: user record updated with SUKEDEK and salt is saved to db
-  server: public key S are made available in the active user session object context for regular use
-  client: user is ready to securely use the service for duration of their session
+  CD: new user authenticates for first time with TOTP
+  S: session is opened, keypair S is generated, public key S sent to client
+  S: private key S is added to user record, saved to db
+  CD: session keypair A1 is generated, public key A1 sent to server
+  CD & S: shared secrets are derived from each other's public and private keys, then compared to ensure match, else error is thrown
+  CD & S: all data transferred to/from server after this step is encrypted/decrypted with keypair A1 and keypair S, any errors are thrown
+  CD: private key A1 and public key S are saved as JWK in local IndexedDB
+User sets a password
+  CD: on /settings page the user enters a data password and is prompted to save it securely in a password manager or otherwise save a copy
+  CD: random uint8Array(16) salt is generated
+  CD: Argon2 is used to derive secret user key (SUK) from data password and salt
+  CD: data encryption key is generated (DEK), saved as JWK in local IndexedDB
+  CD: SUK is used to encrypt DEK, resulting in SUK-DEK
+  S: user record with SUK-DEK and salt is saved to db
+  S: new device A record with UUID, device A metadata, userID, and public key A1 is saved to db
+  CD: user is ready to securely use the service for duration of their session
 
 Secure handling of user generated content
-  client: user types new plain text (any user-generated content)
-  client: new plain text is encrypted with DEK
-  server: new DEK-encrypted cipher text is saved to DB
-  client: user requests some cipher text from server
-  server: cipher text is sent to the client
-  client: cipher text is decrypted with DEK, then displayed in the UI
+  CD: user types new plain text (any user-generated content)
+  CD: new plain text is encrypted with DEK
+  S: new DEK-encrypted cipher text is saved to DB
+  CD: user requests some cipher text from server
+  S: cipher text is sent to the client
+  CD: cipher text is decrypted with DEK, then displayed in the UI
 
 User logs out on device A
-  client: user logs out, DEK is deleted from local IndexedDB, session token is deleted, etc.
-  server: session token is deleted
+  CD: user logs out
+  CD: all entries deleted from local IndexedDB
+  S: session token is deleted
 
 User logs back in on device A
-  client: user authenticates with TOTP
-  client: user enters password
-  server: salt, SUKEDEK are made available to client in active session user object context
-  client: password and salt used to derive secret user key (SUK)
-  client: SUK is used to decrypt the SUKEDEK
-  client: DEK is saved as JWK in local IndexedDB
+  CD: user authenticates with TOTP
+  CD: session keypair A2 is generated, public key A2 sent to server
+  CD: private key A2 is saved as JWK in local IndexedDB
+  CD & S: shared secrets are derived from each other's public and private keys, then compared to ensure match
+  CD & S: all data transferred to/from server after this step is encrypted/decrypted with keypair A2 and keypair S
+  S: updated device A record with public key A2, save to db
+  S: salt and SUK-DEK are made available to client in active session user object context
+  CD: user enters data password
+  CD: data password and salt used to derive secret user key (SUK)
+  CD: SUK is used to decrypt the SUK-DEK
+  CD: SUK and DEK are saved as JWK in local IndexedDB
 
 User logs in on a new device B
-  client: user authenticates with TOTP
-  client: user enters password
-  client: keypair B is generated
-  client: private key B is saved as JWK in local IndexedDB
-  server: new device UUID, device B metadata, userID, and public key B are saved to db
-  client and server: except for user generated content, all keys, metadata, etc. transferred to/from server from now on is encrypted/decrypted with keypair B
-  server: salt is decrypted with master salt key (loaded from env) and together with SUKEDEK sent to the client
-  client: user key and salt used to derive secret user key (SUK)
-  client: SUKEDEK is decrypted using SUK
-  client: DEK is saved as JWK in local IndexedDB
+  CD: user authenticates with TOTP
+  CD: user enters data password
+  CD: keypair B1 is generated
+  CD: private key B1 is saved as JWK in local IndexedDB
+  S: new device UUID, device B metadata, userID, and public key B1 are saved to db
+  C & S: except for user generated content, all keys, metadata, etc. transferred to/from server from now on is encrypted/decrypted with keypair B1
+  S: salt is decrypted with master salt key (loaded from env) and together with SUK-DEK, made available to client in active session user object context
+  CD: data password and salt used to derive secret user key (SUK)
+  CD: SUK-DEK is decrypted using SUK
+  CD: SUK and DEK are saved as JWK in local IndexedDB
 
 Revoking devices
-  client: user initiates device revocation
-  server: device UUID is marked as revoked in the db
-  server: any active sessions for the revoked device are terminated
-  client: user is notified of successful revocation
+  CD: user initiates device revocation
+  S: device UUID is marked as revoked in the db
+  S: any active sessions for the revoked device are terminated
+  CD: user is notified of successful revocation
 

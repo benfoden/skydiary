@@ -9,6 +9,32 @@ export async function genRandomSalt(): Promise<string> {
   return Buffer.from(salt).toString("base64");
 }
 
+// export function deriveKeyArgon2(passphrase, salt) {
+//   // Import argon2 dynamically to reduce bundle size, if it's not necessary
+//   const saltArr = new Uint8Array(salt);
+//   return import("argon2-browser")
+//     .then((argon2) =>
+//       argon2.hash({
+//         pass: passphrase,
+//         salt: saltArr,
+//         type: argon2.ArgonType.Argon2id,
+//         time: process.env.ARGON2_ITERATIONS,
+//         mem: process.env.ARGON2_MEMORY,
+//         hashLen: 32,
+//         parallelism: 1,
+//       }),
+//     )
+//     .then((res) =>
+//       window.crypto.subtle.importKey(
+//         "raw",
+//         res.hash,
+//         { name: "AES-KW", length: 256 },
+//         false,
+//         ["unwrapKey"],
+//       ),
+//     );
+// }
+
 export async function deriveSecretUserKey({
   password,
   salt,
