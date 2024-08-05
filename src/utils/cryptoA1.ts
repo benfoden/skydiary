@@ -81,27 +81,6 @@ export async function genSymmetricKey(): Promise<CryptoKey> {
   );
 }
 
-export async function generateAsymmetricKeyPair(): Promise<{
-  publicKey: CryptoKey;
-  privateKey: CryptoKey;
-}> {
-  const keyPair = await crypto.subtle.generateKey(
-    {
-      name: "RSA-OAEP",
-      modulusLength: 4096,
-      publicExponent: new Uint8Array([1, 0, 1]),
-      hash: "SHA-256",
-    },
-    true,
-    ["encrypt", "decrypt"],
-  );
-
-  return {
-    publicKey: keyPair.publicKey,
-    privateKey: keyPair.privateKey,
-  };
-}
-
 export async function encryptDataWithKey(
   data: string,
   key: CryptoKey,

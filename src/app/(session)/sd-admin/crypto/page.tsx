@@ -9,7 +9,6 @@ import {
   encryptDataWithKey,
   type EncryptedData,
   exportKeyToJWK,
-  generateAsymmetricKeyPair,
   genRandomSalt,
   genSymmetricKey,
   importKeyFromJWK,
@@ -19,8 +18,6 @@ export default function CryptoPage() {
   const [salt, setSalt] = useState("");
   const [secretUserKey, setSecretUserKey] = useState<JsonWebKey>();
   const [dataEncryptionKey, setDataEncryptionKey] = useState<JsonWebKey>();
-  const [publicKey, setPublicKey] = useState<JsonWebKey>();
-  const [privateKey, setPrivateKey] = useState<JsonWebKey>();
   const [encryptedData, setEncryptedData] = useState<EncryptedData>();
   const [decryptedData, setDecryptedData] = useState<string>();
   const [plainText, setPlainText] = useState("");
@@ -55,8 +52,6 @@ encrypt data encryption key with secret user key
         <p>salt: {salt}</p>
         <p>secretUserKey: {JSON.stringify(secretUserKey)}</p>
         <p>dataEncryptionKey: {JSON.stringify(dataEncryptionKey)}</p>
-        <p>publicKey: {JSON.stringify(publicKey)}</p>
-        <p>privateKey: {JSON.stringify(privateKey)}</p>
         <p>encryptedData: {JSON.stringify(encryptedData)}</p>
         <p>decryptedData: {decryptedData}</p>
       </div>
@@ -97,15 +92,7 @@ encrypt data encryption key with secret user key
         >
           Generate Data Encryption Key
         </Button>
-        <Button
-          onClick={async () => {
-            const { publicKey, privateKey } = await generateAsymmetricKeyPair();
-            setPublicKey(await exportKeyToJWK(publicKey));
-            setPrivateKey(await exportKeyToJWK(privateKey));
-          }}
-        >
-          Generate Asymmetric Key Pair
-        </Button>
+
         <div className="mb-8 flex w-full flex-col gap-4">
           <Input
             label="input plain text"
