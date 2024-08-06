@@ -3,6 +3,8 @@ export interface EncryptedData {
   iv: Uint8Array;
 }
 
+export const MASTERDATAKEY = "masterDataKey";
+
 export async function genRandomSalt(): Promise<string> {
   const salt = new Uint8Array(16);
   crypto.getRandomValues(salt);

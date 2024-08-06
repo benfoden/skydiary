@@ -7,6 +7,12 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { getResponse } from "~/utils/ai";
+import {
+  encryptTextWithKey,
+  getJWKFromIndexedDB,
+  importKeyFromJWK,
+  MASTERDATAKEY,
+} from "~/utils/cryptoA1";
 import { prompts } from "~/utils/prompts";
 import { cleanStringForEntry } from "~/utils/text";
 
@@ -37,14 +43,40 @@ export const postRouter = createTRPCRouter({
       z.object({
         postId: z.string(),
         content: z.string().max(50000).optional(),
-        summary: z.string().optional(),
+        summary: z.string().max(5000).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      let encryptedContent = input.content
+        ? cleanStringForEntry(input.content)
+        : undefined;
+      let iv;
+
+      if (ctx.session.user.sukMdk) {
+        const jwk = await getJWKFromIndexedDB(MASTERDATAKEY);
+        if (jwk) {
+          const mdk = await importKeyFromJWK(jwk);
+          const encryptedData = await encryptTextWithKey({
+            plainText: input.content ?? "",
+            key: mdk,
+          });
+          encryptedContent = encryptedData.cipherText;
+          iv = Buffer.from(encryptedData.iv).toString("base64");
+        }
+        return ctx.db.post.update({
+          where: { id: input.postId, createdBy: { id: ctx.session.user.id } },
+          data: {
+            content: encryptedContent,
+            summary: input.summary,
+            contentIV: iv,
+          },
+        });
+      }
+
       return ctx.db.post.update({
         where: { id: input.postId, createdBy: { id: ctx.session.user.id } },
         data: {
-          content: cleanStringForEntry(input.content),
+          content: input.content,
           summary: input.summary,
         },
       });

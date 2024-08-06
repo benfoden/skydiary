@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import Input from "~/app/_components/Input";
+import { api } from "~/trpc/react";
 import {
   deriveKeyArgon2,
   exportKeyToJWK,
   genSymmetricKey,
-  getJWKFromIndexedDB,
+  MASTERDATAKEY,
   saveJWKToIndexedDB,
   wrapKey,
 } from "~/utils/cryptoA1";
@@ -56,14 +57,14 @@ export default function DataPasswordCard() {
       key: masterDataKey,
     });
 
-    //todo: save passwordSalt and sukMdk to db
-    // Buffer.from(passwordSalt).toString("base64");
+    await api.user.updateUser.useMutation().mutateAsync({
+      passwordSalt: Buffer.from(passwordSalt).toString("base64"),
+      sukMdk: Buffer.from(sukMdk).toString("base64"),
+    });
 
     const jwkDataEncryptionKey = await exportKeyToJWK(masterDataKey);
 
-    await saveJWKToIndexedDB(jwkDataEncryptionKey, "dataEncryptionKey");
-
-    console.log("secret", await getJWKFromIndexedDB("dataEncryptionKey"));
+    await saveJWKToIndexedDB(jwkDataEncryptionKey, MASTERDATAKEY);
   };
 
   useEffect(() => {
