@@ -40,7 +40,6 @@ export const postRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-
       return ctx.db.post.update({
         where: { id: input.postId, createdBy: { id: ctx.session.user.id } },
         data: {
