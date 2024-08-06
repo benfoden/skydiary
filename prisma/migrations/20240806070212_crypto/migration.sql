@@ -1,0 +1,21 @@
+-- AlterTable
+ALTER TABLE "Comment" ADD COLUMN "iv" TEXT;
+
+-- AlterTable
+ALTER TABLE "Post" ADD COLUMN "iv" TEXT;
+
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN "passwordSalt" TEXT;
+ALTER TABLE "User" ADD COLUMN "sukMdk" TEXT;
+
+-- CreateTable
+CREATE TABLE "Device" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "userId" TEXT NOT NULL,
+    "deviceName" TEXT NOT NULL,
+    "osName" TEXT NOT NULL,
+    "osVersion" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "Device_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);

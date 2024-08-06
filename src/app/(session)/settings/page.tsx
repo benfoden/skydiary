@@ -6,6 +6,7 @@ import { Avatar } from "~/app/_components/Avatar";
 import Button from "~/app/_components/Button";
 import ManageBillingButton from "~/app/_components/ButtonBilling";
 import { Card } from "~/app/_components/Card";
+import DataPasswordCard from "~/app/_components/DataSecurity";
 import DropDownUser from "~/app/_components/DropDownUser";
 import FormButton from "~/app/_components/FormButton";
 import FormDeleteButton from "~/app/_components/FormDeleteButton";
@@ -18,7 +19,6 @@ import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { getNewImageUrl } from "~/utils/_uploads";
 import { ACTIVESTATUSES } from "~/utils/constants";
-import DataPasswordCard from "../../_components/DataSecurity";
 
 export async function generateMetadata({
   params: { locale },

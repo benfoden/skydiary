@@ -12,15 +12,16 @@ model Post {
   id             String    @id @default(cuid())
   title          String?
   content        String
+  contentIV      String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   createdById    String
   sentimentScore String?
   summary        String?
+  summaryIV      String?
   comments       Comment[] @relation("PostComments")
   createdBy      User      @relation(fields: [createdById], references: [id])
   tags           Tag[]     @relation("PostTags")
-  iv             String?
 
   @@index([createdById])
 }
@@ -39,13 +40,14 @@ model Tag {
 model Comment {
   id                 String   @id @default(cuid())
   content            String
+  contentIV          String?
   isAI               Boolean  @default(true)
   createdByPersonaId String?
   createdAt          DateTime @default(now())
   coachVariant       String?
   coachName          String?
+  coachNameIV        String?
   postId             String
-  iv                 String?
   post               Post     @relation("PostComments", fields: [postId], references: [id], onDelete: Cascade)
   createdByPersona   Persona? @relation(fields: [createdByPersonaId], references: [id])
 
@@ -123,15 +125,24 @@ model Device {
 model Persona {
   id                  String    @id @default(cuid())
   name                String
+  nameIV              String?
   description         String?
+  descriptionIV       String?
   image               String?
   age                 Int?
+  ageIV               String?
   gender              String?
+  genderIV            String?
   relationship        String?
+  relationshipIV      String?
   occupation          String?
+  occupationIV        String?
   traits              String
+  traitsIV            String?
   communicationStyle  String?
+  communicationStyleIV String?
   communicationSample String?
+  communicationSampleIV String?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
   createdById         String
