@@ -18,7 +18,8 @@ User sets a password
   CD: Argon2 is used to derive secret user key (SUK) from data password and SUKs
   CD: master data key is generated (MDK), saved in jwk format in local IndexedDB
   CD: SUK is used to encrypt MDK, resulting in SUK-MDK
-  S: SUK-MDK, SUKs are added to user record, updated in DB
+  S: master salt key (MSK) is loaded from ENV variable and used to encrypt SUKs
+  S: SUK-MDK, MSK-SUKs are added to user record, updated in DB
   S: new device A record with UUID, device A metadata, userID is created in DB
   CD: user is ready to securely use the service for duration of their session
 

@@ -54,6 +54,8 @@ export const env = createEnv({
     UPLOADTHING_SECRET: z.string(),
     UPLOADTHING_APP_ID: z.string(),
     CRON_SECRET: z.string(),
+    MASTER_SALT_KEY: z.string(),
+    MASTER_SALT_KEY_BACKUP: z.string(),
   },
 
   /**
@@ -106,6 +108,8 @@ export const env = createEnv({
     UPLOADTHING_SECRET: process.env.UPLOADTHING_SECRET,
     UPLOADTHING_APP_ID: process.env.UPLOADTHING_APP_ID,
     CRON_SECRET: process.env.CRON_SECRET,
+    MASTER_SALT_KEY: process.env.MASTER_SALT_KEY,
+    MASTER_SALT_KEY_BACKUP: process.env.MASTER_SALT_KEY_BACKUP,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
