@@ -13,11 +13,7 @@ import {
   wrapKey,
 } from "~/utils/cryptoA1";
 
-export default function DataSecurityCard() {
-  const [output, setOutput] = useState("");
-  const [input, setInput] = useState("");
-  const [encryptedText, setEncryptedText] = useState("");
-  const [encryptionKey, setEncryptionKey] = useState<string>("");
+export default function DataPasswordCard() {
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [message, setMessage] = useState("");
@@ -55,7 +51,10 @@ export default function DataSecurityCard() {
 
     const masterDataKey = await genSymmetricKey();
 
-    const sukMdk = await wrapKey(secretUserKey, masterDataKey);
+    const sukMdk = await wrapKey({
+      wrappingKey: secretUserKey,
+      key: masterDataKey,
+    });
 
     //todo: save passwordSalt and sukMdk to db
     // Buffer.from(passwordSalt).toString("base64");

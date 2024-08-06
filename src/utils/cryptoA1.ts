@@ -47,21 +47,27 @@ export async function genSymmetricKey(): Promise<CryptoKey> {
   );
 }
 
-export async function wrapKey(
-  wrappingKey: CryptoKey,
-  key: CryptoKey,
-): Promise<ArrayBuffer> {
+export async function wrapKey({
+  wrappingKey,
+  key,
+}: {
+  wrappingKey: CryptoKey;
+  key: CryptoKey;
+}): Promise<ArrayBuffer> {
   return await crypto.subtle.wrapKey("raw", key, wrappingKey, {
     name: "AES-KW",
   });
 }
 
-export async function encryptDataWithKey(
-  data: string,
-  key: CryptoKey,
-): Promise<EncryptedData> {
+export async function encryptTextWithKey({
+  plainText,
+  key,
+}: {
+  plainText: string;
+  key: CryptoKey;
+}): Promise<EncryptedData> {
   const encoder = new TextEncoder();
-  const encodedData = encoder.encode(data);
+  const encodedData = encoder.encode(plainText);
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const encryptedData = await crypto.subtle.encrypt(
     {
@@ -77,16 +83,21 @@ export async function encryptDataWithKey(
   };
 }
 
-export async function decryptDataWithKey(
-  encryptedData: { cipherText: string; iv: Uint8Array },
-  key: CryptoKey,
-): Promise<string> {
+export async function decryptDataWithKey({
+  cipherText,
+  iv,
+  key,
+}: {
+  cipherText: string;
+  iv: Uint8Array;
+  key: CryptoKey;
+}): Promise<string> {
   const decoder = new TextDecoder();
-  const encryptedBuffer = Buffer.from(encryptedData.cipherText, "base64");
+  const encryptedBuffer = Buffer.from(cipherText, "base64");
   const decryptedData = await crypto.subtle.decrypt(
     {
       name: "AES-GCM",
-      iv: encryptedData.iv,
+      iv,
     },
     key,
     encryptedBuffer,

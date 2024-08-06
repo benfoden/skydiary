@@ -18,7 +18,7 @@ import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { getNewImageUrl } from "~/utils/_uploads";
 import { ACTIVESTATUSES } from "~/utils/constants";
-import DataSecurityCard from "./DataSecurity";
+import DataPasswordCard from "../../_components/DataSecurity";
 
 export async function generateMetadata({
   params: { locale },
@@ -176,7 +176,7 @@ export default async function Settings() {
             </Card>
           )}
 
-          <DataSecurityCard />
+          <DataPasswordCard />
           <Card variant="form">
             <h2>{t("settings.language")}</h2>
             <div className="flex flex-row gap-2">
