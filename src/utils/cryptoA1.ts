@@ -1,3 +1,5 @@
+import { type User } from "@prisma/client";
+
 export interface EncryptedData {
   cipherText: string;
   iv: Uint8Array;
@@ -83,6 +85,22 @@ export async function encryptTextWithKey({
     cipherText: Buffer.from(encryptedData).toString("base64"),
     iv,
   };
+}
+
+export async function getLocalMdkForUser(user: User): Promise<CryptoKey> {
+  if (!user.sukMdk) {
+    throw new Error("User has no key for text encryption");
+  }
+
+  try {
+    const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
+    if (!jwkMdk) {
+      throw new Error("Failed to retrieve key from IndexedDB");
+    }
+    return await importKeyFromJWK(jwkMdk);
+  } catch (error) {
+    throw new Error(`Error getting local key for user`);
+  }
 }
 
 export async function decryptDataWithKey({

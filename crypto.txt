@@ -30,6 +30,14 @@ Secure handling of user generated content
   S: cipher text is sent to the client
   CD: cipher text is decrypted with MDK, then displayed in the UI
 
+Sending user data to LLM API
+  S: cipher text is sent to the client
+  CD: user requests LLM API response directly, or user visits a page and LLM processing runs in the background
+  CD: cipher text and MDK are sent to server helper route. MDK is never stored on the server.
+  S: decrypted text is sent to LLM API for comments, summarization, tagging, embedding generation, etc.
+  S: LLM API response is encrypted with MDK and saved in DB for the user
+
+
 User logs out on device A
   CD: user logs out
   CD: all entries deleted from local IndexedDB
