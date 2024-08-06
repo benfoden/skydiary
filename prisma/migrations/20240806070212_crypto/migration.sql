@@ -1,10 +1,4 @@
 -- AlterTable
-ALTER TABLE "Comment" ADD COLUMN "iv" TEXT;
-
--- AlterTable
-ALTER TABLE "Post" ADD COLUMN "iv" TEXT;
-
--- AlterTable
 ALTER TABLE "User" ADD COLUMN "passwordSalt" TEXT;
 ALTER TABLE "User" ADD COLUMN "sukMdk" TEXT;
 
