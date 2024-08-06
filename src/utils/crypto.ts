@@ -1,5 +1,5 @@
-export const ARGON2_ITERATIONS = 12; // key derivation (argon2id: https://soatok.blog/2022/12/29/what-we-do-in-the-etc-shadow-cryptography-with-passwords)
-export const ARGON2_MEMORY_SIZE = 131072; // 128 MiB
+export const ARGON2_ITERATIONS = "12"; // key derivation (argon2id: https://soatok.blog/2022/12/29/what-we-do-in-the-etc-shadow-cryptography-with-passwords)
+export const ARGON2_MEMORY_SIZE = "1048576"; // 1024 MiB
 
 export async function generateKeyPair(): Promise<{
   publicKey: string;

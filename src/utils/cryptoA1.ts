@@ -9,65 +9,33 @@ export async function genRandomSalt(): Promise<string> {
   return Buffer.from(salt).toString("base64");
 }
 
-// export function deriveKeyArgon2(passphrase, salt) {
-//   // Import argon2 dynamically to reduce bundle size, if it's not necessary
-//   const saltArr = new Uint8Array(salt);
-//   return import("argon2-browser")
-//     .then((argon2) =>
-//       argon2.hash({
-//         pass: passphrase,
-//         salt: saltArr,
-//         type: argon2.ArgonType.Argon2id,
-//         time: process.env.ARGON2_ITERATIONS,
-//         mem: process.env.ARGON2_MEMORY,
-//         hashLen: 32,
-//         parallelism: 1,
-//       }),
-//     )
-//     .then((res) =>
-//       window.crypto.subtle.importKey(
-//         "raw",
-//         res.hash,
-//         { name: "AES-KW", length: 256 },
-//         false,
-//         ["unwrapKey"],
-//       ),
-//     );
-// }
-
-export async function deriveSecretUserKey({
+export async function deriveKeyArgon2({
   password,
   salt,
 }: {
   password: string;
-  salt: string;
+  salt: Uint8Array;
 }): Promise<JsonWebKey> {
-  const encoder = new TextEncoder();
-  const passwordBuffer = encoder.encode(password);
-  const saltBuffer = Buffer.from(salt, "base64");
+  const { argon2id } = await import("hash-wasm");
+  const hash = await argon2id({
+    password: password.normalize(),
+    salt,
+    parallelism: 1,
+    iterations: 4,
+    memorySize: 1024,
+    hashLength: 32,
+    outputType: "binary",
+  });
 
-  const keyMaterial = await crypto.subtle.importKey(
+  const cryptoKey = await crypto.subtle.importKey(
     "raw",
-    passwordBuffer,
-    { name: "PBKDF2" },
-    false,
-    ["deriveKey"],
-  );
-
-  const derivedKey = await crypto.subtle.deriveKey(
-    {
-      name: "PBKDF2",
-      salt: saltBuffer,
-      iterations: 100000,
-      hash: "SHA-256",
-    },
-    keyMaterial,
-    { name: "AES-GCM", length: 256 },
+    hash,
+    { name: "AES-KW", length: 256 },
     true,
-    ["encrypt", "decrypt"],
+    ["unwrapKey"],
   );
 
-  return await crypto.subtle.exportKey("jwk", derivedKey);
+  return await crypto.subtle.exportKey("jwk", cryptoKey);
 }
 
 export async function genSymmetricKey(): Promise<CryptoKey> {
@@ -188,6 +156,31 @@ export async function getJWKFromIndexedDB(
 
       getRequest.onerror = () => {
         reject(new Error("Failed to retrieve from IndexedDB"));
+      };
+    };
+
+    request.onerror = () => {
+      reject(new Error("Failed to open IndexedDB"));
+    };
+  });
+}
+
+export async function deleteJWKFromIndexedDB(keyName: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("cryptoDB", 1);
+
+    request.onsuccess = (event) => {
+      const db = (event.target as IDBOpenDBRequest).result;
+      const transaction = db.transaction("keys", "readwrite");
+      const store = transaction.objectStore("keys");
+      const deleteRequest = store.delete(keyName);
+
+      deleteRequest.onsuccess = () => {
+        resolve();
+      };
+
+      deleteRequest.onerror = () => {
+        reject(new Error("Failed to delete from IndexedDB"));
       };
     };
 
