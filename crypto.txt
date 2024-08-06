@@ -14,13 +14,13 @@ New user sign up
   CD: new user authenticates for first time with TOTP
 User sets a password
   CD: on /settings page the user enters a data password and is prompted to save it securely in a password manager or otherwise save a copy
-  CD: a random uint8Array(16) salts is generated: SUKs
-  CD: Argon2 is used to derive secret user key (SUK) from data password and SUKs
+  CD: a random uint8Array(16) salts is generated: PSUKs
+  CD: Argon2 is used to derive password salt user key (PSUK) from data password and PSUKs
   CD: master data key is generated (MDK), saved in jwk format in local IndexedDB
-  CD: SUK is used to encrypt MDK, resulting in SUK-MDK
-  S: master salt key (MSK) is loaded from ENV variable and used to encrypt SUKs
-  S: SUK-MDK, MSK-SUKs are added to user record, updated in DB
-  S: new device A record with UUID, device A metadata, userID is created in DB
+  CD: SUK is used to encrypt MDK, resulting in PSUK-MDK
+  S: master salt key (MSK) is loaded from ENV variable and used to encrypt PSUKs
+  S: PSUK-MDK, MSK-PSUKs are added to user record, updated in DB
+  S: new device A record with UUID, device A metadata, userID is created in DB in Devices table
   CD: user is ready to securely use the service for duration of their session
 
 Secure handling of user generated content
@@ -39,10 +39,10 @@ User logs out on device A
 User logs back in on device A
   CD: user authenticates with TOTP
   CD: user enters data password
-  CD: SUKs, SUK-MDK are provided by the server in the active session user object context
-  CD: data password and SUKs used to derive secret user key (SUK)
-  CD: SUK is used to decrypt the SUK-MDK
-  CD: SUK and MDK are saved in jwk format in local IndexedDB
+  CD: SUKs, PSUK-MDK are provided by the server in the active session user object context
+  CD: data password and SUKs used to derive secret user key (PSUK)
+  CD: PSUK is used to decrypt the PSUK-MDK
+  CD: PSUK and MDK are saved in jwk format in local IndexedDB
   CD: user is ready to securely use the service for duration of their session
 
 
@@ -50,10 +50,10 @@ User logs in on a new device B
   CD: user authenticates with TOTP
   CD: user enters data password
   S: new device UUID, device B metadata, userID are created in DB
-  S: SUKs is decrypted with master salt key (loaded from env) and together with SUK-MDK, made available to client in active session user object context
-  CD: data password and SUKs used to derive secret user key (SUK)
-  CD: SUK-MDK is decrypted using SUK
-  CD: SUK and MDK are saved in jwk format in local IndexedDB
+  S: SUKs is decrypted with master salt key (loaded from env) and together with PSUK-MDK, made available to client in active session user object context
+  CD: data password and PSUKs used to derive secret user key (PSUK)
+  CD: PSUK-MDK is decrypted using PSUK
+  CD: PSUK and MDK are saved in jwk format in local IndexedDB
   CD: user is ready to securely use the service for duration of their session
 
 
