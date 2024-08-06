@@ -5,7 +5,6 @@ import Button from "~/app/_components/Button";
 import Input from "~/app/_components/Input";
 import {
   decryptDataWithKey,
-  deriveSecretUserKey,
   encryptDataWithKey,
   type EncryptedData,
   exportKeyToJWK,
@@ -77,14 +76,7 @@ encrypt data encryption key with secret user key
         <Button onClick={async () => setSalt(await genRandomSalt())}>
           Generate Random Salt
         </Button>
-        <Button
-          onClick={async () => {
-            const derivedKey = await deriveSecretUserKey({ password, salt });
-            setSecretUserKey(derivedKey);
-          }}
-        >
-          Derive Secret User Key
-        </Button>
+
         <Button
           onClick={async () =>
             setDataEncryptionKey(await exportKeyToJWK(await genSymmetricKey()))

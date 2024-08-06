@@ -11,15 +11,15 @@ export async function genRandomSalt(): Promise<string> {
 
 export async function deriveKeyArgon2({
   password,
-  salt,
+  passwordSalt,
 }: {
   password: string;
-  salt: Uint8Array;
-}): Promise<JsonWebKey> {
+  passwordSalt: Uint8Array;
+}): Promise<CryptoKey> {
   const { argon2id } = await import("hash-wasm");
   const hash = await argon2id({
     password: password.normalize(),
-    salt,
+    salt: passwordSalt,
     parallelism: 1,
     iterations: 4,
     memorySize: 1024,
@@ -27,15 +27,13 @@ export async function deriveKeyArgon2({
     outputType: "binary",
   });
 
-  const cryptoKey = await crypto.subtle.importKey(
+  return await crypto.subtle.importKey(
     "raw",
     hash,
     { name: "AES-KW", length: 256 },
     true,
     ["unwrapKey"],
   );
-
-  return await crypto.subtle.exportKey("jwk", cryptoKey);
 }
 
 export async function genSymmetricKey(): Promise<CryptoKey> {
@@ -47,6 +45,15 @@ export async function genSymmetricKey(): Promise<CryptoKey> {
     true,
     ["encrypt", "decrypt"],
   );
+}
+
+export async function wrapKey(
+  wrappingKey: CryptoKey,
+  key: CryptoKey,
+): Promise<ArrayBuffer> {
+  return await crypto.subtle.wrapKey("raw", key, wrappingKey, {
+    name: "AES-KW",
+  });
 }
 
 export async function encryptDataWithKey(

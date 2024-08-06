@@ -104,7 +104,7 @@ model User {
   subscriptions            Subscription[] @relation("UserSubscriptions")
   devices                  Device[]       @relation("UserDevices")
   passwordSalt             String?
-  psukMasterDataKey        String?
+  sukMdk                   String?
 }
 
 model Device {

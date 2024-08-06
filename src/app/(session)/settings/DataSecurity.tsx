@@ -6,8 +6,11 @@ import { Card } from "~/app/_components/Card";
 import Input from "~/app/_components/Input";
 import {
   deriveKeyArgon2,
+  exportKeyToJWK,
+  genSymmetricKey,
   getJWKFromIndexedDB,
   saveJWKToIndexedDB,
+  wrapKey,
 } from "~/utils/cryptoA1";
 
 export default function DataSecurityCard() {
@@ -40,23 +43,28 @@ export default function DataSecurityCard() {
       return;
     }
     // derive user key from password
-    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const passwordSalt = crypto.getRandomValues(new Uint8Array(16));
 
-    const saltString = Buffer.from(salt).toString("base64");
     //todo: save salt to db
 
-    const dataEncryptionKey = await deriveKeyArgon2({
+    const secretUserKey = await deriveKeyArgon2({
       password,
-      salt,
+      passwordSalt,
     });
     //todo: save key to indexeddb
 
-    await saveJWKToIndexedDB(dataEncryptionKey, "dataEncryptionKey");
+    const masterDataKey = await genSymmetricKey();
 
-    console.log(
-      "dataEncryptionkey",
-      await getJWKFromIndexedDB("dataEncryptionKey"),
-    );
+    const sukMdk = await wrapKey(secretUserKey, masterDataKey);
+
+    //todo: save passwordSalt and sukMdk to db
+    // Buffer.from(passwordSalt).toString("base64");
+
+    const jwkDataEncryptionKey = await exportKeyToJWK(masterDataKey);
+
+    await saveJWKToIndexedDB(jwkDataEncryptionKey, "dataEncryptionKey");
+
+    console.log("secret", await getJWKFromIndexedDB("dataEncryptionKey"));
   };
 
   useEffect(() => {
