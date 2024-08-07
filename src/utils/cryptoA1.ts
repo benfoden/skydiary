@@ -36,7 +36,7 @@ export async function deriveKeyArgon2({
     hash,
     { name: "AES-KW", length: 256 },
     true,
-    ["unwrapKey"],
+    ["wrapKey", "unwrapKey"],
   );
 }
 
@@ -87,6 +87,35 @@ export async function encryptTextWithKey({
   };
 }
 
+export async function createUserKeys(
+  password: string,
+): Promise<{ sukMdk: ArrayBuffer; passwordSalt: Uint8Array }> {
+  "use client";
+  try {
+    const passwordSalt = crypto.getRandomValues(new Uint8Array(16));
+
+    const secretUserKey = await deriveKeyArgon2({
+      password,
+      passwordSalt,
+    });
+
+    const masterDataKey = await genSymmetricKey();
+
+    const sukMdk = await wrapKey({
+      wrappingKey: secretUserKey,
+      key: masterDataKey,
+    });
+
+    const jwkDataEncryptionKey = await exportKeyToJWK(masterDataKey);
+
+    await saveJWKToIndexedDB(jwkDataEncryptionKey, MASTERDATAKEY);
+    return { sukMdk, passwordSalt };
+  } catch (error) {
+    console.error("Error creating user keys:", error);
+    throw new Error("Failed to create user keys");
+  }
+}
+
 export async function getLocalMdkForUser(user: User): Promise<CryptoKey> {
   if (!user.sukMdk) {
     throw new Error("User has no key for text encryption");
@@ -103,7 +132,7 @@ export async function getLocalMdkForUser(user: User): Promise<CryptoKey> {
   }
 }
 
-export async function decryptDataWithKey({
+export async function decryptTextWithKey({
   cipherText,
   iv,
   key,

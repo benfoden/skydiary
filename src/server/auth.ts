@@ -61,6 +61,7 @@ export const authOptions = (emailDetails: EmailDetails): NextAuthOptions => {
           resetAt: user.resetAt,
           isAdmin: user.isAdmin,
           isSpecial: user.isSpecial,
+          sukMdk: user.sukMdk,
         },
         generateSessionToken: () => {
           return randomUUID?.() ?? randomBytes(32).toString("hex");

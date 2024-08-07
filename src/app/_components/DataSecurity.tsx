@@ -1,23 +1,24 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import Input from "~/app/_components/Input";
 import { api } from "~/trpc/react";
 import {
-  deriveKeyArgon2,
-  exportKeyToJWK,
-  genSymmetricKey,
+  createUserKeys,
+  deleteJWKFromIndexedDB,
   MASTERDATAKEY,
-  saveJWKToIndexedDB,
-  wrapKey,
 } from "~/utils/cryptoA1";
 
 export default function DataPasswordCard() {
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [message, setMessage] = useState("");
+  const updateUser = api.user.updateUser.useMutation();
+  const { data: sessionData } = useSession();
+  const user = sessionData?.user;
 
   // CD: on /settings page the user enters a data password and is prompted to save it securely in a password manager or otherwise save a copy
   // CD: a random uint8Array(16) salts is generated: SUKs
@@ -28,7 +29,7 @@ export default function DataPasswordCard() {
   // S: new device A record with UUID, device A metadata, userID is created in DB
   // CD: user is ready to securely use the service for duration of their session
 
-  const handleCreateKeyFromPassword = async (
+  const handleCreateKeysFromPassword = async (
     password: string,
     password2: string,
   ) => {
@@ -39,32 +40,17 @@ export default function DataPasswordCard() {
       setMessage("Password must be at least 16 characters");
       return;
     }
-    // derive user key from password
-    const passwordSalt = crypto.getRandomValues(new Uint8Array(16));
+    const { sukMdk, passwordSalt } = await createUserKeys(password);
 
-    //todo: save salt to db
-
-    const secretUserKey = await deriveKeyArgon2({
-      password,
-      passwordSalt,
-    });
-    //todo: save key to indexeddb
-
-    const masterDataKey = await genSymmetricKey();
-
-    const sukMdk = await wrapKey({
-      wrappingKey: secretUserKey,
-      key: masterDataKey,
-    });
-
-    await api.user.updateUser.useMutation().mutateAsync({
-      passwordSalt: Buffer.from(passwordSalt).toString("base64"),
-      sukMdk: Buffer.from(sukMdk).toString("base64"),
-    });
-
-    const jwkDataEncryptionKey = await exportKeyToJWK(masterDataKey);
-
-    await saveJWKToIndexedDB(jwkDataEncryptionKey, MASTERDATAKEY);
+    try {
+      await updateUser.mutateAsync({
+        passwordSalt: Buffer.from(passwordSalt).toString("base64"),
+        sukMdk: Buffer.from(sukMdk).toString("base64"),
+      });
+    } catch (error) {
+      console.error("Error saving user keys:", error);
+      throw new Error("Failed to save user keys");
+    }
   };
 
   useEffect(() => {
@@ -87,49 +73,63 @@ export default function DataPasswordCard() {
           setting a data password will keep the data you create private from
           skydiary and anyone else.
         </p>
-        <details
-          className="flex w-full flex-col gap-4 border-l-4 border-yellow-500 bg-yellow-100 p-4 text-sm text-yellow-700"
-          role="alert"
-        >
-          <summary className="cursor-pointer font-bold">Caution</summary>
-          <div className="mt-2 flex flex-col gap-2">
-            <p>
-              because we never see your password, we can not recover it if you
-              forget it.
-            </p>
-            <p>
-              we recommend setting a unique, long password. save it securely in
-              a password manager, write it down, or download a .PDF with the
-              password
-            </p>
+        {user?.sukMdk ? (
+          <div>
+            <details
+              className="flex w-full flex-col gap-4 border-l-4 border-yellow-500 bg-yellow-100 p-4 text-sm text-yellow-700"
+              role="alert"
+            >
+              <summary className="cursor-pointer font-bold">Caution</summary>
+              <div className="mt-2 flex flex-col gap-2">
+                <p>
+                  because we never see your password, we can not recover it if
+                  you forget it.
+                </p>
+                <p>
+                  we recommend setting a unique, long password. save it securely
+                  in a password manager, write it down, or download a .PDF with
+                  the password
+                </p>
+              </div>
+            </details>
+
+            <Input
+              label="data password"
+              type="password"
+              value={password}
+              minLength={16}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <Input
+              label="confirm password"
+              type="password"
+              value={password2}
+              minLength={16}
+              onChange={(e) => setPassword2(e.target.value)}
+              required
+            />
+            <div className="mt-4 flex w-full flex-col gap-4">
+              {message && <p className="text-red-600">{message}</p>}
+
+              <Button
+                onClick={() =>
+                  handleCreateKeysFromPassword(password, password2)
+                }
+              >
+                Set Password and Encrypt Data
+              </Button>
+            </div>
           </div>
-        </details>
-
-        <Input
-          label="data passphrase"
-          type="password"
-          value={password}
-          minLength={16}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <Input
-          label="confirm passphrase"
-          type="password"
-          value={password2}
-          minLength={16}
-          onChange={(e) => setPassword2(e.target.value)}
-          required
-        />
-        <div className="mt-4 flex w-full flex-col gap-4">
-          {message && <p className="text-red-600">{message}</p>}
-
-          <Button
-            onClick={() => handleCreateKeyFromPassword(password, password2)}
-          >
-            Set Password and Encrypt Data
-          </Button>
-        </div>
+        ) : (
+          <div>
+            <Button
+              onClick={async () => await deleteJWKFromIndexedDB(MASTERDATAKEY)}
+            >
+              Delete Master Data Key!?
+            </Button>
+          </div>
+        )}
       </div>
     </Card>
   );

@@ -1,29 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useState } from "react";
 import Button from "~/app/_components/Button";
 import Input from "~/app/_components/Input";
 import {
-  decryptDataWithKey,
-  encryptDataWithKey,
-  type EncryptedData,
-  exportKeyToJWK,
-  genRandomSalt,
-  genSymmetricKey,
-  importKeyFromJWK,
+  decryptTextWithKey,
+  encryptTextWithKey,
+  getLocalMdkForUser,
 } from "~/utils/cryptoA1";
 
 export default function CryptoPage() {
-  const [salt, setSalt] = useState("");
-  const [secretUserKey, setSecretUserKey] = useState<JsonWebKey>();
-  const [dataEncryptionKey, setDataEncryptionKey] = useState<JsonWebKey>();
-  const [encryptedData, setEncryptedData] = useState<EncryptedData>();
-  const [decryptedData, setDecryptedData] = useState<string>();
   const [plainText, setPlainText] = useState("");
-  const [password, setPassword] = useState("");
-  const [password2, setPassword2] = useState("");
-  const [message, setMessage] = useState("");
+  const [cipherText, setCipherText] = useState<string>();
+  const [iv, setIv] = useState<Uint8Array>();
+  const [decryptedText, setDecryptedText] = useState<string>();
 
+  const { data: sessionData } = useSession();
+  const user = sessionData?.user;
   /*
 todo: 
 generate user-held user key
@@ -35,56 +29,17 @@ encrypt data encryption key with secret user key
 
 */
 
-  useEffect(() => {
-    if (password && password2 && password !== password2) {
-      setMessage("Passwords do not match");
-    }
-    if (password === password2) {
-      setMessage("");
-    }
-  }, [password, password2]);
-
   return (
     <div className="container mx-auto flex w-full flex-col gap-4 p-4">
       <div>Crypto</div>
-      <div className="flex flex-col items-start gap-4">
-        <p>salt: {salt}</p>
-        <p>secretUserKey: {JSON.stringify(secretUserKey)}</p>
-        <p>dataEncryptionKey: {JSON.stringify(dataEncryptionKey)}</p>
-        <p>encryptedData: {JSON.stringify(encryptedData)}</p>
-        <p>decryptedData: {decryptedData}</p>
-      </div>
+      {user?.sukMdk ? (
+        <div>user has a key</div>
+      ) : (
+        <div>user does not have a key</div>
+      )}
+
+      <pre>{JSON.stringify(user, null, 2)}</pre>
       <div>
-        {message && <p className="text-red-600">{message}</p>}
-        <Input
-          type="password"
-          label="password"
-          value={password}
-          minLength={16}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          showHidePassword
-        />
-        <Input
-          type="password"
-          label="confirm password"
-          value={password2}
-          minLength={16}
-          onChange={(e) => setPassword2(e.target.value)}
-          required
-        />
-        <Button onClick={async () => setSalt(await genRandomSalt())}>
-          Generate Random Salt
-        </Button>
-
-        <Button
-          onClick={async () =>
-            setDataEncryptionKey(await exportKeyToJWK(await genSymmetricKey()))
-          }
-        >
-          Generate Data Encryption Key
-        </Button>
-
         <div className="mb-8 flex w-full flex-col gap-4">
           <Input
             label="input plain text"
@@ -92,28 +47,37 @@ encrypt data encryption key with secret user key
             onChange={(e) => setPlainText(e.target.value)}
           />
         </div>
+
         <Button
           onClick={async () => {
-            const encryptedData = await encryptDataWithKey(
+            const encryptedText = await encryptTextWithKey({
               plainText,
-              await importKeyFromJWK(dataEncryptionKey!),
-            );
-            setEncryptedData(encryptedData);
+              key: await getLocalMdkForUser(user!),
+            });
+            setCipherText(encryptedText.cipherText);
+            setIv(encryptedText.iv);
           }}
         >
           Encrypt Data
         </Button>
+        {cipherText && <p>cipherText: {cipherText}</p>}
         <Button
           onClick={async () => {
-            const decryptedData = await decryptDataWithKey(
-              encryptedData!,
-              await importKeyFromJWK(dataEncryptionKey!),
-            );
-            setDecryptedData(decryptedData);
+            const decryptedData = await decryptTextWithKey({
+              cipherText: cipherText!,
+              iv: iv!,
+              key: await getLocalMdkForUser(user!),
+            });
+            if (decryptedData) {
+              setDecryptedText(decryptedData);
+            } else {
+              setDecryptedText("failed to decrypt");
+            }
           }}
         >
           Decrypt Data
         </Button>
+        {decryptedText && <p>decryptedText: {decryptedText}</p>}
       </div>
     </div>
   );
