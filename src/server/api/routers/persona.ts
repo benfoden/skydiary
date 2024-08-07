@@ -140,6 +140,13 @@ export const personaRouter = createTRPCRouter({
     });
   }),
 
+  getByUserForJobQueue: protectedProcedure.query(({ ctx }) => {
+    return ctx.db.persona.findMany({
+      where: { createdBy: { id: ctx.session.user.id }, isUser: false },
+      orderBy: { createdAt: "asc" },
+    });
+  }),
+
   getAllUserPersonasAsCron: publicProcedure
     .input(z.object({ cronSecret: z.string() }))
     .query(async ({ ctx, input }) => {

@@ -32,13 +32,7 @@ encrypt data encryption key with secret user key
   return (
     <div className="container mx-auto flex w-full flex-col gap-4 p-4">
       <div>Crypto</div>
-      {user?.sukMdk ? (
-        <div>user has a key</div>
-      ) : (
-        <div>user does not have a key</div>
-      )}
 
-      <pre>{JSON.stringify(user, null, 2)}</pre>
       <div>
         <div className="mb-8 flex w-full flex-col gap-4">
           <Input
