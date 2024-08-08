@@ -19,8 +19,10 @@ export default async function SessionLayout({ children }: Props) {
 
   return (
     <div className="container mx-auto min-h-screen">
-      <JobQueueBuilder />
-      <NextAuthProvider>{children}</NextAuthProvider>
+      <NextAuthProvider>
+        <JobQueueBuilder />
+        {children}
+      </NextAuthProvider>
     </div>
   );
 }

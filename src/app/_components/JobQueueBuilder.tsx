@@ -8,6 +8,7 @@ import {
   type Post,
   type Tag,
 } from "@prisma/client";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
 export type PostsWithCommentsAndTags = Post & {
@@ -15,23 +16,45 @@ export type PostsWithCommentsAndTags = Post & {
   tags: Tag[];
 };
 
-export interface JobQueue {
-  postsWithCommentsAndTags: PostsWithCommentsAndTags[];
+export interface Queue {
+  posts: PostsWithCommentsAndTags[];
   personas: Persona[];
 }
 
 export default function JobQueueBuilder() {
-  const [jobQueue, setJobQueue] = useState<JobQueue>();
+  const session = useSession();
+  const user = session?.data?.user;
+  const [queue, setQueue] = useState<Queue>({
+    posts: [],
+    personas: [],
+  });
+  const [tagAndMemorizeQueue, setTagAndMemorizeQueue] = useState<
+    PostsWithCommentsAndTags[]
+  >([]);
+  const [encryptQueue, setEncryptQueue] = useState<Queue>({
+    posts: [],
+    personas: [],
+  });
   const { data: postsWithCommentsAndTags, isSuccess: isSuccessPosts } =
     api.post.getByUserForJobQueue.useQuery();
   const { data: personas, isSuccess: isSuccessPersonas } =
     api.persona.getByUserForJobQueue.useQuery();
+  const tagAndMemorize = api.post.tagAndMemorize.useMutation();
+
+  // const handleEncryptQueue = async () => {
+  //   if (encryptQueue.personas.length) {
+  //     await api.persona.encryptAsCron.mutateAsync({
+  //       personaQueueOutput: encryptQueue.personas,
+  //       cronSecret: env.CRON_SECRET,
+  //     });
+  //   }
+  // };
 
   useEffect(() => {
     try {
       if (isSuccessPosts && isSuccessPersonas) {
-        setJobQueue({
-          postsWithCommentsAndTags: postsWithCommentsAndTags,
+        setQueue({
+          posts: postsWithCommentsAndTags,
           personas: personas,
         });
       }
@@ -40,7 +63,57 @@ export default function JobQueueBuilder() {
     }
   }, [isSuccessPosts, isSuccessPersonas, postsWithCommentsAndTags, personas]);
 
-  //todo: process the job queue for each jobToDo and save the results in the DB
+  //todo: process the job queue for each jobToDo
 
+  useEffect(() => {
+    if (queue?.posts?.length > 0) {
+      queue.posts.forEach((post) => {
+        if (
+          post.content.length > 15 &&
+          !post.tags.length &&
+          new Date(post.createdAt) < new Date(Date.now() - 8 * 60 * 60 * 1000)
+        ) {
+          setTagAndMemorizeQueue((prev) => [...prev, post]);
+        }
+        if (user?.sukMdk && !post.contentIV) {
+          setEncryptQueue((prev) => ({
+            posts: [...prev.posts, post],
+            personas: prev.personas,
+          }));
+        }
+      });
+    }
+
+    if (queue?.personas?.length > 0 && user?.sukMdk) {
+      setEncryptQueue((prev) => ({
+        posts: prev.posts,
+        personas: queue.personas.filter((persona) => {
+          if (persona.name.length && !persona.nameIV) {
+            return true;
+          }
+        }),
+      }));
+    }
+  }, [queue, user?.sukMdk]);
+
+  useEffect(() => {
+    const handleTagAndMemorize = async () => {
+      if (tagAndMemorizeQueue.length) {
+        await tagAndMemorize.mutateAsync(
+          tagAndMemorizeQueue.map(({ id, content, tags }) => ({
+            id,
+            content,
+            tags: tags.map((tag) => tag.content),
+          })),
+        );
+      }
+    };
+    handleTagAndMemorize().catch((error) => {
+      console.error("Error processing tagAndMemorizeQueue:", error);
+    });
+  }, [tagAndMemorizeQueue]);
+
+  console.log("tagAndMemorizeQueue", tagAndMemorizeQueue);
+  console.log("encryptQueue", encryptQueue);
   return <></>;
 }

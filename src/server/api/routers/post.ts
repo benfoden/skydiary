@@ -1,3 +1,4 @@
+import { type Persona } from "@prisma/client";
 import { z } from "zod";
 import { env } from "~/env";
 
@@ -6,7 +7,8 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { getResponse } from "~/utils/ai";
+import { getResponse, getResponseJSON } from "~/utils/ai";
+import { NEWPERSONAUSER, productPlan, TAGS } from "~/utils/constants";
 import { prompts } from "~/utils/prompts";
 
 export const postRouter = createTRPCRouter({
@@ -192,6 +194,9 @@ export const postRouter = createTRPCRouter({
     return ctx.db.post.findMany({
       where: { createdBy: { id: ctx.session.user.id } },
       orderBy: { createdAt: "desc" },
+      include: {
+        tags: true,
+      },
     });
   }),
 
@@ -244,6 +249,93 @@ export const postRouter = createTRPCRouter({
       return ctx.db.post.findFirst({
         where: { id: input.postId },
       });
+    }),
+
+  tagAndMemorize: protectedProcedure
+    .input(
+      z.array(
+        z.object({
+          id: z.string(),
+          content: z.string(),
+          tags: z.array(z.string()),
+        }),
+      ),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [user, userPersona] = await Promise.all([
+        ctx.db.user.findFirst({
+          where: { id: ctx.session.user.id },
+        }),
+        ctx.db.persona.findFirst({
+          where: { createdById: ctx.session.user.id, isUser: true },
+        }),
+      ]);
+
+      console.log("unprocessed posts length", input.length);
+      for (const post of input) {
+        if (!post?.id && post.content?.length < 20 && post.tags.length > 0) {
+          continue;
+        }
+
+        const [newTags, generatedPersona] = await Promise.all([
+          getResponse({
+            messageContent: prompts.tag({ content: post?.content }),
+            model: "gpt-4o-mini",
+          }),
+          getResponseJSON({
+            messageContent: prompts.userPersona({
+              persona: userPersona ?? NEWPERSONAUSER,
+              content: post?.content,
+              wordLimit: user?.isSpecial
+                ? 150
+                : productPlan(user?.stripeProductId).memories,
+            }),
+            model: "gpt-4o-mini",
+          }),
+        ]);
+
+        if (!newTags) {
+          continue;
+        }
+        if (!generatedPersona) {
+          continue;
+        }
+        const personaObject = JSON.parse(generatedPersona) as Persona;
+
+        const tagContents = newTags?.split(",").map((tag) => tag.trim());
+
+        const tagIds = tagContents
+          ?.map((content) => {
+            const tag = TAGS.find((tag) => tag.content === content);
+            return tag?.id ?? undefined;
+          })
+          .filter((tag): tag is string => tag !== undefined);
+        if (!tagIds?.length) {
+          continue;
+        }
+
+        await Promise.all([
+          ctx.db.persona.update({
+            where: { id: userPersona?.id },
+            data: {
+              description: personaObject?.description,
+              relationship: personaObject?.relationship,
+              traits: personaObject?.traits,
+            },
+          }),
+          ctx.db.post.update({
+            where: { id: post.id },
+            data: {
+              tags: {
+                connect: tagIds.slice(0, 3).map((tagId: string) => ({
+                  id: tagId,
+                })),
+              },
+            },
+          }),
+        ]);
+        console.log("processed post", post.id);
+      }
     }),
 
   addTagsAsCron: publicProcedure
