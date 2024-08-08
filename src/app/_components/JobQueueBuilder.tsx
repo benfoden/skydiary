@@ -111,9 +111,9 @@ export default function JobQueueBuilder() {
     handleTagAndMemorize().catch((error) => {
       console.error("Error processing tagAndMemorizeQueue:", error);
     });
-  }, [tagAndMemorizeQueue]);
+  }, [tagAndMemorizeQueue, tagAndMemorize]);
 
   console.log("tagAndMemorizeQueue", tagAndMemorizeQueue);
   console.log("encryptQueue", encryptQueue);
-  return <></>;
+  return null;
 }
