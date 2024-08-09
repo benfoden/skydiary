@@ -41,15 +41,6 @@ export default function ManageJobQueue() {
     api.persona.getByUserForJobQueue.useQuery();
   const tagAndMemorize = api.post.tagAndMemorize.useMutation();
 
-  // const handleEncryptQueue = async () => {
-  //   if (encryptQueue.personas.length) {
-  //     await api.persona.encryptAsCron.mutateAsync({
-  //       personaQueueOutput: encryptQueue.personas,
-  //       cronSecret: env.CRON_SECRET,
-  //     });
-  //   }
-  // };
-
   useEffect(() => {
     try {
       if (isSuccessPosts && isSuccessPersonas) {
@@ -63,40 +54,48 @@ export default function ManageJobQueue() {
     }
   }, [isSuccessPosts, isSuccessPersonas, PostWithCommentsAndTags, personas]);
 
-  //todo: process the job queue for each jobToDo
-
   useEffect(() => {
-    if (queue?.posts?.length > 0) {
-      queue.posts.forEach((post) => {
-        if (
-          post.content.length > 5 &&
-          !post.tags.length &&
-          new Date(post.createdAt) < new Date(Date.now() - 8 * 60 * 60 * 1000)
-        ) {
-          setTagAndMemorizeQueue((prev) => [...prev, post]);
+    const processPosts = () => {
+      const newTagAndMemorizeQueue: PostWithCommentsAndTags[] = [];
+      const newEncryptQueuePosts: PostWithCommentsAndTags[] = [];
+
+      queue.posts?.forEach((post) => {
+        const isOldPost =
+          new Date(post.createdAt) < new Date(Date.now() - 8 * 60 * 60 * 1000);
+        const hasContent = post.content.length > 5;
+        const hasNoTags = !post.tags.length;
+        const hasComments = post.comments.length > 0;
+
+        if (hasContent && hasNoTags && isOldPost) {
+          newTagAndMemorizeQueue.push(post);
         }
-        if (
-          user?.sukMdk &&
-          (post.content.length > 5 || post.comments.length > 0)
-        ) {
-          setEncryptQueue((prev) => ({
-            posts: [...prev.posts, post],
-            personas: prev.personas,
-          }));
+
+        if (user?.sukMdk && (hasContent || hasComments)) {
+          newEncryptQueuePosts.push(post);
         }
       });
-    }
 
-    if (queue?.personas?.length && user?.sukMdk) {
+      setTagAndMemorizeQueue(newTagAndMemorizeQueue);
       setEncryptQueue((prev) => ({
-        posts: prev.posts,
-        personas: queue.personas.filter((persona) => {
-          if (!persona.nameIV) {
-            return true;
-          }
-        }),
+        posts: newEncryptQueuePosts,
+        personas: prev.personas,
       }));
-    }
+    };
+
+    const processPersonas = () => {
+      if (queue?.personas?.length && user?.sukMdk) {
+        const newEncryptQueuePersonas = queue.personas.filter(
+          (persona) => !persona.nameIV,
+        );
+        setEncryptQueue((prev) => ({
+          posts: prev.posts,
+          personas: newEncryptQueuePersonas,
+        }));
+      }
+    };
+
+    processPosts();
+    processPersonas();
   }, [queue, user?.sukMdk]);
 
   useEffect(() => {
@@ -140,7 +139,6 @@ export default function ManageJobQueue() {
         console.error("Error processing encryptQueue:");
       });
     }
-    console.log("encryptedPersonas", encryptedPersonas);
 
     const handleDecryptPersonas = async (personas: Persona[]) => {
       const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
@@ -165,7 +163,6 @@ export default function ManageJobQueue() {
   useEffect(() => {
     const encryptedPosts: PostWithCommentsAndTags[] = [];
     if (encryptQueue.posts.length && user?.sukMdk) {
-      console.log("encryptQueue.posts", encryptQueue.posts.length);
       const handleEncryptPosts = async () => {
         try {
           const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
@@ -186,7 +183,6 @@ export default function ManageJobQueue() {
         console.error("Error processing encryptQueue:");
       });
     }
-    console.log("encryptedPosts", encryptedPosts);
 
     const handleDecryptPosts = async (posts: PostWithCommentsAndTags[]) => {
       const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
