@@ -11,6 +11,7 @@ import {
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import {
+  decryptPersona,
   encryptPersona,
   getJWKFromIndexedDB,
   importKeyFromJWK,
@@ -132,19 +133,15 @@ export default function JobQueueBuilder() {
             throw new Error("Failed to retrieve key from IndexedDB");
           }
           const mdk = await importKeyFromJWK(jwkMdk);
-          for (const persona of encryptQueue.personas) {
-            if (persona.name.length && !persona.nameIV) {
-              const encryptedPersonaDetails = await encryptPersona(
-                persona,
-                mdk,
-              );
-              const encryptedPersona = {
-                ...persona,
-                ...encryptedPersonaDetails,
-              };
-              encryptedPersonas.push(encryptedPersona);
-            }
-          }
+          await Promise.all(
+            encryptQueue.personas.map(async (persona) => {
+              if (persona.name.length && !persona.nameIV) {
+                const encryptedPersona = await encryptPersona(persona, mdk);
+
+                encryptedPersonas.push(encryptedPersona);
+              }
+            }),
+          );
         } catch (error) {
           console.error("Error processing encryptQueue:", error);
         }
@@ -152,8 +149,27 @@ export default function JobQueueBuilder() {
       handleEncryptQueue().catch(() => {
         console.error("Error processing encryptQueue:");
       });
-      console.log("encryptedPersonas", encryptedPersonas);
     }
+    console.log("encryptedPersonas", encryptedPersonas);
+
+    const handleDecryptPersonas = async (personas: Persona[]) => {
+      const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
+      if (!jwkMdk) {
+        throw new Error("Failed to retrieve key from IndexedDB");
+      }
+      const mdk = await importKeyFromJWK(jwkMdk);
+      return Promise.all(
+        personas.map(async (persona) => {
+          return await decryptPersona(persona, mdk);
+        }),
+      );
+    };
+
+    handleDecryptPersonas(encryptedPersonas)
+      .then((decryptedPersonas) => {
+        console.log("decrypted personas", decryptedPersonas);
+      })
+      .catch((e) => console.error("Error decrypting personas:", e));
   }, [encryptQueue.personas, user?.sukMdk]);
 
   // console.log("tagAndMemorizeQueue", tagAndMemorizeQueue);

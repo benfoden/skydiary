@@ -106,13 +106,12 @@ model Device {
 
 model Persona {
   id                  String    @id @default(cuid())
+  image               String?
+  age                 Int?
   name                String
   nameIV              String?
   description         String?
   descriptionIV       String?
-  image               String?
-  age                 Int?
-  ageIV               String?
   gender              String?
   genderIV            String?
   relationship        String?
