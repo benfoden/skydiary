@@ -11,6 +11,7 @@ import {
   getLocalMdkForUser,
   unwrapMDKAndSave,
 } from "~/utils/cryptoA1";
+import Spinner from "./Spinner";
 
 export default function DataPasswordCard() {
   const [password, setPassword] = useState("");
@@ -38,7 +39,7 @@ export default function DataPasswordCard() {
       return;
     }
     if (password.length < 16) {
-      setMessage("Password must be at least 16 characters");
+      setMessage("passphrases must be at least 16 characters");
       return;
     }
     const { sukMdk, passwordSalt } = await createUserKeys(password);
@@ -59,7 +60,7 @@ export default function DataPasswordCard() {
       setMessage("");
     } else if (password && password2) {
       if (password !== password2) {
-        setMessage("Passwords do not match");
+        setMessage("passphrases do not match");
       } else {
         setMessage("");
       }
@@ -90,7 +91,7 @@ export default function DataPasswordCard() {
     sukMdk: string,
   ) => {
     if (password.length < 16) {
-      setMessage("Password is at least 16 characters");
+      setMessage("your passphrase is at least 16 characters long");
       return;
     }
 
@@ -109,19 +110,24 @@ export default function DataPasswordCard() {
   //todo: handle password reset
   //todo: handle decrypt data and unset key
   if (!user) {
-    return <div>loading data password details...</div>;
+    return (
+      <Card isButton={false}>
+        <Spinner />
+      </Card>
+    );
   }
 
   return (
     <Card variant="form" isButton={false}>
       <div className="flex w-full flex-col items-center gap-4">
-        <h2>data password</h2>
+        <h2>data passphrase</h2>
         <p className="text-sm opacity-60">
-          setting a data password adds an extra layer of encryption for the data
-          you create. <br />
+          use a passphrase to enhance your data privacy and security. <br />
           <br />
-          skydiary does not store your password.
+          it is never stored on our servers.
         </p>
+        {message && <p className="text-red-600">{message}</p>}
+
         {!user?.sukMdk ? (
           <div>
             <details
@@ -131,19 +137,18 @@ export default function DataPasswordCard() {
               <summary className="cursor-pointer font-bold">Caution</summary>
               <div className="mt-2 flex flex-col gap-2">
                 <p>
-                  because we never see your password, we can not recover it if
+                  because we never see your passphrase, we can not recover it if
                   you forget it.
                 </p>
                 <p>
-                  we recommend setting a unique, long password. save it securely
-                  in a password manager, write it down, or download a .PDF with
-                  the password
+                  we recommend setting a unique, long passphrase. save it
+                  securely in a password manager, write it down, or download a
+                  .PDF
                 </p>
               </div>
             </details>
-
             <Input
-              label="data password"
+              label="data passphrase"
               type="password"
               value={password}
               minLength={16}
@@ -151,7 +156,7 @@ export default function DataPasswordCard() {
               required
             />
             <Input
-              label="confirm password"
+              label="confirm passphrase"
               type="password"
               value={password2}
               minLength={16}
@@ -159,27 +164,26 @@ export default function DataPasswordCard() {
               required
             />
             <div className="mt-4 flex w-full flex-col gap-4">
-              {message && <p className="text-red-600">{message}</p>}
-
               <Button
                 onClick={() =>
                   handleCreateKeysFromPassword(password, password2)
                 }
               >
-                Set Password and Encrypt Data
+                set passphrase
               </Button>
             </div>
           </div>
         ) : !isLocalMdk ? (
-          <div>
-            enter your password to use skydiary on this device
+          <div className="flex w-full flex-col items-center gap-4">
+            <p className="font-light">unlock your data on this device</p>
             <Input
-              label="data password"
+              label="passphrase"
               type="password"
               value={password}
               minLength={16}
               onChange={(e) => setPassword(e.target.value)}
               required
+              showHidePassword
             />
             <Button
               onClick={() =>
@@ -190,14 +194,20 @@ export default function DataPasswordCard() {
                 )
               }
             >
-              Unlock your data
+              unlock data on this device
             </Button>
           </div>
         ) : (
-          <div>
-            Data password is set
-            <p>removing and resetting passwords is coming soon</p>
-          </div>
+          <Card isButton={false}>
+            <div className="flex w-full flex-col items-center gap-4">
+              <p className="font-light">
+                data access is enabled on this device
+              </p>
+              <p className="text-sm opacity-60">
+                reseting passphrase coming soon
+              </p>
+            </div>
+          </Card>
         )}
       </div>
     </Card>

@@ -286,7 +286,7 @@ export async function getJWKFromIndexedDB(
   keyName: string,
 ): Promise<JsonWebKey | null> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("cryptoDB", 1);
+    const request = indexedDB.open("cryptoDB", 2);
 
     request.onsuccess = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
@@ -330,7 +330,7 @@ export async function getJWKFromIndexedDB(
 
 export async function deleteJWKFromIndexedDB(keyName: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("cryptoDB", 1);
+    const request = indexedDB.open("cryptoDB", 2);
 
     request.onsuccess = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;

@@ -142,7 +142,7 @@ export const personaRouter = createTRPCRouter({
 
   getByUserForJobQueue: protectedProcedure.query(({ ctx }) => {
     return ctx.db.persona.findMany({
-      where: { createdBy: { id: ctx.session.user.id }, isUser: false },
+      where: { createdBy: { id: ctx.session.user.id } },
       orderBy: { createdAt: "asc" },
     });
   }),
