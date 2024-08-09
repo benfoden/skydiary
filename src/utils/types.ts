@@ -1,3 +1,10 @@
+import {
+  type Comment,
+  type Persona,
+  type Post,
+  type Tag,
+} from "@prisma/client";
+
 export interface EmailDetails {
   text: string;
   subject: string;
@@ -19,3 +26,13 @@ export type JobType =
 
 //todo: create types for JobQueue, and any necessary subtypes
 //todo: should reuse the existing types for Post, Comment, and Persona
+
+export type PostWithCommentsAndTags = Post & {
+  comments: Comment[];
+  tags: Tag[];
+};
+
+export interface PostsWithCommentsAndTagsAndPersonas {
+  posts: PostWithCommentsAndTags[];
+  personas: Persona[];
+}

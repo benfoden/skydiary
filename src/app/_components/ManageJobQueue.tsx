@@ -2,48 +2,40 @@
 
 import { api } from "~/trpc/react";
 
-import {
-  type Comment,
-  type Persona,
-  type Post,
-  type Tag,
-} from "@prisma/client";
+import { type Persona } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import {
   decryptPersona,
+  decryptPost,
   encryptPersona,
+  encryptPost,
   getJWKFromIndexedDB,
   importKeyFromJWK,
   MASTERDATAKEY,
 } from "~/utils/cryptoA1";
+import {
+  type PostsWithCommentsAndTagsAndPersonas,
+  type PostWithCommentsAndTags,
+} from "~/utils/types";
 
-export type PostsWithCommentsAndTags = Post & {
-  comments: Comment[];
-  tags: Tag[];
-};
-
-export interface Queue {
-  posts: PostsWithCommentsAndTags[];
-  personas: Persona[];
-}
-
-export default function JobQueueBuilder() {
+export default function ManageJobQueue() {
   const session = useSession();
   const user = session?.data?.user;
-  const [queue, setQueue] = useState<Queue>({
+  const [queue, setQueue] = useState<PostsWithCommentsAndTagsAndPersonas>({
     posts: [],
     personas: [],
   });
   const [tagAndMemorizeQueue, setTagAndMemorizeQueue] = useState<
-    PostsWithCommentsAndTags[]
+    PostWithCommentsAndTags[]
   >([]);
-  const [encryptQueue, setEncryptQueue] = useState<Queue>({
-    posts: [],
-    personas: [],
-  });
+  const [encryptQueue, setEncryptQueue] =
+    useState<PostsWithCommentsAndTagsAndPersonas>({
+      posts: [],
+      personas: [],
+    });
 
-  const { data: postsWithCommentsAndTags, isSuccess: isSuccessPosts } =
+  const { data: PostWithCommentsAndTags, isSuccess: isSuccessPosts } =
     api.post.getByUserForJobQueue.useQuery();
   const { data: personas, isSuccess: isSuccessPersonas } =
     api.persona.getByUserForJobQueue.useQuery();
@@ -62,14 +54,14 @@ export default function JobQueueBuilder() {
     try {
       if (isSuccessPosts && isSuccessPersonas) {
         setQueue({
-          posts: postsWithCommentsAndTags,
+          posts: PostWithCommentsAndTags,
           personas: personas,
         });
       }
     } catch (error) {
       console.error("Error fetching data:", error);
     }
-  }, [isSuccessPosts, isSuccessPersonas, postsWithCommentsAndTags, personas]);
+  }, [isSuccessPosts, isSuccessPersonas, PostWithCommentsAndTags, personas]);
 
   //todo: process the job queue for each jobToDo
 
@@ -92,11 +84,11 @@ export default function JobQueueBuilder() {
       });
     }
 
-    if (queue?.personas?.length > 0 && user?.sukMdk) {
+    if (queue?.personas?.length && user?.sukMdk) {
       setEncryptQueue((prev) => ({
         posts: prev.posts,
         personas: queue.personas.filter((persona) => {
-          if (persona.name.length && !persona.nameIV) {
+          if (!persona.nameIV) {
             return true;
           }
         }),
@@ -123,7 +115,6 @@ export default function JobQueueBuilder() {
 
   useEffect(() => {
     const encryptedPersonas: Persona[] = [];
-    const encryptedPosts: Post[] = [];
     if (encryptQueue.personas.length && user?.sukMdk) {
       console.log("encryptQueue.personas", encryptQueue.personas.length);
       const handleEncryptQueue = async () => {
@@ -134,13 +125,9 @@ export default function JobQueueBuilder() {
           }
           const mdk = await importKeyFromJWK(jwkMdk);
           await Promise.all(
-            encryptQueue.personas.map(async (persona) => {
-              if (persona.name.length && !persona.nameIV) {
-                const encryptedPersona = await encryptPersona(persona, mdk);
-
-                encryptedPersonas.push(encryptedPersona);
-              }
-            }),
+            encryptQueue.personas.map(async (persona) =>
+              encryptedPersonas.push(await encryptPersona(persona, mdk)),
+            ),
           );
         } catch (error) {
           console.error("Error processing encryptQueue:", error);
@@ -172,6 +159,51 @@ export default function JobQueueBuilder() {
       .catch((e) => console.error("Error decrypting personas:", e));
   }, [encryptQueue.personas, user?.sukMdk]);
 
+  useEffect(() => {
+    const encryptedPosts: PostWithCommentsAndTags[] = [];
+    if (encryptQueue.posts.length && user?.sukMdk) {
+      console.log("encryptQueue.posts", encryptQueue.posts.length);
+      const handleEncryptQueue = async () => {
+        try {
+          const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
+          if (!jwkMdk) {
+            throw new Error("Failed to retrieve key from IndexedDB");
+          }
+          const mdk = await importKeyFromJWK(jwkMdk);
+          await Promise.all(
+            encryptQueue.posts.map(async (post) =>
+              encryptedPosts.push(await encryptPost(post, mdk)),
+            ),
+          );
+        } catch (error) {
+          console.error("Error processing encryptQueue:", error);
+        }
+      };
+      handleEncryptQueue().catch(() => {
+        console.error("Error processing encryptQueue:");
+      });
+    }
+    console.log("encryptedPosts", encryptedPosts);
+
+    const handleDecryptPosts = async (posts: PostWithCommentsAndTags[]) => {
+      const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
+      if (!jwkMdk) {
+        throw new Error("Failed to retrieve key from IndexedDB");
+      }
+      const mdk = await importKeyFromJWK(jwkMdk);
+      return Promise.all(
+        posts.map(async (post) => {
+          return await decryptPost(post, mdk);
+        }),
+      );
+    };
+
+    handleDecryptPosts(encryptedPosts)
+      .then((decryptedPosts) => {
+        console.log("decrypted posts", decryptedPosts);
+      })
+      .catch((e) => console.error("Error decrypting posts:", e));
+  }, [encryptQueue.posts, user?.sukMdk]);
   // console.log("tagAndMemorizeQueue", tagAndMemorizeQueue);
   // console.log("encryptQueue", encryptQueue);
   return null;

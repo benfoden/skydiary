@@ -1,4 +1,5 @@
 import { type Persona } from "@prisma/client";
+import { type PostWithCommentsAndTags } from "./types";
 
 export interface EncryptedData {
   cipherText: string;
@@ -555,6 +556,127 @@ export async function decryptPersona(
   await Promise.all(decryptionPromises);
 
   return result as Persona;
+}
+
+export async function encryptPost(
+  post: PostWithCommentsAndTags,
+  mdk: CryptoKey,
+): Promise<PostWithCommentsAndTags> {
+  const result: Partial<PostWithCommentsAndTags> = { ...post };
+  const encryptionPromises = [];
+
+  if (post.content) {
+    encryptionPromises.push(
+      encryptTextWithKey(post.content, mdk).then(({ cipherText, iv }) => {
+        result.content = cipherText;
+        result.contentIV = Buffer.from(iv).toString("base64");
+      }),
+    );
+  }
+
+  if (post.summary) {
+    encryptionPromises.push(
+      encryptTextWithKey(post.summary, mdk).then(({ cipherText, iv }) => {
+        result.summary = cipherText;
+        result.summaryIV = Buffer.from(iv).toString("base64");
+      }),
+    );
+  }
+
+  if (post.comments) {
+    post.comments.forEach((comment) => {
+      if (comment.content) {
+        encryptionPromises.push(
+          encryptTextWithKey(comment.content, mdk).then(
+            ({ cipherText, iv }) => {
+              comment.content = cipherText;
+              comment.contentIV = Buffer.from(iv).toString("base64");
+            },
+          ),
+        );
+      }
+
+      if (comment.coachName) {
+        encryptionPromises.push(
+          encryptTextWithKey(comment.coachName, mdk).then(
+            ({ cipherText, iv }) => {
+              comment.coachName = cipherText;
+              comment.coachNameIV = Buffer.from(iv).toString("base64");
+            },
+          ),
+        );
+      }
+    });
+  }
+
+  await Promise.all(encryptionPromises);
+
+  return result as PostWithCommentsAndTags;
+}
+
+export async function decryptPost(
+  post: PostWithCommentsAndTags,
+  mdk: CryptoKey,
+): Promise<PostWithCommentsAndTags> {
+  const result: Partial<PostWithCommentsAndTags> = { ...post };
+
+  const decryptionPromises: Promise<void>[] = [];
+
+  if (post.content && post.contentIV) {
+    decryptionPromises.push(
+      decryptTextWithIVAndKey({
+        cipherText: post.content,
+        iv: Uint8Array.from(Buffer.from(post.contentIV, "base64")),
+        key: mdk,
+      }).then((decryptedText) => {
+        result.content = decryptedText;
+      }),
+    );
+  }
+
+  if (post.summary && post.summaryIV) {
+    decryptionPromises.push(
+      decryptTextWithIVAndKey({
+        cipherText: post.summary,
+        iv: Uint8Array.from(Buffer.from(post.summaryIV, "base64")),
+        key: mdk,
+      }).then((decryptedText) => {
+        result.summary = decryptedText;
+      }),
+    );
+  }
+
+  if (post.comments) {
+    post.comments.forEach((comment) => {
+      if (comment.content && comment.contentIV) {
+        decryptionPromises.push(
+          decryptTextWithIVAndKey({
+            cipherText: comment.content,
+            iv: Uint8Array.from(Buffer.from(comment.contentIV, "base64")),
+            key: mdk,
+          }).then((decryptedText) => {
+            comment.content = decryptedText;
+          }),
+        );
+      }
+
+      if (comment.coachName && comment.coachNameIV) {
+        decryptionPromises.push(
+          decryptTextWithIVAndKey({
+            cipherText: comment.coachName,
+            iv: Uint8Array.from(Buffer.from(comment.coachNameIV, "base64")),
+            key: mdk,
+          }).then((decryptedText) => {
+            comment.coachName = decryptedText;
+          }),
+        );
+      }
+    });
+  }
+
+  await Promise.all(decryptionPromises);
+
+  return result as PostWithCommentsAndTags;
 }
 
 // export async function genUserKey() {
