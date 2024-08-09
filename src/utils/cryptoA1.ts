@@ -1,11 +1,10 @@
-import { type User } from "@prisma/client";
-
 export interface EncryptedData {
   cipherText: string;
   iv: Uint8Array;
 }
 
 export const MASTERDATAKEY = "masterDataKey";
+export const SECRETUSERKEY = "secretUserKey";
 
 export async function genRandomSalt(): Promise<string> {
   const salt = new Uint8Array(16);
@@ -63,6 +62,61 @@ export async function wrapKey({
   });
 }
 
+export async function unwrapKey({
+  wrappingKey,
+  wrappedKey,
+}: {
+  wrappingKey: CryptoKey;
+  wrappedKey: ArrayBuffer;
+}): Promise<CryptoKey> {
+  return await crypto.subtle.unwrapKey(
+    "raw",
+    wrappedKey,
+    wrappingKey,
+    {
+      name: "AES-KW",
+    },
+    {
+      name: "AES-GCM",
+      length: 256,
+    },
+    true,
+    ["encrypt", "decrypt"],
+  );
+}
+
+export async function unwrapMDKAndSave({
+  password,
+  passwordSalt,
+  sukMdk,
+}: {
+  password: string;
+  passwordSalt: string;
+  sukMdk: string;
+}) {
+  const passwordSaltArray = Uint8Array.from(
+    Buffer.from(passwordSalt, "base64"),
+  );
+  try {
+    const secretUserKey = await deriveSecretUserKey(
+      password,
+      passwordSaltArray,
+    );
+    const masterDataKey = await unwrapKey({
+      wrappingKey: secretUserKey,
+      wrappedKey: Buffer.from(sukMdk, "base64").buffer,
+    });
+    const jwkMdk = await exportKeyToJWK(masterDataKey);
+    console.log("JWK MDK", jwkMdk);
+
+    await saveJWKToIndexedDB(jwkMdk, MASTERDATAKEY);
+  } catch (error) {
+    console.error("Error unwrapping key:", error);
+    return false;
+  }
+  return true;
+}
+
 export async function encryptTextWithKey({
   plainText,
   key,
@@ -89,7 +143,7 @@ export async function encryptTextWithKey({
 
 export async function createUserKeys(
   password: string,
-): Promise<{ sukMdk: ArrayBuffer; passwordSalt: Uint8Array }> {
+): Promise<{ sukMdk: ArrayBuffer; suk: CryptoKey; passwordSalt: Uint8Array }> {
   "use client";
   try {
     const passwordSalt = crypto.getRandomValues(new Uint8Array(16));
@@ -109,16 +163,32 @@ export async function createUserKeys(
     const jwkDataEncryptionKey = await exportKeyToJWK(masterDataKey);
 
     await saveJWKToIndexedDB(jwkDataEncryptionKey, MASTERDATAKEY);
-    return { sukMdk, passwordSalt };
+    return { sukMdk, suk: secretUserKey, passwordSalt };
   } catch (error) {
     console.error("Error creating user keys:", error);
     throw new Error("Failed to create user keys");
   }
 }
 
-export async function getLocalMdkForUser(user: User): Promise<CryptoKey> {
-  if (!user.sukMdk) {
-    throw new Error("User has no key for text encryption");
+export async function deriveSecretUserKey(
+  password: string,
+  passwordSalt: Uint8Array,
+): Promise<CryptoKey> {
+  "use client";
+  try {
+    return await deriveKeyArgon2({
+      password,
+      passwordSalt,
+    });
+  } catch (error) {
+    console.error("Error deriving secret user key");
+    throw new Error("Failed to derive secret user key");
+  }
+}
+
+export async function getLocalMdkForUser(sukMdk: string): Promise<CryptoKey> {
+  if (!sukMdk) {
+    throw new Error("No key for data encryption");
   }
 
   try {
@@ -164,24 +234,36 @@ export async function importKeyFromJWK(jwk: JsonWebKey): Promise<CryptoKey> {
     "decrypt",
   ]);
 }
-
 export async function saveJWKToIndexedDB(
   jwk: JsonWebKey,
   keyName: string,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("cryptoDB", 1);
+    const request = indexedDB.open("cryptoDB", 2); // Incremented version to 2
 
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
       if (!db.objectStoreNames.contains("keys")) {
         db.createObjectStore("keys", { keyPath: "name" });
+        console.log("Object store 'keys' created");
       }
     };
 
     request.onsuccess = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
-      const transaction = db.transaction("keys", "readwrite");
+      let transaction;
+      try {
+        transaction = db.transaction("keys", "readwrite");
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "NotFoundError") {
+          console.error("Object store 'keys' not found in IndexedDB");
+          reject(new Error("Object store 'keys' not found in IndexedDB"));
+          return;
+        } else {
+          reject(new Error("Failed to create transaction"));
+          return;
+        }
+      }
       const store = transaction.objectStore("keys");
       const putRequest = store.put({ name: keyName, jwk });
 
@@ -208,7 +290,21 @@ export async function getJWKFromIndexedDB(
 
     request.onsuccess = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
-      const transaction = db.transaction("keys", "readonly");
+
+      let transaction;
+      try {
+        transaction = db.transaction("keys", "readonly");
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "NotFoundError") {
+          console.error("Object store keys not found in IndexedDB");
+          resolve(null);
+          return;
+        } else {
+          reject(new Error("Failed to create transaction"));
+          return;
+        }
+      }
+
       const store = transaction.objectStore("keys");
       const getRequest = store.get(keyName);
 

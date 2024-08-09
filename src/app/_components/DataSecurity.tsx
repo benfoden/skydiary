@@ -8,14 +8,15 @@ import Input from "~/app/_components/Input";
 import { api } from "~/trpc/react";
 import {
   createUserKeys,
-  deleteJWKFromIndexedDB,
-  MASTERDATAKEY,
+  getLocalMdkForUser,
+  unwrapMDKAndSave,
 } from "~/utils/cryptoA1";
 
 export default function DataPasswordCard() {
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [message, setMessage] = useState("");
+  const [isLocalMdk, setIsLocalMdk] = useState(false);
   const updateUser = api.user.updateUser.useMutation();
   const { data: sessionData } = useSession();
   const user = sessionData?.user;
@@ -65,15 +66,63 @@ export default function DataPasswordCard() {
     }
   }, [password, password2]);
 
+  useEffect(() => {
+    const fetchLocalMdk = async () => {
+      if (user?.sukMdk) {
+        try {
+          const key = await getLocalMdkForUser(user.sukMdk);
+
+          setIsLocalMdk(!!key);
+        } catch (error) {
+          console.error("Error fetching local key:", error);
+        }
+      }
+    };
+
+    fetchLocalMdk().catch((error) => {
+      console.error("Error fetching local key:", error);
+    });
+  }, [user, isLocalMdk]);
+
+  const handleSetupEncryptionOnNewDevice = async (
+    password: string,
+    passwordSalt: string,
+    sukMdk: string,
+  ) => {
+    if (password.length < 16) {
+      setMessage("Password is at least 16 characters");
+      return;
+    }
+
+    const unwrapped = await unwrapMDKAndSave({
+      password,
+      passwordSalt,
+      sukMdk,
+    });
+    if (unwrapped) {
+      setIsLocalMdk(true);
+      setMessage("Your data is now accessible.");
+    }
+  };
+
+  //todo: handle user logged in on second device
+  //todo: handle password reset
+  //todo: handle decrypt data and unset key
+  if (!user) {
+    return <div>loading data password details...</div>;
+  }
+
   return (
     <Card variant="form" isButton={false}>
       <div className="flex w-full flex-col items-center gap-4">
         <h2>data password</h2>
         <p className="text-sm opacity-60">
-          setting a data password will keep the data you create private from
-          skydiary and anyone else.
+          setting a data password adds an extra layer of encryption for the data
+          you create. <br />
+          <br />
+          skydiary does not store your password.
         </p>
-        {user?.sukMdk ? (
+        {!user?.sukMdk ? (
           <div>
             <details
               className="flex w-full flex-col gap-4 border-l-4 border-yellow-500 bg-yellow-100 p-4 text-sm text-yellow-700"
@@ -121,13 +170,33 @@ export default function DataPasswordCard() {
               </Button>
             </div>
           </div>
+        ) : !isLocalMdk ? (
+          <div>
+            enter your password to use skydiary on this device
+            <Input
+              label="data password"
+              type="password"
+              value={password}
+              minLength={16}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <Button
+              onClick={() =>
+                handleSetupEncryptionOnNewDevice(
+                  password,
+                  user.passwordSalt!,
+                  user.sukMdk!,
+                )
+              }
+            >
+              Unlock your data
+            </Button>
+          </div>
         ) : (
           <div>
-            <Button
-              onClick={async () => await deleteJWKFromIndexedDB(MASTERDATAKEY)}
-            >
-              Delete Master Data Key!?
-            </Button>
+            Data password is set
+            <p>removing and resetting passwords is coming soon</p>
           </div>
         )}
       </div>

@@ -14,7 +14,7 @@ export default async function SessionLayout({ children }: Props) {
   if (!session) {
     redirect("/auth/signin");
   }
-
+  
   await api.user.resetDailyUsage();
 
   return (
