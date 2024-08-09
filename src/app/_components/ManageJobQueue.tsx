@@ -69,13 +69,16 @@ export default function ManageJobQueue() {
     if (queue?.posts?.length > 0) {
       queue.posts.forEach((post) => {
         if (
-          post.content.length > 15 &&
+          post.content.length > 5 &&
           !post.tags.length &&
           new Date(post.createdAt) < new Date(Date.now() - 8 * 60 * 60 * 1000)
         ) {
           setTagAndMemorizeQueue((prev) => [...prev, post]);
         }
-        if (user?.sukMdk && !post.contentIV) {
+        if (
+          user?.sukMdk &&
+          (post.content.length > 5 || post.comments.length > 0)
+        ) {
           setEncryptQueue((prev) => ({
             posts: [...prev.posts, post],
             personas: prev.personas,
@@ -163,7 +166,7 @@ export default function ManageJobQueue() {
     const encryptedPosts: PostWithCommentsAndTags[] = [];
     if (encryptQueue.posts.length && user?.sukMdk) {
       console.log("encryptQueue.posts", encryptQueue.posts.length);
-      const handleEncryptQueue = async () => {
+      const handleEncryptPosts = async () => {
         try {
           const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
           if (!jwkMdk) {
@@ -179,7 +182,7 @@ export default function ManageJobQueue() {
           console.error("Error processing encryptQueue:", error);
         }
       };
-      handleEncryptQueue().catch(() => {
+      handleEncryptPosts().catch(() => {
         console.error("Error processing encryptQueue:");
       });
     }
@@ -199,6 +202,7 @@ export default function ManageJobQueue() {
     };
 
     handleDecryptPosts(encryptedPosts)
+      .catch((e) => console.error("Error decrypting posts:", e))
       .then((decryptedPosts) => {
         console.log("decrypted posts", decryptedPosts);
       })
