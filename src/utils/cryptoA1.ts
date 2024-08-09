@@ -1,3 +1,5 @@
+import { type Persona } from "@prisma/client";
+
 export interface EncryptedData {
   cipherText: string;
   iv: Uint8Array;
@@ -117,13 +119,10 @@ export async function unwrapMDKAndSave({
   return true;
 }
 
-export async function encryptTextWithKey({
-  plainText,
-  key,
-}: {
-  plainText: string;
-  key: CryptoKey;
-}): Promise<EncryptedData> {
+export async function encryptTextWithKey(
+  plainText: string,
+  key: CryptoKey,
+): Promise<{ cipherText: string; iv: Uint8Array }> {
   const encoder = new TextEncoder();
   const encodedData = encoder.encode(plainText);
   const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -351,6 +350,74 @@ export async function deleteJWKFromIndexedDB(keyName: string): Promise<void> {
       reject(new Error("Failed to open IndexedDB"));
     };
   });
+}
+
+export async function encryptPersona(persona: Persona, mdk: CryptoKey) {
+  const result: {
+    name?: string;
+    nameIV?: string;
+    traits?: string;
+    traitsIV?: string;
+    description?: string;
+    descriptionIV?: string;
+    relationship?: string;
+    relationshipIV?: string;
+    communicationStyle?: string;
+    communicationStyleIV?: string;
+    communicationSample?: string;
+    communicationSampleIV?: string;
+  } = {};
+
+  if (persona.name) {
+    const { cipherText: name, iv: nameIV } = await encryptTextWithKey(
+      persona.name,
+      mdk,
+    );
+    result.name = name;
+    result.nameIV = Buffer.from(nameIV).toString("base64");
+  }
+
+  if (persona.traits) {
+    const { cipherText: traits, iv: traitsIV } = await encryptTextWithKey(
+      persona.traits,
+      mdk,
+    );
+    result.traits = traits;
+    result.traitsIV = Buffer.from(traitsIV).toString("base64");
+  }
+
+  if (persona.description) {
+    const { cipherText: description, iv: descriptionIV } =
+      await encryptTextWithKey(persona.description, mdk);
+    result.description = description;
+    result.descriptionIV = Buffer.from(descriptionIV).toString("base64");
+  }
+
+  if (persona.relationship) {
+    const { cipherText: relationship, iv: relationshipIV } =
+      await encryptTextWithKey(persona.relationship, mdk);
+    result.relationship = relationship;
+    result.relationshipIV = Buffer.from(relationshipIV).toString("base64");
+  }
+
+  if (persona.communicationStyle) {
+    const { cipherText: communicationStyle, iv: communicationStyleIV } =
+      await encryptTextWithKey(persona.communicationStyle, mdk);
+    result.communicationStyle = communicationStyle;
+    result.communicationStyleIV =
+      Buffer.from(communicationStyleIV).toString("base64");
+  }
+
+  if (persona.communicationSample) {
+    const { cipherText: communicationSample, iv: communicationSampleIV } =
+      await encryptTextWithKey(persona.communicationSample, mdk);
+    result.communicationSample = communicationSample;
+    result.communicationSampleIV = Buffer.from(communicationSampleIV).toString(
+      "base64",
+    );
+  }
+
+  return result;
 }
 
 // export async function genUserKey() {

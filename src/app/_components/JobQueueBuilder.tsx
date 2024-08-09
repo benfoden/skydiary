@@ -10,6 +10,12 @@ import {
 } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import {
+  encryptPersona,
+  getJWKFromIndexedDB,
+  importKeyFromJWK,
+  MASTERDATAKEY,
+} from "~/utils/cryptoA1";
 
 export type PostsWithCommentsAndTags = Post & {
   comments: Comment[];
@@ -35,6 +41,7 @@ export default function JobQueueBuilder() {
     posts: [],
     personas: [],
   });
+
   const { data: postsWithCommentsAndTags, isSuccess: isSuccessPosts } =
     api.post.getByUserForJobQueue.useQuery();
   const { data: personas, isSuccess: isSuccessPersonas } =
@@ -113,7 +120,44 @@ export default function JobQueueBuilder() {
     });
   }, [tagAndMemorizeQueue, tagAndMemorize]);
 
-  console.log("tagAndMemorizeQueue", tagAndMemorizeQueue);
-  console.log("encryptQueue", encryptQueue);
+  useEffect(() => {
+    const encryptedPersonas: Persona[] = [];
+    const encryptedPosts: Post[] = [];
+    if (encryptQueue.personas.length && user?.sukMdk) {
+      const handleEncryptQueue = async () => {
+        try {
+          const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
+          if (!jwkMdk) {
+            throw new Error("Failed to retrieve key from IndexedDB");
+          }
+          const mdk = await importKeyFromJWK(jwkMdk);
+          if (encryptQueue.personas.length) {
+            for (const persona of encryptQueue.personas) {
+              if (persona.name.length && !persona.nameIV) {
+                const encryptedPersonaDetails = await encryptPersona(
+                  persona,
+                  mdk,
+                );
+                const encryptedPersona = {
+                  ...persona,
+                  ...encryptedPersonaDetails,
+                };
+                encryptedPersonas.push(encryptedPersona);
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error processing encryptQueue:", error);
+        }
+      };
+      handleEncryptQueue().catch(() => {
+        console.error("Error processing encryptQueue:");
+      });
+      console.log("encryptedPersonas", encryptedPersonas);
+    }
+  }, [encryptQueue.personas, user?.sukMdk]);
+
+  // console.log("tagAndMemorizeQueue", tagAndMemorizeQueue);
+  // console.log("encryptQueue", encryptQueue);
   return null;
 }
