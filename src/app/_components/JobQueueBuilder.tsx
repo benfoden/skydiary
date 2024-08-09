@@ -124,6 +124,7 @@ export default function JobQueueBuilder() {
     const encryptedPersonas: Persona[] = [];
     const encryptedPosts: Post[] = [];
     if (encryptQueue.personas.length && user?.sukMdk) {
+      console.log("encryptQueue.personas", encryptQueue.personas.length);
       const handleEncryptQueue = async () => {
         try {
           const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
@@ -131,19 +132,17 @@ export default function JobQueueBuilder() {
             throw new Error("Failed to retrieve key from IndexedDB");
           }
           const mdk = await importKeyFromJWK(jwkMdk);
-          if (encryptQueue.personas.length) {
-            for (const persona of encryptQueue.personas) {
-              if (persona.name.length && !persona.nameIV) {
-                const encryptedPersonaDetails = await encryptPersona(
-                  persona,
-                  mdk,
-                );
-                const encryptedPersona = {
-                  ...persona,
-                  ...encryptedPersonaDetails,
-                };
-                encryptedPersonas.push(encryptedPersona);
-              }
+          for (const persona of encryptQueue.personas) {
+            if (persona.name.length && !persona.nameIV) {
+              const encryptedPersonaDetails = await encryptPersona(
+                persona,
+                mdk,
+              );
+              const encryptedPersona = {
+                ...persona,
+                ...encryptedPersonaDetails,
+              };
+              encryptedPersonas.push(encryptedPersona);
             }
           }
         } catch (error) {
