@@ -163,7 +163,7 @@ export default function ManageJobQueue() {
     };
 
     console.log("decrypted personas", decryptedPersonas);
-  }, [encryptQueue.personas, user?.sukMdk]);
+  }, [encryptQueue.personas, user?.sukMdk, user?.passwordSalt]);
 
   useEffect(() => {
     const encryptedPosts: PostWithCommentsAndTags[] = [];
