@@ -41,6 +41,8 @@ export default function ManageJobQueue() {
     api.persona.getByUserForJobQueue.useQuery();
   const tagAndMemorize = api.post.tagAndMemorize.useMutation();
 
+  const encryptPersonas = api.persona.bulkUpdateEncrypted.useMutation();
+
   useEffect(() => {
     try {
       if (isSuccessPosts && isSuccessPersonas) {
@@ -129,9 +131,12 @@ export default function ManageJobQueue() {
           }
           const mdk = await importKeyFromJWK(jwkMdk);
           await Promise.all(
-            encryptQueue.personas.map(async (persona) =>
-              encryptedPersonas.push(await encryptPersona(persona, mdk)),
-            ),
+            encryptQueue.personas.map(async (persona) => {
+              const encryptedPersona = await encryptPersona(persona, mdk);
+              if (encryptedPersona.nameIV) {
+                encryptedPersonas.push(encryptedPersona);
+              }
+            }),
           );
         } catch (error) {
           console.error("Error processing encryptQueue:", error);
@@ -140,6 +145,9 @@ export default function ManageJobQueue() {
       handleEncryptPersonas()
         .then(() => {
           console.log("encrypted personas", encryptedPersonas);
+          encryptPersonas
+            .mutateAsync(encryptedPersonas)
+            .catch((e) => console.error("Error encrypting personas:", e));
           handleDecryptPersonas(encryptedPersonas).catch((e) =>
             console.error("Error decrypting personas:", e),
           );

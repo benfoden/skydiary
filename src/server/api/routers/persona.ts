@@ -1,3 +1,4 @@
+import { type Persona } from "@prisma/client";
 import { z } from "zod";
 import { env } from "~/env";
 
@@ -102,6 +103,71 @@ export const personaRouter = createTRPCRouter({
           isUser: input.isUser,
           isFavorite: input.isFavorite,
         },
+      });
+    }),
+  bulkUpdateEncrypted: protectedProcedure
+    .input(
+      z.array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          nameIV: z.string(),
+          traits: z.string(),
+          traitsIV: z.string(),
+          gender: z.string().optional(),
+          genderIV: z.string().optional(),
+          description: z.string().optional(),
+          descriptionIV: z.string().optional(),
+          occupation: z.string().optional(),
+          occupationIV: z.string().optional(),
+          relationship: z.string().optional(),
+          relationshipIV: z.string().optional(),
+          communicationStyle: z.string().optional(),
+          communicationStyleIV: z.string().optional(),
+          communicationSample: z.string().optional(),
+          communicationSampleIV: z.string().optional(),
+        }),
+      ),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const updateData = input.map((persona) => {
+        const data: Partial<Persona> = {
+          name: persona.name,
+          nameIV: persona.nameIV,
+          traits: persona.traits,
+          traitsIV: persona.traitsIV,
+        };
+
+        if (persona.gender && persona.genderIV) {
+          data.gender = persona.gender;
+          data.genderIV = persona.genderIV;
+        }
+        if (persona.description && persona.descriptionIV) {
+          data.description = persona.description;
+          data.descriptionIV = persona.descriptionIV;
+        }
+        if (persona.occupation && persona.occupationIV) {
+          data.occupation = persona.occupation;
+          data.occupationIV = persona.occupationIV;
+        }
+        if (persona.relationship && persona.relationshipIV) {
+          data.relationship = persona.relationship;
+          data.relationshipIV = persona.relationshipIV;
+        }
+        if (persona.communicationStyle && persona.communicationStyleIV) {
+          data.communicationStyle = persona.communicationStyle;
+          data.communicationStyleIV = persona.communicationStyleIV;
+        }
+        if (persona.communicationSample && persona.communicationSampleIV) {
+          data.communicationSample = persona.communicationSample;
+          data.communicationSampleIV = persona.communicationSampleIV;
+        }
+
+        return data;
+      });
+
+      await ctx.db.persona.updateMany({
+        data: updateData,
       });
     }),
 
