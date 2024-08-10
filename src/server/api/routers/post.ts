@@ -203,7 +203,7 @@ export const postRouter = createTRPCRouter({
   getByUserForJobQueue: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.db.post.findMany({
       where: { createdBy: { id: ctx.session.user.id } },
-      orderBy: { createdAt: "asc" },
+      orderBy: { createdAt: "desc" },
       include: {
         tags: true,
         comments: true,

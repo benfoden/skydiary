@@ -117,9 +117,11 @@ export default function ManageJobQueue() {
 
   useEffect(() => {
     const encryptedPersonas: Persona[] = [];
+    const decryptedPersonas: Persona[] = [];
+
     if (encryptQueue.personas.length && user?.sukMdk) {
-      console.log("encryptQueue.personas", encryptQueue.personas.length);
-      const handleEncryptQueue = async () => {
+      console.log("encryptQueue.personas", encryptQueue.personas);
+      const handleEncryptPersonas = async () => {
         try {
           const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
           if (!jwkMdk) {
@@ -135,9 +137,16 @@ export default function ManageJobQueue() {
           console.error("Error processing encryptQueue:", error);
         }
       };
-      handleEncryptQueue().catch(() => {
-        console.error("Error processing encryptQueue:");
-      });
+      handleEncryptPersonas()
+        .then(() => {
+          console.log("encrypted personas", encryptedPersonas);
+          handleDecryptPersonas(encryptedPersonas).catch((e) =>
+            console.error("Error decrypting personas:", e),
+          );
+        })
+        .catch(() => {
+          console.error("Error processing encryptQueue:");
+        });
     }
 
     const handleDecryptPersonas = async (personas: Persona[]) => {
@@ -148,20 +157,17 @@ export default function ManageJobQueue() {
       const mdk = await importKeyFromJWK(jwkMdk);
       return Promise.all(
         personas.map(async (persona) => {
-          return await decryptPersona(persona, mdk);
+          decryptedPersonas.push(await decryptPersona(persona, mdk));
         }),
       );
     };
 
-    handleDecryptPersonas(encryptedPersonas)
-      .then((decryptedPersonas) => {
-        console.log("decrypted personas", decryptedPersonas);
-      })
-      .catch((e) => console.error("Error decrypting personas:", e));
+    console.log("decrypted personas", decryptedPersonas);
   }, [encryptQueue.personas, user?.sukMdk]);
 
   useEffect(() => {
     const encryptedPosts: PostWithCommentsAndTags[] = [];
+    const decryptedPosts: PostWithCommentsAndTags[] = [];
     if (encryptQueue.posts.length && user?.sukMdk) {
       const handleEncryptPosts = async () => {
         try {
@@ -179,9 +185,16 @@ export default function ManageJobQueue() {
           console.error("Error processing encryptQueue:", error);
         }
       };
-      handleEncryptPosts().catch(() => {
-        console.error("Error processing encryptQueue:");
-      });
+      handleEncryptPosts()
+        .then(() => {
+          console.log("encrypted posts", encryptedPosts);
+          handleDecryptPosts(encryptedPosts)
+            .then(() => console.log("decrypted posts", decryptedPosts))
+            .catch((e) => console.error("Error decrypting posts:", e));
+        })
+        .catch(() => {
+          console.error("Error processing encryptQueue:");
+        });
     }
 
     const handleDecryptPosts = async (posts: PostWithCommentsAndTags[]) => {
@@ -196,13 +209,6 @@ export default function ManageJobQueue() {
         }),
       );
     };
-
-    handleDecryptPosts(encryptedPosts)
-      .catch((e) => console.error("Error decrypting posts:", e))
-      .then((decryptedPosts) => {
-        console.log("decrypted posts", decryptedPosts);
-      })
-      .catch((e) => console.error("Error decrypting posts:", e));
   }, [encryptQueue.posts, user?.sukMdk]);
   // console.log("tagAndMemorizeQueue", tagAndMemorizeQueue);
   // console.log("encryptQueue", encryptQueue);

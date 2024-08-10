@@ -498,7 +498,6 @@ export async function decryptPersona(
 
   return result as Persona;
 }
-
 export async function encryptPost(
   post: PostWithCommentsAndTags,
   mdk: CryptoKey,
@@ -525,29 +524,29 @@ export async function encryptPost(
   }
 
   if (post.comments) {
-    post.comments.forEach((comment) => {
-      if (comment.content) {
-        encryptionPromises.push(
-          encryptTextWithKey(comment.content, mdk).then(
-            ({ cipherText, iv }) => {
-              comment.content = cipherText;
-              comment.contentIV = Buffer.from(iv).toString("base64");
-            },
-          ),
-        );
-      }
+    result.comments = await Promise.all(
+      post.comments.map(async (comment) => {
+        if (comment.content) {
+          const { cipherText, iv } = await encryptTextWithKey(
+            comment.content,
+            mdk,
+          );
+          comment.content = cipherText;
+          comment.contentIV = Buffer.from(iv).toString("base64");
+        }
 
-      if (comment.coachName) {
-        encryptionPromises.push(
-          encryptTextWithKey(comment.coachName, mdk).then(
-            ({ cipherText, iv }) => {
-              comment.coachName = cipherText;
-              comment.coachNameIV = Buffer.from(iv).toString("base64");
-            },
-          ),
-        );
-      }
-    });
+        if (comment.coachName) {
+          const { cipherText, iv } = await encryptTextWithKey(
+            comment.coachName,
+            mdk,
+          );
+          comment.coachName = cipherText;
+          comment.coachNameIV = Buffer.from(iv).toString("base64");
+        }
+
+        return comment;
+      }),
+    );
   }
 
   await Promise.all(encryptionPromises);

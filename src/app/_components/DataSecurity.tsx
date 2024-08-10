@@ -1,7 +1,6 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import Button from "~/app/_components/Button";
@@ -52,7 +51,6 @@ export default function DataPasswordCard() {
         sukMdk: Buffer.from(sukMdk).toString("base64"),
       });
 
-      revalidatePath("/settings");
       redirect("/settings");
     } catch (error) {
       console.error("Error saving user keys:", error);
@@ -108,7 +106,6 @@ export default function DataPasswordCard() {
       });
       if (unwrapped) {
         setIsLocalMdk(true);
-        revalidatePath("/settings");
         redirect("/settings");
       }
     } catch (error) {
