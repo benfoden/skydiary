@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import Button from "~/app/_components/Button";
@@ -31,30 +32,33 @@ export default function DataPasswordCard() {
   // S: SUK-MDK, SUKs are added to user record, updated in DB
   // S: new device A record with UUID, device A metadata, userID is created in DB
   // CD: user is ready to securely use the service for duration of their session
-
   const handleCreateKeysFromPassword = async (
     password: string,
     password2: string,
   ) => {
-    if (password && password2 && password !== password2) {
+    if (password !== password2) {
+      setMessage("passphrases do not match");
       return;
     }
     if (password.length < 16) {
       setMessage("passphrases must be at least 16 characters");
       return;
     }
-    const { sukMdk, passwordSalt } = await createUserKeys(password);
-
     try {
+      const { sukMdk, passwordSalt } = await createUserKeys(password);
+
       await updateUser.mutateAsync({
         passwordSalt: Buffer.from(passwordSalt).toString("base64"),
         sukMdk: Buffer.from(sukMdk).toString("base64"),
       });
+
+      revalidatePath("/settings");
+      redirect("/settings");
     } catch (error) {
       console.error("Error saving user keys:", error);
-      throw new Error("Failed to save user keys");
+      setMessage("Failed to save user keys");
+      throw new Error("Failed to save user keys.");
     }
-    redirect("/settings");
   };
 
   useEffect(() => {
@@ -96,15 +100,21 @@ export default function DataPasswordCard() {
       setMessage("your passphrase is at least 16 characters long");
       return;
     }
-
-    const unwrapped = await unwrapMDKAndSave({
-      password,
-      passwordSalt,
-      sukMdk,
-    });
-    if (unwrapped) {
-      setIsLocalMdk(true);
-      setMessage("Your data is now accessible.");
+    try {
+      const unwrapped = await unwrapMDKAndSave({
+        password,
+        passwordSalt,
+        sukMdk,
+      });
+      if (unwrapped) {
+        setIsLocalMdk(true);
+        revalidatePath("/settings");
+        redirect("/settings");
+      }
+    } catch (error) {
+      console.error("Error enabling data access:", error);
+      setMessage("Failed to enable data access");
+      throw new Error("Failed to enable data access");
     }
   };
 
@@ -167,6 +177,7 @@ export default function DataPasswordCard() {
             />
             <div className="mt-4 flex w-full flex-col gap-4">
               <Button
+                disabled={password.length < 16}
                 onClick={() =>
                   handleCreateKeysFromPassword(password, password2)
                 }
