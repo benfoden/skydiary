@@ -1,12 +1,13 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import Input from "~/app/_components/Input";
 import { api } from "~/trpc/react";
+
+import { useRouter } from "next/navigation";
 import {
   createUserKeys,
   getLocalMdkForUser,
@@ -22,6 +23,7 @@ export default function DataPasswordCard() {
   const updateUser = api.user.updateUser.useMutation();
   const { data: sessionData } = useSession();
   const user = sessionData?.user;
+  const router = useRouter();
 
   // CD: on /settings page the user enters a data password and is prompted to save it securely in a password manager or otherwise save a copy
   // CD: a random uint8Array(16) salts is generated: SUKs
@@ -50,8 +52,7 @@ export default function DataPasswordCard() {
         passwordSalt: Buffer.from(passwordSalt).toString("base64"),
         sukMdk: Buffer.from(sukMdk).toString("base64"),
       });
-
-      redirect("/settings");
+      router.refresh();
     } catch (error) {
       console.error("Error saving user keys:", error);
       setMessage("Failed to save user keys");
@@ -106,7 +107,7 @@ export default function DataPasswordCard() {
       });
       if (unwrapped) {
         setIsLocalMdk(true);
-        redirect("/settings");
+        router.refresh();
       }
     } catch (error) {
       console.error("Error enabling data access:", error);
@@ -214,7 +215,7 @@ export default function DataPasswordCard() {
                 data access is enabled on this device
               </p>
               <p className="text-sm opacity-60">
-                reseting passphrase coming soon
+                option to reset passphrase coming soon
               </p>
             </div>
           </Card>

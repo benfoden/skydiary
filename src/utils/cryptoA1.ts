@@ -125,21 +125,59 @@ export async function encryptTextWithKey(
   plainText: string,
   key: CryptoKey,
 ): Promise<{ cipherText: string; iv: Uint8Array }> {
-  const encoder = new TextEncoder();
-  const encodedData = encoder.encode(plainText);
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const encryptedData = await crypto.subtle.encrypt(
-    {
-      name: "AES-GCM",
-      iv,
-    },
-    key,
-    encodedData,
-  );
-  return {
-    cipherText: Buffer.from(encryptedData).toString("base64"),
-    iv,
-  };
+  try {
+    const encoder = new TextEncoder();
+    const encodedData = encoder.encode(plainText);
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const encryptedData = await crypto.subtle.encrypt(
+      {
+        name: "AES-GCM",
+        iv,
+      },
+      key,
+      encodedData,
+    );
+    const cipherText = Buffer.from(encryptedData).toString("base64");
+
+    if (cipherText) {
+      return {
+        cipherText,
+        iv,
+      };
+    } else {
+      throw new Error("Failed to encrypt text");
+    }
+  } catch (error) {
+    console.error("Error encrypting text:", error);
+    throw new Error("Failed to encrypt text");
+  }
+}
+
+export async function decryptTextWithIVAndKey({
+  cipherText,
+  iv,
+  key,
+}: {
+  cipherText: string;
+  iv: Uint8Array;
+  key: CryptoKey;
+}): Promise<string> {
+  try {
+    const decoder = new TextDecoder();
+    const encryptedBuffer = Buffer.from(cipherText, "base64");
+    const decryptedData = await crypto.subtle.decrypt(
+      {
+        name: "AES-GCM",
+        iv,
+      },
+      key,
+      encryptedBuffer,
+    );
+    return decoder.decode(decryptedData);
+  } catch (error) {
+    console.error("Error decrypting text:", error);
+    throw new Error("Failed to decrypt text");
+  }
 }
 
 export async function createUserKeys(
@@ -201,28 +239,6 @@ export async function getLocalMdkForUser(sukMdk: string): Promise<CryptoKey> {
   } catch (error) {
     throw new Error(`Error getting local key for user`);
   }
-}
-
-export async function decryptTextWithIVAndKey({
-  cipherText,
-  iv,
-  key,
-}: {
-  cipherText: string;
-  iv: Uint8Array;
-  key: CryptoKey;
-}): Promise<string> {
-  const decoder = new TextDecoder();
-  const encryptedBuffer = Buffer.from(cipherText, "base64");
-  const decryptedData = await crypto.subtle.decrypt(
-    {
-      name: "AES-GCM",
-      iv,
-    },
-    key,
-    encryptedBuffer,
-  );
-  return decoder.decode(decryptedData);
 }
 
 export async function exportKeyToJWK(key: CryptoKey): Promise<JsonWebKey> {
