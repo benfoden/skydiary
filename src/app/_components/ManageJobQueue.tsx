@@ -70,7 +70,7 @@ export default function ManageJobQueue() {
           newTagAndMemorizeQueue.push(post);
         }
 
-        if (user?.sukMdk && (hasContent || hasComments)) {
+        if (user?.sukMdk && user?.passwordSalt && (hasContent || hasComments)) {
           newEncryptQueuePosts.push(post);
         }
       });
@@ -96,7 +96,7 @@ export default function ManageJobQueue() {
 
     processPosts();
     processPersonas();
-  }, [queue, user?.sukMdk]);
+  }, [queue, user?.sukMdk, user?.passwordSalt]);
 
   useEffect(() => {
     const handleTagAndMemorize = async () => {
@@ -119,7 +119,7 @@ export default function ManageJobQueue() {
     const encryptedPersonas: Persona[] = [];
     const decryptedPersonas: Persona[] = [];
 
-    if (encryptQueue.personas.length && user?.sukMdk) {
+    if (user?.sukMdk && user?.passwordSalt && encryptQueue.personas.length) {
       console.log("encryptQueue.personas", encryptQueue.personas);
       const handleEncryptPersonas = async () => {
         try {
@@ -168,7 +168,7 @@ export default function ManageJobQueue() {
   useEffect(() => {
     const encryptedPosts: PostWithCommentsAndTags[] = [];
     const decryptedPosts: PostWithCommentsAndTags[] = [];
-    if (encryptQueue.posts.length && user?.sukMdk) {
+    if (user?.sukMdk && user?.passwordSalt && encryptQueue.posts.length) {
       const handleEncryptPosts = async () => {
         try {
           const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
@@ -209,7 +209,7 @@ export default function ManageJobQueue() {
         }),
       );
     };
-  }, [encryptQueue.posts, user?.sukMdk]);
+  }, [encryptQueue.posts, user?.sukMdk, user?.passwordSalt]);
   // console.log("tagAndMemorizeQueue", tagAndMemorizeQueue);
   // console.log("encryptQueue", encryptQueue);
   return null;
