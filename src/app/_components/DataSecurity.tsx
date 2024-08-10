@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
@@ -53,6 +54,7 @@ export default function DataPasswordCard() {
       console.error("Error saving user keys:", error);
       throw new Error("Failed to save user keys");
     }
+    redirect("/settings");
   };
 
   useEffect(() => {

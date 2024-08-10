@@ -1,4 +1,5 @@
 import { type Persona } from "@prisma/client";
+import localforage from "localforage";
 import { type PostWithCommentsAndTags } from "./types";
 
 export interface EncryptedData {
@@ -234,123 +235,63 @@ export async function importKeyFromJWK(jwk: JsonWebKey): Promise<CryptoKey> {
     "decrypt",
   ]);
 }
+
 export async function saveJWKToIndexedDB(
   jwk: JsonWebKey,
   keyName: string,
 ): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open("cryptoDB", 2); // Incremented version to 2
-
-    request.onupgradeneeded = (event) => {
-      const db = (event.target as IDBOpenDBRequest).result;
-      if (!db.objectStoreNames.contains("keys")) {
-        db.createObjectStore("keys", { keyPath: "name" });
-        console.log("Object store 'keys' created");
-      }
-    };
-
-    request.onsuccess = (event) => {
-      const db = (event.target as IDBOpenDBRequest).result;
-      let transaction;
-      try {
-        transaction = db.transaction("keys", "readwrite");
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "NotFoundError") {
-          console.error("Object store 'keys' not found in IndexedDB");
-          reject(new Error("Object store 'keys' not found in IndexedDB"));
-          return;
-        } else {
-          reject(new Error("Failed to create transaction"));
-          return;
-        }
-      }
-      const store = transaction.objectStore("keys");
-      const putRequest = store.put({ name: keyName, jwk });
-
-      putRequest.onsuccess = () => {
-        resolve();
-      };
-
-      putRequest.onerror = () => {
-        reject(new Error("Failed to save to IndexedDB"));
-      };
-    };
-
-    request.onerror = () => {
-      reject(new Error("Failed to open IndexedDB"));
-    };
-  });
+  try {
+    localforage.config({
+      driver: localforage.INDEXEDDB,
+      name: "skydiary",
+      version: 1.0,
+      storeName: "keys",
+      description: "hello",
+    });
+    await localforage.setItem(keyName, jwk);
+  } catch (error) {
+    console.error("Failed to save to local db:", error);
+    throw new Error("Failed to save to local db");
+  }
 }
 
 export async function getJWKFromIndexedDB(
   keyName: string,
 ): Promise<JsonWebKey | null> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open("cryptoDB", 2);
-
-    request.onsuccess = (event) => {
-      const db = (event.target as IDBOpenDBRequest).result;
-
-      let transaction;
-      try {
-        transaction = db.transaction("keys", "readonly");
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "NotFoundError") {
-          console.error("Object store keys not found in IndexedDB");
-          resolve(null);
-          return;
-        } else {
-          reject(new Error("Failed to create transaction"));
-          return;
-        }
-      }
-
-      const store = transaction.objectStore("keys");
-      const getRequest = store.get(keyName);
-
-      getRequest.onsuccess = () => {
-        const result = getRequest.result as { jwk: JsonWebKey } | null;
-        if (result) {
-          resolve(result.jwk);
-        } else {
-          resolve(null);
-        }
-      };
-
-      getRequest.onerror = () => {
-        reject(new Error("Failed to retrieve from IndexedDB"));
-      };
-    };
-
-    request.onerror = () => {
-      reject(new Error("Failed to open IndexedDB"));
-    };
-  });
+  try {
+    localforage.config({
+      driver: localforage.INDEXEDDB,
+      name: "skydiary",
+      version: 1.0,
+      storeName: "keys",
+      description: "hello",
+    });
+    const jwk = await localforage.getItem<JsonWebKey>(keyName);
+    if (!jwk) {
+      console.error("Key not found in local db");
+      return null;
+    }
+    return jwk;
+  } catch (error) {
+    console.error("Failed to retrieve from local db:", error);
+    throw new Error("Failed to retrieve from local db");
+  }
 }
 
 export async function deleteJWKFromIndexedDB(keyName: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open("cryptoDB", 2);
-
-    request.onsuccess = (event) => {
-      const db = (event.target as IDBOpenDBRequest).result;
-      const transaction = db.transaction("keys", "readwrite");
-      const store = transaction.objectStore("keys");
-      const deleteRequest = store.delete(keyName);
-
-      deleteRequest.onsuccess = () => {
-        resolve();
-      };
-
-      deleteRequest.onerror = () => {
-        reject(new Error("Failed to delete from IndexedDB"));
-      };
-    };
-
-    request.onerror = () => {
-      reject(new Error("Failed to open IndexedDB"));
-    };
-  });
+  try {
+    localforage.config({
+      driver: localforage.INDEXEDDB,
+      name: "skydiary",
+      version: 1.0,
+      storeName: "keys",
+      description: "hello",
+    });
+    await localforage.removeItem(keyName);
+  } catch (error) {
+    console.error("Failed to delete from local db:", error);
+    throw new Error("Failed to delete from local db");
+  }
 }
 
 export async function encryptPersona(
