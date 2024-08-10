@@ -1,3 +1,4 @@
+import { type Persona } from "@prisma/client";
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
@@ -12,6 +13,7 @@ import { type Locale } from "~/config";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { getNewImageUrl } from "~/utils/_uploads";
+import { decryptPersona, getLocalMdkForUser } from "~/utils/cryptoA1";
 import { isFavoritePersonaAvailable } from "~/utils/planDetails";
 import UpgradeBanner from "../../../_components/UpgradeBanner";
 import PersonaSidebar from "../Sidebar";
@@ -34,6 +36,13 @@ export default async function Persona() {
   const t = await getTranslations();
 
   const personas = await api.persona.getAllByUserId();
+  let decryptedPersonas: Persona[] = [];
+  if (personas.some((p) => p.nameIV) && session.user.sukMdk) {
+    const mdk = await getLocalMdkForUser(session.user.sukMdk);
+    decryptedPersonas = await Promise.all(
+      personas.map(async (persona) => await decryptPersona(persona, mdk)),
+    );
+  }
   return (
     <>
       <SessionNav>
@@ -46,11 +55,12 @@ export default async function Persona() {
 
       <main className="flex min-h-screen w-full flex-col items-center justify-start">
         <div className="container flex flex-col items-center justify-start gap-12 px-2 pb-12 ">
-          {!isFavoritePersonaAvailable(session?.user, personas) && (
-            <UpgradeBanner variant="persona" />
-          )}
+          {!isFavoritePersonaAvailable(
+            session?.user,
+            decryptedPersonas ?? personas,
+          ) && <UpgradeBanner variant="persona" />}
           <div className="flex w-full flex-col items-center justify-center gap-4 md:flex-row md:items-start md:px-32">
-            <PersonaSidebar personas={personas} />
+            <PersonaSidebar personas={decryptedPersonas ?? personas} />
             <div
               id="newPersona"
               className="mb-4 flex flex-col items-start justify-center gap-4 md:w-full"

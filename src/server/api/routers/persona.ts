@@ -111,33 +111,35 @@ export const personaRouter = createTRPCRouter({
         z.object({
           id: z.string(),
           name: z.string(),
-          nameIV: z.string(),
+          nameIV: z.string().nullable().optional(),
           traits: z.string(),
-          traitsIV: z.string(),
-          gender: z.string().optional(),
-          genderIV: z.string().optional(),
-          description: z.string().optional(),
-          descriptionIV: z.string().optional(),
-          occupation: z.string().optional(),
-          occupationIV: z.string().optional(),
-          relationship: z.string().optional(),
-          relationshipIV: z.string().optional(),
-          communicationStyle: z.string().optional(),
-          communicationStyleIV: z.string().optional(),
-          communicationSample: z.string().optional(),
-          communicationSampleIV: z.string().optional(),
+          traitsIV: z.string().nullable().optional(),
+          gender: z.string().nullable().optional(),
+          genderIV: z.string().nullable().optional(),
+          description: z.string().nullable().optional(),
+          descriptionIV: z.string().nullable().optional(),
+          occupation: z.string().nullable().optional(),
+          occupationIV: z.string().nullable().optional(),
+          relationship: z.string().nullable().optional(),
+          relationshipIV: z.string().nullable().optional(),
+          communicationStyle: z.string().nullable().optional(),
+          communicationStyleIV: z.string().nullable().optional(),
+          communicationSample: z.string().nullable().optional(),
+          communicationSampleIV: z.string().nullable().optional(),
         }),
       ),
     )
     .mutation(async ({ ctx, input }) => {
-      const updateData = input.map((persona) => {
-        const data: Partial<Persona> = {
-          name: persona.name,
-          nameIV: persona.nameIV,
-          traits: persona.traits,
-          traitsIV: persona.traitsIV,
-        };
-
+      const updatePromises = input.map((persona) => {
+        const data: Partial<Persona> = {};
+        if (persona.nameIV) {
+          data.name = persona.name;
+          data.nameIV = persona.nameIV;
+        }
+        if (persona.traitsIV) {
+          data.traits = persona.traits;
+          data.traitsIV = persona.traitsIV;
+        }
         if (persona.gender && persona.genderIV) {
           data.gender = persona.gender;
           data.genderIV = persona.genderIV;
@@ -163,12 +165,13 @@ export const personaRouter = createTRPCRouter({
           data.communicationSampleIV = persona.communicationSampleIV;
         }
 
-        return data;
+        return ctx.db.persona.update({
+          where: { id: persona.id },
+          data: data,
+        });
       });
 
-      await ctx.db.persona.updateMany({
-        data: updateData,
-      });
+      await Promise.all(updatePromises);
     }),
 
   updateUserPersonaAsCron: publicProcedure
