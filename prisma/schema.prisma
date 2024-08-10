@@ -88,7 +88,6 @@ model User {
   devices                  Device[]       @relation("UserDevices")
   passwordSalt             String?
   sukMdk                   String?
-  jobQueue                 String?
 }
 
 model Device {
