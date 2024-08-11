@@ -5,7 +5,6 @@ import { api } from "~/trpc/react";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import {
-  decryptPost,
   encryptPost,
   getJWKFromIndexedDB,
   importKeyFromJWK,
@@ -46,7 +45,6 @@ export default function ManageEncryption() {
       if (!mdkJwk) {
         throw new Error("Failed to retrieve key from IndexedDB");
       }
-      console.log("setting mdk cookie", mdkJwk);
 
       document.cookie = `mdkJwk=${JSON.stringify(mdkJwk)}; path=/; secure; samesite=strict`;
     };
@@ -184,21 +182,6 @@ export default function ManageEncryption() {
           console.error("Error processing encryptQueue:");
         });
     }
-
-    const handleDecryptPosts = async (posts: PostWithCommentsAndTags[]) => {
-      const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
-      if (!jwkMdk) {
-        throw new Error("Failed to retrieve key from IndexedDB");
-      }
-      const mdk = await importKeyFromJWK(jwkMdk);
-      return Promise.all(
-        posts.map(async (post) => {
-          return await decryptPost(post, mdk);
-        }),
-      );
-    };
   }, [encryptQueue.posts, user?.sukMdk, user?.passwordSalt]);
-  // console.log("tagAndMemorizeQueue", tagAndMemorizeQueue);
-  // console.log("encryptQueue", encryptQueue);
   return null;
 }
