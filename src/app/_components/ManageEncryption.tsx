@@ -153,7 +153,6 @@ export default function ManageEncryption() {
 
   useEffect(() => {
     const encryptedPosts: PostWithCommentsAndTags[] = [];
-    const decryptedPosts: PostWithCommentsAndTags[] = [];
     if (user?.sukMdk && user?.passwordSalt && encryptQueue.posts.length) {
       const handleEncryptPosts = async () => {
         try {
