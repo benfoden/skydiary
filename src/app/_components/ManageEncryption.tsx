@@ -130,11 +130,11 @@ export default function ManageEncryption() {
   useEffect(() => {
     if (user?.sukMdk && user?.passwordSalt && encryptQueue.personas.length) {
       const handleEncryptPersonas = async () => {
-        const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
+        const mdkJwk = await getJWKFromIndexedDB(MASTERDATAKEY);
         try {
           await bulkUpdatePersonas.mutateAsync({
             personas: encryptQueue.personas,
-            jwkMdk,
+            mdkJwk,
           });
         } catch (error) {
           console.error("Error processing encryptQueue:", error);
@@ -157,11 +157,11 @@ export default function ManageEncryption() {
     if (user?.sukMdk && user?.passwordSalt && encryptQueue.posts.length) {
       const handleEncryptPosts = async () => {
         try {
-          const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
-          if (!jwkMdk) {
+          const mdkJwk = await getJWKFromIndexedDB(MASTERDATAKEY);
+          if (!mdkJwk) {
             throw new Error("Failed to retrieve key from IndexedDB");
           }
-          const mdk = await importKeyFromJWK(jwkMdk);
+          const mdk = await importKeyFromJWK(mdkJwk);
           await Promise.all(
             encryptQueue.posts.map(async (post) =>
               encryptedPosts.push(await encryptPost(post, mdk)),

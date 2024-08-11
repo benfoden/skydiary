@@ -110,9 +110,9 @@ export async function unwrapMDKAndSave({
       wrappingKey: secretUserKey,
       wrappedKey: Buffer.from(sukMdk, "base64").buffer,
     });
-    const jwkMdk = await exportKeyToJWK(masterDataKey);
+    const mdkJwk = await exportKeyToJWK(masterDataKey);
 
-    await saveJWKToIndexedDB(jwkMdk, MASTERDATAKEY);
+    await saveJWKToIndexedDB(mdkJwk, MASTERDATAKEY);
   } catch (error) {
     console.error("Error unwrapping key:", error);
     return false;
@@ -232,11 +232,11 @@ export async function getLocalMdkForUser(sukMdk: string): Promise<CryptoKey> {
   }
 
   try {
-    const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
-    if (!jwkMdk) {
+    const mdkJwk = await getJWKFromIndexedDB(MASTERDATAKEY);
+    if (!mdkJwk) {
       throw new Error("Failed to retrieve key from IndexedDB");
     }
-    return await importKeyFromJWK(jwkMdk);
+    return await importKeyFromJWK(mdkJwk);
   } catch (error) {
     throw new Error(`Error getting local key for user`);
   }

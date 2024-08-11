@@ -18,6 +18,7 @@ export const personaRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
+        mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
         name: z.string().max(140),
         traits: z.string().max(140),
         description: z.string().max(1700).optional(),
@@ -58,7 +59,6 @@ export const personaRouter = createTRPCRouter({
           isFavorite: input.isFavorite,
         },
       });
-
       if (persona) {
         await ctx.db.event.create({
           data: {
@@ -72,7 +72,7 @@ export const personaRouter = createTRPCRouter({
   update: protectedProcedure
     .input(
       z.object({
-        mdk: z.string().nullable().optional(),
+        mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
         personaId: z.string(),
         name: z.string().max(140),
         traits: z.string().max(140),
@@ -105,9 +105,8 @@ export const personaRouter = createTRPCRouter({
         isUser: input.isUser,
         isFavorite: input.isFavorite,
       };
-      if (input.mdk) {
-        const jwkMdk = JSON.parse(input.mdk) as JsonWebKey;
-        const key = await importKeyFromJWK(jwkMdk);
+      if (input.mdkJwk) {
+        const key = await importKeyFromJWK(input.mdkJwk);
         data = await encryptPersona(data, key);
       }
       return await ctx.db.persona.update({
@@ -118,7 +117,7 @@ export const personaRouter = createTRPCRouter({
   bulkUpdate: protectedProcedure
     .input(
       z.object({
-        jwkMdk: z.custom<JsonWebKey>().nullable().optional(),
+        mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
         personas: z.array(
           z.object({
             id: z.string(),
@@ -158,8 +157,8 @@ export const personaRouter = createTRPCRouter({
           isUser: persona.isUser,
           isFavorite: persona.isFavorite,
         };
-        if (input.jwkMdk) {
-          const key = await importKeyFromJWK(input.jwkMdk);
+        if (input.mdkJwk) {
+          const key = await importKeyFromJWK(input.mdkJwk);
           data = await encryptPersona(data, key);
         }
         return ctx.db.persona.update({
@@ -279,17 +278,40 @@ export const personaRouter = createTRPCRouter({
   }),
 
   getById: protectedProcedure
-    .input(z.object({ personaId: z.string() }))
-    .query(({ ctx, input }) => {
-      return ctx.db.persona.findUnique({
+    .input(
+      z.object({
+        personaId: z.string(),
+        mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const persona = await ctx.db.persona.findUnique({
         where: { id: input.personaId },
       });
+      if (input?.mdkJwk && persona?.nameIV) {
+        const key = await importKeyFromJWK(input.mdkJwk);
+        return await decryptPersona(persona, key);
+      }
+      return persona;
     }),
-  getUserPersona: protectedProcedure.query(({ ctx }) => {
-    return ctx.db.persona.findFirst({
-      where: { createdBy: { id: ctx.session.user.id }, isUser: true },
-    });
-  }),
+  getUserPersona: protectedProcedure
+    .input(
+      z
+        .object({
+          mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const persona = await ctx.db.persona.findFirst({
+        where: { createdBy: { id: ctx.session.user.id }, isUser: true },
+      });
+      if (input?.mdkJwk && persona?.nameIV) {
+        const key = await importKeyFromJWK(input.mdkJwk);
+        return await decryptPersona(persona, key);
+      }
+      return persona;
+    }),
 
   delete: protectedProcedure
     .input(z.object({ personaId: z.string() }))

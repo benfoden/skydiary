@@ -1,7 +1,6 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import PersonaFormFields from "~/app/(session)/persona/PersonaFormFields";
 import { Card } from "~/app/_components/Card";
@@ -14,6 +13,7 @@ import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { getNewImageUrl } from "~/utils/_uploads";
 import { isFavoritePersonaAvailable } from "~/utils/planDetails";
+import { useMdkJwk } from "~/utils/useMdkJwk";
 import UpgradeBanner from "../../../_components/UpgradeBanner";
 import PersonaSidebar from "../Sidebar";
 
@@ -31,14 +31,9 @@ export async function generateMetadata({
 
 export default async function Persona() {
   const session = await getServerAuthSession();
+  const mdkJwk = useMdkJwk();
   if (!session?.user) return redirect("/auth/signin");
   const t = await getTranslations();
-  const getMdkJwkFromCookies = () => {
-    const mdkCookie = cookies().get("mdkJwk");
-    return mdkCookie ? (JSON.parse(mdkCookie.value) as JsonWebKey) : undefined;
-  };
-
-  const mdkJwk = getMdkJwkFromCookies();
 
   const personas = await api.persona.getAllByUserId({ mdkJwk });
 
