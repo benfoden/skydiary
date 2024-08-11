@@ -73,7 +73,7 @@ export const personaRouter = createTRPCRouter({
   update: protectedProcedure
     .input(
       z.object({
-        mdk: z.instanceof(CryptoKey).optional(),
+        mdk: z.string().nullable().optional(),
         personaId: z.string(),
         name: z.string().max(140),
         traits: z.string().max(140),
@@ -107,7 +107,10 @@ export const personaRouter = createTRPCRouter({
         isFavorite: input.isFavorite,
       };
       if (input.mdk) {
-        data = await encryptPersona(data, input.mdk);
+        const jwkMdk = JSON.parse(input.mdk) as JsonWebKey;
+        const key = await importKeyFromJWK(jwkMdk);
+        console.log("encrypting personas with mdk:", key);
+        data = await encryptPersona(data, key);
       }
       return await ctx.db.persona.update({
         where: { id: input.personaId, createdBy: { id: ctx.session.user.id } },
@@ -346,9 +349,10 @@ export const personaRouter = createTRPCRouter({
         //todo: remove slice
         await Promise.all(
           personas.map(async (persona: Persona) => {
-            if (input) {
-              await decryptPersona(persona, key);
+            if (persona.nameIV) {
+              return await decryptPersona(persona, key);
             }
+            return persona;
           }),
         );
       }

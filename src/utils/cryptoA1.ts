@@ -316,91 +316,29 @@ export async function encryptPersona(
   mdk: CryptoKey,
 ): Promise<Partial<Persona>> {
   const result: Partial<Persona> = { ...persona };
-  const encryptionPromises = [];
 
-  if (persona.name) {
-    encryptionPromises.push(
-      encryptTextWithKey(persona.name, mdk).then(({ cipherText, iv }) => {
-        result.name = cipherText;
-        result.nameIV = Buffer.from(iv).toString("base64");
-      }),
-    );
-  }
+  const fieldsToEncrypt = [
+    "name",
+    "gender",
+    "occupation",
+    "traits",
+    "description",
+    "relationship",
+    "communicationStyle",
+    "communicationSample",
+  ] as const;
 
-  if (persona.gender) {
-    encryptionPromises.push(
-      encryptTextWithKey(persona.gender, mdk).then(({ cipherText, iv }) => {
-        result.gender = cipherText;
-        result.genderIV = Buffer.from(iv).toString("base64");
-      }),
-    );
-  }
-
-  if (persona.occupation) {
-    encryptionPromises.push(
-      encryptTextWithKey(persona.occupation, mdk).then(({ cipherText, iv }) => {
-        result.occupation = cipherText;
-        result.occupationIV = Buffer.from(iv).toString("base64");
-      }),
-    );
-  }
-
-  if (persona.traits) {
-    encryptionPromises.push(
-      encryptTextWithKey(persona.traits, mdk).then(({ cipherText, iv }) => {
-        result.traits = cipherText;
-        result.traitsIV = Buffer.from(iv).toString("base64");
-      }),
-    );
-  }
-
-  if (persona.description) {
-    encryptionPromises.push(
-      encryptTextWithKey(persona.description, mdk).then(
-        ({ cipherText, iv }) => {
-          result.description = cipherText;
-          result.descriptionIV = Buffer.from(iv).toString("base64");
-        },
-      ),
-    );
-  }
-
-  if (persona.relationship) {
-    encryptionPromises.push(
-      encryptTextWithKey(persona.relationship, mdk).then(
-        ({ cipherText, iv }) => {
-          result.relationship = cipherText;
-          result.relationshipIV = Buffer.from(iv).toString("base64");
-        },
-      ),
-    );
-  }
-
-  if (persona.communicationStyle) {
-    encryptionPromises.push(
-      encryptTextWithKey(persona.communicationStyle, mdk).then(
-        ({ cipherText, iv }) => {
-          result.communicationStyle = cipherText;
-          result.communicationStyleIV = Buffer.from(iv).toString("base64");
-        },
-      ),
-    );
-  }
-
-  if (persona.communicationSample) {
-    encryptionPromises.push(
-      encryptTextWithKey(persona.communicationSample, mdk).then(
-        ({ cipherText, iv }) => {
-          result.communicationSample = cipherText;
-          result.communicationSampleIV = Buffer.from(iv).toString("base64");
-        },
-      ),
-    );
-  }
+  const encryptionPromises = fieldsToEncrypt.map(async (field) => {
+    if (persona[field]) {
+      const { cipherText, iv } = await encryptTextWithKey(persona[field], mdk);
+      result[field] = cipherText;
+      result[`${field}IV`] = Buffer.from(iv).toString("base64");
+    }
+  });
 
   await Promise.all(encryptionPromises);
 
-  return result as Persona;
+  return result;
 }
 
 export async function decryptPersona(
@@ -430,7 +368,6 @@ export async function decryptPersona(
         ),
         key: mdk,
       });
-      console.log("decrypted text", decryptedText);
       if (typeof decryptedText === "string") {
         result[field] = decryptedText;
       }

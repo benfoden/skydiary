@@ -2,13 +2,10 @@
 
 import { api } from "~/trpc/react";
 
-import { type Persona } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import {
-  decryptPersona,
   decryptPost,
-  encryptPersona,
   encryptPost,
   getJWKFromIndexedDB,
   importKeyFromJWK,
@@ -132,62 +129,62 @@ export default function ManageEncryption() {
     });
   }, [tagAndMemorizeQueue, tagAndMemorize]);
 
-  useEffect(() => {
-    const encryptedPersonas: Persona[] = [];
-    const decryptedPersonas: Persona[] = [];
+  // useEffect(() => {
+  //   const encryptedPersonas: Persona[] = [];
+  //   const decryptedPersonas: Persona[] = [];
 
-    if (user?.sukMdk && user?.passwordSalt && encryptQueue.personas.length) {
-      const handleEncryptPersonas = async () => {
-        try {
-          const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
-          if (!jwkMdk) {
-            throw new Error("Failed to retrieve key from IndexedDB");
-          }
-          const mdk = await importKeyFromJWK(jwkMdk);
-          await Promise.all(
-            encryptQueue.personas.map(async (persona) => {
-              const encryptedPersona = await encryptPersona(persona, mdk);
-              if (encryptedPersona.nameIV && encryptedPersona.id) {
-                encryptedPersonas.push(encryptedPersona as Persona);
-              }
-            }),
-          );
-        } catch (error) {
-          console.error("Error processing encryptQueue:", error);
-        }
-      };
-      handleEncryptPersonas()
-        .then(() => {
-          encryptPersonas
-            .mutateAsync(encryptedPersonas)
-            .catch((e) => console.error("Error encrypting personas:", e));
-          handleDecryptPersonas(encryptedPersonas).catch((e) =>
-            console.error("Error decrypting personas:", e),
-          );
-        })
-        .catch(() => {
-          console.error("Error processing encryptQueue:");
-        });
-    }
+  //   if (user?.sukMdk && user?.passwordSalt && encryptQueue.personas.length) {
+  //     const handleEncryptPersonas = async () => {
+  //       try {
+  //         const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
+  //         if (!jwkMdk) {
+  //           throw new Error("Failed to retrieve key from IndexedDB");
+  //         }
+  //         const mdk = await importKeyFromJWK(jwkMdk);
+  //         await Promise.all(
+  //           encryptQueue.personas.map(async (persona) => {
+  //             const encryptedPersona = await encryptPersona(persona, mdk);
+  //             if (encryptedPersona.nameIV && encryptedPersona.id) {
+  //               encryptedPersonas.push(encryptedPersona as Persona);
+  //             }
+  //           }),
+  //         );
+  //       } catch (error) {
+  //         console.error("Error processing encryptQueue:", error);
+  //       }
+  //     };
+  //     handleEncryptPersonas()
+  //       .then(() => {
+  //         encryptPersonas
+  //           .mutateAsync(encryptedPersonas)
+  //           .catch((e) => console.error("Error encrypting personas:", e));
+  //         handleDecryptPersonas(encryptedPersonas).catch((e) =>
+  //           console.error("Error decrypting personas:", e),
+  //         );
+  //       })
+  //       .catch(() => {
+  //         console.error("Error processing encryptQueue:");
+  //       });
+  //   }
 
-    const handleDecryptPersonas = async (personas: Persona[]) => {
-      const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
-      if (!jwkMdk) {
-        throw new Error("Failed to retrieve key from IndexedDB");
-      }
-      const mdk = await importKeyFromJWK(jwkMdk);
-      return Promise.all(
-        personas.map(async (persona) => {
-          decryptedPersonas.push(await decryptPersona(persona, mdk));
-        }),
-      );
-    };
-  }, [
-    encryptQueue.personas,
-    user?.sukMdk,
-    user?.passwordSalt,
-    encryptPersonas,
-  ]);
+  //   const handleDecryptPersonas = async (personas: Persona[]) => {
+  //     const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
+  //     if (!jwkMdk) {
+  //       throw new Error("Failed to retrieve key from IndexedDB");
+  //     }
+  //     const mdk = await importKeyFromJWK(jwkMdk);
+  //     return Promise.all(
+  //       personas.map(async (persona) => {
+  //         decryptedPersonas.push(await decryptPersona(persona, mdk));
+  //       }),
+  //     );
+  //   };
+  // }, [
+  //   encryptQueue.personas,
+  //   user?.sukMdk,
+  //   user?.passwordSalt,
+  //   encryptPersonas,
+  // ]);
 
   useEffect(() => {
     const encryptedPosts: PostWithCommentsAndTags[] = [];

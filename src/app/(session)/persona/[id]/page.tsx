@@ -102,6 +102,8 @@ export default async function Persona({ params }: { params: { id: string } }) {
                         ? formData.get("isFavorite") === "on"
                         : persona.isFavorite;
 
+                      const mdkCookie = cookies().get("mdk");
+                      const mdk = mdkCookie ? mdkCookie.value : undefined;
                       if (name && traits) {
                         updated = await api.persona.update({
                           personaId,
@@ -116,6 +118,7 @@ export default async function Persona({ params }: { params: { id: string } }) {
                           communicationStyle,
                           communicationSample,
                           isFavorite,
+                          mdk,
                         });
                       }
                     } catch (error) {
