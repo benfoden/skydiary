@@ -118,20 +118,20 @@ export const personaRouter = createTRPCRouter({
   bulkUpdate: protectedProcedure
     .input(
       z.object({
-        jwkMdk: z.any().optional(),
+        jwkMdk: z.custom<JsonWebKey>().nullable().optional(),
         personas: z.array(
           z.object({
             id: z.string(),
             name: z.string().max(140),
             traits: z.string().max(140),
-            description: z.string().max(1700).optional(),
-            image: z.string().optional(),
-            age: z.number().max(10000).optional(),
-            gender: z.string().max(140).optional(),
-            relationship: z.string().max(140).optional(),
-            occupation: z.string().max(140).optional(),
-            communicationStyle: z.string().max(140).optional(),
-            communicationSample: z.string().max(1000).optional(),
+            description: z.string().max(1700).nullable().optional(),
+            image: z.string().nullable().optional(),
+            age: z.number().max(10000).nullable().optional(),
+            gender: z.string().max(140).nullable().optional(),
+            relationship: z.string().max(140).nullable().optional(),
+            occupation: z.string().max(140).nullable().optional(),
+            communicationStyle: z.string().max(140).nullable().optional(),
+            communicationSample: z.string().max(1000).nullable().optional(),
             isUser: z.boolean().optional(),
             isFavorite: z.boolean().optional(),
           }),
@@ -203,18 +203,19 @@ export const personaRouter = createTRPCRouter({
     }),
 
   getAllByUserId: protectedProcedure
-    .input(z.string().nullable().optional())
+    .input(
+      z
+        .object({ mdkJwk: z.custom<JsonWebKey>().nullable().optional() })
+        .nullable()
+        .optional(),
+    )
     .query(async ({ ctx, input }) => {
       const personas = await ctx.db.persona.findMany({
         where: { createdBy: { id: ctx.session.user.id }, isUser: false },
         orderBy: { createdAt: "asc" },
       });
-      if (input) {
-        const jwkMdk = JSON.parse(input) as JsonWebKey;
-        const key = await importKeyFromJWK(jwkMdk);
-        console.log("decrypting personas with mdk:", key);
-
-        //todo: remove slice
+      if (input?.mdkJwk) {
+        const key = await importKeyFromJWK(input?.mdkJwk);
         await Promise.all(
           personas.map(async (persona: Persona) => {
             if (persona.nameIV) {

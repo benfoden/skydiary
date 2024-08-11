@@ -33,10 +33,14 @@ export default async function Persona() {
   const session = await getServerAuthSession();
   if (!session?.user) return redirect("/auth/signin");
   const t = await getTranslations();
-  const mdkCookie = cookies().get("mdk");
-  const mdk = mdkCookie ? mdkCookie.value : undefined;
+  const getMdkJwkFromCookies = () => {
+    const mdkCookie = cookies().get("mdkJwk");
+    return mdkCookie ? (JSON.parse(mdkCookie.value) as JsonWebKey) : undefined;
+  };
 
-  const personas = await api.persona.getAllByUserId(mdk);
+  const mdkJwk = getMdkJwkFromCookies();
+
+  const personas = await api.persona.getAllByUserId({ mdkJwk });
 
   return (
     <>
