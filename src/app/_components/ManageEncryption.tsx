@@ -4,12 +4,7 @@ import { api } from "~/trpc/react";
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import {
-  encryptPost,
-  getJWKFromIndexedDB,
-  importKeyFromJWK,
-  MASTERDATAKEY,
-} from "~/utils/cryptoA1";
+import { getJWKFromIndexedDB, MASTERDATAKEY } from "~/utils/cryptoA1";
 import {
   type PostsWithCommentsAndTagsAndPersonas,
   type PostWithCommentsAndTags,
@@ -151,36 +146,36 @@ export default function ManageEncryption() {
     bulkUpdatePersonas,
   ]);
 
-  useEffect(() => {
-    const encryptedPosts: PostWithCommentsAndTags[] = [];
-    if (user?.sukMdk && user?.passwordSalt && encryptQueue.posts.length) {
-      const handleEncryptPosts = async () => {
-        try {
-          const mdkJwk = await getJWKFromIndexedDB(MASTERDATAKEY);
-          if (!mdkJwk) {
-            throw new Error("Failed to retrieve key from IndexedDB");
-          }
-          const mdk = await importKeyFromJWK(mdkJwk);
-          await Promise.all(
-            encryptQueue.posts.map(async (post) =>
-              encryptedPosts.push(await encryptPost(post, mdk)),
-            ),
-          );
-        } catch (error) {
-          console.error("Error processing encryptQueue:", error);
-        }
-      };
-      handleEncryptPosts()
-        // .then(() => {
-        //   // console.log("encrypted posts", encryptedPosts);
-        //   handleDecryptPosts(encryptedPosts)
-        //     // .then(() => console.log("decrypted posts", decryptedPosts))
-        //     .catch((e) => console.error("Error decrypting posts:", e));
-        // })
-        .catch(() => {
-          console.error("Error processing encryptQueue:");
-        });
-    }
-  }, [encryptQueue.posts, user?.sukMdk, user?.passwordSalt]);
+  // useEffect(() => {
+  //   const encryptedPosts: PostWithCommentsAndTags[] = [];
+  //   if (user?.sukMdk && user?.passwordSalt && encryptQueue.posts.length) {
+  //     const handleEncryptPosts = async () => {
+  //       try {
+  //         const mdkJwk = await getJWKFromIndexedDB(MASTERDATAKEY);
+  //         if (!mdkJwk) {
+  //           throw new Error("Failed to retrieve key from IndexedDB");
+  //         }
+  //         const mdk = await importKeyFromJWK(mdkJwk);
+  //         await Promise.all(
+  //           encryptQueue.posts.map(async (post) =>
+  //             encryptedPosts.push(await encryptPost(post, mdk)),
+  //           ),
+  //         );
+  //       } catch (error) {
+  //         console.error("Error processing encryptQueue:", error);
+  //       }
+  //     };
+  //     handleEncryptPosts()
+  //       // .then(() => {
+  //       //   // console.log("encrypted posts", encryptedPosts);
+  //       //   handleDecryptPosts(encryptedPosts)
+  //       //     // .then(() => console.log("decrypted posts", decryptedPosts))
+  //       //     .catch((e) => console.error("Error decrypting posts:", e));
+  //       // })
+  //       .catch(() => {
+  //         console.error("Error processing encryptQueue:");
+  //       });
+  //   }
+  // }, [encryptQueue.posts, user?.sukMdk, user?.passwordSalt]);
   return null;
 }

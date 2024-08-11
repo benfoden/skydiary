@@ -28,8 +28,8 @@ export type JobType =
 //todo: should reuse the existing types for Post, Comment, and Persona
 
 export type PostWithCommentsAndTags = Post & {
-  comments: Comment[];
-  tags: Tag[];
+  comments?: Comment[];
+  tags?: Tag[];
 };
 
 export interface PostsWithCommentsAndTagsAndPersonas {

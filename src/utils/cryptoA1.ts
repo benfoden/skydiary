@@ -1,4 +1,4 @@
-import { type Persona } from "@prisma/client";
+import { type Persona, type Post } from "@prisma/client";
 import localforage from "localforage";
 import { type PostWithCommentsAndTags } from "./types";
 
@@ -378,125 +378,50 @@ export async function decryptPersona(
 
   return result;
 }
+
 export async function encryptPost(
-  post: PostWithCommentsAndTags,
+  post: Post,
   mdk: CryptoKey,
-): Promise<PostWithCommentsAndTags> {
-  const result: Partial<PostWithCommentsAndTags> = { ...post };
-  const encryptionPromises = [];
+): Promise<Partial<Post>> {
+  const result: Partial<Post> = post;
 
-  if (post.content) {
-    encryptionPromises.push(
-      encryptTextWithKey(post.content, mdk).then(({ cipherText, iv }) => {
-        result.content = cipherText;
-        result.contentIV = Buffer.from(iv).toString("base64");
-      }),
-    );
-  }
+  const fieldsToEncrypt = ["content", "summary"] as const;
 
-  if (post.summary) {
-    encryptionPromises.push(
-      encryptTextWithKey(post.summary, mdk).then(({ cipherText, iv }) => {
-        result.summary = cipherText;
-        result.summaryIV = Buffer.from(iv).toString("base64");
-      }),
-    );
-  }
-
-  if (post.comments) {
-    result.comments = await Promise.all(
-      post.comments.map(async (comment) => {
-        if (comment.content) {
-          const { cipherText, iv } = await encryptTextWithKey(
-            comment.content,
-            mdk,
-          );
-          comment.content = cipherText;
-          comment.contentIV = Buffer.from(iv).toString("base64");
-        }
-
-        if (comment.coachName) {
-          const { cipherText, iv } = await encryptTextWithKey(
-            comment.coachName,
-            mdk,
-          );
-          comment.coachName = cipherText;
-          comment.coachNameIV = Buffer.from(iv).toString("base64");
-        }
-
-        return comment;
-      }),
-    );
-  }
+  const encryptionPromises = fieldsToEncrypt.map(async (field) => {
+    if (post[field]) {
+      const { cipherText, iv } = await encryptTextWithKey(post[field], mdk);
+      result[field] = cipherText;
+      result[`${field}IV`] = Buffer.from(iv).toString("base64");
+    }
+  });
 
   await Promise.all(encryptionPromises);
 
   return result as PostWithCommentsAndTags;
 }
 
-export async function decryptPost(
-  post: PostWithCommentsAndTags,
-  mdk: CryptoKey,
-): Promise<PostWithCommentsAndTags> {
-  const result: Partial<PostWithCommentsAndTags> = { ...post };
+export async function decryptPost(post: Post, mdk: CryptoKey): Promise<Post> {
+  const result: Post = post;
 
-  const decryptionPromises: Promise<void>[] = [];
+  const fieldsToDecrypt = ["content", "summary"] as const;
 
-  if (post.content && post.contentIV) {
-    decryptionPromises.push(
-      decryptTextWithIVAndKey({
-        cipherText: post.content,
-        iv: Uint8Array.from(Buffer.from(post.contentIV, "base64")),
+  const decryptionPromises = fieldsToDecrypt.map(async (field) => {
+    const ivField = `${field}IV` as keyof Post;
+    if (post[field as keyof Post] && post[ivField]) {
+      const decryptedText = await decryptTextWithIVAndKey({
+        cipherText: post[field as keyof Post] as string,
+        iv: Uint8Array.from(Buffer.from(post[ivField] as string, "base64")),
         key: mdk,
-      }).then((decryptedText) => {
-        result.content = decryptedText;
-      }),
-    );
-  }
-
-  if (post.summary && post.summaryIV) {
-    decryptionPromises.push(
-      decryptTextWithIVAndKey({
-        cipherText: post.summary,
-        iv: Uint8Array.from(Buffer.from(post.summaryIV, "base64")),
-        key: mdk,
-      }).then((decryptedText) => {
-        result.summary = decryptedText;
-      }),
-    );
-  }
-
-  if (post.comments) {
-    post.comments.forEach((comment) => {
-      if (comment.content && comment.contentIV) {
-        decryptionPromises.push(
-          decryptTextWithIVAndKey({
-            cipherText: comment.content,
-            iv: Uint8Array.from(Buffer.from(comment.contentIV, "base64")),
-            key: mdk,
-          }).then((decryptedText) => {
-            comment.content = decryptedText;
-          }),
-        );
+      });
+      if (typeof decryptedText === "string") {
+        result[field] = decryptedText;
       }
-
-      if (comment.coachName && comment.coachNameIV) {
-        decryptionPromises.push(
-          decryptTextWithIVAndKey({
-            cipherText: comment.coachName,
-            iv: Uint8Array.from(Buffer.from(comment.coachNameIV, "base64")),
-            key: mdk,
-          }).then((decryptedText) => {
-            comment.coachName = decryptedText;
-          }),
-        );
-      }
-    });
-  }
+    }
+  });
 
   await Promise.all(decryptionPromises);
 
-  return result as PostWithCommentsAndTags;
+  return result;
 }
 
 // export async function genUserKey() {
