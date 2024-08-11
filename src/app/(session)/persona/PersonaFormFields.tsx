@@ -2,7 +2,6 @@ import { type Persona, type User } from "@prisma/client";
 import { PersonIcon, StarFilledIcon } from "@radix-ui/react-icons";
 import { getTranslations } from "next-intl/server";
 import { Avatar } from "~/app/_components/Avatar";
-import DecryptedTextSpan from "~/app/_components/DecryptText";
 import { isFavoritePersonaAvailable } from "~/utils/planDetails";
 import Input from "../../_components/Input";
 
@@ -28,16 +27,7 @@ export default async function PersonaFormFields({
             <PersonIcon className="h-24 w-24" />
           )}
           <div className="flex flex-row items-center gap-2">
-            <p className="text-lg">
-              {persona?.nameIV ? (
-                <DecryptedTextSpan
-                  cipherText={persona.name}
-                  iv={persona.nameIV}
-                />
-              ) : (
-                persona?.name
-              )}
-            </p>
+            <p className="text-lg">{persona?.name}</p>
             {persona?.isFavorite && <StarFilledIcon className="h-5 w-5" />}
           </div>
         </div>
@@ -59,7 +49,6 @@ export default async function PersonaFormFields({
         name="name"
         placeholder={t("personas.namePlaceholder")}
         initialValue={persona?.name ?? ""}
-        iv={persona?.nameIV}
         maxLength={140}
         required
       />
@@ -76,7 +65,6 @@ export default async function PersonaFormFields({
         id="traits"
         name="traits"
         initialValue={persona?.traits ?? ""}
-        iv={persona?.traitsIV}
         placeholder={t("personas.traitsPlaceholder")}
         maxLength={140}
         required
@@ -87,7 +75,6 @@ export default async function PersonaFormFields({
         id="description"
         name="description"
         initialValue={persona?.description ?? ""}
-        iv={persona?.descriptionIV}
         placeholder={t("personas.descriptionPlaceholder")}
         maxLength={700}
       />
@@ -107,7 +94,6 @@ export default async function PersonaFormFields({
         name="gender"
         placeholder={t("personas.identitiesPlaceholder")}
         initialValue={persona?.gender ?? ""}
-        iv={persona?.genderIV}
         maxLength={140}
       />
       <Input
@@ -115,7 +101,6 @@ export default async function PersonaFormFields({
         id="relationship"
         name="relationship"
         initialValue={persona?.relationship ?? ""}
-        iv={persona?.relationshipIV}
         placeholder={t("personas.relationshipPlaceholder")}
         maxLength={140}
       />
@@ -124,7 +109,6 @@ export default async function PersonaFormFields({
         id="occupation"
         name="occupation"
         initialValue={persona?.occupation ?? ""}
-        iv={persona?.occupationIV}
         placeholder={t("personas.occupationPlaceholder")}
         maxLength={140}
       />
@@ -134,7 +118,6 @@ export default async function PersonaFormFields({
         id="communicationStyle"
         name="communicationStyle"
         initialValue={persona?.communicationStyle ?? ""}
-        iv={persona?.communicationStyleIV}
         placeholder={t("personas.communicationStylePlaceholder")}
         maxLength={140}
       />
@@ -144,7 +127,6 @@ export default async function PersonaFormFields({
         id="communicationSample"
         name="communicationSample"
         initialValue={persona?.communicationSample ?? ""}
-        iv={persona?.communicationSampleIV}
         placeholder={t("personas.communicationSamplePlaceholder")}
         maxLength={1000}
       />

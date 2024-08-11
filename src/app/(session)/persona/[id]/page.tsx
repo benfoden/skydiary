@@ -1,6 +1,7 @@
 import { PersonIcon, StarFilledIcon } from "@radix-ui/react-icons";
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import PersonaFormFields from "~/app/(session)/persona/PersonaFormFields";
 import { Avatar } from "~/app/_components/Avatar";
@@ -34,7 +35,10 @@ export default async function Persona({ params }: { params: { id: string } }) {
   const session = await getServerAuthSession();
   if (!session?.user) return redirect("/auth/signin");
   const personaId = params.id;
-  const personas = await api.persona.getAllByUserId();
+  const mdkCookie = cookies().get("mdk");
+  const mdk = mdkCookie ? mdkCookie.value : undefined;
+
+  const personas = await api.persona.getAllByUserId(mdk);
   const persona = personas?.find((persona) => persona.id === personaId);
   if (!persona) return null;
   const t = await getTranslations();
