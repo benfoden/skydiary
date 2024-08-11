@@ -10,7 +10,6 @@ import {
 import {
   decryptPersona,
   encryptPersona,
-  encryptTextWithKey,
   importKeyFromJWK,
 } from "~/utils/cryptoA1";
 import { cleanStringForInput } from "~/utils/text";
@@ -109,7 +108,6 @@ export const personaRouter = createTRPCRouter({
       if (input.mdk) {
         const jwkMdk = JSON.parse(input.mdk) as JsonWebKey;
         const key = await importKeyFromJWK(jwkMdk);
-        console.log("encrypting personas with mdk:", key);
         data = await encryptPersona(data, key);
       }
       return await ctx.db.persona.update({
@@ -117,191 +115,61 @@ export const personaRouter = createTRPCRouter({
         data,
       });
     }),
-
-  updateEncrypted: protectedProcedure
+  bulkUpdate: protectedProcedure
     .input(
       z.object({
-        mdk: z.instanceof(CryptoKey),
-        personaId: z.string(),
-        image: z.string().optional(),
-        age: z.number().optional(),
-        name: z.string(),
-        traits: z.string(),
-        gender: z.string().nullable().optional(),
-        description: z.string().nullable().optional(),
-        occupation: z.string().nullable().optional(),
-        relationship: z.string().nullable().optional(),
-        communicationStyle: z.string().nullable().optional(),
-        communicationSample: z.string().nullable().optional(),
-        isFavorite: z.boolean().optional(),
+        jwkMdk: z.any().optional(),
+        personas: z.array(
+          z.object({
+            id: z.string(),
+            name: z.string().max(140),
+            traits: z.string().max(140),
+            description: z.string().max(1700).optional(),
+            image: z.string().optional(),
+            age: z.number().max(10000).optional(),
+            gender: z.string().max(140).optional(),
+            relationship: z.string().max(140).optional(),
+            occupation: z.string().max(140).optional(),
+            communicationStyle: z.string().max(140).optional(),
+            communicationSample: z.string().max(1000).optional(),
+            isUser: z.boolean().optional(),
+            isFavorite: z.boolean().optional(),
+          }),
+        ),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const data: Partial<Persona> = {};
-
-      const encryptIfNotNullish = async (
-        value: string | null | undefined,
-        key: CryptoKey,
-      ) => {
-        if (value != null) {
-          const { cipherText, iv } = await encryptTextWithKey(value, key);
-          return { cipherText, iv: Buffer.from(iv).toString("base64") };
+      const updatePromises = input.personas.map(async (persona) => {
+        let data: Partial<Persona> = {
+          name: cleanStringForInput(persona.name),
+          description: cleanStringForInput(persona.description ?? ""),
+          image: persona.image,
+          age: persona.age,
+          gender: cleanStringForInput(persona.gender ?? ""),
+          relationship: cleanStringForInput(persona.relationship ?? ""),
+          occupation: cleanStringForInput(persona.occupation ?? ""),
+          traits: cleanStringForInput(persona.traits ?? ""),
+          communicationStyle: cleanStringForInput(
+            persona.communicationStyle ?? "",
+          ),
+          communicationSample: cleanStringForInput(
+            persona.communicationSample ?? "",
+          ),
+          isUser: persona.isUser,
+          isFavorite: persona.isFavorite,
+        };
+        if (input.jwkMdk) {
+          const key = await importKeyFromJWK(input.jwkMdk);
+          data = await encryptPersona(data, key);
         }
-        return null;
-      };
-
-      const encryptedName = await encryptIfNotNullish(input.name, input.mdk);
-      if (encryptedName) {
-        data.name = encryptedName.cipherText;
-        data.nameIV = encryptedName.iv;
-      }
-
-      const encryptedTraits = await encryptIfNotNullish(
-        input.traits,
-        input.mdk,
-      );
-      if (encryptedTraits) {
-        data.traits = encryptedTraits.cipherText;
-        data.traitsIV = encryptedTraits.iv;
-      }
-
-      const encryptedGender = await encryptIfNotNullish(
-        input.gender,
-        input.mdk,
-      );
-      if (encryptedGender) {
-        data.gender = encryptedGender.cipherText;
-        data.genderIV = encryptedGender.iv;
-      }
-
-      const encryptedDescription = await encryptIfNotNullish(
-        input.description,
-        input.mdk,
-      );
-      if (encryptedDescription) {
-        data.description = encryptedDescription.cipherText;
-        data.descriptionIV = encryptedDescription.iv;
-      }
-
-      const encryptedOccupation = await encryptIfNotNullish(
-        input.occupation,
-        input.mdk,
-      );
-      if (encryptedOccupation) {
-        data.occupation = encryptedOccupation.cipherText;
-        data.occupationIV = encryptedOccupation.iv;
-      }
-
-      const encryptedRelationship = await encryptIfNotNullish(
-        input.relationship,
-        input.mdk,
-      );
-      if (encryptedRelationship) {
-        data.relationship = encryptedRelationship.cipherText;
-        data.relationshipIV = encryptedRelationship.iv;
-      }
-
-      const encryptedCommunicationStyle = await encryptIfNotNullish(
-        input.communicationStyle,
-        input.mdk,
-      );
-      if (encryptedCommunicationStyle) {
-        data.communicationStyle = encryptedCommunicationStyle.cipherText;
-        data.communicationStyleIV = encryptedCommunicationStyle.iv;
-      }
-
-      const encryptedCommunicationSample = await encryptIfNotNullish(
-        input.communicationSample,
-        input.mdk,
-      );
-      if (encryptedCommunicationSample) {
-        data.communicationSample = encryptedCommunicationSample.cipherText;
-        data.communicationSampleIV = encryptedCommunicationSample.iv;
-      }
-
-      if (input.image != null) {
-        data.image = input.image;
-      }
-
-      if (input.age != null) {
-        data.age = input.age;
-      }
-
-      if (input.isFavorite != null) {
-        data.isFavorite = input.isFavorite;
-      }
-
-      return ctx.db.persona.update({
-        where: { id: input.personaId },
-        data: data,
-      });
-    }),
-  bulkUpdateEncrypted: protectedProcedure
-    .input(
-      z.array(
-        z.object({
-          id: z.string(),
-          name: z.string(),
-          nameIV: z.string().nullable().optional(),
-          traits: z.string(),
-          traitsIV: z.string().nullable().optional(),
-          gender: z.string().nullable().optional(),
-          genderIV: z.string().nullable().optional(),
-          description: z.string().nullable().optional(),
-          descriptionIV: z.string().nullable().optional(),
-          occupation: z.string().nullable().optional(),
-          occupationIV: z.string().nullable().optional(),
-          relationship: z.string().nullable().optional(),
-          relationshipIV: z.string().nullable().optional(),
-          communicationStyle: z.string().nullable().optional(),
-          communicationStyleIV: z.string().nullable().optional(),
-          communicationSample: z.string().nullable().optional(),
-          communicationSampleIV: z.string().nullable().optional(),
-        }),
-      ),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const updatePromises = input.map((persona) => {
-        const data: Partial<Persona> = {};
-        if (persona.nameIV) {
-          data.name = persona.name;
-          data.nameIV = persona.nameIV;
-        }
-        if (persona.traitsIV) {
-          data.traits = persona.traits;
-          data.traitsIV = persona.traitsIV;
-        }
-        if (persona.gender && persona.genderIV) {
-          data.gender = persona.gender;
-          data.genderIV = persona.genderIV;
-        }
-        if (persona.description && persona.descriptionIV) {
-          data.description = persona.description;
-          data.descriptionIV = persona.descriptionIV;
-        }
-        if (persona.occupation && persona.occupationIV) {
-          data.occupation = persona.occupation;
-          data.occupationIV = persona.occupationIV;
-        }
-        if (persona.relationship && persona.relationshipIV) {
-          data.relationship = persona.relationship;
-          data.relationshipIV = persona.relationshipIV;
-        }
-        if (persona.communicationStyle && persona.communicationStyleIV) {
-          data.communicationStyle = persona.communicationStyle;
-          data.communicationStyleIV = persona.communicationStyleIV;
-        }
-        if (persona.communicationSample && persona.communicationSampleIV) {
-          data.communicationSample = persona.communicationSample;
-          data.communicationSampleIV = persona.communicationSampleIV;
-        }
-
         return ctx.db.persona.update({
-          where: { id: persona.id },
-          data: data,
+          where: {
+            id: persona.id,
+            createdBy: { id: ctx.session.user.id },
+          },
+          data,
         });
       });
-
       await Promise.all(updatePromises);
     }),
 

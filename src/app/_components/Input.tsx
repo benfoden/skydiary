@@ -1,22 +1,7 @@
 "use client";
 import { EyeClosedIcon, EyeOpenIcon } from "@radix-ui/react-icons";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
-import { encryptTextWithKey, getLocalMdkForUser } from "~/utils/cryptoA1";
-
-async function encryptText(
-  plainText: string,
-  sukMdk: string,
-): Promise<{ cipherText: string; iv: string }> {
-  const mdk = await getLocalMdkForUser(sukMdk);
-  const encryptedText = await encryptTextWithKey(plainText, mdk);
-
-  return {
-    cipherText: encryptedText.cipherText,
-    iv: Buffer.from(encryptedText.iv).toString("base64"),
-  };
-}
 
 export default function Input({
   type,
@@ -26,7 +11,6 @@ export default function Input({
   radioOptions,
   showHidePassword,
   initialValue,
-  iv,
   ...props
 }: {
   type?:
@@ -49,17 +33,14 @@ export default function Input({
   }[];
   showHidePassword?: boolean;
   initialValue?: string | number | boolean | undefined;
-  iv?: string | null | undefined;
 } & React.InputHTMLAttributes<
   | HTMLInputElement
   | HTMLTextAreaElement
   | (HTMLInputElement & { type: "checkbox" })
 >) {
   const t = useTranslations();
-  const { data: sessionData } = useSession();
-  const user = sessionData?.user;
   if (!type) type = "text";
-  const { id, value, onChange, name } = props;
+  const { id, value, onChange } = props;
 
   const ref = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
   const [inputValue, setInputValue] = useState<string | undefined>(
@@ -72,13 +53,6 @@ export default function Input({
     { id: string; label: string; value: string | number; checked?: boolean }[]
   >(radioOptions ?? []);
   const [showPassword, setShowPassword] = useState(false);
-  const [encryptedData, setEncryptedData] = useState<{
-    cipherText: string;
-    iv: string;
-  }>({
-    cipherText: "",
-    iv: "",
-  });
 
   const handleFocus = () => {
     setIsActive(true);
@@ -191,18 +165,6 @@ export default function Input({
                 handleChange(e);
               }}
             />
-            <input
-              type="hidden"
-              id={`${id}Encrypted`}
-              name={`${name}Encrypted`}
-              value={encryptedData.cipherText}
-            />
-            <input
-              type="hidden"
-              name={`${name}IV`}
-              id={`${id}IV`}
-              value={Buffer.from(encryptedData.iv).toString("base64")}
-            />
           </>
         )}
       {type === "password" && (
@@ -292,18 +254,6 @@ export default function Input({
             onChange={handleChange}
             rows={7}
             value={inputValue}
-          />
-          <input
-            type="hidden"
-            id={`${id}Encrypted`}
-            name={`${name}Encrypted`}
-            value={encryptedData.cipherText}
-          />
-          <input
-            type="hidden"
-            name={`${name}IV`}
-            id={`${id}IV`}
-            value={Buffer.from(encryptedData.iv).toString("base64")}
           />
         </>
       )}
