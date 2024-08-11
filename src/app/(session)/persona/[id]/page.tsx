@@ -1,6 +1,5 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import PersonaFormFields from "~/app/(session)/persona/PersonaFormFields";
 import { Card } from "~/app/_components/Card";
@@ -103,8 +102,6 @@ export default async function Persona({ params }: { params: { id: string } }) {
                         ? formData.get("isFavorite") === "on"
                         : persona.isFavorite;
 
-                      const mdkCookie = cookies().get("mdk");
-                      const mdk = mdkCookie ? mdkCookie.value : undefined;
                       if (name && traits) {
                         updated = await api.persona.update({
                           personaId,
@@ -119,7 +116,7 @@ export default async function Persona({ params }: { params: { id: string } }) {
                           communicationStyle,
                           communicationSample,
                           isFavorite,
-                          mdk,
+                          mdkJwk,
                         });
                       }
                     } catch (error) {
