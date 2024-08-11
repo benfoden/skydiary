@@ -38,26 +38,33 @@ export const personaRouter = createTRPCRouter({
         where: { id: ctx.session.user.id },
         data: { personasUsed: { increment: 1 } },
       });
+
+      let data = {
+        name: cleanStringForInput(input.name),
+        description: cleanStringForInput(input.description ?? ""),
+        image: input.image,
+        age: input.age,
+        gender: cleanStringForInput(input.gender ?? ""),
+        relationship: cleanStringForInput(input.relationship ?? ""),
+        occupation: cleanStringForInput(input.occupation ?? ""),
+        traits: cleanStringForInput(input.traits ?? ""),
+        communicationStyle: cleanStringForInput(input.communicationStyle ?? ""),
+        communicationSample: cleanStringForInput(
+          input.communicationSample ?? "",
+        ),
+        isUser: input.isUser,
+        createdBy: { connect: { id: ctx.session.user.id } },
+        isFavorite: input.isFavorite,
+      };
+      if (input.mdkJwk) {
+        const key = await importKeyFromJWK(input.mdkJwk);
+        data = (await encryptPersona(
+          data as Partial<Persona>,
+          key,
+        )) as typeof data;
+      }
       const persona = await ctx.db.persona.create({
-        data: {
-          name: cleanStringForInput(input.name),
-          description: cleanStringForInput(input.description ?? ""),
-          image: input.image,
-          age: input.age,
-          gender: cleanStringForInput(input.gender ?? ""),
-          relationship: cleanStringForInput(input.relationship ?? ""),
-          occupation: cleanStringForInput(input.occupation ?? ""),
-          traits: cleanStringForInput(input.traits ?? ""),
-          communicationStyle: cleanStringForInput(
-            input.communicationStyle ?? "",
-          ),
-          communicationSample: cleanStringForInput(
-            input.communicationSample ?? "",
-          ),
-          isUser: input.isUser,
-          createdBy: { connect: { id: ctx.session.user.id } },
-          isFavorite: input.isFavorite,
-        },
+        data,
       });
       if (persona) {
         await ctx.db.event.create({

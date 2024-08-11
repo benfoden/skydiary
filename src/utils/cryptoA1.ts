@@ -315,7 +315,7 @@ export async function encryptPersona(
   persona: Partial<Persona>,
   mdk: CryptoKey,
 ): Promise<Partial<Persona>> {
-  const result: Partial<Persona> = { ...persona };
+  const result: Partial<Persona> = persona;
 
   const fieldsToEncrypt = [
     "name",
