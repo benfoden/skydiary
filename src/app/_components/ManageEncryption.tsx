@@ -49,9 +49,9 @@ export default function ManageEncryption() {
       if (!jwkMdk) {
         throw new Error("Failed to retrieve key from IndexedDB");
       }
-      const mdk = await importKeyFromJWK(jwkMdk);
+      console.log("setting mdk cookie", jwkMdk);
 
-      document.cookie = `mdk=${JSON.stringify(mdk)}; path=/; secure; samesite=strict`;
+      document.cookie = `mdk=${JSON.stringify(jwkMdk)}; path=/; secure; samesite=strict`;
     };
     handleMakeMdkCookie().catch((error) => {
       console.error("Error handling makeMdkCookie:", error);
@@ -182,8 +182,6 @@ export default function ManageEncryption() {
         }),
       );
     };
-
-    console.log("decrypted personas", decryptedPersonas);
   }, [
     encryptQueue.personas,
     user?.sukMdk,
@@ -212,12 +210,12 @@ export default function ManageEncryption() {
         }
       };
       handleEncryptPosts()
-        .then(() => {
-          console.log("encrypted posts", encryptedPosts);
-          handleDecryptPosts(encryptedPosts)
-            .then(() => console.log("decrypted posts", decryptedPosts))
-            .catch((e) => console.error("Error decrypting posts:", e));
-        })
+        // .then(() => {
+        //   // console.log("encrypted posts", encryptedPosts);
+        //   handleDecryptPosts(encryptedPosts)
+        //     // .then(() => console.log("decrypted posts", decryptedPosts))
+        //     .catch((e) => console.error("Error decrypting posts:", e));
+        // })
         .catch(() => {
           console.error("Error processing encryptQueue:");
         });

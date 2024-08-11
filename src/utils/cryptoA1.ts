@@ -407,113 +407,39 @@ export async function decryptPersona(
   persona: Persona,
   mdk: CryptoKey,
 ): Promise<Persona> {
-  const result: Partial<Persona> = { ...persona };
+  const result: Persona = persona;
 
-  const decryptionPromises: Promise<void>[] = [];
+  const fieldsToDecrypt = [
+    "name",
+    "gender",
+    "occupation",
+    "traits",
+    "description",
+    "relationship",
+    "communicationStyle",
+    "communicationSample",
+  ] as const;
 
-  if (persona.name && persona.nameIV) {
-    decryptionPromises.push(
-      decryptTextWithIVAndKey({
-        cipherText: persona.name,
-        iv: Uint8Array.from(Buffer.from(persona.nameIV, "base64")),
-        key: mdk,
-      }).then((decryptedText) => {
-        result.name = decryptedText;
-      }),
-    );
-  }
-
-  if (persona.gender && persona.genderIV) {
-    decryptionPromises.push(
-      decryptTextWithIVAndKey({
-        cipherText: persona.gender,
-        iv: Uint8Array.from(Buffer.from(persona.genderIV, "base64")),
-        key: mdk,
-      }).then((decryptedText) => {
-        result.gender = decryptedText;
-      }),
-    );
-  }
-
-  if (persona.occupation && persona.occupationIV) {
-    decryptionPromises.push(
-      decryptTextWithIVAndKey({
-        cipherText: persona.occupation,
-        iv: Uint8Array.from(Buffer.from(persona.occupationIV, "base64")),
-        key: mdk,
-      }).then((decryptedText) => {
-        result.occupation = decryptedText;
-      }),
-    );
-  }
-
-  if (persona.traits && persona.traitsIV) {
-    decryptionPromises.push(
-      decryptTextWithIVAndKey({
-        cipherText: persona.traits,
-        iv: Uint8Array.from(Buffer.from(persona.traitsIV, "base64")),
-        key: mdk,
-      }).then((decryptedText) => {
-        result.traits = decryptedText;
-      }),
-    );
-  }
-
-  if (persona.description && persona.descriptionIV) {
-    decryptionPromises.push(
-      decryptTextWithIVAndKey({
-        cipherText: persona.description,
-        iv: Uint8Array.from(Buffer.from(persona.descriptionIV, "base64")),
-        key: mdk,
-      }).then((decryptedText) => {
-        result.description = decryptedText;
-      }),
-    );
-  }
-
-  if (persona.relationship && persona.relationshipIV) {
-    decryptionPromises.push(
-      decryptTextWithIVAndKey({
-        cipherText: persona.relationship,
-        iv: Uint8Array.from(Buffer.from(persona.relationshipIV, "base64")),
-        key: mdk,
-      }).then((decryptedText) => {
-        result.relationship = decryptedText;
-      }),
-    );
-  }
-
-  if (persona.communicationStyle && persona.communicationStyleIV) {
-    decryptionPromises.push(
-      decryptTextWithIVAndKey({
-        cipherText: persona.communicationStyle,
+  const decryptionPromises = fieldsToDecrypt.map(async (field) => {
+    const ivField = `${field}IV`;
+    if (persona[field as keyof Persona] && persona[ivField as keyof Persona]) {
+      const decryptedText = await decryptTextWithIVAndKey({
+        cipherText: persona[field as keyof Persona] as string,
         iv: Uint8Array.from(
-          Buffer.from(persona.communicationStyleIV, "base64"),
+          Buffer.from(persona[ivField as keyof Persona] as string, "base64"),
         ),
         key: mdk,
-      }).then((decryptedText) => {
-        result.communicationStyle = decryptedText;
-      }),
-    );
-  }
-
-  if (persona.communicationSample && persona.communicationSampleIV) {
-    decryptionPromises.push(
-      decryptTextWithIVAndKey({
-        cipherText: persona.communicationSample,
-        iv: Uint8Array.from(
-          Buffer.from(persona.communicationSampleIV, "base64"),
-        ),
-        key: mdk,
-      }).then((decryptedText) => {
-        result.communicationSample = decryptedText;
-      }),
-    );
-  }
+      });
+      console.log("decrypted text", decryptedText);
+      if (typeof decryptedText === "string") {
+        result[field] = decryptedText;
+      }
+    }
+  });
 
   await Promise.all(decryptionPromises);
 
-  return result as Persona;
+  return result;
 }
 export async function encryptPost(
   post: PostWithCommentsAndTags,

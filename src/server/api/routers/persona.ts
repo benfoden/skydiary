@@ -11,6 +11,7 @@ import {
   decryptPersona,
   encryptPersona,
   encryptTextWithKey,
+  importKeyFromJWK,
 } from "~/utils/cryptoA1";
 import { cleanStringForInput } from "~/utils/text";
 
@@ -338,7 +339,11 @@ export const personaRouter = createTRPCRouter({
         orderBy: { createdAt: "asc" },
       });
       if (input) {
-        const key = JSON.parse(input) as CryptoKey;
+        const jwkMdk = JSON.parse(input) as JsonWebKey;
+        const key = await importKeyFromJWK(jwkMdk);
+        console.log("decrypting personas with mdk:", key);
+
+        //todo: remove slice
         await Promise.all(
           personas.map(async (persona: Persona) => {
             if (input) {

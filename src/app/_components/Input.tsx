@@ -3,11 +3,7 @@ import { EyeClosedIcon, EyeOpenIcon } from "@radix-ui/react-icons";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
-import {
-  decryptTextWithIVAndKey,
-  encryptTextWithKey,
-  getLocalMdkForUser,
-} from "~/utils/cryptoA1";
+import { encryptTextWithKey, getLocalMdkForUser } from "~/utils/cryptoA1";
 
 async function encryptText(
   plainText: string,
@@ -97,27 +93,9 @@ export default function Input({
       setInputValue(event.target.value);
       setValueLength(event.target.value.length);
 
-      const handleChangeTimeout = (
-        handleChange as unknown as { timeout?: number }
-      ).timeout;
-      clearTimeout(handleChangeTimeout);
-      (handleChange as unknown as { timeout?: number }).timeout =
-        window.setTimeout(() => {
-          void (async () => {
-            try {
-              const encryptedDataResult = await encryptText(
-                event.target.value,
-                user?.sukMdk ?? "",
-              );
-              setEncryptedData(encryptedDataResult);
-            } catch (error) {
-              console.error("Error encrypting text on change:", error);
-            }
-          })();
-        }, 300);
-    }
-    if (onChange) {
-      onChange(event);
+      if (onChange) {
+        onChange(event);
+      }
     }
   };
 
@@ -154,32 +132,6 @@ export default function Input({
       setIsActive(true);
     }
   }, [value]);
-
-  useEffect(() => {
-    const decryptInitialValue = async () => {
-      if (iv && inputValue && user?.sukMdk) {
-        try {
-          setEncryptedData({
-            cipherText: initialValue as string,
-            iv,
-          });
-          const mdk = await getLocalMdkForUser(user.sukMdk);
-          const decryptedText = await decryptTextWithIVAndKey({
-            cipherText: inputValue,
-            iv: Uint8Array.from(Buffer.from(iv, "base64")),
-            key: mdk,
-          });
-          setInputValue(decryptedText);
-        } catch (error) {
-          console.error("Error decrypting initial value:", error);
-        }
-      }
-    };
-
-    decryptInitialValue().catch(() => {
-      throw new Error("Error decrypting initial value");
-    });
-  }, [iv, user?.sukMdk, inputValue, initialValue]);
 
   return (
     <div className={`relative flex w-full flex-col items-start`}>
