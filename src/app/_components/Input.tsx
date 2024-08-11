@@ -1,16 +1,36 @@
 "use client";
 import { EyeClosedIcon, EyeOpenIcon } from "@radix-ui/react-icons";
+import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import {
+  decryptTextWithIVAndKey,
+  encryptTextWithKey,
+  getLocalMdkForUser,
+} from "~/utils/cryptoA1";
+
+async function encryptText(
+  plainText: string,
+  sukMdk: string,
+): Promise<{ cipherText: string; iv: string }> {
+  const mdk = await getLocalMdkForUser(sukMdk);
+  const encryptedText = await encryptTextWithKey(plainText, mdk);
+
+  return {
+    cipherText: encryptedText.cipherText,
+    iv: Buffer.from(encryptedText.iv).toString("base64"),
+  };
+}
 
 export default function Input({
   type,
   label,
   fileSelectButtonLabel,
   defaultChecked,
-  initialValue,
   radioOptions,
   showHidePassword,
+  initialValue,
+  iv,
   ...props
 }: {
   type?:
@@ -31,17 +51,24 @@ export default function Input({
     value: string | number;
     checked?: boolean;
   }[];
-  initialValue?: string | number;
   showHidePassword?: boolean;
+  initialValue?: string | number | boolean | undefined;
+  iv?: string | null | undefined;
 } & React.InputHTMLAttributes<
   | HTMLInputElement
   | HTMLTextAreaElement
   | (HTMLInputElement & { type: "checkbox" })
 >) {
   const t = useTranslations();
+  const { data: sessionData } = useSession();
+  const user = sessionData?.user;
   if (!type) type = "text";
-  const { id, value, defaultValue } = props;
+  const { id, value, onChange, name } = props;
+
   const ref = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
+  const [inputValue, setInputValue] = useState<string | undefined>(
+    (value ?? initialValue) as string | undefined,
+  );
   const [isActive, setIsActive] = useState(false);
   const [valueLength, setValueLength] = useState<number | null>(null);
   const [isChecked, setIsChecked] = useState(defaultChecked ?? false);
@@ -49,6 +76,13 @@ export default function Input({
     { id: string; label: string; value: string | number; checked?: boolean }[]
   >(radioOptions ?? []);
   const [showPassword, setShowPassword] = useState(false);
+  const [encryptedData, setEncryptedData] = useState<{
+    cipherText: string;
+    iv: string;
+  }>({
+    cipherText: "",
+    iv: "",
+  });
 
   const handleFocus = () => {
     setIsActive(true);
@@ -60,7 +94,30 @@ export default function Input({
     if (type === "checkbox") {
       setIsChecked((event.target as HTMLInputElement).checked);
     } else {
+      setInputValue(event.target.value);
       setValueLength(event.target.value.length);
+
+      const handleChangeTimeout = (
+        handleChange as unknown as { timeout?: number }
+      ).timeout;
+      clearTimeout(handleChangeTimeout);
+      (handleChange as unknown as { timeout?: number }).timeout =
+        window.setTimeout(() => {
+          void (async () => {
+            try {
+              const encryptedDataResult = await encryptText(
+                event.target.value,
+                user?.sukMdk ?? "",
+              );
+              setEncryptedData(encryptedDataResult);
+            } catch (error) {
+              console.error("Error encrypting text on change:", error);
+            }
+          })();
+        }, 300);
+    }
+    if (onChange) {
+      onChange(event);
     }
   };
 
@@ -81,22 +138,48 @@ export default function Input({
     if (type === "checkbox") {
       setValueLength(null);
     } else if (
-      typeof defaultValue === "string" ||
-      Array.isArray(defaultValue)
+      typeof initialValue === "string" ||
+      Array.isArray(initialValue)
     ) {
-      setValueLength(defaultValue.length);
-    } else if (typeof defaultValue === "number") {
-      setValueLength(defaultValue.toString().length);
+      setValueLength(inputValue?.length ?? null);
+    } else if (typeof initialValue === "number") {
+      setValueLength(inputValue?.toString().length ?? null);
     } else {
       setValueLength(null);
     }
-  }, [defaultValue, type]);
+  }, [initialValue, inputValue, type]);
 
   useEffect(() => {
     if (value) {
       setIsActive(true);
     }
   }, [value]);
+
+  useEffect(() => {
+    const decryptInitialValue = async () => {
+      if (iv && inputValue && user?.sukMdk) {
+        try {
+          setEncryptedData({
+            cipherText: initialValue as string,
+            iv,
+          });
+          const mdk = await getLocalMdkForUser(user.sukMdk);
+          const decryptedText = await decryptTextWithIVAndKey({
+            cipherText: inputValue,
+            iv: Uint8Array.from(Buffer.from(iv, "base64")),
+            key: mdk,
+          });
+          setInputValue(decryptedText);
+        } catch (error) {
+          console.error("Error decrypting initial value:", error);
+        }
+      }
+    };
+
+    decryptInitialValue().catch(() => {
+      throw new Error("Error decrypting initial value");
+    });
+  }, [iv, user?.sukMdk, inputValue, initialValue]);
 
   return (
     <div className={`relative flex w-full flex-col items-start`}>
@@ -141,27 +224,41 @@ export default function Input({
         type !== "file" &&
         type !== "radio" &&
         type !== "password" && (
-          <input
-            type={type}
-            {...props}
-            value={initialValue ?? value}
-            className={`w-full rounded-md px-5 py-3 text-base outline-none transition placeholder:text-sm placeholder:font-light placeholder:text-black/60 placeholder:dark:text-white/80 ${isActive && "bg-white/80 transition dark:bg-white/[.18]"} bg-primary ${props.disabled && "opacity-60"}`}
-            ref={ref as React.RefObject<HTMLInputElement>}
-            onFocus={handleFocus}
-            onChange={(e) => {
-              if (props.onChange) {
-                props.onChange(e);
-              }
-              handleChange(e);
-            }}
-          />
+          <>
+            <input
+              type={type}
+              {...props}
+              value={inputValue}
+              className={`w-full rounded-md px-5 py-3 text-base outline-none transition placeholder:text-sm placeholder:font-light placeholder:text-black/60 placeholder:dark:text-white/80 ${isActive && "bg-white/80 transition dark:bg-white/[.18]"} bg-primary ${props.disabled && "opacity-60"}`}
+              ref={ref as React.RefObject<HTMLInputElement>}
+              onFocus={handleFocus}
+              onChange={(e) => {
+                if (props.onChange) {
+                  props.onChange(e);
+                }
+                handleChange(e);
+              }}
+            />
+            <input
+              type="hidden"
+              id={`${id}Encrypted`}
+              name={`${name}Encrypted`}
+              value={encryptedData.cipherText}
+            />
+            <input
+              type="hidden"
+              name={`${name}IV`}
+              id={`${id}IV`}
+              value={Buffer.from(encryptedData.iv).toString("base64")}
+            />
+          </>
         )}
       {type === "password" && (
         <div className="relative w-full">
           <input
             type={showPassword ? "text" : "password"}
             {...props}
-            value={initialValue ?? value}
+            value={inputValue}
             className={`w-full rounded-md px-5 py-3 text-base outline-none transition placeholder:text-sm placeholder:font-light placeholder:text-black/60 placeholder:dark:text-white/80 ${isActive && "bg-white/80 transition dark:bg-white/[.18] "} bg-primary`}
             ref={ref as React.RefObject<HTMLInputElement>}
             onFocus={handleFocus}
@@ -234,14 +331,29 @@ export default function Input({
         </fieldset>
       )}
       {type === "textarea" && (
-        <textarea
-          {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
-          className={`w-full rounded-md py-4 pl-5 pr-10 outline-none transition placeholder:text-sm placeholder:font-light ${isActive && "bg-white/80 dark:bg-white/[.18]"} bg-primary`}
-          ref={ref as React.RefObject<HTMLTextAreaElement>}
-          onFocus={handleFocus}
-          onChange={handleChange}
-          rows={7}
-        />
+        <>
+          <textarea
+            {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
+            className={`w-full rounded-md py-4 pl-5 pr-10 outline-none transition placeholder:text-sm placeholder:font-light ${isActive && "bg-white/80 dark:bg-white/[.18]"} bg-primary`}
+            ref={ref as React.RefObject<HTMLTextAreaElement>}
+            onFocus={handleFocus}
+            onChange={handleChange}
+            rows={7}
+            value={inputValue}
+          />
+          <input
+            type="hidden"
+            id={`${id}Encrypted`}
+            name={`${name}Encrypted`}
+            value={encryptedData.cipherText}
+          />
+          <input
+            type="hidden"
+            name={`${name}IV`}
+            id={`${id}IV`}
+            value={Buffer.from(encryptedData.iv).toString("base64")}
+          />
+        </>
       )}
       {type === "checkbox" && (
         <input

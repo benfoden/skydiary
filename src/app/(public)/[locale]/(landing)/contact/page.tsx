@@ -84,7 +84,7 @@ export default async function Contact() {
                 label={t("contact.from")}
                 name="from"
                 type="email"
-                initialValue={session?.user?.email ?? undefined}
+                defaultValue={session?.user?.email ?? undefined}
                 disabled={!!session?.user?.email}
                 required
               />

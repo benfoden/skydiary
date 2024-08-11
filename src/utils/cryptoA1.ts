@@ -111,7 +111,6 @@ export async function unwrapMDKAndSave({
       wrappedKey: Buffer.from(sukMdk, "base64").buffer,
     });
     const jwkMdk = await exportKeyToJWK(masterDataKey);
-    console.log("JWK MDK", jwkMdk);
 
     await saveJWKToIndexedDB(jwkMdk, MASTERDATAKEY);
   } catch (error) {
@@ -152,7 +151,6 @@ export async function encryptTextWithKey(
     throw new Error("Failed to encrypt text");
   }
 }
-
 export async function decryptTextWithIVAndKey({
   cipherText,
   iv,
@@ -163,6 +161,9 @@ export async function decryptTextWithIVAndKey({
   key: CryptoKey;
 }): Promise<string> {
   try {
+    if (!cipherText || !iv || !key) {
+      throw new Error("Missing cipherText, iv or key");
+    }
     const decoder = new TextDecoder();
     const encryptedBuffer = Buffer.from(cipherText, "base64");
     const decryptedData = await crypto.subtle.decrypt(
@@ -311,9 +312,9 @@ export async function deleteJWKFromIndexedDB(keyName: string): Promise<void> {
 }
 
 export async function encryptPersona(
-  persona: Persona,
+  persona: Partial<Persona>,
   mdk: CryptoKey,
-): Promise<Persona> {
+): Promise<Partial<Persona>> {
   const result: Partial<Persona> = { ...persona };
   const encryptionPromises = [];
 

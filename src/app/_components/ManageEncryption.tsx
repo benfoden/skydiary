@@ -19,7 +19,7 @@ import {
   type PostWithCommentsAndTags,
 } from "~/utils/types";
 
-export default function ManageJobQueue() {
+export default function ManageEncryption() {
   const session = useSession();
   const user = session?.data?.user;
   const [queue, setQueue] = useState<PostsWithCommentsAndTagsAndPersonas>({
@@ -42,6 +42,21 @@ export default function ManageJobQueue() {
   const tagAndMemorize = api.post.tagAndMemorize.useMutation();
 
   const encryptPersonas = api.persona.bulkUpdateEncrypted.useMutation();
+
+  useEffect(() => {
+    const handleMakeMdkCookie = async () => {
+      const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
+      if (!jwkMdk) {
+        throw new Error("Failed to retrieve key from IndexedDB");
+      }
+      const mdk = await importKeyFromJWK(jwkMdk);
+
+      document.cookie = `mdk=${JSON.stringify(mdk)}; path=/; secure; samesite=strict`;
+    };
+    handleMakeMdkCookie().catch((error) => {
+      console.error("Error handling makeMdkCookie:", error);
+    });
+  }, []);
 
   useEffect(() => {
     try {
@@ -122,7 +137,6 @@ export default function ManageJobQueue() {
     const decryptedPersonas: Persona[] = [];
 
     if (user?.sukMdk && user?.passwordSalt && encryptQueue.personas.length) {
-      console.log("encryptQueue.personas", encryptQueue.personas);
       const handleEncryptPersonas = async () => {
         try {
           const jwkMdk = await getJWKFromIndexedDB(MASTERDATAKEY);
@@ -133,8 +147,8 @@ export default function ManageJobQueue() {
           await Promise.all(
             encryptQueue.personas.map(async (persona) => {
               const encryptedPersona = await encryptPersona(persona, mdk);
-              if (encryptedPersona.nameIV) {
-                encryptedPersonas.push(encryptedPersona);
+              if (encryptedPersona.nameIV && encryptedPersona.id) {
+                encryptedPersonas.push(encryptedPersona as Persona);
               }
             }),
           );
@@ -144,7 +158,6 @@ export default function ManageJobQueue() {
       };
       handleEncryptPersonas()
         .then(() => {
-          console.log("encrypted personas", encryptedPersonas);
           encryptPersonas
             .mutateAsync(encryptedPersonas)
             .catch((e) => console.error("Error encrypting personas:", e));

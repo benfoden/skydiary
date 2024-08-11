@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { type ReactNode } from "react";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
-import ManageJobQueue from "../_components/ManageJobQueue";
+import ManageEncryption from "../_components/ManageEncryption";
 import { NextAuthProvider } from "../_components/NextAuthProvider";
 
 type Props = {
@@ -20,7 +20,7 @@ export default async function SessionLayout({ children }: Props) {
   return (
     <div className="container mx-auto min-h-screen">
       <NextAuthProvider>
-        <ManageJobQueue />
+        <ManageEncryption />
         {children}
       </NextAuthProvider>
     </div>

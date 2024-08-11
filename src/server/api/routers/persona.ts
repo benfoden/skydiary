@@ -7,6 +7,11 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import {
+  decryptPersona,
+  encryptPersona,
+  encryptTextWithKey,
+} from "~/utils/cryptoA1";
 import { cleanStringForInput } from "~/utils/text";
 
 export const personaRouter = createTRPCRouter({
@@ -67,6 +72,7 @@ export const personaRouter = createTRPCRouter({
   update: protectedProcedure
     .input(
       z.object({
+        mdk: z.instanceof(CryptoKey).optional(),
         personaId: z.string(),
         name: z.string().max(140),
         traits: z.string().max(140),
@@ -83,26 +89,147 @@ export const personaRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.persona.update({
+      let data: Partial<Persona> = {
+        name: cleanStringForInput(input.name),
+        description: cleanStringForInput(input.description ?? ""),
+        image: input.image,
+        age: input.age,
+        gender: cleanStringForInput(input.gender ?? ""),
+        relationship: cleanStringForInput(input.relationship ?? ""),
+        occupation: cleanStringForInput(input.occupation ?? ""),
+        traits: cleanStringForInput(input.traits ?? ""),
+        communicationStyle: cleanStringForInput(input.communicationStyle ?? ""),
+        communicationSample: cleanStringForInput(
+          input.communicationSample ?? "",
+        ),
+        isUser: input.isUser,
+        isFavorite: input.isFavorite,
+      };
+      if (input.mdk) {
+        data = await encryptPersona(data, input.mdk);
+      }
+      return await ctx.db.persona.update({
         where: { id: input.personaId, createdBy: { id: ctx.session.user.id } },
-        data: {
-          name: cleanStringForInput(input.name),
-          description: cleanStringForInput(input.description ?? ""),
-          image: input.image,
-          age: input.age,
-          gender: cleanStringForInput(input.gender ?? ""),
-          relationship: cleanStringForInput(input.relationship ?? ""),
-          occupation: cleanStringForInput(input.occupation ?? ""),
-          traits: cleanStringForInput(input.traits ?? ""),
-          communicationStyle: cleanStringForInput(
-            input.communicationStyle ?? "",
-          ),
-          communicationSample: cleanStringForInput(
-            input.communicationSample ?? "",
-          ),
-          isUser: input.isUser,
-          isFavorite: input.isFavorite,
-        },
+        data,
+      });
+    }),
+
+  updateEncrypted: protectedProcedure
+    .input(
+      z.object({
+        mdk: z.instanceof(CryptoKey),
+        personaId: z.string(),
+        image: z.string().optional(),
+        age: z.number().optional(),
+        name: z.string(),
+        traits: z.string(),
+        gender: z.string().nullable().optional(),
+        description: z.string().nullable().optional(),
+        occupation: z.string().nullable().optional(),
+        relationship: z.string().nullable().optional(),
+        communicationStyle: z.string().nullable().optional(),
+        communicationSample: z.string().nullable().optional(),
+        isFavorite: z.boolean().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const data: Partial<Persona> = {};
+
+      const encryptIfNotNullish = async (
+        value: string | null | undefined,
+        key: CryptoKey,
+      ) => {
+        if (value != null) {
+          const { cipherText, iv } = await encryptTextWithKey(value, key);
+          return { cipherText, iv: Buffer.from(iv).toString("base64") };
+        }
+        return null;
+      };
+
+      const encryptedName = await encryptIfNotNullish(input.name, input.mdk);
+      if (encryptedName) {
+        data.name = encryptedName.cipherText;
+        data.nameIV = encryptedName.iv;
+      }
+
+      const encryptedTraits = await encryptIfNotNullish(
+        input.traits,
+        input.mdk,
+      );
+      if (encryptedTraits) {
+        data.traits = encryptedTraits.cipherText;
+        data.traitsIV = encryptedTraits.iv;
+      }
+
+      const encryptedGender = await encryptIfNotNullish(
+        input.gender,
+        input.mdk,
+      );
+      if (encryptedGender) {
+        data.gender = encryptedGender.cipherText;
+        data.genderIV = encryptedGender.iv;
+      }
+
+      const encryptedDescription = await encryptIfNotNullish(
+        input.description,
+        input.mdk,
+      );
+      if (encryptedDescription) {
+        data.description = encryptedDescription.cipherText;
+        data.descriptionIV = encryptedDescription.iv;
+      }
+
+      const encryptedOccupation = await encryptIfNotNullish(
+        input.occupation,
+        input.mdk,
+      );
+      if (encryptedOccupation) {
+        data.occupation = encryptedOccupation.cipherText;
+        data.occupationIV = encryptedOccupation.iv;
+      }
+
+      const encryptedRelationship = await encryptIfNotNullish(
+        input.relationship,
+        input.mdk,
+      );
+      if (encryptedRelationship) {
+        data.relationship = encryptedRelationship.cipherText;
+        data.relationshipIV = encryptedRelationship.iv;
+      }
+
+      const encryptedCommunicationStyle = await encryptIfNotNullish(
+        input.communicationStyle,
+        input.mdk,
+      );
+      if (encryptedCommunicationStyle) {
+        data.communicationStyle = encryptedCommunicationStyle.cipherText;
+        data.communicationStyleIV = encryptedCommunicationStyle.iv;
+      }
+
+      const encryptedCommunicationSample = await encryptIfNotNullish(
+        input.communicationSample,
+        input.mdk,
+      );
+      if (encryptedCommunicationSample) {
+        data.communicationSample = encryptedCommunicationSample.cipherText;
+        data.communicationSampleIV = encryptedCommunicationSample.iv;
+      }
+
+      if (input.image != null) {
+        data.image = input.image;
+      }
+
+      if (input.age != null) {
+        data.age = input.age;
+      }
+
+      if (input.isFavorite != null) {
+        data.isFavorite = input.isFavorite;
+      }
+
+      return ctx.db.persona.update({
+        where: { id: input.personaId },
+        data: data,
       });
     }),
   bulkUpdateEncrypted: protectedProcedure
@@ -202,12 +329,26 @@ export const personaRouter = createTRPCRouter({
         },
       });
     }),
-  getAllByUserId: protectedProcedure.query(({ ctx }) => {
-    return ctx.db.persona.findMany({
-      where: { createdBy: { id: ctx.session.user.id }, isUser: false },
-      orderBy: { createdAt: "asc" },
-    });
-  }),
+
+  getAllByUserId: protectedProcedure
+    .input(z.string().nullable().optional())
+    .query(async ({ ctx, input }) => {
+      const personas = await ctx.db.persona.findMany({
+        where: { createdBy: { id: ctx.session.user.id }, isUser: false },
+        orderBy: { createdAt: "asc" },
+      });
+      if (input) {
+        const key = JSON.parse(input) as CryptoKey;
+        await Promise.all(
+          personas.map(async (persona: Persona) => {
+            if (input) {
+              await decryptPersona(persona, key);
+            }
+          }),
+        );
+      }
+      return personas;
+    }),
 
   getByUserForJobQueue: protectedProcedure.query(({ ctx }) => {
     return ctx.db.persona.findMany({
