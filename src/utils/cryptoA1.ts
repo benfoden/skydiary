@@ -1,6 +1,6 @@
 import { type Persona, type Post } from "@prisma/client";
 import localforage from "localforage";
-import { type PostWithCommentsAndTags } from "./types";
+import { type EncryptedPostData } from "./types";
 
 export interface EncryptedData {
   cipherText: string;
@@ -380,16 +380,16 @@ export async function decryptPersona(
 }
 
 export async function encryptPost(
-  post: Post,
+  postData: { content: string; summary: string },
   mdk: CryptoKey,
-): Promise<Partial<Post>> {
-  const result: Partial<Post> = post;
+): Promise<EncryptedPostData> {
+  const result: EncryptedPostData = postData;
 
   const fieldsToEncrypt = ["content", "summary"] as const;
 
   const encryptionPromises = fieldsToEncrypt.map(async (field) => {
-    if (post[field]) {
-      const { cipherText, iv } = await encryptTextWithKey(post[field], mdk);
+    if (postData[field]) {
+      const { cipherText, iv } = await encryptTextWithKey(postData[field], mdk);
       result[field] = cipherText;
       result[`${field}IV`] = Buffer.from(iv).toString("base64");
     }
@@ -397,7 +397,7 @@ export async function encryptPost(
 
   await Promise.all(encryptionPromises);
 
-  return result as PostWithCommentsAndTags;
+  return result;
 }
 
 export async function decryptPost(post: Post, mdk: CryptoKey): Promise<Post> {

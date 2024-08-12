@@ -1,4 +1,4 @@
-import { type Persona, type Post } from "@prisma/client";
+import { type Persona } from "@prisma/client";
 import { z } from "zod";
 import { env } from "~/env";
 
@@ -11,6 +11,7 @@ import { getResponse, getResponseJSON } from "~/utils/ai";
 import { NEWPERSONAUSER, productPlan, TAGS } from "~/utils/constants";
 import { encryptPost, importKeyFromJWK } from "~/utils/cryptoA1";
 import { prompts } from "~/utils/prompts";
+import { type EncryptedPostData } from "~/utils/types";
 
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
@@ -44,15 +45,16 @@ export const postRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      let data: Partial<Post> = {
-        content: input.content,
-        summary: input.summary,
+      let data: EncryptedPostData = {
+        content: input.content ?? "",
+        summary: input.summary ?? "",
       };
 
       if (input.mdkJwk) {
         const key = await importKeyFromJWK(input.mdkJwk);
         data = await encryptPost(data, key);
       }
+
       return ctx.db.post.update({
         where: { id: input.postId, createdBy: { id: ctx.session.user.id } },
         data,

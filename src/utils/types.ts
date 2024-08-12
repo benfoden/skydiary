@@ -36,3 +36,10 @@ export interface PostsWithCommentsAndTagsAndPersonas {
   posts: PostWithCommentsAndTags[];
   personas: Persona[];
 }
+
+export type EncryptedPostData = {
+  content: string;
+  contentIV?: string;
+  summary: string;
+  summaryIV?: string;
+};
