@@ -345,6 +345,7 @@ export async function decryptPersona(
   persona: Persona,
   mdk: CryptoKey,
 ): Promise<Persona> {
+  console.log("decrypt persona", persona, mdk);
   const result: Persona = persona;
 
   const fieldsToDecrypt = [

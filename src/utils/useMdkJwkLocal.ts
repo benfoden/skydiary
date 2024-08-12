@@ -1,10 +1,13 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { getJWKFromIndexedDB, MASTERDATAKEY } from "./cryptoA1";
 
 import { useCallback, useEffect, useState } from "react";
 
 export function useMdkJwkLocal(): JsonWebKey | undefined {
+  const { data: session } = useSession();
+  const user = session?.user;
   const [mdkJwk, setMdkJwk] = useState<JsonWebKey | undefined>(undefined);
 
   const fetchJWK = useCallback(async () => {
@@ -17,10 +20,12 @@ export function useMdkJwkLocal(): JsonWebKey | undefined {
   }, []);
 
   useEffect(() => {
-    fetchJWK().catch((error) => {
-      console.error("Error:", error);
-    });
-  }, [fetchJWK]);
+    if (user?.sukMdk && user?.passwordSalt) {
+      fetchJWK().catch((error) => {
+        console.error("Error:", error);
+      });
+    }
+  }, [fetchJWK, user?.sukMdk, user?.passwordSalt]);
 
   return mdkJwk;
 }

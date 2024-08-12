@@ -15,7 +15,7 @@ import {
 } from "~/utils/cryptoA1";
 import Spinner from "./Spinner";
 
-export default function DataPasswordCard() {
+export default function DataSecurityCard() {
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [message, setMessage] = useState("");

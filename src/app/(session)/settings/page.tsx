@@ -6,7 +6,7 @@ import { Avatar } from "~/app/_components/Avatar";
 import Button from "~/app/_components/Button";
 import ManageBillingButton from "~/app/_components/ButtonBilling";
 import { Card } from "~/app/_components/Card";
-import DataPasswordCard from "~/app/_components/DataSecurity";
+import DataSecurityCard from "~/app/_components/DataSecurity";
 import DropDownUser from "~/app/_components/DropDownUser";
 import FormButton from "~/app/_components/FormButton";
 import FormDeleteButton from "~/app/_components/FormDeleteButton";
@@ -180,7 +180,7 @@ export default async function Settings() {
             </Card>
           )}
 
-          <DataPasswordCard />
+          <DataSecurityCard />
           <Card variant="form">
             <h2>{t("settings.language")}</h2>
             <div className="flex flex-row gap-2">
