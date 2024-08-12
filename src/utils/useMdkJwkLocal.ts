@@ -2,18 +2,25 @@
 
 import { getJWKFromIndexedDB, MASTERDATAKEY } from "./cryptoA1";
 
-export function useMdkJwkLocal(): JsonWebKey | undefined {
-  let mdkJwk: JsonWebKey | undefined;
-  const getMdkJwkFromCookies = () => {
-    getJWKFromIndexedDB(MASTERDATAKEY)
-      .then((result) => {
-        mdkJwk = result;
-      })
-      .catch((error) => {
-        console.error("Failed to retrieve key from IndexedDB:", error);
-      });
-  };
+import { useCallback, useEffect, useState } from "react";
 
-  getMdkJwkFromCookies();
+export function useMdkJwkLocal(): JsonWebKey | undefined {
+  const [mdkJwk, setMdkJwk] = useState<JsonWebKey | undefined>(undefined);
+
+  const fetchJWK = useCallback(async () => {
+    try {
+      const result = await getJWKFromIndexedDB(MASTERDATAKEY);
+      setMdkJwk(result ?? undefined);
+    } catch (error) {
+      console.error("Failed to retrieve key from IndexedDB:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchJWK().catch((error) => {
+      console.error("Error:", error);
+    });
+  }, [fetchJWK]);
+
   return mdkJwk;
 }

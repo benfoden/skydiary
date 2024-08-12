@@ -47,7 +47,7 @@ export default function ManageEncryption() {
     handleMakeMdkCookie().catch((error) => {
       console.error("Error handling makeMdkCookie:", error);
     });
-  }, []);
+  }, [mdkJwk]);
 
   useEffect(() => {
     try {
@@ -144,6 +144,7 @@ export default function ManageEncryption() {
     user?.sukMdk,
     user?.passwordSalt,
     bulkUpdatePersonas,
+    mdkJwk,
   ]);
 
   // useEffect(() => {
