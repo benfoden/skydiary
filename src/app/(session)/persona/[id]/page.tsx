@@ -31,7 +31,7 @@ export async function generateMetadata({
 
 export default async function Persona({ params }: { params: { id: string } }) {
   const session = await getServerAuthSession();
-  const mdkJwk = useMdkJwk();
+  const mdkJwk = await useMdkJwk();
 
   if (!session?.user) return redirect("/auth/signin");
   const personaId = params.id;

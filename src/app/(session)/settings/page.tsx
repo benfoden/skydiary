@@ -37,7 +37,7 @@ export default async function Settings() {
   const t = await getTranslations();
   const locale: Locale = (await getLocale()) as Locale;
   const session = await getServerAuthSession();
-  const mdkJwk = useMdkJwk();
+  const mdkJwk = await useMdkJwk();
 
   const userPersona = await api.persona.getUserPersona({ mdkJwk });
   const subscription = await api.stripe.getUserSubDetails();

@@ -9,7 +9,7 @@ import {
 } from "~/server/api/trpc";
 import { getResponse, getResponseJSON } from "~/utils/ai";
 import { NEWPERSONAUSER, productPlan, TAGS } from "~/utils/constants";
-import { encryptPost, importKeyFromJWK } from "~/utils/cryptoA1";
+import { decryptPost, encryptPost, importKeyFromJWK } from "~/utils/cryptoA1";
 import { prompts } from "~/utils/prompts";
 import { type EncryptedPostData } from "~/utils/types";
 
@@ -61,94 +61,76 @@ export const postRouter = createTRPCRouter({
       });
     }),
 
-  getLatest: protectedProcedure.query(({ ctx }) => {
-    return ctx.db.post.findFirst({
-      orderBy: { createdAt: "desc" },
-      where: { createdBy: { id: ctx.session.user.id } },
-    });
-  }),
-
-  getLatestTwoByInputUserIdAsCron: publicProcedure
-    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
-    .query(({ ctx, input }) => {
-      if (input.cronSecret !== env.CRON_SECRET) {
-        throw new Error("Unauthorized");
-      }
-      return ctx.db.post.findMany({
+  getLatest: protectedProcedure
+    .input(z.object({ mdkJwk: z.custom<JsonWebKey>().optional() }))
+    .query(async ({ ctx, input }) => {
+      let post = await ctx.db.post.findFirst({
         orderBy: { createdAt: "desc" },
-        where: { createdBy: { id: input.userId }, content: { not: "" } },
-        take: 2,
+        where: { createdBy: { id: ctx.session.user.id } },
       });
+
+      if (post && input?.mdkJwk) {
+        const key = await importKeyFromJWK(input.mdkJwk);
+        const decryptedPostData = await decryptPost(post, key);
+        post = decryptedPostData;
+      }
+      return post;
     }),
 
-  getLatestTaggedByInputUserIdAsCron: publicProcedure
-    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
-    .query(({ ctx, input }) => {
-      if (input.cronSecret !== env.CRON_SECRET) {
-        throw new Error("Unauthorized");
-      }
-      return ctx.db.post.findFirst({
-        orderBy: { createdAt: "desc" },
+  getAllByUserAndTagId: protectedProcedure
+    .input(
+      z.object({
+        tagId: z.string(),
+        mdkJwk: z.custom<JsonWebKey>().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const posts = await ctx.db.post.findMany({
         where: {
-          createdBy: { id: input.userId },
-          content: { not: "" },
-          tags: { none: {} },
+          AND: [
+            { createdBy: { id: ctx.session.user.id } },
+            { tags: { some: { id: input.tagId } } },
+          ],
         },
-        include: {
-          tags: true,
-        },
-      });
-    }),
-
-  getAllUntaggedByInputUserIdAsCron: publicProcedure
-    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
-    .query(({ ctx, input }) => {
-      if (input.cronSecret !== env.CRON_SECRET) {
-        throw new Error("Unauthorized");
-      }
-      return ctx.db.post.findMany({
         orderBy: { createdAt: "desc" },
-        where: {
-          createdBy: { id: input.userId },
-          tags: { none: {} },
-        },
-        include: {
-          tags: true,
-        },
       });
+
+      if (input.mdkJwk) {
+        const key = await importKeyFromJWK(input.mdkJwk);
+        return await Promise.all(
+          posts.map(async (post) => await decryptPost(post, key)),
+        );
+      }
+
+      return posts;
     }),
 
-  getAllTaggedByInputUserIdAsCron: publicProcedure
-    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
-    .query(({ ctx, input }) => {
-      if (input.cronSecret !== env.CRON_SECRET) {
-        throw new Error("Unauthorized");
-      }
-      return ctx.db.post.findMany({
-        orderBy: { createdAt: "desc" },
-        where: {
-          createdBy: { id: input.userId },
-          tags: { some: {} },
-        },
-        include: {
-          tags: true,
-        },
-      });
-    }),
-
-  getAllByUserIdAsCron: publicProcedure
-    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
-    .query(({ ctx, input }) => {
-      if (input.cronSecret !== env.CRON_SECRET) {
-        throw new Error("Unauthorized");
-      }
-      return ctx.db.post.findMany({
-        where: { createdBy: { id: input.userId } },
+  getByUser: protectedProcedure
+    .input(z.object({ mdkJwk: z.custom<JsonWebKey>() }).optional())
+    .query(async ({ ctx, input }) => {
+      const posts = await ctx.db.post.findMany({
+        where: { createdBy: { id: ctx.session.user.id } },
         orderBy: { createdAt: "desc" },
         include: {
           tags: true,
         },
       });
+
+      if (input?.mdkJwk) {
+        const key = await importKeyFromJWK(input.mdkJwk);
+        const decryptedPosts = await Promise.all(
+          posts.map(async (post) => {
+            const decryptedPost = await decryptPost(post, key);
+            return {
+              ...decryptedPost,
+              tags: post.tags,
+            };
+          }),
+        );
+        return decryptedPosts;
+      }
+
+      return posts;
     }),
 
   getTagsAndCounts: protectedProcedure.query(async ({ ctx }) => {
@@ -186,79 +168,72 @@ export const postRouter = createTRPCRouter({
     return tagsList;
   }),
 
-  getAllByUserAndTagId: protectedProcedure
-    .input(z.object({ tagId: z.string() }))
-    .query(({ ctx, input }) => {
-      return ctx.db.post.findMany({
-        where: {
-          AND: [
-            { createdBy: { id: ctx.session.user.id } },
-            { tags: { some: { id: input.tagId } } },
-          ],
-        },
+  getByUserForJobQueue: protectedProcedure
+    .input(z.object({ mdkJwk: z.custom<JsonWebKey>() }).optional())
+    .query(async ({ ctx, input }) => {
+      const posts = await ctx.db.post.findMany({
+        where: { createdBy: { id: ctx.session.user.id } },
         orderBy: { createdAt: "desc" },
+        include: {
+          tags: true,
+          comments: true,
+        },
       });
+
+      if (input?.mdkJwk) {
+        const key = await importKeyFromJWK(input.mdkJwk);
+        return await Promise.all(
+          posts.map(async (post) => await decryptPost(post, key)),
+        );
+      }
+
+      return posts;
     }),
 
-  getByUser: protectedProcedure.query(({ ctx }) => {
-    return ctx.db.post.findMany({
-      where: { createdBy: { id: ctx.session.user.id } },
-      orderBy: { createdAt: "desc" },
-      include: {
-        tags: true,
-      },
-    });
-  }),
-
-  getByUserForJobQueue: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.post.findMany({
-      where: { createdBy: { id: ctx.session.user.id } },
-      orderBy: { createdAt: "desc" },
-      include: {
-        tags: true,
-        comments: true,
-      },
-    });
-  }),
-
-  getAllByUserForExport: protectedProcedure.query(async ({ ctx }) => {
-    const posts = await ctx.db.post.findMany({
-      where: { createdBy: { id: ctx.session.user.id } },
-      orderBy: { createdAt: "desc" },
-      include: {
-        tags: {
-          select: {
-            content: true,
+  getAllByUserForExport: protectedProcedure
+    .input(z.object({ mdkJwk: z.custom<JsonWebKey>() }).optional())
+    .query(async ({ ctx, input }) => {
+      const posts = await ctx.db.post.findMany({
+        where: { createdBy: { id: ctx.session.user.id } },
+        orderBy: { createdAt: "desc" },
+        include: {
+          tags: {
+            select: {
+              content: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    return posts.map(
-      (post: {
-        content: string;
-        updatedAt: Date;
-        createdAt: Date;
-        id: string;
-        tags: { content: string }[];
-      }) => ({
-        id: post.id,
-        content: post.content,
-        updatedAt: post.updatedAt,
-        createdAt: post.createdAt,
-        tags: post.tags.map((tag) => ({
-          content: tag.content,
-        })),
-      }),
-    );
-  }),
+      if (input?.mdkJwk) {
+        const key = await importKeyFromJWK(input.mdkJwk);
+        const decryptedPosts = await Promise.all(
+          posts.map(async (post) => await decryptPost(post, key)),
+        );
+        return decryptedPosts;
+      }
+
+      return posts;
+    }),
 
   getByPostId: protectedProcedure
-    .input(z.object({ postId: z.string() }))
-    .query(({ ctx, input }) => {
-      return ctx.db.post.findFirst({
+    .input(
+      z.object({
+        postId: z.string(),
+        mdkJwk: z.custom<JsonWebKey>().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      let post = await ctx.db.post.findFirst({
         where: { id: input.postId },
       });
+
+      if (post && input.mdkJwk) {
+        const key = await importKeyFromJWK(input.mdkJwk);
+        post = await decryptPost(post, key);
+      }
+
+      return post;
     }),
 
   tagAndMemorize: protectedProcedure
@@ -267,19 +242,16 @@ export const postRouter = createTRPCRouter({
         z.object({
           id: z.string(),
           content: z.string(),
+          summary: z.string().nullable().optional(),
           tags: z.array(z.string()),
+          mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
         }),
       ),
     )
     .mutation(async ({ ctx, input }) => {
-      const [user, userPersona] = await Promise.all([
-        ctx.db.user.findFirst({
-          where: { id: ctx.session.user.id },
-        }),
-        ctx.db.persona.findFirst({
-          where: { createdById: ctx.session.user.id, isUser: true },
-        }),
-      ]);
+      const userPersona = await ctx.db.persona.findFirst({
+        where: { createdById: ctx.session.user.id, isUser: true },
+      });
 
       console.log("unprocessed posts length", input.length);
       for (const post of input) {
@@ -296,9 +268,9 @@ export const postRouter = createTRPCRouter({
             messageContent: prompts.userPersona({
               persona: userPersona ?? NEWPERSONAUSER,
               content: post?.content,
-              wordLimit: user?.isSpecial
+              wordLimit: ctx.session.user?.isSpecial
                 ? 150
-                : productPlan(user?.stripeProductId).memories,
+                : productPlan(ctx.session.user?.stripeProductId).memories,
             }),
             model: "gpt-4o-mini",
           }),
@@ -322,6 +294,19 @@ export const postRouter = createTRPCRouter({
           .filter((tag): tag is string => tag !== undefined);
         if (!tagIds?.length) {
           continue;
+        }
+
+        if (post.mdkJwk) {
+          const key = await importKeyFromJWK(post.mdkJwk);
+          if (post.summary === null || post.summary === undefined) {
+            post.summary = "";
+          }
+          const encryptedPost = await encryptPost(
+            { content: post.content, summary: post.summary },
+            key,
+          );
+          post.content = encryptedPost.content;
+          post.summary = encryptedPost.summary;
         }
 
         await Promise.all([
@@ -460,5 +445,88 @@ export const postRouter = createTRPCRouter({
           });
         }
       }
+    }),
+
+  getLatestTwoByInputUserIdAsCron: publicProcedure
+    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
+    .query(({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
+      return ctx.db.post.findMany({
+        orderBy: { createdAt: "desc" },
+        where: { createdBy: { id: input.userId }, content: { not: "" } },
+        take: 2,
+      });
+    }),
+
+  getLatestTaggedByInputUserIdAsCron: publicProcedure
+    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
+    .query(({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
+      return ctx.db.post.findFirst({
+        orderBy: { createdAt: "desc" },
+        where: {
+          createdBy: { id: input.userId },
+          content: { not: "" },
+          tags: { none: {} },
+        },
+        include: {
+          tags: true,
+        },
+      });
+    }),
+
+  getAllUntaggedByInputUserIdAsCron: publicProcedure
+    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
+    .query(({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
+      return ctx.db.post.findMany({
+        orderBy: { createdAt: "desc" },
+        where: {
+          createdBy: { id: input.userId },
+          tags: { none: {} },
+        },
+        include: {
+          tags: true,
+        },
+      });
+    }),
+
+  getAllTaggedByInputUserIdAsCron: publicProcedure
+    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
+    .query(({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
+      return ctx.db.post.findMany({
+        orderBy: { createdAt: "desc" },
+        where: {
+          createdBy: { id: input.userId },
+          tags: { some: {} },
+        },
+        include: {
+          tags: true,
+        },
+      });
+    }),
+
+  getAllByUserIdAsCron: publicProcedure
+    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
+    .query(({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
+      return ctx.db.post.findMany({
+        where: { createdBy: { id: input.userId } },
+        orderBy: { createdAt: "desc" },
+        include: {
+          tags: true,
+        },
+      });
     }),
 });

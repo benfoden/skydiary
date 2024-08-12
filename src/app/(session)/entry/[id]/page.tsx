@@ -50,7 +50,7 @@ export default async function Entry({
 }) {
   const session = await getServerAuthSession();
   const { user } = session;
-  const mdkJwk = useMdkJwk();
+  const mdkJwk = await useMdkJwk();
   const [t, locale, post, comments, tags, personas] = await Promise.all([
     getTranslations(),
     getUserLocale(),

@@ -4,15 +4,17 @@ import { api } from "~/trpc/react";
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { getJWKFromIndexedDB, MASTERDATAKEY } from "~/utils/cryptoA1";
 import {
   type PostsWithCommentsAndTagsAndPersonas,
   type PostWithCommentsAndTags,
 } from "~/utils/types";
+import { useMdkJwkLocal } from "~/utils/useMdkJwkLocal";
 
 export default function ManageEncryption() {
   const session = useSession();
   const user = session?.data?.user;
+  const mdkJwk = useMdkJwkLocal();
+
   const [queue, setQueue] = useState<PostsWithCommentsAndTagsAndPersonas>({
     posts: [],
     personas: [],
@@ -36,7 +38,6 @@ export default function ManageEncryption() {
 
   useEffect(() => {
     const handleMakeMdkCookie = async () => {
-      const mdkJwk = await getJWKFromIndexedDB(MASTERDATAKEY);
       if (!mdkJwk) {
         throw new Error("Failed to retrieve key from IndexedDB");
       }
@@ -125,7 +126,6 @@ export default function ManageEncryption() {
   useEffect(() => {
     if (user?.sukMdk && user?.passwordSalt && encryptQueue.personas.length) {
       const handleEncryptPersonas = async () => {
-        const mdkJwk = await getJWKFromIndexedDB(MASTERDATAKEY);
         try {
           await bulkUpdatePersonas.mutateAsync({
             personas: encryptQueue.personas,

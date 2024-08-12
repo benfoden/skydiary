@@ -31,7 +31,7 @@ export async function generateMetadata({
 
 export default async function Persona() {
   const session = await getServerAuthSession();
-  const mdkJwk = useMdkJwk();
+  const mdkJwk = await useMdkJwk();
   if (!session?.user) return redirect("/auth/signin");
   const t = await getTranslations();
 
