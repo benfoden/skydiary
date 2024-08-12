@@ -13,6 +13,7 @@ import { type Locale } from "~/config";
 import { getUserLocale } from "~/i18n";
 import { api } from "~/trpc/server";
 import { formattedTimeStampToDate } from "~/utils/text";
+import { useMdkJwk } from "~/utils/useMdkJwk";
 export const dynamic = "force-dynamic";
 
 const filterPostsByDateRange = (
@@ -87,7 +88,8 @@ export async function generateMetadata({
 export default async function Home() {
   const t = await getTranslations();
   const locale = (await getUserLocale()) as Locale;
-  const userPosts = await api.post.getByUser();
+  const mdkJwk = await useMdkJwk();
+  const userPosts = await api.post.getByUser({ mdkJwk });
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const today = new Date().toLocaleDateString("en-US", {
     timeZone: userTimezone,

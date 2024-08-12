@@ -106,7 +106,7 @@ export const postRouter = createTRPCRouter({
     }),
 
   getByUser: protectedProcedure
-    .input(z.object({ mdkJwk: z.custom<JsonWebKey>() }).optional())
+    .input(z.object({ mdkJwk: z.custom<JsonWebKey>().optional() }))
     .query(async ({ ctx, input }) => {
       const posts = await ctx.db.post.findMany({
         where: { createdBy: { id: ctx.session.user.id } },
@@ -169,7 +169,7 @@ export const postRouter = createTRPCRouter({
   }),
 
   getByUserForJobQueue: protectedProcedure
-    .input(z.object({ mdkJwk: z.custom<JsonWebKey>() }).optional())
+    .input(z.object({ mdkJwk: z.custom<JsonWebKey>().optional() }))
     .query(async ({ ctx, input }) => {
       const posts = await ctx.db.post.findMany({
         where: { createdBy: { id: ctx.session.user.id } },
@@ -191,7 +191,7 @@ export const postRouter = createTRPCRouter({
     }),
 
   getAllByUserForExport: protectedProcedure
-    .input(z.object({ mdkJwk: z.custom<JsonWebKey>() }).optional())
+    .input(z.object({ mdkJwk: z.custom<JsonWebKey>().optional() }))
     .query(async ({ ctx, input }) => {
       const posts = await ctx.db.post.findMany({
         where: { createdBy: { id: ctx.session.user.id } },

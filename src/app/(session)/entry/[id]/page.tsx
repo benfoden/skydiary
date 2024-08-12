@@ -54,7 +54,7 @@ export default async function Entry({
   const [t, locale, post, comments, tags, personas] = await Promise.all([
     getTranslations(),
     getUserLocale(),
-    api.post.getByPostId({ postId: params.id }),
+    api.post.getByPostId({ postId: params.id, mdkJwk }),
     api.comment.getCommentsByPostId({ postId: params.id }),
     api.tag.getByPostId({ postId: params.id }),
     api.persona.getAllByUserId({ mdkJwk }),

@@ -44,6 +44,8 @@ export default function EntryBody({ post }: { post: Post }) {
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newContent = e.target.value;
 
+    if (newContent === content) return;
+
     setContent(newContent);
 
     if (debounceTimeout) {
@@ -66,10 +68,10 @@ export default function EntryBody({ post }: { post: Post }) {
   };
 
   useEffect(() => {
-    if (isSuccess) {
-      setContent(data?.content ?? "");
+    if (isSuccess && data?.content) {
+      setContent(data.content);
     }
-  }, [data, isSuccess]);
+  }, [data?.content, isSuccess]);
 
   useEffect(() => {
     adjustTextareaHeight();
