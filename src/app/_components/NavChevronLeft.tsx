@@ -24,7 +24,6 @@ export function NavChevronLeft({
     <Link
       href={!isDisabled && !isBack && targetPathname ? targetPathname : ""}
       className={`${isDisabled && "cursor-not-allowed"}`}
-      prefetch={true}
       onClick={() => isBack && router.back()}
     >
       <Button variant="nav">

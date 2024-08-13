@@ -8,8 +8,12 @@ import { useEffect, useRef, useState, type SetStateAction } from "react";
 import ButtonSpinner from "~/app/_components/ButtonSpinner";
 import { cardColors } from "~/app/_components/Card";
 import { api } from "~/trpc/react";
-import { decryptPost } from "~/utils/cryptoA1";
+import { decryptPost, encryptPost } from "~/utils/cryptoA1";
 import { useMdk } from "~/utils/useMdk";
+
+//todo: decrypt post data on mount
+//todo: update post data on edit
+// todo: on edit, decrypt new post data and save to db
 
 export default function EntryBody({ post }: { post: Post }) {
   const user = useSession().data?.user;
@@ -25,7 +29,7 @@ export default function EntryBody({ post }: { post: Post }) {
   const t = useTranslations();
   const router = useRouter();
 
-  const { data, isSuccess } = api.post.getByPostId.useQuery({
+  const { data: localPost, isSuccess } = api.post.getByPostId.useQuery({
     postId: post?.id,
   });
 
@@ -47,26 +51,11 @@ export default function EntryBody({ post }: { post: Post }) {
     }
   };
 
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleContentChange = async (
+    e: React.ChangeEvent<HTMLTextAreaElement>,
+  ) => {
     const newContent = e.target.value;
-    if (first.current) return;
     if (newContent === content) return;
-
-    setIsDecrypting(true);
-    if (newContent) {
-      const newPost = { ...post, content: newContent };
-      const handleDecrypt = async () => {
-        const { content: postContent } = await decryptPost(newPost, mdk);
-        setContent(postContent);
-      };
-      handleDecrypt()
-        .catch(() => {
-          console.error("Error decrypting post.");
-        })
-        .finally(() => {
-          setIsDecrypting(false);
-        });
-    }
 
     setContent(newContent);
 
@@ -75,7 +64,24 @@ export default function EntryBody({ post }: { post: Post }) {
     }
 
     const newTimeout = setTimeout(() => {
-      updatePost.mutate({ content: newContent, postId: post?.id });
+      (async () => {
+        try {
+          if (!localPost) return;
+          const encryptNowPost = {
+            ...localPost,
+            content: newContent,
+            summary: "",
+          };
+          const encryptedPost = await encryptPost(encryptNowPost, mdk);
+          updatePost.mutate({
+            content: encryptedPost.content,
+            contentIV: encryptedPost.contentIV,
+            postId: post?.id,
+          });
+        } catch (error) {
+          console.error("Error encrypting post:", error);
+        }
+      })().catch((error) => console.error("Error in async function:", error));
     }, 1000);
 
     setDebounceTimeout(newTimeout as unknown as SetStateAction<null>);
@@ -91,9 +97,15 @@ export default function EntryBody({ post }: { post: Post }) {
 
   useEffect(() => {
     setIsDecrypting(true);
-    if (post?.content) {
+    if (
+      isSuccess &&
+      localPost?.content &&
+      localPost?.content !== content &&
+      first.current
+    ) {
+      console.log("hi");
       const handleDecrypt = async () => {
-        const { content: postContent } = await decryptPost(post, mdk);
+        const { content: postContent } = await decryptPost(localPost, mdk);
         setContent(postContent);
       };
       handleDecrypt()
@@ -105,11 +117,11 @@ export default function EntryBody({ post }: { post: Post }) {
           setIsDecrypting(false);
         });
     }
-  }, [user?.sukMdk, mdk, post]);
+  }, [user?.sukMdk, mdk, localPost, content, isSuccess]);
 
   useEffect(() => {
     adjustTextareaHeight();
-  }, []);
+  }, [content]); // Adjust textarea height whenever content changes
 
   return (
     <div className="flex h-full w-full flex-col items-center pb-4">

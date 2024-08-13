@@ -1,4 +1,8 @@
-"use server";
+/* eslint-disable react/jsx-key */
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+export const dynamic = "force-dynamic";
+
 import { type Post } from "@prisma/client";
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
@@ -76,17 +80,13 @@ export default async function Home({}) {
                   <Button>{t("home.whats happening")}</Button>
                 </Link>
               ) : (
-                <PostCard
-                  key={userPosts[0]?.id}
-                  post={userPosts[0]!}
-                  locale={locale}
-                />
+                <PostCard postId={userPosts[0]?.id ?? ""} locale={locale} />
               )}
               {filterPostsByDateRange(1, 6, userPosts).length > 0 && (
                 <>
                   <div className="pl-4 pt-4">{t("home.last7Days")}</div>
                   {filterPostsByDateRange(1, 6, userPosts).map((post) => (
-                    <PostCard key={post.id} post={post} locale={locale} />
+                    <PostCard postId={post.id ?? ""} locale={locale} />
                   ))}
                 </>
               )}
@@ -94,7 +94,7 @@ export default async function Home({}) {
                 <>
                   <div className="pl-4 pt-4">{t("home.last30Days")}</div>
                   {filterPostsByDateRange(8, 30, userPosts).map((post) => (
-                    <PostCard key={post.id} post={post} locale={locale} />
+                    <PostCard postId={post?.id ?? ""} locale={locale} />
                   ))}
                 </>
               )}
@@ -117,7 +117,7 @@ export default async function Home({}) {
                           return postMonthYear === monthYear;
                         })
                         .map((post) => (
-                          <PostCard key={post.id} post={post} locale={locale} />
+                          <PostCard postId={post?.id ?? ""} locale={locale} />
                         ))}
                     </div>
                   ))}

@@ -3,8 +3,6 @@ import localforage from "localforage";
 import {
   type EncryptCommentPartialInput,
   type EncryptedCommentPartialResult,
-  type EncryptedPostPartialResult,
-  type EncryptPostPartialInput,
   type PostWithTags,
 } from "./types";
 
@@ -403,24 +401,11 @@ export async function encryptComment(
   return result;
 }
 
-export async function encryptPost(
-  postData: EncryptPostPartialInput,
-  mdk: CryptoKey,
-) {
-  const result: EncryptedPostPartialResult = {
-    id: postData.id,
-    content: postData.content,
-    contentIV: "",
-    summary: postData.summary ?? "",
-    summaryIV: "",
-    comments: postData.comments?.map((comment) => ({
-      id: comment.id,
-      content: comment.content,
-      contentIV: "",
-      coachName: comment.coachName ?? "",
-      coachNameIV: "",
-    })),
-  };
+export async function encryptPost(postData: Post, mdk?: CryptoKey) {
+  if (!mdk) {
+    return postData;
+  }
+  const result: Post = postData;
 
   const fieldsToEncrypt = ["content", "summary"] as const;
 
@@ -432,13 +417,6 @@ export async function encryptPost(
     }
   });
 
-  if (postData.comments) {
-    result.comments = await Promise.all(
-      postData.comments.map(async (comment) => {
-        return await encryptComment(comment, mdk);
-      }),
-    );
-  }
   await Promise.all(encryptionPromises);
 
   return result;
@@ -448,30 +426,30 @@ export async function decryptPost(
   post: PostWithTags,
   mdk?: CryptoKey,
 ): Promise<Post> {
-  if (!mdk) {
-    return post;
-  }
-  const result: PostWithTags = post;
+  if (mdk && post.content && post.contentIV) {
+    const result: PostWithTags = post;
 
-  const fieldsToDecrypt = ["content", "summary"] as const;
+    const fieldsToDecrypt = ["content", "summary"] as const;
 
-  const decryptionPromises = fieldsToDecrypt.map(async (field) => {
-    const ivField = `${field}IV` as keyof Post;
-    if (post[field as keyof Post] && post[ivField]) {
-      const decryptedText = await decryptTextWithIVAndKey({
-        cipherText: post[field as keyof Post] as string,
-        iv: Uint8Array.from(Buffer.from(post[ivField] as string, "base64")),
-        key: mdk,
-      });
-      if (typeof decryptedText === "string") {
-        result[field] = decryptedText;
+    const decryptionPromises = fieldsToDecrypt.map(async (field) => {
+      const ivField = `${field}IV` as keyof Post;
+      if (post[field as keyof Post] && post[ivField]) {
+        const decryptedText = await decryptTextWithIVAndKey({
+          cipherText: post[field as keyof Post] as string,
+          iv: Uint8Array.from(Buffer.from(post[ivField] as string, "base64")),
+          key: mdk,
+        });
+        if (typeof decryptedText === "string") {
+          result[field] = decryptedText;
+        }
       }
-    }
-  });
+    });
 
-  await Promise.all(decryptionPromises);
+    await Promise.all(decryptionPromises);
 
-  return result;
+    return result;
+  }
+  return post;
 }
 
 // export async function genUserKey() {

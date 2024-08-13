@@ -37,14 +37,21 @@ export const postRouter = createTRPCRouter({
     .input(
       z.object({
         postId: z.string(),
-        content: z.string().max(50000).optional(),
-        summary: z.string().max(5000).optional(),
+        content: z.string().max(50000),
+        contentIV: z.string().nullable().optional(),
+        summary: z.string().max(5000).nullable().optional(),
+        summaryIV: z.string().nullable().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       return ctx.db.post.update({
         where: { id: input.postId, createdBy: { id: ctx.session.user.id } },
-        data: { content: input.content ?? "", summary: input.summary ?? "" },
+        data: {
+          content: input.content,
+          contentIV: input.contentIV ?? null,
+          summary: input.summary ?? null,
+          summaryIV: input.summaryIV ?? null,
+        },
       });
     }),
 
@@ -76,6 +83,7 @@ export const postRouter = createTRPCRouter({
     }),
 
   getByUser: protectedProcedure.query(async ({ ctx }) => {
+    console.log("hiiiii");
     return await ctx.db.post.findMany({
       where: { createdBy: { id: ctx.session.user.id } },
       orderBy: { createdAt: "desc" },
@@ -144,16 +152,17 @@ export const postRouter = createTRPCRouter({
       },
     });
   }),
-
   getByPostId: protectedProcedure
     .input(
       z.object({
         postId: z.string(),
+        withTags: z.boolean().optional().default(false),
       }),
     )
     .query(async ({ ctx, input }) => {
       return await ctx.db.post.findFirst({
         where: { id: input.postId },
+        include: input.withTags ? { tags: true } : undefined,
       });
     }),
 

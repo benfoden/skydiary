@@ -1,7 +1,12 @@
 "use client";
+export const fetchCache = "force-no-store";
+export const revalidate = 0; // seconds
+export const dynamic = "force-dynamic";
+
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { api } from "~/trpc/react";
 import { decryptPost } from "~/utils/cryptoA1";
 import { formattedTimeStampToDate } from "~/utils/text";
 import { type PostWithTags } from "~/utils/types";
@@ -10,10 +15,10 @@ import { Card } from "./Card";
 import Spinner from "./Spinner";
 
 export default function PostCard({
-  post,
+  postId,
   locale,
 }: {
-  post: PostWithTags;
+  postId: string;
   locale: string;
 }) {
   const user = useSession().data?.user;
@@ -22,23 +27,47 @@ export default function PostCard({
   const [isDecrypting, setIsDecrypting] = useState(true);
   const [currentPost, setCurrentPost] = useState<PostWithTags>();
 
+  const { data: localPost, isSuccess } = api.post.getByPostId.useQuery({
+    postId: postId,
+    withTags: true,
+  }) as { data: PostWithTags | null; isSuccess: boolean };
+
   useEffect(() => {
     setIsDecrypting(true);
-    if (user?.sukMdk && post && mdk) {
-      console.log("Decrypting post...", mdk);
-      const handleDecrypt = async () => {
-        setCurrentPost(await decryptPost(post, mdk));
-      };
-      handleDecrypt()
-        .then(() => setIsDecrypting(false))
-        .catch(() => {
-          console.error("Error decrypting post.");
-        });
+
+    if (isSuccess && !localPost?.content) {
+      setIsDecrypting(false);
+      return;
     }
-  }, [user?.sukMdk, mdk, post]);
+    if (isSuccess && user?.sukMdk && localPost && mdk) {
+      const handleDecrypt = async () => {
+        try {
+          const decryptedPost = await decryptPost(localPost, mdk);
+          setCurrentPost(decryptedPost);
+        } catch (error) {
+          console.error(
+            "Error decrypting post.",
+            localPost.id,
+            localPost.content,
+            localPost.contentIV,
+            mdk,
+            error,
+          );
+        } finally {
+          setIsDecrypting(false);
+        }
+      };
+
+      handleDecrypt().catch((error) => {
+        console.error("Error decrypting post.", error);
+      });
+    }
+  }, [user?.sukMdk, mdk, localPost, isSuccess]);
+
+  if (!localPost) return <Spinner />;
 
   return (
-    <Link key={post.id} href={`/entry/${post.id}`} className="w-full">
+    <Link key={postId} href={`/entry/${postId}`} className="w-full">
       <Card>
         <div className="flex w-full flex-col items-start justify-between gap-2 py-2">
           {isDecrypting ? (
@@ -51,15 +80,15 @@ export default function PostCard({
 
           <div className="flex w-full flex-row items-center justify-between gap-2 text-xs opacity-70">
             <div className="flex flex-col items-start justify-start gap-1">
-              {post.tags && (
+              {localPost?.tags && (
                 <div className="flex w-full flex-row items-center justify-start gap-2">
-                  {post.tags?.map((tag) => (
+                  {localPost.tags?.map((tag) => (
                     <div key={tag.id}>{tag.content}</div>
                   ))}
                 </div>
               )}
               <div className="flex min-w-fit">
-                {formattedTimeStampToDate(post.createdAt, locale)}
+                {formattedTimeStampToDate(localPost.createdAt, locale)}
               </div>
             </div>
           </div>
