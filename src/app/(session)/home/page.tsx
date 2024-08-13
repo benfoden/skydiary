@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { type Post } from "@prisma/client";
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
@@ -16,7 +17,6 @@ import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { formattedTimeStampToDate } from "~/utils/text";
 import { useMdkJwk } from "~/utils/useMdkJwk";
-export const dynamic = "force-dynamic";
 
 const filterPostsByDateRange = (
   daysMin: number,
