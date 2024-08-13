@@ -6,11 +6,13 @@ import { Suspense } from "react";
 import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
+import FormButton from "~/app/_components/FormButton";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { SessionNav } from "~/app/_components/SessionNav";
 import Spinner from "~/app/_components/Spinner";
 import { type Locale } from "~/config";
 import { getUserLocale } from "~/i18n";
+import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { formattedTimeStampToDate } from "~/utils/text";
 import { useMdkJwk } from "~/utils/useMdkJwk";
@@ -86,6 +88,7 @@ export async function generateMetadata({
 }
 
 export default async function Home() {
+  const { user } = await getServerAuthSession();
   const t = await getTranslations();
   const locale = (await getUserLocale()) as Locale;
   const mdkJwk = await useMdkJwk();
@@ -113,6 +116,13 @@ export default async function Home() {
           <Suspense fallback={<Spinner />}>
             <div className="flex w-full flex-col items-start justify-center gap-4 md:max-w-3xl">
               <div className="ml-4">{t("home.today")}</div>
+              {user?.sukMdk && user?.passwordSalt && !mdkJwk && (
+                <div className="text-sm opacity-60">
+                  <form action="/home" method="get">
+                    <FormButton>refresh once to see decrypted text</FormButton>
+                  </form>
+                </div>
+              )}
               {lastPostDate !== today || userPosts?.length === 0 ? (
                 <Link href="/today" prefetch={true} className="w-full">
                   <Button>{t("home.whats happening")}</Button>
