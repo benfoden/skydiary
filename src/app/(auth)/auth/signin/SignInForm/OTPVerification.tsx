@@ -25,15 +25,12 @@ export default function OTPVerification({ email }: Props) {
 
     const formattedEmail = encodeURIComponent(email.toLowerCase().trim());
     const formattedCode = encodeURIComponent(code);
-    const formattedCallback = encodeURIComponent("/auth/verified");
-    const otpRequestURL = `/api/auth/callback/email?email=${formattedEmail}&token=${formattedCode}&callbackUrl=${formattedCallback}`;
+    const otpRequestURL = `/api/auth/callback/email?email=${formattedEmail}&token=${formattedCode}`;
     const response = await fetch(otpRequestURL);
 
-    //todo: why is this required?
-    if (response.url.includes("/auth/verified")) {
+    if (response.ok) {
       router.replace("/auth/new-user");
-    }
-    if (!response) {
+    } else {
       setIsSubmitting(false);
       router.replace(`/auth/signin?error=Verification`);
     }
