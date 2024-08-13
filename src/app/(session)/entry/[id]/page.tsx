@@ -1,4 +1,3 @@
-"use server";
 export const dynamic = "force-dynamic";
 
 import { type Persona, type Tag } from "@prisma/client";
