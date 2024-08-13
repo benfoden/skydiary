@@ -74,7 +74,7 @@ export default function ChatThread({
   };
 
   return (
-    <div className="my-4 w-full md:max-w-2xl">
+    <div className="my-2 w-full md:max-w-2xl">
       <Card isButton={false}>
         <div className="w-full">
           {messages.slice(1).map((message, index) => (
@@ -100,7 +100,7 @@ export default function ChatThread({
             </Card>
           ))}
           {isLoading && (
-            <div className="flex w-full flex-row items-center justify-center">
+            <div className="my-2 flex w-full flex-row items-center justify-center">
               <Spinner />
             </div>
           )}
