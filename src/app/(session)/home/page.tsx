@@ -1,8 +1,4 @@
 /* eslint-disable react/jsx-key */
-export const fetchCache = "force-no-store";
-export const revalidate = 0;
-export const dynamic = "force-dynamic";
-
 import { type Post } from "@prisma/client";
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
