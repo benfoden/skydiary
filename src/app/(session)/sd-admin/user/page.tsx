@@ -67,7 +67,6 @@ export default async function Secret({
                     communicationStyle,
                     communicationSample,
                     isUser,
-                    mdkJwk,
                   });
                 } catch (error) {
                   console.error("Error updating user:", error);

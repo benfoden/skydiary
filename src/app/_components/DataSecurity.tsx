@@ -10,7 +10,9 @@ import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
 import {
   createUserKeys,
+  deleteJWKFromIndexedDB,
   getLocalMdkForUser,
+  MASTERDATAKEY,
   unwrapMDKAndSave,
 } from "~/utils/cryptoA1";
 import Spinner from "./Spinner";
@@ -60,6 +62,43 @@ export default function DataSecurityCard() {
     }
   };
 
+  const handleSetupEncryptionOnNewDevice = async (
+    password: string,
+    passwordSalt: string,
+    sukMdk: string,
+  ) => {
+    if (password.length < 16) {
+      setMessage("your passphrase is at least 16 characters long");
+      return;
+    }
+    try {
+      await unwrapMDKAndSave({
+        password,
+        passwordSalt,
+        sukMdk,
+      });
+      setIsLocalMdk(true);
+      router.push("/settings");
+    } catch (error) {
+      console.error("Error enabling data access:", error);
+      setMessage("Failed to enable data access");
+      throw new Error("Failed to enable data access");
+    }
+  };
+
+  const handleRevokeAccess = async () => {
+    try {
+      setIsLocalMdk(false);
+      document.cookie = "mdkJwk=; path=/; secure; samesite=strict";
+      await deleteJWKFromIndexedDB(MASTERDATAKEY);
+      router.refresh();
+    } catch (error) {
+      console.error("Error revoking access:", error);
+      setMessage("Failed to revoke access");
+      throw new Error("Failed to revoke access");
+    }
+  };
+
   useEffect(() => {
     if (!password && !password2) {
       setMessage("");
@@ -80,42 +119,17 @@ export default function DataSecurityCard() {
 
           setIsLocalMdk(!!key);
         } catch (error) {
-          console.error("Error fetching local key:", error);
+          //don't leak error details to client
+          return undefined;
         }
       }
     };
 
-    fetchLocalMdk().catch((error) => {
-      console.error("Error fetching local key:", error);
+    fetchLocalMdk().catch(() => {
+      //don't leak error details to client
+      return undefined;
     });
   }, [user, isLocalMdk]);
-
-  const handleSetupEncryptionOnNewDevice = async (
-    password: string,
-    passwordSalt: string,
-    sukMdk: string,
-  ) => {
-    if (password.length < 16) {
-      setMessage("your passphrase is at least 16 characters long");
-      return;
-    }
-    try {
-      const unwrapped = await unwrapMDKAndSave({
-        password,
-        passwordSalt,
-        sukMdk,
-      });
-      if (unwrapped) {
-        setIsLocalMdk(true);
-        router.refresh();
-      }
-    } catch (error) {
-      console.error("Error enabling data access:", error);
-      setMessage("Failed to enable data access");
-      throw new Error("Failed to enable data access");
-    }
-  };
-
   //todo: handle user logged in on second device
   //todo: handle password reset
   //todo: handle decrypt data and unset key
@@ -215,8 +229,12 @@ export default function DataSecurityCard() {
                 data access is enabled on this device
               </p>
               <p className="text-sm opacity-60">
-                option to reset passphrase coming soon
+                Caution: If you revoke access on this device, you need to enter
+                your password again to see your unencrypted data.
               </p>
+              <Button onClick={() => handleRevokeAccess()}>
+                revoke access
+              </Button>
             </div>
           </Card>
         )}

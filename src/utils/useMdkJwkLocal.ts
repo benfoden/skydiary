@@ -6,7 +6,7 @@ import { getJWKFromIndexedDB, MASTERDATAKEY } from "./cryptoA1";
 import { useEffect, useState } from "react";
 
 export function useMdkJwkLocal(): JsonWebKey | undefined {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const user = session?.user;
   const [mdkJwk, setMdkJwk] = useState<JsonWebKey | undefined>(undefined);
 
@@ -20,29 +20,22 @@ export function useMdkJwkLocal(): JsonWebKey | undefined {
           setMdkJwk(result ?? undefined);
         }
       } catch (error) {
-        console.error(
-          "Failed to retrieve key from IndexedDB in useMdkJwkLocal:",
-          error,
-        );
-        // Additional logging for debugging
-        console.error("IndexedDB Error Details:", {
-          status,
-          user,
-          MASTERDATAKEY,
-        });
+        //don't leak error details to client
+        return undefined;
       }
     };
 
-    if (status === "authenticated" && user?.sukMdk && user?.passwordSalt) {
-      fetchJWK().catch((error) => {
-        console.error("Error in fetchJWK call in useMdkJwkLocal:", error);
+    if (user?.sukMdk && user?.passwordSalt) {
+      fetchJWK().catch(() => {
+        //don't leak error details to client
+        return undefined;
       });
     }
 
     return () => {
       isMounted = false;
     };
-  }, [status, user, user?.sukMdk, user?.passwordSalt]);
+  }, [user, user?.sukMdk, user?.passwordSalt]);
 
   return mdkJwk;
 }

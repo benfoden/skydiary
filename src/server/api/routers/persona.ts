@@ -74,7 +74,7 @@ export const personaRouter = createTRPCRouter({
           },
         });
       }
-      return null;
+      return persona;
     }),
   update: protectedProcedure
     .input(

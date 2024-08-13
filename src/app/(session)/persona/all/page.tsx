@@ -1,6 +1,5 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import PersonaFormFields from "~/app/(session)/persona/PersonaFormFields";
 import { Card } from "~/app/_components/Card";
@@ -120,8 +119,7 @@ export default async function Persona() {
                       throw new Error("Error creating persona");
                     }
                     if (created) {
-                      revalidatePath("/persona/all");
-                      redirect("/persona/all");
+                      redirect(`/persona/${created.id}`);
                     }
                   }}
                 >

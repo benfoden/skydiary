@@ -70,6 +70,7 @@ export default async function Settings() {
                 const age = Number(formData.get("age"));
                 const gender: string = formData.get("gender") as string;
                 const imageFile = formData.get("imageFile") as File;
+                const occupation: string = formData.get("occupation") as string;
                 const image = await getNewImageUrl({ imageFile });
                 const isUser = true;
 
@@ -91,6 +92,7 @@ export default async function Settings() {
                         age,
                         gender,
                         traits: "",
+                        occupation,
                         isUser,
                         mdkJwk,
                       });
@@ -104,17 +106,17 @@ export default async function Settings() {
               <Input
                 id="name"
                 name="name"
+                initialValue={session?.user.name ?? ""}
                 placeholder={t("settings.placeholderName")}
                 required
                 label={t("settings.your name")}
-                defaultValue={session?.user.name ?? ""}
               />
               <Input
                 type="number"
                 id="age"
                 name="age"
                 placeholder="1"
-                defaultValue={userPersona?.age ?? 0}
+                initialValue={userPersona?.age ?? 0}
                 label={t("settings.your age")}
               />
               {session?.user?.image && (
@@ -134,7 +136,7 @@ export default async function Settings() {
                 id="gender"
                 name="gender"
                 placeholder={t("settings.placeholder identities")}
-                defaultValue={userPersona?.gender ?? ""}
+                initialValue={userPersona?.gender ?? ""}
                 label={t("settings.your identities")}
               />
               <Input
@@ -142,7 +144,7 @@ export default async function Settings() {
                 name="occupation"
                 placeholder={t("settings.occupationPlaceholder")}
                 label={t("settings.occupation")}
-                defaultValue={userPersona?.occupation ?? ""}
+                initialValue={userPersona?.occupation ?? ""}
               />
 
               <FormButton variant="submit">{t("form.save")}</FormButton>

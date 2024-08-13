@@ -28,24 +28,40 @@ export default function ManageEncryption({ user }: { user: User }) {
 
   useEffect(() => {
     if (isSuccessPosts && isSuccessPersonas) {
-      setQueue({
+      setQueue((prev) => ({
         posts: postsData,
-        personas: personasData,
-      });
+        personas: prev.personas,
+      }));
+      let personasFiltered: Persona[] = [];
+      if (personasData.length && user?.sukMdk && user?.passwordSalt && mdkJwk) {
+        personasFiltered = personasData.filter((persona) => {
+          persona.name && !persona.nameIV;
+        });
+      }
+      setQueue((prev) => ({
+        ...prev,
+        personas: personasFiltered,
+      }));
     }
-  }, [isSuccessPosts, isSuccessPersonas, postsData, personasData]);
+  }, [
+    isSuccessPosts,
+    isSuccessPersonas,
+    postsData,
+    personasData,
+    mdkJwk,
+    user?.sukMdk,
+    user?.passwordSalt,
+  ]);
 
   useEffect(() => {
     const newTagAndMemorizeQueue: PostWithCommentsAndTags[] = [];
-    const newEncryptQueuePosts: PostWithCommentsAndTags[] = [];
-    const newEncryptQueuePersonas: Persona[] = [];
+    let newEncryptQueuePosts: PostWithCommentsAndTags[] = [];
 
     queue.posts.forEach((post) => {
       const isOldPost =
         new Date(post.createdAt) < new Date(Date.now() - 8 * 60 * 60 * 1000);
       const hasContent = post.content && post.content.length > 5;
       const hasNoTags = !post.tags?.length;
-      const hasComments = post.comments;
       const hasNoContentIV = !post.contentIV;
 
       if (hasContent && hasNoTags && isOldPost) {
@@ -55,20 +71,13 @@ export default function ManageEncryption({ user }: { user: User }) {
       if (
         user?.sukMdk &&
         user?.passwordSalt &&
-        (hasContent || hasComments) &&
-        hasNoContentIV
+        hasContent &&
+        hasNoContentIV &&
+        mdkJwk
       ) {
         newEncryptQueuePosts.push(post);
       }
     });
-
-    if (queue.personas.length && user?.sukMdk) {
-      queue.personas.forEach((persona) => {
-        if (!persona.nameIV) {
-          newEncryptQueuePersonas.push(persona);
-        }
-      });
-    }
 
     if (newTagAndMemorizeQueue.length) {
       tagAndMemorize
@@ -84,11 +93,21 @@ export default function ManageEncryption({ user }: { user: User }) {
         });
     }
 
-    if (newEncryptQueuePersonas.length) {
+    if (queue.personas.length) {
+      const newEncryptQueuePersonas = queue.personas;
       bulkUpdatePersonas
         .mutateAsync({
           personas: newEncryptQueuePersonas,
           mdkJwk,
+        })
+        .then(() => {
+          // Remove updated personas from the queue to prevent infinite loop
+          setQueue((prevQueue) => ({
+            ...prevQueue,
+            personas: prevQueue.personas.filter(
+              (persona) => !newEncryptQueuePersonas.includes(persona),
+            ),
+          }));
         })
         .catch((error) => {
           console.error("Error processing encryptQueue:", error);
@@ -98,10 +117,10 @@ export default function ManageEncryption({ user }: { user: User }) {
     if (newEncryptQueuePosts.length && mdkJwk) {
       Promise.all(
         newEncryptQueuePosts.map(async (post) => {
-          if (!post.content || post.contentIV) {
+          if (!post.content || (post.content && !post.contentIV)) {
             return;
           }
-          await updatePost.mutateAsync({
+          const updatedPost = await updatePost.mutateAsync({
             postId: post.id,
             content: post.content ?? "",
             summary: post.summary ?? undefined,
@@ -112,6 +131,9 @@ export default function ManageEncryption({ user }: { user: User }) {
             })),
             mdkJwk,
           });
+          if (updatedPost) {
+            newEncryptQueuePosts = newEncryptQueuePosts.filter((post) => post.id !== updatedPost.id);
+          }
         }),
       ).catch((error) => {
         console.error("Error processing encryptQueue:", error);
