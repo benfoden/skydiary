@@ -114,7 +114,6 @@ export default async function Persona({ params }: { params: { id: string } }) {
                           communicationStyle,
                           communicationSample,
                           isFavorite,
-                          mdkJwk,
                         });
                       }
                     } catch (error) {

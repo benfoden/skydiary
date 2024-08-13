@@ -20,7 +20,6 @@ export async function makeComment({
   postId: string;
   userProductId: string;
   commentPersona?: Persona;
-  mdkJwk?: JsonWebKey;
 }) {
   "use server";
 
