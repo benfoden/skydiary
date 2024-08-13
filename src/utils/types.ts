@@ -67,3 +67,5 @@ export type EncryptedPostPartialResult = {
   summaryIV?: string;
   comments?: EncryptedCommentPartialResult[];
 };
+
+export type PostWithTags = Post & { tags?: Tag[] };

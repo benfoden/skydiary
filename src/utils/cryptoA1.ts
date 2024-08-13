@@ -5,12 +5,8 @@ import {
   type EncryptedCommentPartialResult,
   type EncryptedPostPartialResult,
   type EncryptPostPartialInput,
+  type PostWithTags,
 } from "./types";
-
-export interface EncryptedData {
-  cipherText: string;
-  iv: Uint8Array;
-}
 
 export const MASTERDATAKEY = "masterDataKey";
 export const SECRETUSERKEY = "secretUserKey";
@@ -448,8 +444,11 @@ export async function encryptPost(
   return result;
 }
 
-export async function decryptPost(post: Post, mdk: CryptoKey): Promise<Post> {
-  const result: Post = post;
+export async function decryptPost(
+  post: PostWithTags,
+  mdk: CryptoKey,
+): Promise<Post> {
+  const result: PostWithTags = post;
 
   const fieldsToDecrypt = ["content", "summary"] as const;
 

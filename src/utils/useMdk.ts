@@ -1,14 +1,18 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { getJWKFromIndexedDB, MASTERDATAKEY } from "./cryptoA1";
+import {
+  getJWKFromIndexedDB,
+  importKeyFromJWK,
+  MASTERDATAKEY,
+} from "./cryptoA1";
 
 import { useEffect, useState } from "react";
 
-export function useMdkJwkLocal(): JsonWebKey | undefined {
+export function useMdk(): CryptoKey | undefined {
   const { data: session } = useSession();
   const user = session?.user;
-  const [mdkJwk, setMdkJwk] = useState<JsonWebKey | undefined>(undefined);
+  const [mdk, setMdk] = useState<CryptoKey | undefined>(undefined);
 
   useEffect(() => {
     let isMounted = true;
@@ -16,19 +20,21 @@ export function useMdkJwkLocal(): JsonWebKey | undefined {
     const fetchJWK = async () => {
       try {
         const result = await getJWKFromIndexedDB(MASTERDATAKEY);
+        if (!result) {
+          return;
+        }
+        const mdk = await importKeyFromJWK(result);
         if (isMounted) {
-          setMdkJwk(result ?? undefined);
+          setMdk(mdk ?? undefined);
         }
       } catch (error) {
-        //don't leak error details to client
-        return undefined;
+        throw new Error();
       }
     };
 
     if (user?.sukMdk && user?.passwordSalt) {
       fetchJWK().catch(() => {
-        //don't leak error details to client
-        return undefined;
+        console.error("Error getting key for user");
       });
     }
 
@@ -37,5 +43,5 @@ export function useMdkJwkLocal(): JsonWebKey | undefined {
     };
   }, [user, user?.sukMdk, user?.passwordSalt]);
 
-  return mdkJwk;
+  return mdk;
 }

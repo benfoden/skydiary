@@ -1,9 +1,10 @@
 export const dynamic = "force-dynamic";
 import { type Post } from "@prisma/client";
 import { type Metadata } from "next";
+import { useSession } from "next-auth/react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
@@ -13,7 +14,10 @@ import Spinner from "~/app/_components/Spinner";
 import { type Locale } from "~/config";
 import { getUserLocale } from "~/i18n";
 import { api } from "~/trpc/server";
+import { decryptPost } from "~/utils/cryptoA1";
 import { formattedTimeStampToDate } from "~/utils/text";
+import { type PostWithTags } from "~/utils/types";
+import { useMdk } from "~/utils/useMdk";
 
 const filterPostsByDateRange = (
   daysMin: number,
@@ -37,13 +41,35 @@ const filterPostsByDateRange = (
   });
 };
 
-function PostCard({
+async function PostCard({
   post,
   locale,
 }: {
-  post: Post & { tags: { content: string; id: string }[] };
+  post: PostWithTags;
   locale: Locale;
-}): JSX.Element {
+}): Promise<JSX.Element> {
+  const user = useSession().data?.user;
+  const mdk = useMdk();
+
+  const [isDecrypting, setIsDecrypting] = useState(false);
+  const [currentPost, setCurrentPost] = useState<PostWithTags>(post);
+
+  useEffect(() => {
+    if (user?.sukMdk && mdk) {
+      setIsDecrypting(true);
+      const handleDecrypt = async () => {
+        setCurrentPost(await decryptPost(post, mdk));
+      };
+      handleDecrypt().catch(() => {
+        console.error("Error decrypting post.");
+      });
+      setIsDecrypting(false);
+    } else {
+      setCurrentPost(post);
+    }
+  }, [user?.sukMdk, mdk, post]);
+
+  ("use client");
   return (
     <Link key={post.id} href={`/entry/${post.id}`} className="w-full">
       <Card>
