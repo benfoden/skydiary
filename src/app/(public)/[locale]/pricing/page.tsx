@@ -81,9 +81,9 @@ export default function Pricing({
     <div className="relative flex min-h-screen w-full flex-col items-center justify-start">
       <StarsBackground hidden={checkoutStatus !== SUCCESS} />
       <main className="flex min-h-screen w-full flex-col items-center justify-start">
-        <div className="container flex flex-col items-center justify-start gap-12 px-4 py-16 ">
+        <div className="container flex flex-col items-center justify-start gap-12 px-4 py-16">
           {checkoutStatus !== SUCCESS && (
-            <h1 className="text-xl">{t("title")}</h1>
+            <h1 className="text-3xl font-light">{t("title")}</h1>
           )}
           {checkoutStatus === SUCCESS && (
             <div className="flex flex-col items-start gap-6 sm:items-center">

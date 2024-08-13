@@ -1,4 +1,5 @@
 "use client";
+import { EyeClosedIcon, EyeOpenIcon } from "@radix-ui/react-icons";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
@@ -7,8 +8,9 @@ export default function Input({
   label,
   fileSelectButtonLabel,
   defaultChecked,
-  initialValue,
   radioOptions,
+  showHidePassword,
+  initialValue,
   ...props
 }: {
   type?:
@@ -29,7 +31,8 @@ export default function Input({
     value: string | number;
     checked?: boolean;
   }[];
-  initialValue?: string | number;
+  showHidePassword?: boolean;
+  initialValue?: string | number | boolean | undefined;
 } & React.InputHTMLAttributes<
   | HTMLInputElement
   | HTMLTextAreaElement
@@ -37,14 +40,19 @@ export default function Input({
 >) {
   const t = useTranslations();
   if (!type) type = "text";
-  const { id, value, defaultValue } = props;
+  const { id, value, onChange } = props;
+
   const ref = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
+  const [inputValue, setInputValue] = useState<string | undefined>(
+    (value ?? initialValue) as string | undefined,
+  );
   const [isActive, setIsActive] = useState(false);
   const [valueLength, setValueLength] = useState<number | null>(null);
   const [isChecked, setIsChecked] = useState(defaultChecked ?? false);
   const [radioChoices, setRadioChoices] = useState<
     { id: string; label: string; value: string | number; checked?: boolean }[]
   >(radioOptions ?? []);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleFocus = () => {
     setIsActive(true);
@@ -56,7 +64,12 @@ export default function Input({
     if (type === "checkbox") {
       setIsChecked((event.target as HTMLInputElement).checked);
     } else {
+      setInputValue(event.target.value);
       setValueLength(event.target.value.length);
+
+      if (onChange) {
+        onChange(event);
+      }
     }
   };
 
@@ -77,16 +90,16 @@ export default function Input({
     if (type === "checkbox") {
       setValueLength(null);
     } else if (
-      typeof defaultValue === "string" ||
-      Array.isArray(defaultValue)
+      typeof initialValue === "string" ||
+      Array.isArray(initialValue)
     ) {
-      setValueLength(defaultValue.length);
-    } else if (typeof defaultValue === "number") {
-      setValueLength(defaultValue.toString().length);
+      setValueLength(inputValue?.length ?? null);
+    } else if (typeof initialValue === "number") {
+      setValueLength(inputValue?.toString().length ?? null);
     } else {
       setValueLength(null);
     }
-  }, [defaultValue, type]);
+  }, [initialValue, inputValue, type]);
 
   useEffect(() => {
     if (value) {
@@ -117,17 +130,50 @@ export default function Input({
                 {valueLength ?? 0} / {props.maxLength ?? 0}
               </span>
             )}
+          {type === "password" && props.minLength && valueLength !== null && (
+            <span
+              className={`text-xs ${
+                valueLength < props.minLength
+                  ? "text-red-600"
+                  : valueLength === props.minLength
+                    ? "text-yellow-500"
+                    : "text-green-600"
+              }`}
+            >
+              {valueLength ?? 0} / {props.minLength ?? 0}+
+            </span>
+          )}
         </label>
       )}
       {type !== "textarea" &&
         type !== "checkbox" &&
         type !== "file" &&
-        type !== "radio" && (
+        type !== "radio" &&
+        type !== "password" && (
+          <>
+            <input
+              type={type}
+              {...props}
+              value={inputValue}
+              className={`w-full rounded-md px-5 py-3 text-base outline-none transition placeholder:text-sm placeholder:font-light placeholder:text-black/60 placeholder:dark:text-white/80 ${isActive && "bg-white/80 transition dark:bg-white/[.18]"} bg-primary ${props.disabled && "opacity-60"}`}
+              ref={ref as React.RefObject<HTMLInputElement>}
+              onFocus={handleFocus}
+              onChange={(e) => {
+                if (props.onChange) {
+                  props.onChange(e);
+                }
+                handleChange(e);
+              }}
+            />
+          </>
+        )}
+      {type === "password" && (
+        <div className="relative w-full">
           <input
-            type={type}
+            type={showPassword ? "text" : "password"}
             {...props}
-            value={initialValue ?? value}
-            className={`w-full rounded-md px-5 py-3 text-base outline-none transition placeholder:text-sm placeholder:font-light placeholder:text-black/60 placeholder:dark:text-white/80 ${isActive && "bg-white/80 transition dark:bg-white/[.18]"} bg-primary ${props.disabled && "opacity-60"}`}
+            value={inputValue}
+            className={`w-full rounded-md px-5 py-3 text-base outline-none transition placeholder:text-sm placeholder:font-light placeholder:text-black/60 placeholder:dark:text-white/80 ${isActive && "bg-white/80 transition dark:bg-white/[.18] "} bg-primary`}
             ref={ref as React.RefObject<HTMLInputElement>}
             onFocus={handleFocus}
             onChange={(e) => {
@@ -137,7 +183,21 @@ export default function Input({
               handleChange(e);
             }}
           />
-        )}
+          {showHidePassword && (
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 -translate-y-1/2 transform text-sm text-gray-600 dark:text-gray-400"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? (
+                <EyeClosedIcon className="h-5 w-5" />
+              ) : (
+                <EyeOpenIcon className="h-5 w-5" />
+              )}
+            </button>
+          )}
+        </div>
+      )}
       {type === "radio" && (
         <fieldset className="flex w-full flex-col">
           <legend
@@ -185,14 +245,17 @@ export default function Input({
         </fieldset>
       )}
       {type === "textarea" && (
-        <textarea
-          {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
-          className={`w-full rounded-md py-4 pl-5 pr-10 outline-none transition placeholder:text-sm placeholder:font-light ${isActive && "bg-white/80 dark:bg-white/[.18]"} bg-primary`}
-          ref={ref as React.RefObject<HTMLTextAreaElement>}
-          onFocus={handleFocus}
-          onChange={handleChange}
-          rows={7}
-        />
+        <>
+          <textarea
+            {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
+            className={`w-full rounded-md py-4 pl-5 pr-10 outline-none transition placeholder:text-sm placeholder:font-light ${isActive && "bg-white/80 dark:bg-white/[.18]"} bg-primary`}
+            ref={ref as React.RefObject<HTMLTextAreaElement>}
+            onFocus={handleFocus}
+            onChange={handleChange}
+            rows={7}
+            value={inputValue}
+          />
+        </>
       )}
       {type === "checkbox" && (
         <input

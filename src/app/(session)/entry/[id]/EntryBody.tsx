@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, type SetStateAction } from "react";
 import ButtonSpinner from "~/app/_components/ButtonSpinner";
 import { cardColors } from "~/app/_components/Card";
 import { api } from "~/trpc/react";
+import { useMdkJwkLocal } from "~/utils/useMdkJwkLocal";
 
 export default function EntryBody({ post }: { post: Post }) {
   const [content, setContent] = useState(post?.content ?? "");
@@ -15,9 +16,11 @@ export default function EntryBody({ post }: { post: Post }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const t = useTranslations();
   const router = useRouter();
+  const mdkJwk = useMdkJwkLocal();
 
   const { data, isSuccess } = api.post.getByPostId.useQuery({
     postId: post?.id,
+    mdkJwk,
   });
 
   const updatePost = api.post.update.useMutation({
@@ -41,6 +44,8 @@ export default function EntryBody({ post }: { post: Post }) {
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newContent = e.target.value;
 
+    if (newContent === content) return;
+
     setContent(newContent);
 
     if (debounceTimeout) {
@@ -48,7 +53,7 @@ export default function EntryBody({ post }: { post: Post }) {
     }
 
     const newTimeout = setTimeout(() => {
-      updatePost.mutate({ content: newContent, postId: post?.id });
+      updatePost.mutate({ content: newContent, postId: post?.id, mdkJwk });
     }, 1000);
 
     setDebounceTimeout(newTimeout as unknown as SetStateAction<null>);
@@ -63,10 +68,10 @@ export default function EntryBody({ post }: { post: Post }) {
   };
 
   useEffect(() => {
-    if (isSuccess) {
-      setContent(data?.content ?? "");
+    if (isSuccess && data?.content) {
+      setContent(data.content);
     }
-  }, [data, isSuccess]);
+  }, [data?.content, isSuccess]);
 
   useEffect(() => {
     adjustTextareaHeight();

@@ -6,6 +6,7 @@ import { Avatar } from "~/app/_components/Avatar";
 import Button from "~/app/_components/Button";
 import ManageBillingButton from "~/app/_components/ButtonBilling";
 import { Card } from "~/app/_components/Card";
+import DataSecurityCard from "~/app/_components/DataSecurity";
 import DropDownUser from "~/app/_components/DropDownUser";
 import FormButton from "~/app/_components/FormButton";
 import FormDeleteButton from "~/app/_components/FormDeleteButton";
@@ -18,6 +19,7 @@ import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { getNewImageUrl } from "~/utils/_uploads";
 import { ACTIVESTATUSES } from "~/utils/constants";
+import { useMdkJwk } from "~/utils/useMdkJwk";
 
 export async function generateMetadata({
   params: { locale },
@@ -35,7 +37,9 @@ export default async function Settings() {
   const t = await getTranslations();
   const locale: Locale = (await getLocale()) as Locale;
   const session = await getServerAuthSession();
-  const userPersona = await api.persona.getUserPersona();
+  const mdkJwk = await useMdkJwk();
+
+  const userPersona = await api.persona.getUserPersona({ mdkJwk });
   const subscription = await api.stripe.getUserSubDetails();
 
   return (
@@ -66,6 +70,7 @@ export default async function Settings() {
                 const age = Number(formData.get("age"));
                 const gender: string = formData.get("gender") as string;
                 const imageFile = formData.get("imageFile") as File;
+                const occupation: string = formData.get("occupation") as string;
                 const image = await getNewImageUrl({ imageFile });
                 const isUser = true;
 
@@ -87,7 +92,9 @@ export default async function Settings() {
                         age,
                         gender,
                         traits: "",
+                        occupation,
                         isUser,
+                        mdkJwk,
                       });
                     }
                   }
@@ -99,17 +106,17 @@ export default async function Settings() {
               <Input
                 id="name"
                 name="name"
+                initialValue={session?.user.name ?? ""}
                 placeholder={t("settings.placeholderName")}
                 required
                 label={t("settings.your name")}
-                defaultValue={session?.user.name ?? ""}
               />
               <Input
                 type="number"
                 id="age"
                 name="age"
                 placeholder="1"
-                defaultValue={userPersona?.age ?? 0}
+                initialValue={userPersona?.age ?? 0}
                 label={t("settings.your age")}
               />
               {session?.user?.image && (
@@ -129,7 +136,7 @@ export default async function Settings() {
                 id="gender"
                 name="gender"
                 placeholder={t("settings.placeholder identities")}
-                defaultValue={userPersona?.gender ?? ""}
+                initialValue={userPersona?.gender ?? ""}
                 label={t("settings.your identities")}
               />
               <Input
@@ -137,7 +144,7 @@ export default async function Settings() {
                 name="occupation"
                 placeholder={t("settings.occupationPlaceholder")}
                 label={t("settings.occupation")}
-                defaultValue={userPersona?.occupation ?? ""}
+                initialValue={userPersona?.occupation ?? ""}
               />
 
               <FormButton variant="submit">{t("form.save")}</FormButton>
@@ -175,6 +182,7 @@ export default async function Settings() {
             </Card>
           )}
 
+          <DataSecurityCard />
           <Card variant="form">
             <h2>{t("settings.language")}</h2>
             <div className="flex flex-row gap-2">

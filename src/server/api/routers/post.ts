@@ -1,3 +1,4 @@
+import { type Persona } from "@prisma/client";
 import { z } from "zod";
 import { env } from "~/env";
 
@@ -6,9 +7,10 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { getResponse } from "~/utils/ai";
+import { getResponse, getResponseJSON } from "~/utils/ai";
+import { NEWPERSONAUSER, productPlan, TAGS } from "~/utils/constants";
+import { decryptPost, encryptPost, importKeyFromJWK } from "~/utils/cryptoA1";
 import { prompts } from "~/utils/prompts";
-import { cleanStringForEntry } from "~/utils/text";
 
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
@@ -37,107 +39,233 @@ export const postRouter = createTRPCRouter({
       z.object({
         postId: z.string(),
         content: z.string().max(50000).optional(),
-        summary: z.string().optional(),
+        summary: z.string().max(5000).optional(),
+        comments: z
+          .array(
+            z.object({
+              id: z.string(),
+              content: z.string().max(10000),
+              coachName: z.string().optional(),
+            }),
+          )
+          .optional(),
+        mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const data = {
+        id: input.postId,
+        content: input.content ?? "",
+        summary: input.summary,
+        contentIV: "",
+        summaryIV: "",
+        comments: input.comments?.map((comment) => ({
+          id: comment.id,
+          content: comment.content,
+          coachName: comment.coachName ?? "",
+          contentIV: "",
+          coachNameIV: "",
+        })),
+      };
+
+      if (input.mdkJwk) {
+        const key = await importKeyFromJWK(input.mdkJwk);
+        const encryptedData = await encryptPost(data, key);
+        data.content = encryptedData.content ?? data.content;
+        data.summary = encryptedData.summary ?? data.summary;
+        data.summaryIV = encryptedData.summaryIV ?? "";
+        data.contentIV = encryptedData.contentIV ?? "";
+        data.comments = encryptedData.comments?.map((comment) => ({
+          id: comment.id,
+          content: comment.content,
+          coachName: comment.coachName ?? "",
+          contentIV: comment.contentIV ?? "",
+          coachNameIV: comment.coachNameIV ?? "",
+        }));
+        if (
+          (!data.contentIV || (data.summary && !data.summaryIV)) ??
+          data.comments?.some((comment) => !comment.contentIV)
+        ) {
+          throw new Error("Post / comment encryption failed");
+        }
+      }
+
+      if (data.comments) {
+        const commentUpdatePromises = data.comments.map(async (comment) => {
+          return ctx.db.comment.update({
+            where: { id: comment.id },
+            data: {
+              content: comment.content,
+              coachName: comment.coachName,
+              contentIV: comment.contentIV,
+              coachNameIV: comment.coachNameIV,
+            },
+          });
+        });
+        await Promise.all(commentUpdatePromises);
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { comments: _unused, ...dataWithoutComments } = data;
       return ctx.db.post.update({
         where: { id: input.postId, createdBy: { id: ctx.session.user.id } },
-        data: {
-          content: cleanStringForEntry(input.content),
-          summary: input.summary,
-        },
+        data: dataWithoutComments,
       });
     }),
+  bulkUpdate: protectedProcedure
+    .input(
+      z.object({
+        mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
+        posts: z.array(
+          z.object({
+            id: z.string(),
+            content: z.string().max(50000).optional(),
+            summary: z.string().max(5000).optional(),
+            comments: z
+              .array(
+                z.object({
+                  id: z.string(),
+                  content: z.string().max(10000),
+                  coachName: z.string().optional(),
+                }),
+              )
+              .optional(),
+            mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
+          }),
+        ),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const updatePromises = input.posts.map(async (post) => {
+        const data = {
+          id: post.id,
+          content: post.content ?? "",
+          summary: post.summary,
+          comments: post.comments?.map((comment) => ({
+            id: comment.id,
+            content: comment.content,
+            coachName: comment.coachName ?? "",
+            contentIV: "",
+            coachNameIV: "",
+          })),
+          contentIV: "",
+          summaryIV: "",
+        };
 
-  getLatest: protectedProcedure.query(({ ctx }) => {
-    return ctx.db.post.findFirst({
-      orderBy: { createdAt: "desc" },
-      where: { createdBy: { id: ctx.session.user.id } },
-    });
-  }),
+        if (input.mdkJwk) {
+          const key = await importKeyFromJWK(input.mdkJwk);
+          const encryptedData = await encryptPost(data, key);
+          data.content = encryptedData.content ?? data.content;
+          data.contentIV = encryptedData.contentIV ?? "";
+          data.summary = encryptedData.summary ?? data.summary;
+          data.summaryIV = encryptedData.summaryIV ?? "";
+          data.comments = encryptedData.comments?.map((comment) => ({
+            id: comment.id,
+            content: comment.content,
+            coachName: comment.coachName ?? "",
+            contentIV: comment.contentIV ?? "",
+            coachNameIV: comment.coachNameIV ?? "",
+          }));
+          if (
+            (!data.contentIV || (data.summary && !data.summaryIV)) ??
+            data.comments?.some((comment) => !comment.contentIV)
+          ) {
+            throw new Error("Post / comment encryption failed");
+          }
+        }
 
-  getLatestTwoByInputUserIdAsCron: publicProcedure
-    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
-    .query(({ ctx, input }) => {
-      if (input.cronSecret !== env.CRON_SECRET) {
-        throw new Error("Unauthorized");
-      }
-      return ctx.db.post.findMany({
-        orderBy: { createdAt: "desc" },
-        where: { createdBy: { id: input.userId }, content: { not: "" } },
-        take: 2,
+        if (data.comments) {
+          const commentUpdatePromises = data.comments.map(async (comment) => {
+            return ctx.db.comment.update({
+              where: { id: comment.id },
+              data: {
+                content: comment.content,
+                coachName: comment.coachName,
+                contentIV: comment.contentIV,
+                coachNameIV: comment.coachNameIV,
+              },
+            });
+          });
+          await Promise.all(commentUpdatePromises);
+        }
+
+        return ctx.db.post.update({
+          where: { id: post.id, createdBy: { id: ctx.session.user.id } },
+          data: { ...data, comments: undefined },
+        });
       });
+      await Promise.all(updatePromises);
     }),
 
-  getLatestTaggedByInputUserIdAsCron: publicProcedure
-    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
-    .query(({ ctx, input }) => {
-      if (input.cronSecret !== env.CRON_SECRET) {
-        throw new Error("Unauthorized");
-      }
-      return ctx.db.post.findFirst({
+  getLatest: protectedProcedure
+    .input(z.object({ mdkJwk: z.custom<JsonWebKey>().optional() }))
+    .query(async ({ ctx, input }) => {
+      let post = await ctx.db.post.findFirst({
         orderBy: { createdAt: "desc" },
+        where: { createdBy: { id: ctx.session.user.id } },
+      });
+
+      if (post && input?.mdkJwk) {
+        const key = await importKeyFromJWK(input.mdkJwk);
+        const decryptedPostData = await decryptPost(post, key);
+        post = decryptedPostData;
+      }
+      return post;
+    }),
+
+  getAllByUserAndTagId: protectedProcedure
+    .input(
+      z.object({
+        tagId: z.string(),
+        mdkJwk: z.custom<JsonWebKey>().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const posts = await ctx.db.post.findMany({
         where: {
-          createdBy: { id: input.userId },
-          content: { not: "" },
-          tags: { none: {} },
+          AND: [
+            { createdBy: { id: ctx.session.user.id } },
+            { tags: { some: { id: input.tagId } } },
+          ],
         },
-        include: {
-          tags: true,
-        },
-      });
-    }),
-
-  getAllUntaggedByInputUserIdAsCron: publicProcedure
-    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
-    .query(({ ctx, input }) => {
-      if (input.cronSecret !== env.CRON_SECRET) {
-        throw new Error("Unauthorized");
-      }
-      return ctx.db.post.findMany({
         orderBy: { createdAt: "desc" },
-        where: {
-          createdBy: { id: input.userId },
-          tags: { none: {} },
-        },
-        include: {
-          tags: true,
-        },
       });
+
+      if (input.mdkJwk) {
+        const key = await importKeyFromJWK(input.mdkJwk);
+        return await Promise.all(
+          posts.map(async (post) => await decryptPost(post, key)),
+        );
+      }
+
+      return posts;
     }),
 
-  getAllTaggedByInputUserIdAsCron: publicProcedure
-    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
-    .query(({ ctx, input }) => {
-      if (input.cronSecret !== env.CRON_SECRET) {
-        throw new Error("Unauthorized");
-      }
-      return ctx.db.post.findMany({
-        orderBy: { createdAt: "desc" },
-        where: {
-          createdBy: { id: input.userId },
-          tags: { some: {} },
-        },
-        include: {
-          tags: true,
-        },
-      });
-    }),
-
-  getAllByUserIdAsCron: publicProcedure
-    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
-    .query(({ ctx, input }) => {
-      if (input.cronSecret !== env.CRON_SECRET) {
-        throw new Error("Unauthorized");
-      }
-      return ctx.db.post.findMany({
-        where: { createdBy: { id: input.userId } },
+  getByUser: protectedProcedure
+    .input(z.object({ mdkJwk: z.custom<JsonWebKey>().optional() }))
+    .query(async ({ ctx, input }) => {
+      const posts = await ctx.db.post.findMany({
+        where: { createdBy: { id: ctx.session.user.id } },
         orderBy: { createdAt: "desc" },
         include: {
           tags: true,
         },
       });
+
+      if (input?.mdkJwk) {
+        const key = await importKeyFromJWK(input.mdkJwk);
+        const decryptedPosts = await Promise.all(
+          posts.map(async (post) => {
+            const decryptedPost = await decryptPost(post, key);
+            return {
+              ...decryptedPost,
+              tags: post.tags,
+            };
+          }),
+        );
+        return decryptedPosts;
+      }
+
+      return posts;
     }),
 
   getTagsAndCounts: protectedProcedure.query(async ({ ctx }) => {
@@ -175,68 +303,167 @@ export const postRouter = createTRPCRouter({
     return tagsList;
   }),
 
-  getAllByUserAndTagId: protectedProcedure
-    .input(z.object({ tagId: z.string() }))
-    .query(({ ctx, input }) => {
-      return ctx.db.post.findMany({
-        where: {
-          AND: [
-            { createdBy: { id: ctx.session.user.id } },
-            { tags: { some: { id: input.tagId } } },
-          ],
-        },
+  getByUserForJobQueue: protectedProcedure
+    .input(z.object({ mdkJwk: z.custom<JsonWebKey>().optional() }))
+    .query(async ({ ctx, input }) => {
+      const posts = await ctx.db.post.findMany({
+        where: { createdBy: { id: ctx.session.user.id } },
         orderBy: { createdAt: "desc" },
+        include: {
+          tags: true,
+          comments: true,
+        },
       });
+
+      if (input?.mdkJwk) {
+        const key = await importKeyFromJWK(input.mdkJwk);
+        return await Promise.all(
+          posts.map(async (post) => await decryptPost(post, key)),
+        );
+      }
+
+      return posts;
     }),
 
-  getByUser: protectedProcedure.query(({ ctx }) => {
-    return ctx.db.post.findMany({
-      where: { createdBy: { id: ctx.session.user.id } },
-      orderBy: { createdAt: "desc" },
-      include: {
-        tags: true,
-      },
-    });
-  }),
-
-  getAllByUserForExport: protectedProcedure.query(async ({ ctx }) => {
-    const posts = await ctx.db.post.findMany({
-      where: { createdBy: { id: ctx.session.user.id } },
-      orderBy: { createdAt: "desc" },
-      include: {
-        tags: {
-          select: {
-            content: true,
+  getAllByUserForExport: protectedProcedure
+    .input(z.object({ mdkJwk: z.custom<JsonWebKey>().optional() }))
+    .query(async ({ ctx, input }) => {
+      const posts = await ctx.db.post.findMany({
+        where: { createdBy: { id: ctx.session.user.id } },
+        orderBy: { createdAt: "desc" },
+        include: {
+          tags: {
+            select: {
+              content: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    return posts.map(
-      (post: {
-        content: string;
-        updatedAt: Date;
-        createdAt: Date;
-        id: string;
-        tags: { content: string }[];
-      }) => ({
-        id: post.id,
-        content: post.content,
-        updatedAt: post.updatedAt,
-        createdAt: post.createdAt,
-        tags: post.tags.map((tag) => ({
-          content: tag.content,
-        })),
-      }),
-    );
-  }),
+      if (input?.mdkJwk) {
+        const key = await importKeyFromJWK(input.mdkJwk);
+        const decryptedPosts = await Promise.all(
+          posts.map(async (post) => await decryptPost(post, key)),
+        );
+        return decryptedPosts;
+      }
+
+      return posts;
+    }),
 
   getByPostId: protectedProcedure
-    .input(z.object({ postId: z.string() }))
-    .query(({ ctx, input }) => {
-      return ctx.db.post.findFirst({
+    .input(
+      z.object({
+        postId: z.string(),
+        mdkJwk: z.custom<JsonWebKey>().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      let post = await ctx.db.post.findFirst({
         where: { id: input.postId },
       });
+
+      if (post && input.mdkJwk) {
+        const key = await importKeyFromJWK(input.mdkJwk);
+        post = await decryptPost(post, key);
+      }
+
+      return post;
+    }),
+
+  tagAndMemorize: protectedProcedure
+    .input(
+      z.array(
+        z.object({
+          id: z.string(),
+          content: z.string(),
+          summary: z.string().nullable().optional(),
+          tags: z.array(z.string()),
+          mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
+        }),
+      ),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userPersona = await ctx.db.persona.findFirst({
+        where: { createdById: ctx.session.user.id, isUser: true },
+      });
+
+      for (const post of input) {
+        if (!post?.id && post.content?.length < 20 && post.tags.length > 0) {
+          continue;
+        }
+
+        const [newTags, generatedPersona] = await Promise.all([
+          getResponse({
+            messageContent: prompts.tag({ content: post?.content }),
+            model: "gpt-4o-mini",
+          }),
+          getResponseJSON({
+            messageContent: prompts.userPersona({
+              persona: userPersona ?? NEWPERSONAUSER,
+              content: post?.content,
+              wordLimit: ctx.session.user?.isSpecial
+                ? 150
+                : productPlan(ctx.session.user?.stripeProductId).memories,
+            }),
+            model: "gpt-4o-mini",
+          }),
+        ]);
+
+        if (!newTags) {
+          continue;
+        }
+        if (!generatedPersona) {
+          continue;
+        }
+        const personaObject = JSON.parse(generatedPersona) as Persona;
+
+        const tagContents = newTags?.split(",").map((tag) => tag.trim());
+
+        const tagIds = tagContents
+          ?.map((content) => {
+            const tag = TAGS.find((tag) => tag.content === content);
+            return tag?.id ?? undefined;
+          })
+          .filter((tag): tag is string => tag !== undefined);
+        if (!tagIds?.length) {
+          continue;
+        }
+
+        if (post.mdkJwk) {
+          if (post.summary === null || post.summary === undefined) {
+            post.summary = "";
+          }
+          const mdk = await importKeyFromJWK(post.mdkJwk);
+          const encryptedPost = await encryptPost(
+            { id: post.id, content: post.content, summary: post.summary },
+            mdk,
+          );
+          post.content = encryptedPost.content ?? "";
+          post.summary = encryptedPost.summary;
+        }
+
+        await Promise.all([
+          ctx.db.persona.update({
+            where: { id: userPersona?.id },
+            data: {
+              description: personaObject?.description,
+              relationship: personaObject?.relationship,
+              traits: personaObject?.traits,
+            },
+          }),
+          ctx.db.post.update({
+            where: { id: post.id },
+            data: {
+              tags: {
+                connect: tagIds.slice(0, 3).map((tagId: string) => ({
+                  id: tagId,
+                })),
+              },
+            },
+          }),
+        ]);
+      }
     }),
 
   addTagsAsCron: publicProcedure
@@ -351,5 +578,88 @@ export const postRouter = createTRPCRouter({
           });
         }
       }
+    }),
+
+  getLatestTwoByInputUserIdAsCron: publicProcedure
+    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
+    .query(({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
+      return ctx.db.post.findMany({
+        orderBy: { createdAt: "desc" },
+        where: { createdBy: { id: input.userId }, content: { not: "" } },
+        take: 2,
+      });
+    }),
+
+  getLatestTaggedByInputUserIdAsCron: publicProcedure
+    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
+    .query(({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
+      return ctx.db.post.findFirst({
+        orderBy: { createdAt: "desc" },
+        where: {
+          createdBy: { id: input.userId },
+          content: { not: "" },
+          tags: { none: {} },
+        },
+        include: {
+          tags: true,
+        },
+      });
+    }),
+
+  getAllUntaggedByInputUserIdAsCron: publicProcedure
+    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
+    .query(({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
+      return ctx.db.post.findMany({
+        orderBy: { createdAt: "desc" },
+        where: {
+          createdBy: { id: input.userId },
+          tags: { none: {} },
+        },
+        include: {
+          tags: true,
+        },
+      });
+    }),
+
+  getAllTaggedByInputUserIdAsCron: publicProcedure
+    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
+    .query(({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
+      return ctx.db.post.findMany({
+        orderBy: { createdAt: "desc" },
+        where: {
+          createdBy: { id: input.userId },
+          tags: { some: {} },
+        },
+        include: {
+          tags: true,
+        },
+      });
+    }),
+
+  getAllByUserIdAsCron: publicProcedure
+    .input(z.object({ userId: z.string(), cronSecret: z.string() }))
+    .query(({ ctx, input }) => {
+      if (input.cronSecret !== env.CRON_SECRET) {
+        throw new Error("Unauthorized");
+      }
+      return ctx.db.post.findMany({
+        where: { createdBy: { id: input.userId } },
+        orderBy: { createdAt: "desc" },
+        include: {
+          tags: true,
+        },
+      });
     }),
 });

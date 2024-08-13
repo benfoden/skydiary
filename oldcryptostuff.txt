@@ -1,0 +1,238 @@
+
+---OLD NOTES, DO NOT REFERENCE BELOW THIS LINE---
+
+
+----------------------------------
+End to End Encryption Strategy 1
+
+User signs up on device A
+  client: new user authenticates for first time with TOTP
+  client: user enters password
+  client: random salt is generated
+  client: password and salt used to derive secret user key (SUK)
+  client: keypair A is generated
+  client: private key A is saved as JWK with IndexedDB
+  server: new device UUID, device A metadata, userID, and public key A are saved to db
+  - all relevant data sent to/from server from now on is encrypted/decrypted with keypair A
+  server: salt is decrypted with private key A then encrypted with master salt key (loaded from env) then saved to db
+  client: data encryption key is generated (DEK)
+  client: DEK is saved as JWK with IndexedDB
+  client: SUK is used to encrypt DEK, resulting in SUKEDEK
+  server: SUKEDEK is saved to db
+
+Secure handling of user generated content
+  client: user types a new post
+  client: new post plain text is encrypted with DEK, then encrypted with private key A
+  server: new post cipher text is decrypted with public key A and saved to DB
+  client: user opens an old post (request to server)
+  server: old post cipher text is encrypted with public key A
+  client: old post cipher text is decrypted with private key A, then decrypted with DEK, then displayed in the UI
+
+User logs in on a new device B
+  client: user authenticates with TOTP
+  client: user enters password
+  client: keypair B is generated
+  client: private key B is saved as JWK with IndexedDB
+  server: new device UUID, device B metadata, userID, and public key B are saved to db
+  - all relevant data sent to/from server from now on is encrypted/decrypted with keypair B
+  server: salt is decrypted with master salt key (loaded from env) and together with SUKEDEK sent to the client
+  client: password and salt used to derive secret user key (SUK)
+  client: SUKEDEK is decrypted using SUK
+  client: DEK is saved as JWK with IndexedDB for future use
+
+User logs out on device A
+  client: private key A is encrypted with DEK
+  server: DEK encrypted private key A is stored under device A record
+  client: private key A and DEK are deleted from IndexedDB
+  client: session is ended
+  server: session metadata is deleted
+
+User logs back in on the same device
+  client: user authenticates with TOTP
+  client: user enters password
+  server: salt, SUKEDEK, and encrypted private key A are sent to client
+  client: password and salt used to derive secret user key (SUK)
+  client: SUK is used to decrypt the SUKEDEK
+  client: DEK is saved as JWK with IndexedDB
+  client: private key A is decrypted using DEK and saved as JWK with IndexedDB
+
+Revoking devices
+  client: user initiates device revocation
+  server: device UUID is marked as revoked in the db
+  server: any active sessions for the revoked device are terminated
+  client: user is notified of successful revocation
+
+
+----------------------------------
+End to End Encryption Strategy 2 (encrypt indexedDB entries)
+GOAL
+  end to end encryption of user data across multiple devices, and at rest such that the the business and any third parties can't decrypt the user generated content
+
+
+Notes
+  All transfers between client and server are protected with SSL / TLS
+  Web Crypto API (subtle) is used for generating all symmetric and assymetric keys
+  Sessions expire after two weeks
+  Long, strong passwords are auto-generated for the user
+  The user is suggested multiple backup methods for their password
+
+
+User signs up on device A
+  client: new user authenticates for first time with TOTP
+  client: user gets a new password generated
+  client: random salt is generated
+  client: password and salt are used with PBKDF2 to derive secret user key (SUK)
+  client: IndexedDB encryption key (IEK) is generated
+  server: IEK is saved in the db
+  server: IEK is made available in the user session object context
+  client: keypair A is generated
+  client: private key A is encrypted with IEK and saved as JWK in IndexedDB
+  server: new device UUID, device A metadata, userID, and public key A are saved to db
+  client and server: all relevant data transferred to/from server from now on is encrypted/decrypted with keypair A
+  server: salt is decrypted with private key A then encrypted with master salt key (loaded from env) then saved to db
+  client: data encryption key is generated (DEK)
+  client: DEK is encrypted with IEK and saved as JWK in IndexedDB
+  client: SUK is used to encrypt DEK, resulting in SUKEDEK
+  server: SUKEDEK is saved to db
+  client: user is ready to securely use the service for duration of their session
+
+Secure handling of user generated content
+  client: user types new plain text in a new post (user generated content)
+  client: new post plain text is encrypted with DEK, then encrypted with private key A
+  server: new post double-encrypted text is once decrypted with public key A, then the DEK-encrypted ciphertext is saved to DB
+  client: user opens an old post (request to server)
+  server: old post cipher text is encrypted with public key A
+  client: old post cipher text is decrypted with private key A, then decrypted with DEK, then displayed in the UI
+
+User logs out on device A
+  client: user logs out, DEK is deleted from IndexedDB, session token is deleted, etc.
+  server: session token is deleted
+
+User logs back in on device A
+  client: user authenticates with TOTP
+  client: user enters password
+  server: salt, SUKEDEK, IEK are made available to client
+  server: after this step, all data in IndexedDB on the client is always encrypted before storage and decrypted before usage with the IEK, which is made available in the session user object
+  client: password and salt used to derive secret user key (SUK)
+  client: SUK is used to decrypt the SUKEDEK
+  client: DEK is encrypted with IEK and saved as JWK with IndexedDB
+
+  User logs in on a new device B
+  client: user authenticates with TOTP
+  client: user enters password
+  server: after this step, all data in IndexedDB on the client is always encrypted before storage and decrypted before usage with the IEK, which is made available in the session user object
+  client: keypair B is generated
+  client: private key B is encrypted with IEK and saved as JWK with IndexedDB
+  server: new device UUID, device B metadata, userID, and public key B are saved to db
+  client and server: all relevant data transferred to/from server from now on is encrypted/decrypted with keypair B
+  server: salt is decrypted with master salt key (loaded from env) and together with SUKEDEK sent to the client
+  client: password and salt used to derive secret user key (SUK)
+  client: SUKEDEK is decrypted using SUK
+  client: DEK is encrypted with IEK and saved as JWK with IndexedDB
+
+Revoking devices
+  client: user initiates device revocation
+  server: device UUID is marked as revoked in the db
+  server: any active sessions for the revoked device are terminated
+  client: user is notified of successful revocation
+
+
+Feature set
+
+login with email address and enter passcode from email --> user is logged in
+
+data password input UI -- lock and key, etc. to make it clear this is separate from user account
+
+user inputs a password and PBKDF2 user encryption key derived (with a consistent result!)
+
+randomly generate salt when password is created, save in user table, and send it to user when they are deriving keys locally
+
+user encryption key is encrypted via the server, and then stored in local storage ??
+
+data encryption key is generated randomly on client
+
+user encryption key encrypts data encryption key
+
+encrypted data encryption key is saved in db
+
+when user logs in on new device, they must supply their password,
+which is used to derive user encryption key, and that key is used to decrypt data encryption key
+
+unencrypted data encryption key can be used to decrypt / encrypt user data on the client
+
+Notes
+
+session temporary storage (best available option?) should be used for encrypted local storage of user encryption key
+
+user encryption key is decrypted via server to local storage
+
+when user encryption key is decrypted/encrypted via server, there is a check if the device id has been revoked or not
+
+automatically expire sessions after one month by default -- user adjustable value
+
+add keep me logged in checkbox
+
+session encryption key generated by server to encrypt user encryption key locally when session starts
+
+session encryption key is not stored locally
+
+when client tries to decrypt locally stored user encryption key,
+request is sent to server with userID, deviceID, session token, then conditionals are run,
+and session encryption key is returned or not
+
+
+
+1. 
+•   Each user has a unique account protected by strong authentication mechanisms (e.g., password and TOTP).
+•   Upon successful authentication, the user receives a session token to communicate with the server.
+
+2.  
+•   The user enters a password.
+•   A random salt is generated.
+•   A user password key (UPK) is derived from the password and the salt on the client.
+•   The salt is encrypted with a master salt key (loaded from ENV) and stored in the DB.
+•   SKIP A data encryption key (DEK) is generated on the client.
+•   SKIP The UPK is used to encrypt the DEK on the client.
+•   A public/ private keypair is generated on the client.
+•   SKIP The public key, and encrypted DEK are stored in the DB.
+•   The public key is stored in the DB.
+•   The private key is used to create an encrypted UPK (EUPK).
+•   The UPK and private key are stored locally in JWK format, using the IndexedDB API.
+•   The user is responsible for securely storing their password. It can be backed up or stored in a secure location accessible only to the user.
+•   If the user logs out, the EPK is deleted from the device.
+
+3. 
+•   The UPK is used to decrypt the private key and that is used to encrypt / decrypt data locally as needed.
+
+
+4.  
+•   When the user logs in from a new device, they authenticate using their credentials and a multi-factor authentication process.
+•   When the user enters their data password on a new device, the salt is decrypted and sent from the server to be used to derive the same user key again and then it is stored locally.
+•   A random UUID is generated and stored on the server as a device ID, together with a label for the device, various metadata about the device. The deviceID is also stored locally.
+•   The data encryption key can then be decrypted on the new deviice and used for encrypting/decrypting data on the new device.
+•   If the user revokes a device, when a PUT or GET request comes from that revoked device, the server returns an error response and invalidates the relevant session token immediately.
+
+Workflow for Multiple Devices
+
+1.  Device Registration:
+•   When a user logs in from a new device, the device is registered and linked to the user’s account.
+•   The server sends the encrypted data encryption key to the device.
+•   The user must enter their encryption key on the new device to decrypt the data encryption key.
+2.  Key Synchronization:
+•   For subsequent logins, the server re-sends the encrypted data encryption key.
+•   The user must enter their encryption key each time to decrypt the data encryption key on each device.
+3.  Key Rotation and Revocation:
+•   Regular key rotation policies ensure that encryption keys are periodically updated by the user.
+•   When a key is rotated, the user re-encrypts the data with the new key and updates the encrypted data encryption key stored on the server.
+•   If a device is compromised, the user can revoke access by rotating their encryption key, making the compromised key invalid.
+
+Security Considerations
+
+•   Secure Transmission: Ensure all communications between client and server are encrypted using strong TLS protocols.
+•   Authentication: Use robust authentication mechanisms to prevent unauthorized access.
+•   User-Controlled Keys: Ensure that the encryption keys required to decrypt user data are generated and controlled by the user and are never accessible to the server.
+•   Key Storage: Users are responsible for securely storing their encryption keys. This can be done using secure hardware (e.g., hardware security modules, encrypted USB drives) or secure software (e.g., password managers).
+•   Session Management: Implement secure session management to protect session tokens and prevent session hijacking.
+•   Device Trust: Maintain a list of trusted devices for each user, allowing users to review and revoke access as needed.
+
+By ensuring that the encryption keys are user-generated and never transmitted to the server, the business operating the service can never independently decrypt user data without user intervention. This approach puts the control of the encryption keys firmly in the hands of the users, safeguarding their data against unauthorized access by the service provider.

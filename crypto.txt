@@ -1,0 +1,78 @@
+Encryption Strategy for Robust User Data Privacy (from the business) and Security (from third parties)
+
+
+Notes
+  All transfers between client and server are encrypted with TLS
+  Web Crypto API (subtle) is used for generating all symmetric keys with (AES-GCM) 
+  Sessions expire after two weeks
+  Long, strong passwords are required. The business can't see them. They can't be reset, only updated by providing the original password (all on the client.)
+  The DB on the server side is encrypted at rest
+  The local IndexedDB is considered secure
+  CD is the client device, S is the server (or serverless function etc)
+
+New user sign up
+  CD: new user authenticates for first time with TOTP
+User sets a password
+  CD: on /settings page the user enters a data password and is prompted to save it securely in a password manager or otherwise save a copy
+  CD: a random uint8Array(16) salts is generated: SUKs
+  CD: Argon2 is used to derive password salt user key (SUK) from data password and SUKs
+  CD: master data key is generated (MDK), saved in jwk format in local IndexedDB
+  CD: SUK is used to encrypt MDK, resulting in SUK-MDK
+  S: SUK-MDK, SUKs are added to user record, updated in DB
+  S: new device A record with UUID, device A metadata, userID is created in DB in Devices table --- TODO
+  CD: user is ready to securely use the service for duration of their session
+
+Handle job queues
+note: jobToDo is a string that is either "encryptAndSave", "decryptAndSave", "memorize", "genEmbed", "summarize", or "tag"
+  S: create jobQueue stringified object with all posts, comments, personas ids in object with each key and corresponding arrays of objects: {id, jobToDo} andsave in DB
+  CD: check for unprocessed items in job queue when any session page loads
+  CD: process job queue in background while session is active. prioritize old data first
+
+Secure handling of user generated content
+  CD: user types new plain text (any user-generated content)
+  CD: new plain text is encrypted with MDK
+  S: new MDK-encrypted cipher text is created in DB
+  CD: user requests some cipher text from server
+  S: cipher text is sent to the client
+  CD: cipher text is decrypted with MDK, then displayed in the UI
+
+Sending user data to LLM API
+  S: cipher text is sent to the client
+  CD: user requests LLM API response directly, or user visits a page and LLM processing runs in the background
+  CD: cipher text and MDK are sent to server helper route. MDK is never stored on the server.
+  S: decrypted text is sent to LLM API for comments, summarization, tagging, embedding generation, etc.
+  S: LLM API response is encrypted with MDK and saved in DB for the user
+
+
+User logs out on device A
+  CD: user logs out
+  CD: all entries deleted from local IndexedDB
+  S: session token is deleted
+
+User logs back in on device A
+  CD: user authenticates with TOTP
+  CD: user enters data password
+  CD: SUKs, SUK-MDK are provided by the server in the active session user object context
+  CD: data password and SUKs used to derive secret user key (SUK)
+  CD: SUK is used to decrypt the SUK-MDK
+  CD: SUK and MDK are saved in jwk format in local IndexedDB
+  CD: user is ready to securely use the service for duration of their session
+
+
+User logs in on a new device B
+  CD: user authenticates with TOTP
+  CD: user enters data password
+  S: new device UUID, device B metadata, userID are created in DB
+  S: SUKs is decrypted with master salt key (loaded from env) and together with SUK-MDK, made available to client in active session user object context
+  CD: data password and SUKs used to derive secret user key (SUK)
+  CD: SUK-MDK is decrypted using SUK
+  CD: SUK and MDK are saved in jwk format in local IndexedDB
+  CD: user is ready to securely use the service for duration of their session
+
+
+Revoking devices
+  CD: user initiates device revocation
+  S: device UUID row is deleted from the DB
+  S: any active sessions for the revoked device are terminated
+  CD: user is notified of successful revocation
+

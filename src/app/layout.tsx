@@ -20,6 +20,14 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "metadata" });
 
   return {
+    metadataBase: new URL("https://skydiary.app"),
+    alternates: {
+      canonical: "/",
+      languages: {
+        en: "/en",
+        ja: "/ja",
+      },
+    },
     title: { template: "%s · skydiary", default: "skydiary" },
     description: t("top.description"),
     icons: [{ rel: "icon", url: "/favicon.ico" }],
@@ -47,12 +55,13 @@ export default async function RootLayout({
   const locale = await getLocale();
   const messages = await getMessages();
 
-
+  const theme = "dark";
   return (
-    <html lang={locale}>
+    <html lang={locale} data-theme={theme} suppressHydrationWarning={true}>
       <head>
         <ThemeScript />
       </head>
+
       <body className={`font-sans ${inter.variable} bg-transparent`}>
         <div className="relative min-h-screen w-full">
           <div className="absolute inset-0 z-[-20] min-h-full w-full bg-gradient-to-b from-[#cce3f1] to-[#f3f6f6] dark:from-[#07090a] dark:to-[#171727]" />

@@ -5,9 +5,11 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import Button from "~/app/_components/Button";
 import { PersonaIcon } from "~/app/_components/PersonaIcon";
+import Spinner from "~/app/_components/Spinner";
 
 export default function PersonaSidebar({ personas }: { personas: Persona[] }) {
   const t = useTranslations();
+
   return (
     <div className="mb-4 flex flex-col items-start justify-center gap-4">
       <a href="/persona/all#newPersona" className="flex items-center gap-2">
@@ -18,8 +20,8 @@ export default function PersonaSidebar({ personas }: { personas: Persona[] }) {
             <PlusIcon className="h-6 w-6" />
           </div>
         </Button>
-      </a>{" "}
-      {personas && (
+      </a>
+      {personas ? (
         <>
           {personas?.map((persona) => (
             <Link key={persona.id} href={`/persona/${persona.id}`}>
@@ -35,6 +37,10 @@ export default function PersonaSidebar({ personas }: { personas: Persona[] }) {
             </Link>
           ))}
         </>
+      ) : (
+        <div className="flex w-full flex-col items-center justify-center gap-4">
+          <Spinner />
+        </div>
       )}
     </div>
   );

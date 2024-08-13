@@ -1,0 +1,72 @@
+Encryption Strategy for Robust User Data Privacy (from the business) and Security (from third parties)
+
+Notes
+
+- All transfers between client and server are encrypted with TLS
+
+Requirements
+
+- Web Crypto API (subtle) is used for generating keys with (AES-GCM)
+- User generated data is encrypted at rest in the DB
+- User data in the DB is decrypted on the server only to complete data processing for the user - such as summarization and tagging, via LLM Api calls, etc.
+- Keys are rotated every six months.
+
+Master Data Key Generation and Management
+
+- Generate a master data key, MDK0
+- Store key in server environment variable MDK0
+
+Rotation of MDKs
+
+- Rotate MDKs every six months
+- When its time to rotate MDK0, first MDK1, then MDK2 is generated, then next time generate new MDK0
+
+Data encryption key generation and management
+
+- For each user, generate a data encryption key, DEK0
+- Store the DEK in the user record in the database.
+
+Rotation of DEKs
+
+- Rotate DEKs every year
+- Decrypt the DEK0 with MDK
+- Decrypt all data with DEK0, encrypt with DEK1, then store in the user record in the database again.
+- When its time to rotate DEK0, first DEK1, then DEK2 is generated, then next time generate new DEK0
+
+Data Encryption at Rest
+
+- Encrypt all user generated data with the DEK on the client before sending to the database
+- Encrypt each user's DEK with the MDK
+- Store the encrypted DEKs in each user record in the database.
+
+Data Decryption for Processing
+
+- Conditions under which data is decrypted
+  - Data is decrypted only when necessary for summarization, memory saving, tagging, etc.
+  - Decrypt the DEK with the master key.
+  - Decrypt the data with the DEK and process it, then encrypt the data with the DEK again and store
+  - Decrypted data is kept in memory only for the duration of processing.
+
+Data decryption on client for user display
+
+- Conditions under which data is decrypted
+  - Data is decrypted on the client only when it needs to be displayed.
+- Client-side decryption process before display
+  - Securely transmit the DEK to the client.
+  - Example: Use a secure channel (e.g., TLS) to send the DEK.
+  - Decrypt the data with the DEK on the client.
+  - Example: `crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, dek, encryptedData)`
+- Ensuring secure transmission of decryption keys to the client
+  - Use secure methods to transmit keys, such as end-to-end encryption.
+
+Sending user data to LLM API
+
+- Anonymize sensitive information before sending data to the LLM API. Replace names, addresses, etc., with placeholders.
+- Encrypt data before sending it to the LLM API.
+- Decrypt the response from the LLM API securely.
+
+Encrypting vector data
+
+- Decrypt chunk data before sending to embedding API
+- Before saving output to the database, encrypt chunk data with the DEK
+- Decrypt chunk data when vector search is performed

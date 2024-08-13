@@ -15,11 +15,13 @@ export async function makeComment({
   postId,
   userProductId,
   commentPersona,
+  mdkJwk,
 }: {
   comments: Comment[];
   postId: string;
   userProductId: string;
   commentPersona?: Persona;
+  mdkJwk?: JsonWebKey;
 }) {
   "use server";
 
@@ -27,7 +29,7 @@ export async function makeComment({
     // get latest post in case there are any changes
     const [latestPost, currentUserPersona, session] = await Promise.all([
       api.post.getByPostId({ postId }),
-      api.persona.getUserPersona(),
+      api.persona.getUserPersona({ mdkJwk }),
       getServerAuthSession(),
     ]);
     const { user } = session;

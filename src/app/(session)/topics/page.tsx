@@ -7,6 +7,7 @@ import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { SessionNav } from "~/app/_components/SessionNav";
 import { type Locale } from "~/config";
 import { api } from "~/trpc/server";
+import { useMdkJwk } from "~/utils/useMdkJwk";
 
 export async function generateMetadata({
   params: { locale },
@@ -22,7 +23,8 @@ export async function generateMetadata({
 
 export default async function Topics() {
   const t = await getTranslations();
-  const userPosts = await api.post.getByUser();
+  const mdkJwk = await useMdkJwk();
+  const userPosts = await api.post.getByUser({ mdkJwk });
 
   const tagsAndCounts = await api.post.getTagsAndCounts();
 

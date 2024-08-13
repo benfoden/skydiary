@@ -24,6 +24,7 @@ export default async function Image() {
         <FormButton isSpecial variant="submit">
           upload
         </FormButton>
+        See console log for image url
       </form>
     </div>
   );

@@ -26,8 +26,6 @@ export default function EventBody({
       throw new Error("No events found.");
     }
 
-    console.log("events", events);
-
     const eventMap = events
       .filter((event) => event.userId !== "clwaeilcb0000j405ba96cc5p")
       .reduce(
@@ -55,8 +53,6 @@ export default function EventBody({
         },
         {} as Record<string, { total: number; types: Record<string, number> }>,
       );
-
-    console.log("eventMap", eventMap);
 
     const weekStart = startOfWeek(new Date());
     const weekEnd = endOfWeek(new Date());
