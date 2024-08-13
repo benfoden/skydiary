@@ -89,9 +89,10 @@ export async function generateMetadata({
 
 export default async function Home() {
   const { user } = await getServerAuthSession();
+  const mdkJwk = await useMdkJwk();
+
   const t = await getTranslations();
   const locale = (await getUserLocale()) as Locale;
-  const mdkJwk = await useMdkJwk();
   const userPosts = await api.post.getByUser({ mdkJwk });
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const today = new Date().toLocaleDateString("en-US", {
@@ -115,14 +116,16 @@ export default async function Home() {
         <div className="container flex flex-col items-center justify-start px-2 pb-12">
           <Suspense fallback={<Spinner />}>
             <div className="flex w-full flex-col items-start justify-center gap-4 md:max-w-3xl">
-              <div className="ml-4">{t("home.today")}</div>
               {user?.sukMdk && user?.passwordSalt && !mdkJwk && (
-                <div className="text-sm opacity-60">
+                <Card isButton={false}>
                   <form action="/home" method="get">
-                    <FormButton>refresh once to see decrypted text</FormButton>
+                    <div className="w-full flex-row items-center justify-center">
+                      <FormButton>click here to show decrypted text</FormButton>
+                    </div>
                   </form>
-                </div>
+                </Card>
               )}
+              <div className="ml-4">{t("home.today")}</div>
               {lastPostDate !== today || userPosts?.length === 0 ? (
                 <Link href="/today" prefetch={true} className="w-full">
                   <Button>{t("home.whats happening")}</Button>
