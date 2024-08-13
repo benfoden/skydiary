@@ -1,5 +1,11 @@
 import { type Persona, type Post } from "@prisma/client";
 import localforage from "localforage";
+import {
+  type EncryptCommentPartialInput,
+  type EncryptedCommentPartialResult,
+  type EncryptedPostPartialResult,
+  type EncryptPostPartialInput,
+} from "./types";
 
 export interface EncryptedData {
   cipherText: string;
@@ -373,11 +379,52 @@ export async function decryptPersona(
   return result;
 }
 
-export async function encryptPost(
-  postData: { content: string | undefined; summary: string | undefined },
+export async function encryptComment(
+  commentData: EncryptCommentPartialInput,
   mdk: CryptoKey,
-): Promise<Partial<Post>> {
-  const result: Partial<Post> = postData;
+) {
+  const result: EncryptedCommentPartialResult = {
+    id: commentData.id,
+    content: commentData.content,
+    coachName: commentData.coachName ?? "",
+    coachNameIV: "",
+    contentIV: "",
+  };
+
+  const fieldsToEncrypt = ["content", "coachName"] as const;
+
+  const encryptionPromises = fieldsToEncrypt.map(async (field) => {
+    const fieldValue = commentData[field];
+    if (typeof fieldValue === "string") {
+      const { cipherText, iv } = await encryptTextWithKey(fieldValue, mdk);
+      result[field] = cipherText;
+      result[`${field}IV`] = Buffer.from(iv).toString("base64");
+    }
+  });
+
+  await Promise.all(encryptionPromises);
+
+  return result;
+}
+
+export async function encryptPost(
+  postData: EncryptPostPartialInput,
+  mdk: CryptoKey,
+) {
+  const result: EncryptedPostPartialResult = {
+    id: postData.id,
+    content: postData.content,
+    contentIV: "",
+    summary: postData.summary ?? "",
+    summaryIV: "",
+    comments: postData.comments?.map((comment) => ({
+      id: comment.id,
+      content: comment.content,
+      contentIV: "",
+      coachName: comment.coachName ?? "",
+      coachNameIV: "",
+    })),
+  };
 
   const fieldsToEncrypt = ["content", "summary"] as const;
 
@@ -389,6 +436,13 @@ export async function encryptPost(
     }
   });
 
+  if (postData.comments) {
+    result.comments = await Promise.all(
+      postData.comments.map(async (comment) => {
+        return await encryptComment(comment, mdk);
+      }),
+    );
+  }
   await Promise.all(encryptionPromises);
 
   return result;

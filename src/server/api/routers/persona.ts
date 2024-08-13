@@ -115,6 +115,9 @@ export const personaRouter = createTRPCRouter({
       if (input.mdkJwk) {
         const key = await importKeyFromJWK(input.mdkJwk);
         data = await encryptPersona(data, key);
+        if (!data.nameIV) {
+          throw new Error("Persona encryption failed");
+        }
       }
       return await ctx.db.persona.update({
         where: { id: input.personaId, createdBy: { id: ctx.session.user.id } },
@@ -167,6 +170,9 @@ export const personaRouter = createTRPCRouter({
         if (input.mdkJwk) {
           const key = await importKeyFromJWK(input.mdkJwk);
           data = await encryptPersona(data, key);
+          if (!data.nameIV) {
+            throw new Error("Persona encryption failed");
+          }
         }
         return ctx.db.persona.update({
           where: {

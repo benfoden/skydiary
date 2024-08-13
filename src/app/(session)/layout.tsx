@@ -24,7 +24,7 @@ export default async function SessionLayout({ children }: Props) {
     <div className="container mx-auto min-h-screen">
       <NextAuthProvider>
         <PrepareMDK user={session.user} />
-        <ManageEncryption />
+        <ManageEncryption user={session.user} />
         {children}
       </NextAuthProvider>
     </div>

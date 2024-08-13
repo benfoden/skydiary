@@ -22,7 +22,8 @@ export type JobType =
   | "memorize"
   | "genEmbed"
   | "summarize"
-  | "tag";
+  | "tag"
+  | "tagAndMemorize";
 
 //todo: create types for JobQueue, and any necessary subtypes
 //todo: should reuse the existing types for Post, Comment, and Persona
@@ -37,9 +38,32 @@ export interface PostsWithCommentsAndTagsAndPersonas {
   personas: Persona[];
 }
 
-export type EncryptedPostData = {
+export type EncryptedCommentPartialResult = {
+  id: string;
   content: string;
-  contentIV?: string;
-  summary: string;
+  contentIV: string;
+  coachName?: string;
+  coachNameIV?: string;
+};
+
+export type EncryptCommentPartialInput = {
+  id: string;
+  content: string;
+  coachName?: string;
+};
+
+export type EncryptPostPartialInput = {
+  id: string;
+  content: string;
+  summary?: string;
+  comments?: EncryptCommentPartialInput[];
+};
+
+export type EncryptedPostPartialResult = {
+  id: string;
+  content: string;
+  contentIV: string;
+  summary?: string;
   summaryIV?: string;
+  comments?: EncryptedCommentPartialResult[];
 };

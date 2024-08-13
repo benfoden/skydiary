@@ -45,8 +45,11 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const data = {
-        content: input.content,
+        id: input.postId,
+        content: input.content ?? "",
         summary: input.summary,
+        contentIV: "",
+        summaryIV: "",
       };
 
       if (input.mdkJwk) {
@@ -54,12 +57,101 @@ export const postRouter = createTRPCRouter({
         const encryptedData = await encryptPost(data, key);
         data.content = encryptedData.content ?? data.content;
         data.summary = encryptedData.summary ?? data.summary;
+        data.summaryIV = encryptedData.summaryIV ?? "";
+        data.contentIV = encryptedData.contentIV ?? "";
+        if (!data.contentIV || (data.summary && !data.summaryIV)) {
+          throw new Error("Post / Comment encryption failed");
+        }
       }
 
       return ctx.db.post.update({
         where: { id: input.postId, createdBy: { id: ctx.session.user.id } },
         data,
       });
+    }),
+  bulkUpdate: protectedProcedure
+    .input(
+      z.object({
+        mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
+        posts: z.array(
+          z.object({
+            id: z.string(),
+            content: z.string().max(50000).optional(),
+            summary: z.string().max(5000).optional(),
+            comments: z
+              .array(
+                z.object({
+                  id: z.string(),
+                  content: z.string().max(10000),
+                  coachName: z.string().optional(),
+                }),
+              )
+              .optional(),
+            mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
+          }),
+        ),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const updatePromises = input.posts.map(async (post) => {
+        const data = {
+          id: post.id,
+          content: post.content ?? "",
+          summary: post.summary,
+          comments: post.comments?.map((comment) => ({
+            id: comment.id,
+            content: comment.content,
+            coachName: comment.coachName ?? "",
+            contentIV: "",
+            coachNameIV: "",
+          })),
+          contentIV: "",
+          summaryIV: "",
+        };
+
+        if (input.mdkJwk) {
+          const key = await importKeyFromJWK(input.mdkJwk);
+          const encryptedData = await encryptPost(data, key);
+          data.content = encryptedData.content ?? data.content;
+          data.contentIV = encryptedData.contentIV ?? "";
+          data.summary = encryptedData.summary ?? data.summary;
+          data.summaryIV = encryptedData.summaryIV ?? "";
+          data.comments = encryptedData.comments?.map((comment) => ({
+            id: comment.id,
+            content: comment.content,
+            coachName: comment.coachName ?? "",
+            contentIV: comment.contentIV ?? "",
+            coachNameIV: comment.coachNameIV ?? "",
+          }));
+          if (
+            (!data.contentIV || (data.summary && !data.summaryIV)) ??
+            data.comments?.some((comment) => !comment.contentIV)
+          ) {
+            throw new Error("Post / comment encryption failed");
+          }
+        }
+
+        if (data.comments) {
+          const commentUpdatePromises = data.comments.map(async (comment) => {
+            return ctx.db.comment.update({
+              where: { id: comment.id },
+              data: {
+                content: comment.content,
+                coachName: comment.coachName,
+                contentIV: comment.contentIV,
+                coachNameIV: comment.coachNameIV,
+              },
+            });
+          });
+          await Promise.all(commentUpdatePromises);
+        }
+
+        return ctx.db.post.update({
+          where: { id: post.id, createdBy: { id: ctx.session.user.id } },
+          data: { ...data, comments: undefined },
+        });
+      });
+      await Promise.all(updatePromises);
     }),
 
   getLatest: protectedProcedure
@@ -302,7 +394,7 @@ export const postRouter = createTRPCRouter({
           }
           const mdk = await importKeyFromJWK(post.mdkJwk);
           const encryptedPost = await encryptPost(
-            { content: post.content, summary: post.summary },
+            { id: post.id, content: post.content, summary: post.summary },
             mdk,
           );
           post.content = encryptedPost.content ?? "";
