@@ -2,8 +2,7 @@
 
 import { api } from "~/trpc/react";
 
-import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   type PostsWithCommentsAndTagsAndPersonas,
   type PostWithCommentsAndTags,
@@ -11,8 +10,6 @@ import {
 import { useMdkJwkLocal } from "~/utils/useMdkJwkLocal";
 
 export default function ManageEncryption() {
-  const session = useSession();
-  const user = session?.data?.user;
   const mdkJwk = useMdkJwkLocal();
 
   const [queue, setQueue] = useState<PostsWithCommentsAndTagsAndPersonas>({
@@ -35,32 +32,6 @@ export default function ManageEncryption() {
   const tagAndMemorize = api.post.tagAndMemorize.useMutation();
 
   const bulkUpdatePersonas = api.persona.bulkUpdate.useMutation();
-
-  useEffect(() => {
-    const handleMakeMdkCookie = async () => {
-      if (!mdkJwk) {
-        throw new Error("Failed to retrieve key from IndexedDB");
-      }
-      document.cookie = `mdkJwk=${JSON.stringify(mdkJwk)}; path=/; secure; samesite=strict`;
-    };
-    if (user?.sukMdk && user?.passwordSalt) {
-      handleMakeMdkCookie().catch((error) => {
-        console.error("Error handling makeMdkCookie:", error);
-      });
-    }
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState !== "visible") {
-        document.cookie = `mdkJwk=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=strict`;
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [mdkJwk, user?.sukMdk, user?.passwordSalt]);
 
   // useEffect(() => {
   //   try {

@@ -3,29 +3,46 @@
 import { useSession } from "next-auth/react";
 import { getJWKFromIndexedDB, MASTERDATAKEY } from "./cryptoA1";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 export function useMdkJwkLocal(): JsonWebKey | undefined {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const user = session?.user;
   const [mdkJwk, setMdkJwk] = useState<JsonWebKey | undefined>(undefined);
 
-  const fetchJWK = useCallback(async () => {
-    try {
-      const result = await getJWKFromIndexedDB(MASTERDATAKEY);
-      setMdkJwk(result ?? undefined);
-    } catch (error) {
-      console.error("Failed to retrieve key from IndexedDB:", error);
-    }
-  }, []);
-
   useEffect(() => {
-    if (user?.sukMdk && user?.passwordSalt) {
+    let isMounted = true;
+
+    const fetchJWK = async () => {
+      try {
+        const result = await getJWKFromIndexedDB(MASTERDATAKEY);
+        if (isMounted) {
+          setMdkJwk(result ?? undefined);
+        }
+      } catch (error) {
+        console.error(
+          "Failed to retrieve key from IndexedDB in useMdkJwkLocal:",
+          error,
+        );
+        // Additional logging for debugging
+        console.error("IndexedDB Error Details:", {
+          status,
+          user,
+          MASTERDATAKEY,
+        });
+      }
+    };
+
+    if (status === "authenticated" && user?.sukMdk && user?.passwordSalt) {
       fetchJWK().catch((error) => {
-        console.error("Error:", error);
+        console.error("Error in fetchJWK call in useMdkJwkLocal:", error);
       });
     }
-  }, [fetchJWK, user?.sukMdk, user?.passwordSalt]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [status, user, user?.sukMdk, user?.passwordSalt]);
 
   return mdkJwk;
 }

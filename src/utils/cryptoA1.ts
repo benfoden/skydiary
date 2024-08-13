@@ -1,6 +1,5 @@
 import { type Persona, type Post } from "@prisma/client";
 import localforage from "localforage";
-import { type EncryptedPostData } from "./types";
 
 export interface EncryptedData {
   cipherText: string;
@@ -283,12 +282,7 @@ export async function getJWKFromIndexedDB(
       storeName: "keys",
       description: "hello",
     });
-    const jwk = await localforage.getItem<JsonWebKey>(keyName);
-    if (!jwk) {
-      console.error("Key not found in local db");
-      return null;
-    }
-    return jwk;
+    return await localforage.getItem<JsonWebKey>(keyName);
   } catch (error) {
     console.error("Failed to retrieve from local db:", error);
     throw new Error("Failed to retrieve from local db");
@@ -345,7 +339,6 @@ export async function decryptPersona(
   persona: Persona,
   mdk: CryptoKey,
 ): Promise<Persona> {
-  console.log("decrypt persona", persona, mdk);
   const result: Persona = persona;
 
   const fieldsToDecrypt = [
@@ -381,10 +374,10 @@ export async function decryptPersona(
 }
 
 export async function encryptPost(
-  postData: { content: string; summary: string },
+  postData: { content: string | undefined; summary: string | undefined },
   mdk: CryptoKey,
-): Promise<EncryptedPostData> {
-  const result: EncryptedPostData = postData;
+): Promise<Partial<Post>> {
+  const result: Partial<Post> = postData;
 
   const fieldsToEncrypt = ["content", "summary"] as const;
 

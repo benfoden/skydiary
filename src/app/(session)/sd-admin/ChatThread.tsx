@@ -1,30 +1,27 @@
 "use client";
 import { type Persona, type User } from "@prisma/client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Avatar } from "~/app/_components/Avatar";
 import { Card } from "~/app/_components/Card";
 import FormButton from "~/app/_components/FormButton";
 import Input from "~/app/_components/Input";
-import { api } from "~/trpc/react";
+import Spinner from "~/app/_components/Spinner";
 
 export default function ChatThread({
   firstMessage,
   currentUserPersona,
+  aiPersona,
   user,
 }: {
   firstMessage: string;
   currentUserPersona: Persona;
+  aiPersona: Persona;
   user: User;
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<
     { personaId: string | undefined | null; content: string }[]
   >([{ personaId: "system", content: firstMessage }]);
-
-  const [personas, setPersonas] = useState<Persona[]>([]);
-
-  const { data: personasData, isSuccess } =
-    api.persona.getAllByUserId.useQuery();
 
   const handleCommand = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -51,9 +48,7 @@ export default function ChatThread({
         body: JSON.stringify({
           messages: [...messages, newCommand],
           userPersona: currentUserPersona,
-          aiPersona: personas.find(
-            (persona) => persona.id === "clxyqqo3l00005ep3t8amw32a",
-          ),
+          aiPersona,
         }),
       });
 
@@ -78,12 +73,6 @@ export default function ChatThread({
     setIsLoading(false);
   };
 
-  useEffect(() => {
-    if (isSuccess && personasData) {
-      setPersonas(personasData);
-    }
-  }, [personasData, isSuccess]);
-
   return (
     <div className="my-4 w-full md:max-w-2xl">
       <Card isButton={false}>
@@ -97,31 +86,32 @@ export default function ChatThread({
                 {message.personaId === currentUserPersona?.id && (
                   <Avatar src={user?.image ?? ""} alt="me" size="medium" />
                 )}
-                {personas.find(
-                  (persona) => persona.id === message.personaId,
-                ) && (
+
+                {message.personaId === aiPersona.id && (
                   <Avatar
-                    src={
-                      personas.find(
-                        (persona) => persona.id === message.personaId,
-                      )?.image ?? ""
-                    }
+                    src={aiPersona.image ?? ""}
                     alt="them"
                     size="medium"
                   />
                 )}
+
                 <p>{message.content}</p>
               </div>
             </Card>
           ))}
+          {isLoading && (
+            <div className="flex w-full flex-row items-center justify-center">
+              <Spinner />
+            </div>
+          )}
 
           <form
             onSubmit={(event) => handleCommand(event)}
             className="flex w-full flex-col"
           >
-            <Input id="chatInput" />
+            <Input id="chatInput" initialValue={""} />
             <FormButton isDisabled={isLoading} variant="submit">
-              enter
+              command
             </FormButton>
           </form>
         </div>

@@ -11,7 +11,6 @@ import { getResponse, getResponseJSON } from "~/utils/ai";
 import { NEWPERSONAUSER, productPlan, TAGS } from "~/utils/constants";
 import { decryptPost, encryptPost, importKeyFromJWK } from "~/utils/cryptoA1";
 import { prompts } from "~/utils/prompts";
-import { type EncryptedPostData } from "~/utils/types";
 
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
@@ -45,14 +44,16 @@ export const postRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      let data: EncryptedPostData = {
-        content: input.content ?? "",
-        summary: input.summary ?? "",
+      const data = {
+        content: input.content,
+        summary: input.summary,
       };
 
       if (input.mdkJwk) {
         const key = await importKeyFromJWK(input.mdkJwk);
-        data = await encryptPost(data, key);
+        const encryptedData = await encryptPost(data, key);
+        data.content = encryptedData.content ?? data.content;
+        data.summary = encryptedData.summary ?? data.summary;
       }
 
       return ctx.db.post.update({
@@ -253,7 +254,6 @@ export const postRouter = createTRPCRouter({
         where: { createdById: ctx.session.user.id, isUser: true },
       });
 
-      console.log("unprocessed posts length", input.length);
       for (const post of input) {
         if (!post?.id && post.content?.length < 20 && post.tags.length > 0) {
           continue;
@@ -297,15 +297,15 @@ export const postRouter = createTRPCRouter({
         }
 
         if (post.mdkJwk) {
-          const key = await importKeyFromJWK(post.mdkJwk);
           if (post.summary === null || post.summary === undefined) {
             post.summary = "";
           }
+          const mdk = await importKeyFromJWK(post.mdkJwk);
           const encryptedPost = await encryptPost(
             { content: post.content, summary: post.summary },
-            key,
+            mdk,
           );
-          post.content = encryptedPost.content;
+          post.content = encryptedPost.content ?? "";
           post.summary = encryptedPost.summary;
         }
 
@@ -329,7 +329,6 @@ export const postRouter = createTRPCRouter({
             },
           }),
         ]);
-        console.log("processed post", post.id);
       }
     }),
 
