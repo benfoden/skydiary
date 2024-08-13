@@ -1,4 +1,5 @@
-"use server";
+export const dynamic = "force-dynamic";
+
 import { type Persona, type Tag } from "@prisma/client";
 import { CircleIcon, PersonIcon, PlusIcon } from "@radix-ui/react-icons";
 import { type Metadata } from "next";
