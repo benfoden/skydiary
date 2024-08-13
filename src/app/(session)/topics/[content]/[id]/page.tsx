@@ -8,18 +8,15 @@ import { SessionNav } from "~/app/_components/SessionNav";
 import Spinner from "~/app/_components/Spinner";
 import { api } from "~/trpc/server";
 import { formattedTimeStampToDate } from "~/utils/text";
-import { useMdkJwk } from "~/utils/useMdkJwk";
 
-export default async function Entry({
+export default async function TopicPosts({
   params,
 }: {
   params: { content: string; id: string };
 }) {
   const t = await getTranslations();
-  const mdkJwk = await useMdkJwk();
   const posts = await api.post.getAllByUserAndTagId({
     tagId: params.id,
-    mdkJwk,
   });
 
   if (!posts || posts.length === 0) return <div>No posts found...</div>;

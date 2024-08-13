@@ -19,7 +19,6 @@ import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { getNewImageUrl } from "~/utils/_uploads";
 import { ACTIVESTATUSES } from "~/utils/constants";
-import { useMdkJwk } from "~/utils/useMdkJwk";
 
 export async function generateMetadata({
   params: { locale },
@@ -37,9 +36,8 @@ export default async function Settings() {
   const t = await getTranslations();
   const locale: Locale = (await getLocale()) as Locale;
   const session = await getServerAuthSession();
-  const mdkJwk = await useMdkJwk();
 
-  const userPersona = await api.persona.getUserPersona({ mdkJwk });
+  const userPersona = await api.persona.getUserPersona();
   const subscription = await api.stripe.getUserSubDetails();
 
   return (
@@ -94,7 +92,6 @@ export default async function Settings() {
                         traits: "",
                         occupation,
                         isUser,
-                        mdkJwk,
                       });
                     }
                   }

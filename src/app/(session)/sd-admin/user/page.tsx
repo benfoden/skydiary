@@ -8,16 +8,14 @@ import Input from "~/app/_components/Input";
 import { env } from "~/env";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
-import { useMdkJwk } from "~/utils/useMdkJwk";
 
 export default async function Secret({
   searchParams,
 }: {
   searchParams?: { targetUserId?: string };
 }) {
-  const mdkJwk = await useMdkJwk();
   const session = await getServerAuthSession();
-  const userPersona = await api.persona.getUserPersona({ mdkJwk });
+  const userPersona = await api.persona.getUserPersona();
   const t = await getTranslations();
 
   const users = await api.user.getAllUsersAsAdmin();

@@ -26,7 +26,6 @@ import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { isCommentAvailable } from "~/utils/planDetails";
 import { formattedTimeStampToDate } from "~/utils/text";
-import { useMdkJwk } from "~/utils/useMdkJwk";
 import EntryBody from "./EntryBody";
 import { makeComment } from "./helpers";
 
@@ -51,14 +50,13 @@ export default async function Entry({
 }) {
   const session = await getServerAuthSession();
   const { user } = session;
-  const mdkJwk = await useMdkJwk();
   const [t, locale, post, comments, tags, personas] = await Promise.all([
     getTranslations(),
     getUserLocale(),
-    api.post.getByPostId({ postId: params.id, mdkJwk }),
+    api.post.getByPostId({ postId: params.id }),
     api.comment.getCommentsByPostId({ postId: params.id }),
     api.tag.getByPostId({ postId: params.id }),
-    api.persona.getAllByUserId({ mdkJwk }),
+    api.persona.getAllByUserId(),
   ]);
 
   const hasComment = isCommentAvailable(user, comments);
@@ -128,7 +126,6 @@ export default async function Entry({
                         comments,
                         postId: params.id,
                         userProductId: user?.stripeProductId ?? "",
-                        mdkJwk,
                       });
                     } catch (error) {
                       throw new Error("Error making sky comment");
@@ -161,7 +158,6 @@ export default async function Entry({
                             postId: params.id,
                             userProductId: user?.stripeProductId ?? "",
                             commentPersona: persona,
-                            mdkJwk,
                           });
                         } catch (error) {
                           throw new Error("Error making persona comment");

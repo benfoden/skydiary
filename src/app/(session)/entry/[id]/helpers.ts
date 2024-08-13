@@ -15,7 +15,6 @@ export async function makeComment({
   postId,
   userProductId,
   commentPersona,
-  mdkJwk,
 }: {
   comments: Comment[];
   postId: string;
@@ -29,7 +28,7 @@ export async function makeComment({
     // get latest post in case there are any changes
     const [latestPost, currentUserPersona, session] = await Promise.all([
       api.post.getByPostId({ postId }),
-      api.persona.getUserPersona({ mdkJwk }),
+      api.persona.getUserPersona(),
       getServerAuthSession(),
     ]);
     const { user } = session;

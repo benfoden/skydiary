@@ -16,7 +16,6 @@ function SignoutPageContent() {
 
   const handleSignout = useCallback(async () => {
     setIsLoading(true);
-    document.cookie = "mdkJwk=; path=/; secure; samesite=strict";
 
     await signOut({
       callbackUrl: callbackUrl || "/",

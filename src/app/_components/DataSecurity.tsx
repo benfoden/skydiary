@@ -89,7 +89,6 @@ export default function DataSecurityCard() {
   const handleRevokeAccess = async () => {
     try {
       setIsLocalMdk(false);
-      document.cookie = "mdkJwk=; path=/; secure; samesite=strict";
       await deleteJWKFromIndexedDB(MASTERDATAKEY);
       router.refresh();
     } catch (error) {

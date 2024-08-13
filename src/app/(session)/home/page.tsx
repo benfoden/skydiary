@@ -7,16 +7,13 @@ import { Suspense } from "react";
 import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
-import FormButton from "~/app/_components/FormButton";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { SessionNav } from "~/app/_components/SessionNav";
 import Spinner from "~/app/_components/Spinner";
 import { type Locale } from "~/config";
 import { getUserLocale } from "~/i18n";
-import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { formattedTimeStampToDate } from "~/utils/text";
-import { useMdkJwk } from "~/utils/useMdkJwk";
 
 const filterPostsByDateRange = (
   daysMin: number,
@@ -88,12 +85,9 @@ export async function generateMetadata({
 }
 
 export default async function Home() {
-  const { user } = await getServerAuthSession();
-  const mdkJwk = await useMdkJwk();
-
   const t = await getTranslations();
   const locale = (await getUserLocale()) as Locale;
-  const userPosts = await api.post.getByUser({ mdkJwk });
+  const userPosts = await api.post.getByUser();
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const today = new Date().toLocaleDateString("en-US", {
     timeZone: userTimezone,
@@ -116,15 +110,6 @@ export default async function Home() {
         <div className="container flex flex-col items-center justify-start px-2 pb-12">
           <Suspense fallback={<Spinner />}>
             <div className="flex w-full flex-col items-start justify-center gap-4 md:max-w-3xl">
-              {user?.sukMdk && user?.passwordSalt && !mdkJwk && (
-                <Card isButton={false}>
-                  <form action="/home" method="get">
-                    <div className="w-full flex-row items-center justify-center">
-                      <FormButton>click here to show decrypted text</FormButton>
-                    </div>
-                  </form>
-                </Card>
-              )}
               <div className="ml-4">{t("home.today")}</div>
               {lastPostDate !== today || userPosts?.length === 0 ? (
                 <Link href="/today" prefetch={true} className="w-full">

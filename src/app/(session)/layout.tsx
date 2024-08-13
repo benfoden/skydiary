@@ -6,7 +6,6 @@ import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import ManageEncryption from "../_components/ManageEncryption";
 import { NextAuthProvider } from "../_components/NextAuthProvider";
-import PrepareMDK from "../_components/PrepareMDK";
 
 type Props = {
   children: ReactNode;
@@ -24,7 +23,6 @@ export default async function SessionLayout({ children }: Props) {
     <div className="container mx-auto min-h-screen">
       <NextAuthProvider>
         {children}
-        <PrepareMDK />
         <ManageEncryption user={session.user} />
       </NextAuthProvider>
     </div>
