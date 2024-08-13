@@ -1,23 +1,17 @@
-export const dynamic = "force-dynamic";
+"use server";
 import { type Post } from "@prisma/client";
 import { type Metadata } from "next";
-import { useSession } from "next-auth/react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense } from "react";
 import Button from "~/app/_components/Button";
-import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
+import PostCard from "~/app/_components/PostCard";
 import { SessionNav } from "~/app/_components/SessionNav";
 import Spinner from "~/app/_components/Spinner";
-import { type Locale } from "~/config";
 import { getUserLocale } from "~/i18n";
 import { api } from "~/trpc/server";
-import { decryptPost } from "~/utils/cryptoA1";
-import { formattedTimeStampToDate } from "~/utils/text";
-import { type PostWithTags } from "~/utils/types";
-import { useMdk } from "~/utils/useMdk";
 
 const filterPostsByDateRange = (
   daysMin: number,
@@ -41,68 +35,8 @@ const filterPostsByDateRange = (
   });
 };
 
-async function PostCard({
-  post,
-  locale,
-}: {
-  post: PostWithTags;
-  locale: Locale;
-}): Promise<JSX.Element> {
-  const user = useSession().data?.user;
-  const mdk = useMdk();
-
-  const [isDecrypting, setIsDecrypting] = useState(false);
-  const [currentPost, setCurrentPost] = useState<PostWithTags>(post);
-
-  useEffect(() => {
-    if (user?.sukMdk && mdk) {
-      setIsDecrypting(true);
-      const handleDecrypt = async () => {
-        setCurrentPost(await decryptPost(post, mdk));
-      };
-      handleDecrypt().catch(() => {
-        console.error("Error decrypting post.");
-      });
-      setIsDecrypting(false);
-    } else {
-      setCurrentPost(post);
-    }
-  }, [user?.sukMdk, mdk, post]);
-
-  ("use client");
-  return (
-    <Link key={post.id} href={`/entry/${post.id}`} className="w-full">
-      <Card>
-        <div className="flex w-full flex-col items-start justify-between gap-2 py-2">
-          {post.content.length > 140
-            ? post.content.slice(0, 140) + "..."
-            : post.content}
-
-          <div className="flex w-full flex-row items-center justify-between gap-2 text-xs opacity-70">
-            <div className="flex flex-col items-start justify-start gap-1">
-              {post.tags && (
-                <div className="flex w-full flex-row items-center justify-start gap-2">
-                  {post.tags?.map((tag) => (
-                    <div key={tag.id}>{tag.content}</div>
-                  ))}
-                </div>
-              )}
-              <div className="flex min-w-fit">
-                {formattedTimeStampToDate(post.createdAt, locale)}
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
-    </Link>
-  );
-}
-
-export async function generateMetadata({
-  params: { locale },
-}: {
-  params: { locale: Locale };
-}): Promise<Metadata> {
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getUserLocale();
   const t = await getTranslations({ locale, namespace: "metadata" });
 
   return {
@@ -110,9 +44,9 @@ export async function generateMetadata({
   };
 }
 
-export default async function Home() {
+export default async function Home({}) {
   const t = await getTranslations();
-  const locale = (await getUserLocale()) as Locale;
+  const locale = await getUserLocale();
   const userPosts = await api.post.getByUser();
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const today = new Date().toLocaleDateString("en-US", {
@@ -148,19 +82,11 @@ export default async function Home() {
                   locale={locale}
                 />
               )}
-              {filterPostsByDateRange(0, 6, userPosts).length > 0 && (
+              {filterPostsByDateRange(1, 6, userPosts).length > 0 && (
                 <>
                   <div className="pl-4 pt-4">{t("home.last7Days")}</div>
-                  {filterPostsByDateRange(0, 6, userPosts).map((post) => (
-                    <PostCard
-                      key={post.id}
-                      post={
-                        post as Post & {
-                          tags: { content: string; id: string }[];
-                        }
-                      }
-                      locale={locale}
-                    />
+                  {filterPostsByDateRange(1, 6, userPosts).map((post) => (
+                    <PostCard key={post.id} post={post} locale={locale} />
                   ))}
                 </>
               )}
@@ -168,15 +94,7 @@ export default async function Home() {
                 <>
                   <div className="pl-4 pt-4">{t("home.last30Days")}</div>
                   {filterPostsByDateRange(8, 30, userPosts).map((post) => (
-                    <PostCard
-                      key={post.id}
-                      post={
-                        post as Post & {
-                          tags: { content: string; id: string }[];
-                        }
-                      }
-                      locale={locale}
-                    />
+                    <PostCard key={post.id} post={post} locale={locale} />
                   ))}
                 </>
               )}
@@ -199,15 +117,7 @@ export default async function Home() {
                           return postMonthYear === monthYear;
                         })
                         .map((post) => (
-                          <PostCard
-                            key={post.id}
-                            post={
-                              post as Post & {
-                                tags: { content: string; id: string }[];
-                              }
-                            }
-                            locale={locale}
-                          />
+                          <PostCard key={post.id} post={post} locale={locale} />
                         ))}
                     </div>
                   ))}

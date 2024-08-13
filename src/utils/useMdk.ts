@@ -15,8 +15,6 @@ export function useMdk(): CryptoKey | undefined {
   const [mdk, setMdk] = useState<CryptoKey | undefined>(undefined);
 
   useEffect(() => {
-    let isMounted = true;
-
     const fetchJWK = async () => {
       try {
         const result = await getJWKFromIndexedDB(MASTERDATAKEY);
@@ -24,9 +22,7 @@ export function useMdk(): CryptoKey | undefined {
           return;
         }
         const mdk = await importKeyFromJWK(result);
-        if (isMounted) {
-          setMdk(mdk ?? undefined);
-        }
+        setMdk(mdk ?? undefined);
       } catch (error) {
         throw new Error();
       }
@@ -37,10 +33,6 @@ export function useMdk(): CryptoKey | undefined {
         console.error("Error getting key for user");
       });
     }
-
-    return () => {
-      isMounted = false;
-    };
   }, [user, user?.sukMdk, user?.passwordSalt]);
 
   return mdk;

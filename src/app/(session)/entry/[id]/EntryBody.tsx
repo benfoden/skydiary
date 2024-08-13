@@ -1,17 +1,26 @@
 "use client";
 import { type Post } from "@prisma/client";
 import { CheckCircledIcon } from "@radix-ui/react-icons";
+import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type SetStateAction } from "react";
 import ButtonSpinner from "~/app/_components/ButtonSpinner";
 import { cardColors } from "~/app/_components/Card";
 import { api } from "~/trpc/react";
+import { decryptPost } from "~/utils/cryptoA1";
+import { useMdk } from "~/utils/useMdk";
 
 export default function EntryBody({ post }: { post: Post }) {
-  const [content, setContent] = useState(post?.content ?? "");
+  const user = useSession().data?.user;
+  const mdk = useMdk();
+
+  const first = useRef(true);
+  const [content, setContent] = useState("");
   const [debounceTimeout, setDebounceTimeout] = useState(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isDecrypting, setIsDecrypting] = useState(true);
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const t = useTranslations();
   const router = useRouter();
@@ -40,8 +49,24 @@ export default function EntryBody({ post }: { post: Post }) {
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newContent = e.target.value;
-
+    if (first.current) return;
     if (newContent === content) return;
+
+    setIsDecrypting(true);
+    if (newContent) {
+      const newPost = { ...post, content: newContent };
+      const handleDecrypt = async () => {
+        const { content: postContent } = await decryptPost(newPost, mdk);
+        setContent(postContent);
+      };
+      handleDecrypt()
+        .catch(() => {
+          console.error("Error decrypting post.");
+        })
+        .finally(() => {
+          setIsDecrypting(false);
+        });
+    }
 
     setContent(newContent);
 
@@ -65,10 +90,22 @@ export default function EntryBody({ post }: { post: Post }) {
   };
 
   useEffect(() => {
-    if (isSuccess && data?.content) {
-      setContent(data.content);
+    setIsDecrypting(true);
+    if (post?.content) {
+      const handleDecrypt = async () => {
+        const { content: postContent } = await decryptPost(post, mdk);
+        setContent(postContent);
+      };
+      handleDecrypt()
+        .catch(() => {
+          console.error("Error decrypting post.");
+        })
+        .finally(() => {
+          first.current = false;
+          setIsDecrypting(false);
+        });
     }
-  }, [data?.content, isSuccess]);
+  }, [user?.sukMdk, mdk, post]);
 
   useEffect(() => {
     adjustTextareaHeight();
@@ -80,7 +117,9 @@ export default function EntryBody({ post }: { post: Post }) {
         ref={textareaRef}
         value={content}
         onChange={handleContentChange}
-        placeholder={!isSuccess ? t("status.loading") : t("entry.today")}
+        placeholder={
+          !isSuccess && isDecrypting ? t("status.loading") : t("entry.today")
+        }
         className={` min-h-full w-full resize-none rounded-xl border-none px-8 py-6 leading-6 focus:outline-none sm:max-w-5xl sm:rounded-3xl sm:px-16 sm:py-12 dark:text-[#DCDCDC] ${cardColors("default")}`}
         autoFocus
         style={{ height: "auto", overflow: "hidden", paddingBottom: "16px" }}

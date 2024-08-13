@@ -446,8 +446,11 @@ export async function encryptPost(
 
 export async function decryptPost(
   post: PostWithTags,
-  mdk: CryptoKey,
+  mdk?: CryptoKey,
 ): Promise<Post> {
+  if (!mdk) {
+    return post;
+  }
   const result: PostWithTags = post;
 
   const fieldsToDecrypt = ["content", "summary"] as const;
