@@ -17,160 +17,115 @@ export default function ManageEncryption({ user }: { user: User }) {
     posts: [],
     personas: [],
   });
-  const [tagAndMemorizeQueue, setTagAndMemorizeQueue] = useState<
-    PostWithCommentsAndTags[]
-  >([]);
-  const [encryptQueue, setEncryptQueue] = useState<{
-    posts: PostWithCommentsAndTags[];
-    personas: Persona[];
-  }>({
-    posts: [],
-    personas: [],
-  });
 
   const { data: postsData, isSuccess: isSuccessPosts } =
     api.post.getByUserForJobQueue.useQuery({ mdkJwk });
   const { data: personasData, isSuccess: isSuccessPersonas } =
     api.persona.getByUserForJobQueue.useQuery();
   const tagAndMemorize = api.post.tagAndMemorize.useMutation();
-
   const bulkUpdatePersonas = api.persona.bulkUpdate.useMutation();
-  const bulkUpdatePosts = api.post.bulkUpdate.useMutation();
+  const updatePost = api.post.update.useMutation();
 
   useEffect(() => {
-    try {
-      if (isSuccessPosts && isSuccessPersonas) {
-        setQueue({
-          posts: postsData,
-          personas: personasData,
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
+    if (isSuccessPosts && isSuccessPersonas) {
+      setQueue({
+        posts: postsData,
+        personas: personasData,
+      });
     }
   }, [isSuccessPosts, isSuccessPersonas, postsData, personasData]);
 
   useEffect(() => {
-    const processPosts = () => {
-      const newTagAndMemorizeQueue: PostWithCommentsAndTags[] = [];
-      const newEncryptQueuePosts: PostWithCommentsAndTags[] = [];
+    const newTagAndMemorizeQueue: PostWithCommentsAndTags[] = [];
+    const newEncryptQueuePosts: PostWithCommentsAndTags[] = [];
+    const newEncryptQueuePersonas: Persona[] = [];
 
-      queue.posts?.forEach((post) => {
-        const isOldPost =
-          new Date(post.createdAt) < new Date(Date.now() - 8 * 60 * 60 * 1000);
-        const hasContent = post.content && post.content.length > 5;
-        const hasNoTags = !post.tags?.length;
-        const hasComments = post.comments;
+    queue.posts.forEach((post) => {
+      const isOldPost =
+        new Date(post.createdAt) < new Date(Date.now() - 8 * 60 * 60 * 1000);
+      const hasContent = post.content && post.content.length > 5;
+      const hasNoTags = !post.tags?.length;
+      const hasComments = post.comments;
+      const hasNoContentIV = !post.contentIV;
 
-        if (hasContent && hasNoTags && isOldPost) {
-          newTagAndMemorizeQueue.push(post);
-        }
+      if (hasContent && hasNoTags && isOldPost) {
+        newTagAndMemorizeQueue.push(post);
+      }
 
-        if (user?.sukMdk && user?.passwordSalt && (hasContent ?? hasComments)) {
-          newEncryptQueuePosts.push(post);
+      if (
+        user?.sukMdk &&
+        user?.passwordSalt &&
+        (hasContent || hasComments) &&
+        hasNoContentIV
+      ) {
+        newEncryptQueuePosts.push(post);
+      }
+    });
+
+    if (queue.personas.length && user?.sukMdk) {
+      queue.personas.forEach((persona) => {
+        if (!persona.nameIV) {
+          newEncryptQueuePersonas.push(persona);
         }
       });
+    }
 
-      setTagAndMemorizeQueue(newTagAndMemorizeQueue);
-      setEncryptQueue((prev) => ({
-        posts: newEncryptQueuePosts,
-        personas: prev.personas,
-      }));
-    };
-
-    const processPersonas = () => {
-      if (queue?.personas?.length && user?.sukMdk) {
-        const newEncryptQueuePersonas = queue.personas.filter(
-          (persona) => !persona.nameIV,
-        );
-        setEncryptQueue((prev) => ({
-          posts: prev.posts,
-          personas: newEncryptQueuePersonas,
-        }));
-      }
-    };
-
-    processPosts();
-    processPersonas();
-  }, [queue, user?.sukMdk, user?.passwordSalt]);
-
-  useEffect(() => {
-    const handleTagAndMemorize = async () => {
-      if (tagAndMemorizeQueue.length) {
-        await tagAndMemorize.mutateAsync(
-          tagAndMemorizeQueue.map((post) => ({
+    if (newTagAndMemorizeQueue.length) {
+      tagAndMemorize
+        .mutateAsync(
+          newTagAndMemorizeQueue.map((post) => ({
             id: post.id,
             content: post.content,
             tags: post.tags ? post.tags.map((tag) => tag.content) : [],
           })),
-        );
-      }
-    };
-    handleTagAndMemorize().catch((error) => {
-      console.error("Error processing tagAndMemorizeQueue:", error);
-    });
-  }, [tagAndMemorizeQueue, tagAndMemorize]);
-
-  useEffect(() => {
-    if (user?.sukMdk && user?.passwordSalt && encryptQueue.personas.length) {
-      const handleEncryptPersonas = async () => {
-        try {
-          await bulkUpdatePersonas.mutateAsync({
-            personas: encryptQueue.personas,
-            mdkJwk,
-          });
-        } catch (error) {
-          console.error("Error processing encryptQueue:", error);
-        }
-      };
-      handleEncryptPersonas().catch(() => {
-        console.error("Error processing encryptQueue:");
-      });
+        )
+        .catch((error) => {
+          console.error("Error processing tagAndMemorizeQueue:", error);
+        });
     }
-  }, [
-    encryptQueue.personas,
-    user?.sukMdk,
-    user?.passwordSalt,
-    bulkUpdatePersonas,
-    mdkJwk,
-  ]);
 
-  useEffect(() => {
-    if (
-      user?.sukMdk &&
-      user?.passwordSalt &&
-      encryptQueue.posts.length &&
-      mdkJwk
-    ) {
-      const handleEncryptPosts = async () => {
-        try {
-          await bulkUpdatePosts.mutateAsync({
-            posts: encryptQueue.posts.map((post) => ({
-              id: post.id,
-              content: post.content ?? "",
-              summary: post.summary ?? undefined,
-              comments: post.comments?.map((comment) => ({
-                id: comment.id,
-                content: comment.content,
-                coachName: comment.coachName ?? undefined,
-              })),
+    if (newEncryptQueuePersonas.length) {
+      bulkUpdatePersonas
+        .mutateAsync({
+          personas: newEncryptQueuePersonas,
+          mdkJwk,
+        })
+        .catch((error) => {
+          console.error("Error processing encryptQueue:", error);
+        });
+    }
+
+    if (newEncryptQueuePosts.length && mdkJwk) {
+      Promise.all(
+        newEncryptQueuePosts.map(async (post) => {
+          if (!post.content || post.contentIV) {
+            return;
+          }
+          await updatePost.mutateAsync({
+            postId: post.id,
+            content: post.content ?? "",
+            summary: post.summary ?? undefined,
+            comments: post.comments?.map((comment) => ({
+              id: comment.id,
+              content: comment.content,
+              coachName: comment.coachName ?? undefined,
             })),
             mdkJwk,
           });
-        } catch (error) {
-          console.error("Error processing encryptQueue:", error);
-        }
-      };
-      // handleEncryptPosts().catch(() => {
-      //   console.error("Error processing encryptQueue:");
-      // });
+        }),
+      ).catch((error) => {
+        console.error("Error processing encryptQueue:", error);
+      });
     }
   }, [
-    encryptQueue.posts,
+    queue,
     user?.sukMdk,
     user?.passwordSalt,
     mdkJwk,
-    bulkUpdatePosts,
+    tagAndMemorize,
+    bulkUpdatePersonas,
+    updatePost,
   ]);
+
   return null;
 }

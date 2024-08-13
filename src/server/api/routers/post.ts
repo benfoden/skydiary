@@ -40,6 +40,15 @@ export const postRouter = createTRPCRouter({
         postId: z.string(),
         content: z.string().max(50000).optional(),
         summary: z.string().max(5000).optional(),
+        comments: z
+          .array(
+            z.object({
+              id: z.string(),
+              content: z.string().max(10000),
+              coachName: z.string().optional(),
+            }),
+          )
+          .optional(),
         mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
       }),
     )
@@ -50,6 +59,13 @@ export const postRouter = createTRPCRouter({
         summary: input.summary,
         contentIV: "",
         summaryIV: "",
+        comments: input.comments?.map((comment) => ({
+          id: comment.id,
+          content: comment.content,
+          coachName: comment.coachName ?? "",
+          contentIV: "",
+          coachNameIV: "",
+        })),
       };
 
       if (input.mdkJwk) {
@@ -59,14 +75,40 @@ export const postRouter = createTRPCRouter({
         data.summary = encryptedData.summary ?? data.summary;
         data.summaryIV = encryptedData.summaryIV ?? "";
         data.contentIV = encryptedData.contentIV ?? "";
-        if (!data.contentIV || (data.summary && !data.summaryIV)) {
-          throw new Error("Post / Comment encryption failed");
+        data.comments = encryptedData.comments?.map((comment) => ({
+          id: comment.id,
+          content: comment.content,
+          coachName: comment.coachName ?? "",
+          contentIV: comment.contentIV ?? "",
+          coachNameIV: comment.coachNameIV ?? "",
+        }));
+        if (
+          (!data.contentIV || (data.summary && !data.summaryIV)) ??
+          data.comments?.some((comment) => !comment.contentIV)
+        ) {
+          throw new Error("Post / comment encryption failed");
         }
       }
 
+      if (data.comments) {
+        const commentUpdatePromises = data.comments.map(async (comment) => {
+          return ctx.db.comment.update({
+            where: { id: comment.id },
+            data: {
+              content: comment.content,
+              coachName: comment.coachName,
+              contentIV: comment.contentIV,
+              coachNameIV: comment.coachNameIV,
+            },
+          });
+        });
+        await Promise.all(commentUpdatePromises);
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { comments: _unused, ...dataWithoutComments } = data;
       return ctx.db.post.update({
         where: { id: input.postId, createdBy: { id: ctx.session.user.id } },
-        data,
+        data: dataWithoutComments,
       });
     }),
   bulkUpdate: protectedProcedure
