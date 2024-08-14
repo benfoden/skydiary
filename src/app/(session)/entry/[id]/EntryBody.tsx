@@ -103,16 +103,17 @@ export default function EntryBody({ post }: { post: Post }) {
       localPost?.content !== content &&
       first.current
     ) {
-      console.log("hi");
+      let postContent = "";
       const handleDecrypt = async () => {
-        const { content: postContent } = await decryptPost(localPost, mdk);
-        setContent(postContent);
+        const { content: newContent } = await decryptPost(localPost, mdk);
+        postContent = newContent;
       };
       handleDecrypt()
         .catch(() => {
           console.error("Error decrypting post.");
         })
         .finally(() => {
+          setContent(postContent);
           first.current = false;
           setIsDecrypting(false);
         });

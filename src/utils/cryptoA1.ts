@@ -368,7 +368,7 @@ export async function decryptPersona(
     }
   });
 
-  await Promise.all(decryptionPromises);
+  await Promise.allSettled(decryptionPromises);
 
   return result;
 }
@@ -445,7 +445,7 @@ export async function decryptPost(
       }
     });
 
-    await Promise.all(decryptionPromises);
+    await Promise.allSettled(decryptionPromises);
 
     return result;
   }
