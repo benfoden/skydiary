@@ -148,7 +148,7 @@ export default async function Entry({
                         >
                           <div className="flex flex-row items-center gap-2 text-xs">
                             <CircleIcon className="h-4 w-4" />
-                            sky
+                            sky comment
                           </div>
                         </FormButton>
                       </form>
