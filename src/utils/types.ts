@@ -39,7 +39,6 @@ export interface PostsWithCommentsAndTagsAndPersonas {
 }
 
 export type EncryptedCommentPartialResult = {
-  id: string;
   content: string;
   contentIV: string;
   coachName?: string;
@@ -47,7 +46,7 @@ export type EncryptedCommentPartialResult = {
 };
 
 export type EncryptCommentPartialInput = {
-  id: string;
+  id?: string;
   content: string;
   coachName?: string;
 };

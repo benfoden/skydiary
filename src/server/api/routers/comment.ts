@@ -2,6 +2,11 @@ import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { productPlan } from "~/utils/constants";
+import {
+  decryptComment,
+  encryptComment,
+  importKeyFromJWK,
+} from "~/utils/cryptoA1";
 
 export const commentRouter = createTRPCRouter({
   create: protectedProcedure
@@ -11,6 +16,7 @@ export const commentRouter = createTRPCRouter({
         postId: z.string(),
         coachVariant: z.string().optional(),
         createdByPersonaId: z.string().optional(),
+        mdkJwk: z.custom<JsonWebKey>().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -26,18 +32,32 @@ export const commentRouter = createTRPCRouter({
           "You have reached the maximum number of comments for this plan.",
         );
       }
+
+      const data = {
+        content: input.content,
+        postId: input.postId,
+        coachVariant: input.coachVariant,
+        createdByPersonaId: input.createdByPersonaId ?? undefined,
+        contentIV: "",
+      };
+      if (input.mdkJwk) {
+        const key = await importKeyFromJWK(input.mdkJwk);
+        const encryptedComment = await encryptComment(
+          {
+            content: input.content,
+          },
+          key,
+        );
+        data.content = encryptedComment.content;
+        data.contentIV = encryptedComment.contentIV;
+      }
       await ctx.db.user.update({
         where: { id: ctx.session.user.id },
         data: { commentsUsed: { increment: 1 } },
       });
 
       const comment = await ctx.db.comment.create({
-        data: {
-          content: input.content,
-          postId: input.postId,
-          coachVariant: input.coachVariant,
-          createdByPersonaId: input.createdByPersonaId ?? undefined,
-        },
+        data,
       });
 
       if (comment) {
@@ -106,11 +126,24 @@ export const commentRouter = createTRPCRouter({
     }),
 
   getCommentsByPostId: protectedProcedure
-    .input(z.object({ postId: z.string() }))
-    .query(({ ctx, input }) => {
-      return ctx.db.comment.findMany({
+    .input(
+      z.object({
+        postId: z.string(),
+        mdkJwk: z.custom<JsonWebKey>().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const comments = await ctx.db.comment.findMany({
         where: { postId: input.postId },
       });
+
+      if (input.mdkJwk) {
+        const key = await importKeyFromJWK(input.mdkJwk);
+        return await Promise.all(
+          comments.map(async (comment) => await decryptComment(comment, key)),
+        );
+      }
+      return comments;
     }),
 
   // delete: protectedProcedure

@@ -7,7 +7,7 @@ import { Suspense } from "react";
 import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
-import FormButton from "~/app/_components/FormButton";
+import EncryptionNotice from "~/app/_components/EncryptionNotice";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { SessionNav } from "~/app/_components/SessionNav";
 import Spinner from "~/app/_components/Spinner";
@@ -115,94 +115,94 @@ export default async function Home() {
       <main className="flex min-h-screen flex-col items-start">
         <div className="container flex flex-col items-center justify-start px-2 pb-12">
           <Suspense fallback={<Spinner />}>
-            <div className="flex w-full flex-col items-start justify-center gap-4 md:max-w-3xl">
-              {user?.sukMdk && user?.passwordSalt && !mdkJwk && (
-                <Card isButton={false}>
-                  <form action="/home" method="get">
-                    <div className="w-full flex-row items-center justify-center">
-                      <FormButton>click here to show decrypted text</FormButton>
-                    </div>
-                  </form>
-                </Card>
-              )}
-              <div className="ml-4">{t("home.today")}</div>
-              {lastPostDate !== today || userPosts?.length === 0 ? (
-                <Link href="/today" prefetch={true} className="w-full">
-                  <Button>{t("home.whats happening")}</Button>
-                </Link>
-              ) : (
-                <PostCard
-                  key={userPosts[0]?.id}
-                  post={userPosts[0]!}
-                  locale={locale}
-                />
-              )}
-              {filterPostsByDateRange(0, 6, userPosts).length > 0 && (
-                <>
-                  <div className="pl-4 pt-4">{t("home.last7Days")}</div>
-                  {filterPostsByDateRange(0, 6, userPosts).map((post) => (
+            {user?.passwordSalt && !mdkJwk ? (
+              <EncryptionNotice user={user} mdkJwk={mdkJwk} />
+            ) : (
+              <>
+                <div className="flex w-full flex-col items-start justify-center gap-4 md:max-w-3xl">
+                  <div className="ml-4">{t("home.today")}</div>
+                  {lastPostDate !== today || userPosts?.length === 0 ? (
+                    <Link href="/today" prefetch={true} className="w-full">
+                      <Button>{t("home.whats happening")}</Button>
+                    </Link>
+                  ) : (
                     <PostCard
-                      key={post.id}
-                      post={
-                        post as Post & {
-                          tags: { content: string; id: string }[];
-                        }
-                      }
+                      key={userPosts[0]?.id}
+                      post={userPosts[0]!}
                       locale={locale}
                     />
-                  ))}
-                </>
-              )}
-              {filterPostsByDateRange(8, 30, userPosts).length > 0 && (
-                <>
-                  <div className="pl-4 pt-4">{t("home.last30Days")}</div>
-                  {filterPostsByDateRange(8, 30, userPosts).map((post) => (
-                    <PostCard
-                      key={post.id}
-                      post={
-                        post as Post & {
-                          tags: { content: string; id: string }[];
-                        }
-                      }
-                      locale={locale}
-                    />
-                  ))}
-                </>
-              )}
-              {userPosts && userPosts.length > 0 && (
-                <>
-                  {Array.from(
-                    new Set(
-                      userPosts.map((post) => {
-                        const date = new Date(post.createdAt);
-                        return `${date.getFullYear()} ${date.toLocaleString("default", { month: "long" })}`;
-                      }),
-                    ),
-                  ).map((monthYear) => (
-                    <div key={monthYear} className="flex flex-col gap-4 pt-4">
-                      <div className="ml-4">{monthYear}</div>
-                      {userPosts
-                        .filter((post) => {
-                          const date = new Date(post.createdAt);
-                          const postMonthYear = `${date.getFullYear()} ${date.toLocaleString("default", { month: "long" })}`;
-                          return postMonthYear === monthYear;
-                        })
-                        .map((post) => (
-                          <PostCard
-                            key={post.id}
-                            post={
-                              post as Post & {
-                                tags: { content: string; id: string }[];
-                              }
+                  )}
+                  {filterPostsByDateRange(0, 6, userPosts).length > 0 && (
+                    <>
+                      <div className="pl-4 pt-4">{t("home.last7Days")}</div>
+                      {filterPostsByDateRange(0, 6, userPosts).map((post) => (
+                        <PostCard
+                          key={post.id}
+                          post={
+                            post as Post & {
+                              tags: { content: string; id: string }[];
                             }
-                            locale={locale}
-                          />
-                        ))}
-                    </div>
-                  ))}
-                </>
-              )}
-            </div>
+                          }
+                          locale={locale}
+                        />
+                      ))}
+                    </>
+                  )}
+                  {filterPostsByDateRange(8, 30, userPosts).length > 0 && (
+                    <>
+                      <div className="pl-4 pt-4">{t("home.last30Days")}</div>
+                      {filterPostsByDateRange(8, 30, userPosts).map((post) => (
+                        <PostCard
+                          key={post.id}
+                          post={
+                            post as Post & {
+                              tags: { content: string; id: string }[];
+                            }
+                          }
+                          locale={locale}
+                        />
+                      ))}
+                    </>
+                  )}
+                  {userPosts && userPosts.length > 0 && (
+                    <>
+                      {Array.from(
+                        new Set(
+                          userPosts.map((post) => {
+                            const date = new Date(post.createdAt);
+                            return `${date.getFullYear()} ${date.toLocaleString("default", { month: "long" })}`;
+                          }),
+                        ),
+                      ).map((monthYear) => (
+                        <div
+                          key={monthYear}
+                          className="flex flex-col gap-4 pt-4"
+                        >
+                          <div className="ml-4">{monthYear}</div>
+                          {userPosts
+                            .filter((post) => {
+                              const date = new Date(post.createdAt);
+                              const postMonthYear = `${date.getFullYear()} ${date.toLocaleString("default", { month: "long" })}`;
+                              return postMonthYear === monthYear;
+                            })
+                            .map((post) => (
+                              <PostCard
+                                key={post.id}
+                                post={
+                                  post as Post & {
+                                    tags: { content: string; id: string }[];
+                                  }
+                                }
+                                locale={locale}
+                              />
+                            ))}
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </div>
+              </>
+            )}
           </Suspense>
         </div>
       </main>
