@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import PersonaFormFields from "~/app/(session)/persona/PersonaFormFields";
 import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
+import EncryptionNotice from "~/app/_components/EncryptionNotice";
 import FormButton from "~/app/_components/FormButton";
 import FormDeleteButton from "~/app/_components/FormDeleteButton";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
@@ -31,6 +32,7 @@ export async function generateMetadata({
 
 export default async function Persona({ params }: { params: { id: string } }) {
   const session = await getServerAuthSession();
+  const { user } = session;
   const mdkJwk = await useMdkJwk();
 
   if (!session?.user) return redirect("/auth/signin");
@@ -55,110 +57,118 @@ export default async function Persona({ params }: { params: { id: string } }) {
       </SessionNav>
 
       <main className="flex min-h-screen w-full flex-col items-center justify-start">
-        <div className="container flex w-full flex-col items-center justify-start gap-12 px-2 pb-12">
-          {!isFavoritePersonaAvailable(session?.user, personas) && (
-            <UpgradeBanner variant="persona" />
-          )}
-          <div className="flex w-full flex-col items-center justify-center gap-4 md:flex-row md:items-start md:px-32">
-            <PersonaSidebar personas={personas} />
-            <div className="flex w-full flex-col items-center justify-center gap-4">
-              <Card variant="form">
-                <form
-                  className="flex w-full max-w-lg flex-col items-center justify-center gap-4"
-                  action={async (formData) => {
-                    "use server";
-                    const name: string = formData.get("name") as string;
-                    const traits: string = formData.get("traits") as string;
-                    const description: string = formData.get(
-                      "description",
-                    ) as string;
-                    const age = Number(formData.get("age"));
-                    const gender: string = formData.get("gender") as string;
-                    const relationship: string = formData.get(
-                      "relationship",
-                    ) as string;
-                    const occupation: string = formData.get(
-                      "occupation",
-                    ) as string;
-                    const communicationStyle: string = formData.get(
-                      "communicationStyle",
-                    ) as string;
-                    const communicationSample: string = formData.get(
-                      "communicationSample",
-                    ) as string;
+        {user?.passwordSalt && !mdkJwk ? (
+          <EncryptionNotice user={user} mdkJwk={mdkJwk} />
+        ) : (
+          <>
+            <div className="container flex w-full flex-col items-center justify-start gap-12 px-2 pb-12">
+              {!isFavoritePersonaAvailable(session?.user, personas) && (
+                <UpgradeBanner variant="persona" />
+              )}
+              <div className="flex w-full flex-col items-center justify-center gap-4 md:flex-row md:items-start md:px-32">
+                <PersonaSidebar personas={personas} />
+                <div className="flex w-full flex-col items-center justify-center gap-4">
+                  <Card variant="form">
+                    <form
+                      className="flex w-full max-w-lg flex-col items-center justify-center gap-4"
+                      action={async (formData) => {
+                        "use server";
+                        const name: string = formData.get("name") as string;
+                        const traits: string = formData.get("traits") as string;
+                        const description: string = formData.get(
+                          "description",
+                        ) as string;
+                        const age = Number(formData.get("age"));
+                        const gender: string = formData.get("gender") as string;
+                        const relationship: string = formData.get(
+                          "relationship",
+                        ) as string;
+                        const occupation: string = formData.get(
+                          "occupation",
+                        ) as string;
+                        const communicationStyle: string = formData.get(
+                          "communicationStyle",
+                        ) as string;
+                        const communicationSample: string = formData.get(
+                          "communicationSample",
+                        ) as string;
 
-                    const imageFile =
-                      (formData.get("imageFile") as File) ?? undefined;
-                    const image = await getNewImageUrl({ imageFile });
+                        const imageFile =
+                          (formData.get("imageFile") as File) ?? undefined;
+                        const image = await getNewImageUrl({ imageFile });
 
-                    let updated;
-                    try {
-                      const isFavoriteAvail = isFavoritePersonaAvailable(
-                        session?.user,
-                        personas,
-                      );
+                        let updated;
+                        try {
+                          const isFavoriteAvail = isFavoritePersonaAvailable(
+                            session?.user,
+                            personas,
+                          );
 
-                      const isFavorite = isFavoriteAvail
-                        ? formData.get("isFavorite") === "on"
-                        : persona.isFavorite;
+                          const isFavorite = isFavoriteAvail
+                            ? formData.get("isFavorite") === "on"
+                            : persona.isFavorite;
 
-                      if (name && traits) {
-                        updated = await api.persona.update({
-                          personaId,
-                          name,
-                          traits,
-                          description,
-                          image,
-                          age,
-                          gender,
-                          relationship,
-                          occupation,
-                          communicationStyle,
-                          communicationSample,
-                          isFavorite,
-                          mdkJwk,
-                        });
-                      }
-                    } catch (error) {
-                      throw new Error("Error updating persona");
-                    }
+                          if (name && traits) {
+                            updated = await api.persona.update({
+                              personaId,
+                              name,
+                              traits,
+                              description,
+                              image,
+                              age,
+                              gender,
+                              relationship,
+                              occupation,
+                              communicationStyle,
+                              communicationSample,
+                              isFavorite,
+                              mdkJwk,
+                            });
+                          }
+                        } catch (error) {
+                          throw new Error("Error updating persona");
+                        }
 
-                    if (updated) {
-                      redirect("/persona/all");
-                    }
-                  }}
-                >
-                  <PersonaFormFields
-                    personas={personas}
-                    personaId={personaId}
-                    user={session?.user}
-                  />
-                  <FormButton variant="submit">{t("form.update")}</FormButton>
-                </form>
-              </Card>
-              <div className="flex w-full flex-row pt-8">
-                <Card isButton={false}>
-                  <form
-                    action={async () => {
-                      "use server";
-                      await api.persona.delete({ personaId });
-                      redirect("/persona/all");
-                    }}
-                  >
-                    <h3 className="text-lg font-medium">
-                      {t("personas.delete")}
-                    </h3>
-                    <div className="flex w-full flex-row items-center justify-center gap-2 pt-4">
-                      <div className="w-fit">
-                        <FormDeleteButton hasText={true} />
-                      </div>
-                    </div>
-                  </form>
-                </Card>
+                        if (updated) {
+                          redirect("/persona/all");
+                        }
+                      }}
+                    >
+                      <PersonaFormFields
+                        personas={personas}
+                        personaId={personaId}
+                        user={session?.user}
+                      />
+                      <FormButton variant="submit">
+                        {t("form.update")}
+                      </FormButton>
+                    </form>
+                  </Card>
+                  <div className="flex w-full flex-row pt-8">
+                    <Card isButton={false}>
+                      <form
+                        action={async () => {
+                          "use server";
+                          await api.persona.delete({ personaId });
+                          redirect("/persona/all");
+                        }}
+                      >
+                        <h3 className="text-lg font-medium">
+                          {t("personas.delete")}
+                        </h3>
+                        <div className="flex w-full flex-row items-center justify-center gap-2 pt-4">
+                          <div className="w-fit">
+                            <FormDeleteButton hasText={true} />
+                          </div>
+                        </div>
+                      </form>
+                    </Card>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          </>
+        )}
       </main>
     </>
   );

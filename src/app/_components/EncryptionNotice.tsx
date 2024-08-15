@@ -29,7 +29,7 @@ export default function EncryptionNotice({
           <div className="text-sm">
             <p>
               if you entered your passphrase already on this device, reload the
-              page to complete decryption.
+              page to continue.
             </p>
           </div>
         </div>
