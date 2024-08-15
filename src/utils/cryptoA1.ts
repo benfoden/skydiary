@@ -1,4 +1,4 @@
-import { type Persona, type Post } from "@prisma/client";
+import { type Comment, type Persona, type Post } from "@prisma/client";
 import localforage from "localforage";
 import {
   type EncryptCommentPartialInput,
@@ -374,7 +374,7 @@ export async function decryptPersona(
     }
   });
 
-  await Promise.all(decryptionPromises);
+  await Promise.allSettled(decryptionPromises);
 
   return result;
 }
@@ -384,7 +384,6 @@ export async function encryptComment(
   mdk: CryptoKey,
 ) {
   const result: EncryptedCommentPartialResult = {
-    id: commentData.id,
     content: commentData.content,
     coachName: commentData.coachName ?? "",
     coachNameIV: "",
@@ -403,6 +402,36 @@ export async function encryptComment(
   });
 
   await Promise.all(encryptionPromises);
+
+  return result;
+}
+
+export async function decryptComment(comment: Comment, mdk: CryptoKey) {
+  const result: Comment = {
+    ...comment,
+    content: "",
+    coachName: "",
+  };
+  if (!comment.contentIV) {
+    return comment;
+  }
+
+  const fieldsToDecrypt = ["content", "coachName"] as const;
+
+  const decryptionPromises = fieldsToDecrypt.map(async (field) => {
+    const fieldValue = comment[field];
+    const ivFieldValue = comment[`${field}IV`];
+    if (typeof fieldValue === "string" && typeof ivFieldValue === "string") {
+      const decryptedText = await decryptTextWithIVAndKey({
+        cipherText: fieldValue,
+        iv: Uint8Array.from(Buffer.from(ivFieldValue, "base64")),
+        key: mdk,
+      });
+      result[field] = decryptedText;
+    }
+  });
+
+  await Promise.allSettled(decryptionPromises);
 
   return result;
 }
@@ -467,7 +496,7 @@ export async function decryptPost(post: Post, mdk: CryptoKey): Promise<Post> {
     }
   });
 
-  await Promise.all(decryptionPromises);
+  await Promise.allSettled(decryptionPromises);
 
   return result;
 }

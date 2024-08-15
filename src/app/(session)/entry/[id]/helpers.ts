@@ -64,6 +64,7 @@ export async function makeComment({
         postId,
         coachVariant: commentType,
         createdByPersonaId: commentPersona?.id ?? undefined,
+        mdkJwk,
       });
       revalidatePath(`/entry/${postId}`);
     } else {

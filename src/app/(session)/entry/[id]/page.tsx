@@ -13,6 +13,7 @@ import { Card } from "~/app/_components/Card";
 import CopyTextButton from "~/app/_components/CopyTextButton";
 import DropDownMenu from "~/app/_components/DropDown";
 import DropDownUser from "~/app/_components/DropDownUser";
+import EncryptionNotice from "~/app/_components/EncryptionNotice";
 import FormButton from "~/app/_components/FormButton";
 import FormDeleteButton from "~/app/_components/FormDeleteButton";
 import LoadingPageBody from "~/app/_components/LoadingPageBody";
@@ -56,7 +57,7 @@ export default async function Entry({
     getTranslations(),
     getUserLocale(),
     api.post.getByPostId({ postId: params.id, mdkJwk }),
-    api.comment.getCommentsByPostId({ postId: params.id }),
+    api.comment.getCommentsByPostId({ postId: params.id, mdkJwk }),
     api.tag.getByPostId({ postId: params.id }),
     api.persona.getAllByUserId({ mdkJwk }),
   ]);
@@ -79,6 +80,7 @@ export default async function Entry({
         <DropDownUser />
       </SessionNav>
       <div className="flex h-full flex-col items-center px-2 pb-4 sm:px-8">
+        <EncryptionNotice user={user} mdkJwk={mdkJwk} />
         <EntryBody post={post} />
         <div className="flex w-full max-w-5xl flex-col items-center gap-4">
           <div className="flex w-full flex-row items-center justify-center gap-4">
@@ -228,7 +230,9 @@ export default async function Entry({
                                     )?.name
                                   }
                                 </span>
-                                {comment.content}
+                                <span style={{ wordBreak: "break-all" }}>
+                                  {comment.content}
+                                </span>
                               </p>
                               <div className="flex w-full flex-row items-center justify-between text-xs">
                                 {formattedTimeStampToDate(

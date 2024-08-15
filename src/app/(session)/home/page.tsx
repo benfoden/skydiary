@@ -7,7 +7,7 @@ import { Suspense } from "react";
 import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
-import FormButton from "~/app/_components/FormButton";
+import EncryptionNotice from "~/app/_components/EncryptionNotice";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { SessionNav } from "~/app/_components/SessionNav";
 import Spinner from "~/app/_components/Spinner";
@@ -115,16 +115,8 @@ export default async function Home() {
       <main className="flex min-h-screen flex-col items-start">
         <div className="container flex flex-col items-center justify-start px-2 pb-12">
           <Suspense fallback={<Spinner />}>
+            <EncryptionNotice user={user} mdkJwk={mdkJwk} />
             <div className="flex w-full flex-col items-start justify-center gap-4 md:max-w-3xl">
-              {user?.sukMdk && user?.passwordSalt && !mdkJwk && (
-                <Card isButton={false}>
-                  <form action="/home" method="get">
-                    <div className="w-full flex-row items-center justify-center">
-                      <FormButton>click here to show decrypted text</FormButton>
-                    </div>
-                  </form>
-                </Card>
-              )}
               <div className="ml-4">{t("home.today")}</div>
               {lastPostDate !== today || userPosts?.length === 0 ? (
                 <Link href="/today" prefetch={true} className="w-full">
