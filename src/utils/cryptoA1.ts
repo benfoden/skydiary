@@ -384,6 +384,7 @@ export async function encryptComment(
   mdk: CryptoKey,
 ) {
   const result: EncryptedCommentPartialResult = {
+    id: commentData.id,
     content: commentData.content,
     coachName: commentData.coachName ?? "",
     coachNameIV: "",

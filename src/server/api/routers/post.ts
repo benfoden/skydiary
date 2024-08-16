@@ -371,6 +371,69 @@ export const postRouter = createTRPCRouter({
       return post;
     }),
 
+  encryptAllPosts: protectedProcedure
+    .input(z.object({ mdkJwk: z.custom<JsonWebKey>().optional() }))
+    .mutation(async ({ ctx, input }) => {
+      if (!input?.mdkJwk) return;
+      const posts = await ctx.db.post.findMany({
+        where: { createdBy: { id: ctx.session.user.id } },
+        orderBy: { createdAt: "desc" },
+        include: {
+          tags: true,
+          comments: true,
+        },
+      });
+
+      const key = await importKeyFromJWK(input.mdkJwk);
+
+      const updatePostPromises = posts
+        .filter((post) => post.content?.length > 5 && !post.contentIV)
+        .map(async (post) => {
+          const data = {
+            id: post.id,
+            content: post.content ?? "",
+            summary: post.summary ?? "",
+            contentIV: "",
+            summaryIV: "",
+            comments: post.comments?.map((comment) => ({
+              id: comment.id,
+              content: comment.content,
+              coachName: comment.coachName ?? "",
+              contentIV: "",
+              coachNameIV: "",
+            })),
+          };
+          const encryptedPost = await encryptPost(data, key);
+          if (!encryptedPost.contentIV) return;
+
+          const updatePost = ctx.db.post.update({
+            where: { id: encryptedPost.id },
+            data: {
+              content: encryptedPost.content,
+              summary: encryptedPost.summary,
+              contentIV: encryptedPost.contentIV,
+              summaryIV: encryptedPost.summaryIV,
+            },
+          });
+
+          const updateComments = encryptedPost.comments?.map((comment) =>
+            ctx.db.comment.update({
+              where: { id: comment.id },
+              data: {
+                content: comment.content,
+                coachName: comment.coachName,
+                contentIV: comment.contentIV,
+                coachNameIV: comment.coachNameIV,
+              },
+            }),
+          );
+
+          return Promise.all([updatePost, ...(updateComments ?? [])]);
+        });
+
+      return await Promise.all(updatePostPromises);
+    }),
+
   tagAndMemorize: protectedProcedure
     .input(
       z.array(
