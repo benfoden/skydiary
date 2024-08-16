@@ -7,6 +7,7 @@ import { Card } from "~/app/_components/Card";
 import Input from "~/app/_components/Input";
 import { api } from "~/trpc/react";
 
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import {
   createUserKeys,
@@ -18,6 +19,7 @@ import {
 import Spinner from "./Spinner";
 
 export default function DataSecurityCard() {
+  const t = useTranslations();
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [message, setMessage] = useState("");
@@ -40,11 +42,11 @@ export default function DataSecurityCard() {
     password2: string,
   ) => {
     if (password !== password2) {
-      setMessage("passphrases do not match");
+      setMessage(t("dataSecurity.passphraseMismatch")); // passphrases do not match
       return;
     }
     if (password.length < 16) {
-      setMessage("passphrases must be at least 16 characters");
+      setMessage("dataSecurity.passphraseTooShort"); // passphrases must be at least 16 characters
       return;
     }
     try {
@@ -57,7 +59,7 @@ export default function DataSecurityCard() {
       router.refresh();
     } catch (error) {
       console.error("Error saving user keys:", error);
-      setMessage("Failed to save user keys");
+      setMessage(t("dataSecurity.failedToSaveUserKeys")); // Failed to save user keys
       throw new Error("Failed to save user keys.");
     }
   };
@@ -68,7 +70,7 @@ export default function DataSecurityCard() {
     sukMdk: string,
   ) => {
     if (password.length < 16) {
-      setMessage("your passphrase is at least 16 characters long");
+      setMessage(t("dataSecurity.passphraseTooShort"));
       return;
     }
     try {
@@ -80,9 +82,9 @@ export default function DataSecurityCard() {
       setIsLocalMdk(true);
       router.push("/settings");
     } catch (error) {
-      console.error("Error enabling data access:", error);
-      setMessage("Failed to enable data access");
-      throw new Error("Failed to enable data access");
+      console.error("Failed to enable encryption/decryption:", error);
+      setMessage(t("dataSecurity.failedToEnableEncryptionDecryption")); // Failed to enable encryption/decryption
+      throw new Error("Failed to enable encryption/decryption");
     }
   };
 
@@ -94,7 +96,7 @@ export default function DataSecurityCard() {
       router.refresh();
     } catch (error) {
       console.error("Error revoking access:", error);
-      setMessage("Failed to revoke access");
+      setMessage(t("dataSecurity.failedToRevokeAccess")); // Failed to revoke data access
       throw new Error("Failed to revoke access");
     }
   };
@@ -104,12 +106,12 @@ export default function DataSecurityCard() {
       setMessage("");
     } else if (password && password2) {
       if (password !== password2) {
-        setMessage("passphrases do not match");
+        setMessage(t("dataSecurity.passphraseMismatch")); // passphrases do not match
       } else {
         setMessage("");
       }
     }
-  }, [password, password2]);
+  }, [password, password2, t]);
 
   useEffect(() => {
     const fetchLocalMdk = async () => {
@@ -144,11 +146,9 @@ export default function DataSecurityCard() {
   return (
     <Card variant="form" isButton={false}>
       <div className="flex w-full flex-col items-center gap-4">
-        <h2>data passphrase</h2>
+        <h2>{t("dataSecurity.dataPassphrase")}</h2>
         <p className="text-sm opacity-60">
-          use a passphrase to enhance your data privacy and security. <br />
-          <br />
-          it is never stored on our servers.
+          {t("dataSecurity.dataPassphraseDescription")}
         </p>
         {message && <p className="text-red-600">{message}</p>}
 
@@ -160,15 +160,8 @@ export default function DataSecurityCard() {
             >
               <summary className="cursor-pointer font-bold">Caution</summary>
               <div className="mt-2 flex flex-col gap-2">
-                <p>
-                  because we never see your passphrase, we can not recover it if
-                  you forget it.
-                </p>
-                <p>
-                  we recommend setting a unique, long passphrase. save it
-                  securely in a password manager, write it down, or download a
-                  .PDF
-                </p>
+                <p>{t("dataSecurity.passphraseCaution")}</p>
+                <p>{t("dataSecurity.passphraseRecommendation")}</p>
               </div>
             </details>
             <Input
@@ -194,13 +187,15 @@ export default function DataSecurityCard() {
                   handleCreateKeysFromPassword(password, password2)
                 }
               >
-                set passphrase
+                {t("dataSecurity.setPassphrase")}
               </Button>
             </div>
           </div>
         ) : !isLocalMdk ? (
           <div className="flex w-full flex-col items-center gap-4">
-            <p className="font-light">unlock your data on this device</p>
+            <p className="font-light">
+              {t("dataSecurity.unlockDataOnThisDevice")}
+            </p>
             <Input
               label="passphrase"
               type="password"
@@ -219,21 +214,20 @@ export default function DataSecurityCard() {
                 )
               }
             >
-              unlock data on this device
+              enable decryption / encryption
             </Button>
           </div>
         ) : (
           <Card isButton={false}>
             <div className="flex w-full flex-col items-center gap-4">
               <p className="font-light">
-                data access is enabled on this device
+                {t("dataSecurity.dataAccessIsEnabledOnThisDevice")}
               </p>
               <p className="text-sm opacity-60">
-                Caution: If you revoke access on this device, you need to enter
-                your password again to see your unencrypted data.
+                {t("dataSecurity.dataAccessCaution")}
               </p>
               <Button onClick={() => handleRevokeAccess()}>
-                revoke access
+                {t("dataSecurity.revokeAccess")}{" "}
               </Button>
             </div>
           </Card>

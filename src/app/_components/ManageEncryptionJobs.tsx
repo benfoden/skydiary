@@ -2,7 +2,7 @@
 
 import { type User } from "@prisma/client";
 
-export default function ManageEncryption({ user }: { user: User }) {
+export default function ManageEncryptionJobs({ user }: { user: User }) {
   // const mdkJwk = useMdkJwkLocal();
 
   // const [queue, setQueue] = useState<{

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { type ReactNode } from "react";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
-import ManageEncryption from "../_components/ManageEncryption";
+import ManageEncryptionJobs from "../_components/ManageEncryptionJobs";
 import { NextAuthProvider } from "../_components/NextAuthProvider";
 import PrepareMDK from "../_components/PrepareMDK";
 
@@ -25,7 +25,7 @@ export default async function SessionLayout({ children }: Props) {
       <NextAuthProvider>
         {children}
         <PrepareMDK />
-        <ManageEncryption user={session.user} />
+        <ManageEncryptionJobs user={session.user} />
       </NextAuthProvider>
     </div>
   );

@@ -269,6 +269,29 @@
     "occupation": "occupation",
     "occupationPlaceholder": "job title, student, housewife, retiree, volunteer, etc."
   },
+  "dataSecurity": {
+    "dataPassphrase": "data passphrase",
+    "dataPassphraseDescription": "use a passphrase to enhance your data privacy and security. it is never stored on our servers.",
+    "passphraseTooShort": "passphrases must be at least 16 characters",
+    "passphraseMismatch": "passphrases do not match",
+    "passphraseCaution": "because we never see your passphrase, we can not recover it if you forget it.",
+    "passphraseRecommendation": "we recommend setting a unique, long passphrase. save it securely in a password manager, write it down, or download a .PDF",
+    "setPassphrase": "set passphrase",
+    "dataAccessIsEnabledOnThisDevice": "encryption / decryption is enabled on this device",
+    "dataAccessCaution": "Caution: If you revoke encryption / decryption on this device, you will need to enter your passphrase again.",
+    "unlockDataOnThisDevice": "decrypt / encrypt your data on this device",
+    "revokeAccess": "revoke access",
+    "failedToRevokeAccess": "Failed to revoke data access",
+    "failedToSaveUserKeys": "Failed to save user keys",
+    "failedToEnableEncryptionDecryption": "Failed to enable encryption/decryption"
+  },
+  "encryptionNotice": {
+    "title": "decrypt your data",
+    "enterPassphrase": "enter passphrase",
+    "or": "or",
+    "reload": "reload",
+    "description": "if you entered your passphrase already on this device, reload the page to continue."
+  },
   "form": {
     "save": "save",
     "save and continue": "save and continue",
