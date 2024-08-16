@@ -182,7 +182,9 @@ export default async function Settings() {
             </Card>
           )}
 
-          {session?.user?.isAdmin && <DataSecurityCard />}
+          <div id="data-security">
+            {session?.user?.isAdmin && <DataSecurityCard />}
+          </div>
           <Card variant="form">
             <h2>{t("settings.language")}</h2>
             <div className="flex flex-row gap-2">

@@ -1,3 +1,4 @@
+"use client";
 import { type User } from "@prisma/client";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -14,11 +15,11 @@ export default function EncryptionNotice({
   const t = useTranslations();
   return (
     <>
-      {user?.sukMdk && user?.passwordSalt && !mdkJwk && (
+      {user?.passwordSalt && !mdkJwk && (
         <div className="m-4 flex w-full flex-col items-center justify-center gap-4 rounded-lg bg-yellow-100/30 p-4">
           <h2 className="text-3xl font-light">{t("encryptionNotice.title")}</h2>
           <div className="flex flex-row items-center gap-4">
-            <Link href="/settings">
+            <Link href="/settings#data-security">
               <Button>{t("encryptionNotice.enterPassphrase")}</Button>
             </Link>
             <div>{t("encryptionNotice.or")}</div>

@@ -56,7 +56,7 @@ export default function DataSecurityCard() {
         passwordSalt: Buffer.from(passwordSalt).toString("base64"),
         sukMdk: Buffer.from(sukMdk).toString("base64"),
       });
-      router.refresh();
+      router.push("/settings#data-security");
     } catch (error) {
       console.error("Error saving user keys:", error);
       setMessage(t("dataSecurity.failedToSaveUserKeys")); // Failed to save user keys
@@ -80,10 +80,10 @@ export default function DataSecurityCard() {
         sukMdk,
       });
       setIsLocalMdk(true);
-      router.push("/settings");
+      router.push("/settings#data-security");
     } catch (error) {
       console.error("Failed to enable encryption/decryption:", error);
-      setMessage(t("dataSecurity.failedToEnableEncryptionDecryption")); // Failed to enable encryption/decryption
+      setMessage(t("dataSecurity.failedToEnableEncryptionDecryption"));
       throw new Error("Failed to enable encryption/decryption");
     }
   };
@@ -93,7 +93,7 @@ export default function DataSecurityCard() {
       setIsLocalMdk(false);
       document.cookie = "mdkJwk=; path=/; secure; samesite=strict";
       await deleteJWKFromIndexedDB(MASTERDATAKEY);
-      router.refresh();
+      router.push("/settings#data-security");
     } catch (error) {
       console.error("Error revoking access:", error);
       setMessage(t("dataSecurity.failedToRevokeAccess")); // Failed to revoke data access
