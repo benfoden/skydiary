@@ -443,14 +443,14 @@ export const postRouter = createTRPCRouter({
       const userPersona = await ctx.db.persona.findFirst({
         where: { createdById: ctx.session.user.id, isUser: true },
       });
-      const eightHoursAgo = new Date(Date.now() - 8 * 60 * 60 * 1000);
+      const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
 
       const posts = await ctx.db.post.findMany({
         where: {
           createdBy: { id: ctx.session.user.id },
           content: { not: "" },
           tags: { none: {} },
-          updatedAt: { lte: eightHoursAgo },
+          updatedAt: { lte: twelveHoursAgo },
         },
         orderBy: { createdAt: "desc" },
       });
