@@ -28,24 +28,16 @@ export default function DataSecurityCard() {
   const { data: sessionData } = useSession();
   const user = sessionData?.user;
 
-  // CD: on /settings page the user enters a data password and is prompted to save it securely in a password manager or otherwise save a copy
-  // CD: a random uint8Array(16) salts is generated: SUKs
-  // CD: Argon2 is used to derive secret user key (SUK) from data password and SUKs
-  // CD: master data key is generated (MDK), saved in jwk format in local IndexedDB
-  // CD: SUK is used to encrypt MDK, resulting in SUK-MDK
-  // S: SUK-MDK, SUKs are added to user record, updated in DB
-  // S: new device A record with UUID, device A metadata, userID is created in DB
-  // CD: user is ready to securely use the service for duration of their session
   const handleCreateKeysFromPassword = async (
     password: string,
     password2: string,
   ) => {
     if (password !== password2) {
-      setMessage(t("dataSecurity.passphraseMismatch")); // passphrases do not match
+      setMessage(t("dataSecurity.passphraseMismatch"));
       return;
     }
     if (password.length < 16) {
-      setMessage("dataSecurity.passphraseTooShort"); // passphrases must be at least 16 characters
+      setMessage("dataSecurity.passphraseTooShort");
       return;
     }
     try {
@@ -59,7 +51,7 @@ export default function DataSecurityCard() {
       window.location.reload();
     } catch (error) {
       console.error("Error saving user keys:", error);
-      setMessage(t("dataSecurity.failedToSaveUserKeys")); // Failed to save user keys
+      setMessage(t("dataSecurity.failedToSaveUserKeys"));
       throw new Error("Failed to save user keys.");
     }
   };
@@ -98,7 +90,7 @@ export default function DataSecurityCard() {
       window.location.reload();
     } catch (error) {
       console.error("Error revoking access:", error);
-      setMessage(t("dataSecurity.failedToRevokeAccess")); // Failed to revoke data access
+      setMessage(t("dataSecurity.failedToRevokeAccess"));
       throw new Error("Failed to revoke access");
     }
   };
@@ -108,7 +100,7 @@ export default function DataSecurityCard() {
       setMessage("");
     } else if (password && password2) {
       if (password !== password2) {
-        setMessage(t("dataSecurity.passphraseMismatch")); // passphrases do not match
+        setMessage(t("dataSecurity.passphraseMismatch"));
       } else {
         setMessage("");
       }
