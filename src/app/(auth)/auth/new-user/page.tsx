@@ -16,9 +16,9 @@ const NewUserPage: React.FC = async () => {
   const session = await getServerAuthSession();
 
   if (!session) return redirect("/auth/signin");
-  // if (session.user.name && !session.user.passwordSalt) {
-  //   return redirect("/home");
-  // }
+  if (session.user.name && !session.user.passwordSalt) {
+    return redirect("/home");
+  }
 
   return (
     <div className="flex w-full flex-col items-center justify-center sm:w-96">

@@ -209,7 +209,7 @@ export default function DataSecurityCard({ user }: { user: User }) {
           ) : (
             <Spinner />
           )
-        ) : !isLocalMdk ? (
+        ) : !isLocalMdk && user.passwordSalt ? (
           <div className="flex w-full flex-col items-center gap-4">
             <p className="font-light">
               {t("dataSecurity.unlockDataOnThisDevice")}
