@@ -120,11 +120,13 @@ export const prompts = {
         "traits: core values, morals, preferences. ";
 
     result +=
-      "Write as concisely as possible. This is for an LLM AI to read, not for humans. " +
+      "Write as concisely as possible, using more detail only for things that are high priority. This is for an LLM AI to read, not for humans. " +
+      "Omit any mundane or low-priority details like regular daily life, chores, or minor events.  " +
+      "Do not extrapolate or speculate about the author's life from one diary entry. " +
+      "For example, if the author watches a baseball game, that doesn't mean they are a baseball fanatic. " +
       "Do not repeat any information. " +
       "Do not add any special characters or emoji. " +
-      "Only add new information or update existing information if it has changed. " +
-      "Do not include any mundane or unmemorable information like regular daily life or minor events.  " +
+      "Only add new information or update existing information. " +
       "Return JSON with the same keys. " +
       "Each value should not exceed" +
       wordLimit.toFixed(0).toString() +
