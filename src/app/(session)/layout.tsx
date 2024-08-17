@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { type ReactNode } from "react";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
+import { runBulkEncryption } from "~/utils/runBulkEncryption";
+import { useMdkJwk } from "~/utils/useMdkJwk";
 import ManageMDK from "../_components/ManageMDK";
 
 type Props = {
@@ -14,6 +16,15 @@ export default async function SessionLayout({ children }: Props) {
   const session = await getServerAuthSession();
   if (!session) {
     redirect("/auth/signin");
+  }
+  const mdkJwk = await useMdkJwk();
+  if (
+    session.user.passwordSalt &&
+    session.user.sukMdk &&
+    mdkJwk &&
+    session.user.isAdmin
+  ) {
+    await runBulkEncryption({ mdkJwk });
   }
 
   await api.user.resetDailyUsage();
