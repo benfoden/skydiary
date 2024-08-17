@@ -76,7 +76,7 @@ export const postRouter = createTRPCRouter({
         data.summaryIV = encryptedData.summaryIV ?? "";
         data.contentIV = encryptedData.contentIV ?? "";
         data.comments = encryptedData.comments?.map((comment) => ({
-          id: comment.id,
+          id: comment.id ?? "",
           content: comment.content,
           coachName: comment.coachName ?? "",
           contentIV: comment.contentIV ?? "",
@@ -159,7 +159,7 @@ export const postRouter = createTRPCRouter({
           data.summary = encryptedData.summary ?? data.summary;
           data.summaryIV = encryptedData.summaryIV ?? "";
           data.comments = encryptedData.comments?.map((comment) => ({
-            id: comment.id,
+            id: comment.id ?? "",
             content: comment.content,
             coachName: comment.coachName ?? "",
             contentIV: comment.contentIV ?? "",

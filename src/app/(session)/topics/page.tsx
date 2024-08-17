@@ -25,8 +25,8 @@ export async function generateMetadata({
 
 export default async function Topics() {
   const { user } = await getServerAuthSession();
-  const t = await getTranslations();
   const mdkJwk = await useMdkJwk();
+  const t = await getTranslations();
   const userPosts = await api.post.getByUser({ mdkJwk });
 
   const tagsAndCounts = await api.post.getTagsAndCounts();

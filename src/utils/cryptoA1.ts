@@ -187,9 +187,7 @@ export async function decryptTextWithIVAndKey({
   }
 }
 
-export async function createUserKeys(
-  password: string,
-): Promise<{
+export async function createUserKeys(password: string): Promise<{
   sukMdk: ArrayBuffer;
   suk: CryptoKey;
   passwordSalt: Uint8Array;
@@ -395,7 +393,6 @@ export async function encryptComment(
   mdk: CryptoKey,
 ) {
   const result: EncryptedCommentPartialResult = {
-    id: commentData.id,
     content: commentData.content,
     coachName: commentData.coachName ?? "",
     coachNameIV: "",
@@ -459,7 +456,6 @@ export async function encryptPost(
     summary: postData.summary ?? "",
     summaryIV: "",
     comments: postData.comments?.map((comment) => ({
-      id: comment.id,
       content: comment.content,
       contentIV: "",
       coachName: comment.coachName ?? "",
