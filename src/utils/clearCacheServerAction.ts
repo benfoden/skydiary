@@ -1,7 +1,7 @@
 "use server";
 import { revalidatePath } from "next/cache";
 
-const clearCacheAndFetch = async (path: string) => {
+const clearCacheServerAction = async (path: string) => {
   try {
     if (path !== "/settings") {
       revalidatePath("/");
@@ -14,4 +14,4 @@ const clearCacheAndFetch = async (path: string) => {
   }
 };
 
-export default clearCacheAndFetch;
+export default clearCacheServerAction;

@@ -8,8 +8,7 @@ import Input from "~/app/_components/Input";
 import { api } from "~/trpc/react";
 
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
-import { default as clearCacheAndFetch } from "~/utils/clearCache";
+import clearCacheServerAction from "~/utils/clearCacheServerAction";
 import {
   createUserKeys,
   deleteJWKFromIndexedDB,
@@ -28,7 +27,6 @@ export default function DataSecurityCard() {
   const updateUser = api.user.updateUser.useMutation();
   const { data: sessionData } = useSession();
   const user = sessionData?.user;
-  const router = useRouter();
 
   // CD: on /settings page the user enters a data password and is prompted to save it securely in a password manager or otherwise save a copy
   // CD: a random uint8Array(16) salts is generated: SUKs
@@ -57,7 +55,8 @@ export default function DataSecurityCard() {
         passwordSalt: Buffer.from(passwordSalt).toString("base64"),
         sukMdk: Buffer.from(sukMdk).toString("base64"),
       });
-      await clearCacheAndFetch("/settings");
+      await clearCacheServerAction("/settings");
+      window.location.reload();
     } catch (error) {
       console.error("Error saving user keys:", error);
       setMessage(t("dataSecurity.failedToSaveUserKeys")); // Failed to save user keys
@@ -80,7 +79,8 @@ export default function DataSecurityCard() {
         passwordSalt,
         sukMdk,
       });
-      await clearCacheAndFetch("/settings");
+      await clearCacheServerAction("/settings");
+      window.location.reload();
       setIsLocalMdk(true);
     } catch (error) {
       console.error("Failed to enable encryption/decryption:", error);
@@ -94,7 +94,8 @@ export default function DataSecurityCard() {
       setIsLocalMdk(false);
       document.cookie = "mdkJwk=; path=/; secure; samesite=strict";
       await deleteJWKFromIndexedDB(MASTERDATAKEY);
-      await clearCacheAndFetch("/settings");
+      await clearCacheServerAction("/settings");
+      window.location.reload();
     } catch (error) {
       console.error("Error revoking access:", error);
       setMessage(t("dataSecurity.failedToRevokeAccess")); // Failed to revoke data access
