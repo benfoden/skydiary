@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
@@ -25,8 +27,8 @@ export async function generateMetadata({
 
 export default async function Topics() {
   const { user } = await getServerAuthSession();
-  const t = await getTranslations();
   const mdkJwk = await useMdkJwk();
+  const t = await getTranslations();
   const userPosts = await api.post.getByUser({ mdkJwk });
 
   const tagsAndCounts = await api.post.getTagsAndCounts();
