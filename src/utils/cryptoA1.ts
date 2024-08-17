@@ -118,6 +118,7 @@ export async function unwrapMDKAndSave({
     const mdkJwk = await exportKeyToJWK(masterDataKey);
 
     await saveJWKToIndexedDB(mdkJwk, MASTERDATAKEY);
+    document.cookie = `mdkJwk=${JSON.stringify(mdkJwk)}; path=/; secure; samesite=strict`;
   } catch (error) {
     console.error("Error unwrapping key:", error);
     return false;

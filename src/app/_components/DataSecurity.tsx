@@ -9,6 +9,7 @@ import { api } from "~/trpc/react";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import { default as clearCacheAndFetch } from "~/utils/clearCache";
 import {
   createUserKeys,
   deleteJWKFromIndexedDB,
@@ -56,7 +57,7 @@ export default function DataSecurityCard() {
         passwordSalt: Buffer.from(passwordSalt).toString("base64"),
         sukMdk: Buffer.from(sukMdk).toString("base64"),
       });
-      router.push("/settings#data-security");
+      await clearCacheAndFetch("/settings");
     } catch (error) {
       console.error("Error saving user keys:", error);
       setMessage(t("dataSecurity.failedToSaveUserKeys")); // Failed to save user keys
@@ -79,8 +80,8 @@ export default function DataSecurityCard() {
         passwordSalt,
         sukMdk,
       });
+      await clearCacheAndFetch("/settings");
       setIsLocalMdk(true);
-      router.push("/settings#data-security");
     } catch (error) {
       console.error("Failed to enable encryption/decryption:", error);
       setMessage(t("dataSecurity.failedToEnableEncryptionDecryption"));
@@ -93,7 +94,7 @@ export default function DataSecurityCard() {
       setIsLocalMdk(false);
       document.cookie = "mdkJwk=; path=/; secure; samesite=strict";
       await deleteJWKFromIndexedDB(MASTERDATAKEY);
-      router.push("/settings#data-security");
+      await clearCacheAndFetch("/settings");
     } catch (error) {
       console.error("Error revoking access:", error);
       setMessage(t("dataSecurity.failedToRevokeAccess")); // Failed to revoke data access
@@ -121,17 +122,16 @@ export default function DataSecurityCard() {
 
           setIsLocalMdk(!!key);
         } catch (error) {
-          //don't leak error details to client
-          return undefined;
+          console.error("Error retrieving local key");
         }
       }
     };
 
     fetchLocalMdk().catch(() => {
-      //don't leak error details to client
-      return undefined;
+      console.error("Error retrieving local key");
     });
-  }, [user, isLocalMdk]);
+  }, [user?.sukMdk, isLocalMdk]);
+
   //todo: handle user logged in on second device
   //todo: handle password reset
   //todo: handle decrypt data and unset key
