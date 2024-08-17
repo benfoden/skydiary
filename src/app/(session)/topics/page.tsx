@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
@@ -48,9 +46,9 @@ export default async function Topics() {
         <EncryptionNotice user={user} mdkJwk={mdkJwk} />
       ) : (
         <main className="flex min-h-screen w-full flex-col items-center justify-start">
-          <div className="container flex flex-col items-center justify-start gap-12 px-4 py-16 ">
-            <div className="flex flex-col items-start justify-center gap-4">
-              <Link className="pb-4" href="/home">
+          <div className="container flex flex-col items-center justify-start gap-12 px-4 md:py-16 ">
+            <div className="flex w-full flex-col items-start justify-center gap-4 md:w-fit">
+              <Link href="/home" className="flex w-full flex-row pb-4">
                 <Card>
                   <div className="flex w-full flex-row items-center justify-between gap-2">
                     <p>{t("topics.all")}</p>
@@ -66,6 +64,7 @@ export default async function Topics() {
                       <Link
                         key={tag.id}
                         href={`/topics/${tag.content}/${tag.id}`}
+                        className="flex w-full flex-row"
                       >
                         <Card>
                           <div className="flex w-full flex-row items-center justify-between gap-2">
