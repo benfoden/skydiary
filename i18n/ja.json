@@ -272,8 +272,8 @@
     "backToSettings": "設定に戻る"
   },
   "dataSecurity": {
-    "dataPassphrase": "データパスフレーズ",
-    "dataPassphraseDescription": "パスフレーズを使用して、データのプライバシーとセキュリティを強化します。パスフレーズはサーバーに保存されません。",
+    "dataAccess": "暗号化データアクセス",
+    "dataAccessDescription": "パスフレーズを使用してデータを暗号化します。このパスフレーズは当社のサーバーには保存されません。",
     "passphraseTooShort": "パスフレーズは少なくとも16文字である必要があります",
     "passphraseMismatch": "パスフレーズが一致しません",
     "passphraseCaution": "パスフレーズを確認できないため、忘れた場合は回復できません。",
@@ -287,6 +287,8 @@
     "failedToSaveUserKeys": "ユーザーキーの保存に失敗しました",
     "failedToEnableEncryptionDecryption": "暗号化/復号化の有効化に失敗しました",
     "failedToRunBulkEncryption": "データの暗号化を完了できませんでした",
+    "encryptingData": "データを暗号化しています。数分かかる場合があります。このページを閉じたり、他のタブに移動しないでください。",
+    "bulkEncryptionComplete": "データの暗号化が完了しました。",
     "continueHome": "ホームページに移動"
   },
   "encryptionNotice": {
