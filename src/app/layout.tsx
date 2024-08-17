@@ -10,6 +10,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { type Locale } from "~/config";
 import { TRPCReactProvider } from "~/trpc/react";
+import { NextAuthProvider } from "./_components/NextAuthProvider";
 
 export const siteTitle = "skydiary";
 export async function generateMetadata({
@@ -65,15 +66,17 @@ export default async function RootLayout({
       <body className={`font-sans ${inter.variable} bg-transparent`}>
         <div className="relative min-h-screen w-full">
           <div className="absolute inset-0 z-[-20] min-h-full w-full bg-gradient-to-b from-[#cce3f1] to-[#f3f6f6] dark:from-[#07090a] dark:to-[#171727]" />
-          <NextIntlClientProvider messages={messages}>
-            <TRPCReactProvider>
-              <div className="relative z-0 mx-auto min-h-screen">
-                {children}
-              </div>
-              <SpeedInsights />
-              <Analytics />
-            </TRPCReactProvider>
-          </NextIntlClientProvider>
+          <NextAuthProvider>
+            <NextIntlClientProvider messages={messages}>
+              <TRPCReactProvider>
+                <div className="relative z-0 mx-auto min-h-screen">
+                  {children}
+                </div>
+                <SpeedInsights />
+                <Analytics />
+              </TRPCReactProvider>
+            </NextIntlClientProvider>
+          </NextAuthProvider>
         </div>
       </body>
     </html>

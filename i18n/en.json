@@ -147,7 +147,8 @@
     "settings": "settings",
     "signout": "sign out",
     "topics": "topics",
-    "personas": "personas",
+    "personas": "edit personas",
+    "persona": "edit persona",
     "addPersonas": "add personas",
     "copy all text": "copy text",
     "back": "back",
@@ -161,6 +162,7 @@
   },
   "new-user": {
     "title": "welcome to skydiary",
+    "welcomeBack": "welcome back",
     "yourName": "your first name",
     "your age": "your age",
     "your identities": "your identities",
@@ -268,6 +270,33 @@
     "exportDataTitle": "skydiary user data export",
     "occupation": "occupation",
     "occupationPlaceholder": "job title, student, housewife, retiree, volunteer, etc."
+  },
+  "dataSecurity": {
+    "dataAccess": "encrypted data access",
+    "dataAccessDescription": "encrypt your data using a passphrase that's never stored on our servers.",
+    "passphraseTooShort": "passphrases must be at least 16 characters",
+    "passphraseMismatch": "passphrases do not match",
+    "passphraseCaution": "because we never see your passphrase, we can not recover it if you forget it.",
+    "passphraseRecommendation": "we recommend setting a unique, long passphrase. save it securely in a password manager, write it down, or download a .PDF",
+    "setPassphrase": "set passphrase",
+    "dataAccessIsEnabledOnThisDevice": "encrypted data is enabled on this device",
+    "dataAccessCaution": "Caution: If you revoke access, you'll need to enter your passphrase again to use skydiary on this device.",
+    "unlockDataOnThisDevice": "decrypt / encrypt your data on this device",
+    "revokeAccess": "revoke access",
+    "failedToRevokeAccess": "Failed to revoke data access",
+    "failedToSaveUserKeys": "Failed to save user keys",
+    "failedToEnableEncryptionDecryption": "Failed to enable encryption/decryption",
+    "encryptingData": "encrypting your data. this may take a few minutes. please don't close or tab away from this page.",
+    "failedToRunBulkEncryption": "Failed to complete encryption of data",
+    "bulkEncryptionComplete": "Data encryption completed.",
+    "continueHome": "go to homepage"
+  },
+  "encryptionNotice": {
+    "title": "decrypt your data",
+    "enterPassphrase": "enter passphrase",
+    "or": "or",
+    "reload": "reload",
+    "description": "if you entered your passphrase already on this device, reload the page to continue."
   },
   "form": {
     "save": "save",

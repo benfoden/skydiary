@@ -147,6 +147,7 @@
     "signout": "サインアウト",
     "topics": "トピック",
     "personas": "パーソナ",
+    "persona": "パーソナ",
     "addPersonas": "パーソナを追加",
     "copy all text": "キストをコピー",
     "back": "戻る",
@@ -161,6 +162,7 @@
   },
   "new-user": {
     "title": "skydiaryへようこそ",
+    "welcomeBack": "おかえりなさい",
     "yourName": "名前（必須）",
     "your age": "年齢",
     "your identities": "身分",
@@ -268,6 +270,33 @@
     "preparingExport": "エクスポートの準備中...",
     "checkDownloadsFolder": "エクスポートとダウンロードが完了しました。ダウンロードフォルダを確認してください",
     "backToSettings": "設定に戻る"
+  },
+  "dataSecurity": {
+    "dataAccess": "暗号化データアクセス",
+    "dataAccessDescription": "パスフレーズを使用してデータを暗号化します。このパスフレーズは当社のサーバーには保存されません。",
+    "passphraseTooShort": "パスフレーズは少なくとも16文字である必要があります",
+    "passphraseMismatch": "パスフレーズが一致しません",
+    "passphraseCaution": "パスフレーズを確認できないため、忘れた場合は回復できません。",
+    "passphraseRecommendation": "ユニークで長いパスフレーズを設定することをお勧めします。パスワードマネージャーに安全に保存するか、書き留めるか、.PDFをダウンロードしてください。",
+    "setPassphrase": "パスフレーズを設定",
+    "dataAccessIsEnabledOnThisDevice": "このデバイスで暗号化/復号化が有効になっています",
+    "dataAccessCaution": "注意: このデバイスで暗号化/復号化を取り消すと、再度パスフレーズを入力する必要があります。",
+    "unlockDataOnThisDevice": "このデバイスでデータを復号化/暗号化",
+    "revokeAccess": "アクセスを取り消す",
+    "failedToRevokeAccess": "データアクセスの取り消しに失敗しました",
+    "failedToSaveUserKeys": "ユーザーキーの保存に失敗しました",
+    "failedToEnableEncryptionDecryption": "暗号化/復号化の有効化に失敗しました",
+    "failedToRunBulkEncryption": "データの暗号化を完了できませんでした",
+    "encryptingData": "データを暗号化しています。数分かかる場合があります。このページを閉じたり、他のタブに移動しないでください。",
+    "bulkEncryptionComplete": "データの暗号化が完了しました。",
+    "continueHome": "ホームページに移動"
+  },
+  "encryptionNotice": {
+    "title": "データを復号化する",
+    "enterPassphrase": "パスフレーズを入力",
+    "or": "または",
+    "reload": "リロード",
+    "description": "このデバイスで既にパスフレーズを入力している場合は、ページをリロードして続行してください。"
   },
   "form": {
     "save": "保存",

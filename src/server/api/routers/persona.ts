@@ -326,6 +326,40 @@ export const personaRouter = createTRPCRouter({
       return persona;
     }),
 
+  encryptAllPersonas: protectedProcedure
+    .input(z.object({ mdkJwk: z.custom<JsonWebKey>().optional() }))
+    .mutation(async ({ ctx, input }) => {
+      if (!input?.mdkJwk) return;
+      const personas = await ctx.db.persona.findMany({
+        where: { createdBy: { id: ctx.session.user.id }, isUser: false },
+        orderBy: { createdAt: "asc" },
+      });
+
+      const key = await importKeyFromJWK(input.mdkJwk);
+      const updatePromises = personas
+        .filter((persona) => !persona.nameIV)
+        .map(async (persona) => {
+          const encryptedPersona = await encryptPersona(persona, key);
+          if (!encryptedPersona.nameIV) return;
+          return ctx.db.persona.update({
+            where: { id: encryptedPersona.id },
+            data: {
+              ...encryptedPersona,
+              nameIV: encryptedPersona.nameIV,
+              descriptionIV: encryptedPersona.descriptionIV,
+              genderIV: encryptedPersona.genderIV,
+              relationshipIV: encryptedPersona.relationshipIV,
+              occupationIV: encryptedPersona.occupationIV,
+              traitsIV: encryptedPersona.traitsIV,
+              communicationStyleIV: encryptedPersona.communicationStyleIV,
+              communicationSampleIV: encryptedPersona.communicationSampleIV,
+            },
+          });
+        });
+
+      return await Promise.all(updatePromises);
+    }),
+
   delete: protectedProcedure
     .input(z.object({ personaId: z.string() }))
     .mutation(async ({ ctx, input }) => {

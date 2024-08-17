@@ -4,9 +4,9 @@ import { redirect } from "next/navigation";
 import { type ReactNode } from "react";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
-import ManageEncryption from "../_components/ManageEncryption";
-import { NextAuthProvider } from "../_components/NextAuthProvider";
-import PrepareMDK from "../_components/PrepareMDK";
+import { runBulkEncryption } from "~/utils/runBulkEncryption";
+import { useMdkJwk } from "~/utils/useMdkJwk";
+import ManageMDK from "../_components/ManageMDK";
 
 type Props = {
   children: ReactNode;
@@ -17,16 +17,22 @@ export default async function SessionLayout({ children }: Props) {
   if (!session) {
     redirect("/auth/signin");
   }
+  const mdkJwk = await useMdkJwk();
+  if (
+    session.user.passwordSalt &&
+    session.user.sukMdk &&
+    mdkJwk &&
+    session.user.isAdmin
+  ) {
+    await runBulkEncryption({ mdkJwk });
+  }
 
   await api.user.resetDailyUsage();
 
   return (
     <div className="container mx-auto min-h-screen">
-      <NextAuthProvider>
-        {children}
-        <PrepareMDK />
-        <ManageEncryption user={session.user} />
-      </NextAuthProvider>
+      {children}
+      <ManageMDK user={session?.user} />
     </div>
   );
 }

@@ -1,12 +1,10 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { type User } from "@prisma/client";
 import { useEffect } from "react";
 import { useMdkJwkLocal } from "~/utils/useMdkJwkLocal";
 
-export default function PrepareMDK() {
-  const { data: session } = useSession();
-  const user = session?.user;
+export default function ManageMDK({ user }: { user?: User }) {
   const mdkJwk = useMdkJwkLocal();
 
   useEffect(() => {

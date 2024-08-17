@@ -118,6 +118,7 @@ export async function unwrapMDKAndSave({
     const mdkJwk = await exportKeyToJWK(masterDataKey);
 
     await saveJWKToIndexedDB(mdkJwk, MASTERDATAKEY);
+    document.cookie = `mdkJwk=${JSON.stringify(mdkJwk)}; path=/; secure; samesite=strict`;
   } catch (error) {
     console.error("Error unwrapping key:", error);
     return false;
@@ -188,7 +189,12 @@ export async function decryptTextWithIVAndKey({
 
 export async function createUserKeys(
   password: string,
-): Promise<{ sukMdk: ArrayBuffer; suk: CryptoKey; passwordSalt: Uint8Array }> {
+): Promise<{
+  sukMdk: ArrayBuffer;
+  suk: CryptoKey;
+  passwordSalt: Uint8Array;
+  mdkJwk: JsonWebKey;
+}> {
   "use client";
   try {
     const passwordSalt = crypto.getRandomValues(new Uint8Array(16));
@@ -208,7 +214,12 @@ export async function createUserKeys(
     const jwkDataEncryptionKey = await exportKeyToJWK(masterDataKey);
 
     await saveJWKToIndexedDB(jwkDataEncryptionKey, MASTERDATAKEY);
-    return { sukMdk, suk: secretUserKey, passwordSalt };
+    return {
+      sukMdk,
+      suk: secretUserKey,
+      passwordSalt,
+      mdkJwk: jwkDataEncryptionKey,
+    };
   } catch (error) {
     console.error("Error creating user keys:", error);
     throw new Error("Failed to create user keys");
@@ -384,6 +395,7 @@ export async function encryptComment(
   mdk: CryptoKey,
 ) {
   const result: EncryptedCommentPartialResult = {
+    id: commentData.id,
     content: commentData.content,
     coachName: commentData.coachName ?? "",
     coachNameIV: "",
