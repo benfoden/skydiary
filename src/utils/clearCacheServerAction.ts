@@ -10,7 +10,7 @@ const clearCacheServerAction = async (path: string) => {
       revalidatePath("/settings", "layout");
     }
   } catch (error) {
-    console.error("clearCacheAndFetch=> ", error);
+    console.error("clearCache error", error);
   }
 };
 
