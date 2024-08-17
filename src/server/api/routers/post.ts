@@ -433,100 +433,96 @@ export const postRouter = createTRPCRouter({
 
       return await Promise.all(updatePostPromises);
     }),
-
   tagAndMemorize: protectedProcedure
     .input(
-      z.array(
-        z.object({
-          id: z.string(),
-          content: z.string(),
-          summary: z.string().nullable().optional(),
-          tags: z.array(z.string()),
-          mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
-        }),
-      ),
+      z.object({
+        mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const userPersona = await ctx.db.persona.findFirst({
         where: { createdById: ctx.session.user.id, isUser: true },
       });
+      const eightHoursAgo = new Date(Date.now() - 8 * 60 * 60 * 1000);
 
-      for (const post of input) {
-        if (!post?.id && post.content?.length < 20 && post.tags.length > 0) {
-          continue;
-        }
+      const posts = await ctx.db.post.findMany({
+        where: {
+          createdBy: { id: ctx.session.user.id },
+          content: { not: "" },
+          tags: { none: {} },
+          updatedAt: { lte: eightHoursAgo },
+        },
+        orderBy: { createdAt: "desc" },
+      });
 
-        const [newTags, generatedPersona] = await Promise.all([
-          getResponse({
-            messageContent: prompts.tag({ content: post?.content }),
-            model: "gpt-4o-mini",
-          }),
-          getResponseJSON({
-            messageContent: prompts.userPersona({
-              persona: userPersona ?? NEWPERSONAUSER,
-              content: post?.content,
-              wordLimit: ctx.session.user?.isSpecial
-                ? 150
-                : productPlan(ctx.session.user?.stripeProductId).memories,
+      const updatePromises = posts
+        .filter((post) => post.content?.length >= 20)
+        .map(async (post) => {
+          const [newTags, generatedPersona] = await Promise.all([
+            getResponse({
+              messageContent: prompts.tag({ content: post?.content }),
+              model: "gpt-4o-mini",
             }),
-            model: "gpt-4o-mini",
-          }),
-        ]);
+            getResponseJSON({
+              messageContent: prompts.userPersona({
+                persona: userPersona ?? NEWPERSONAUSER,
+                content: post?.content,
+                wordLimit: ctx.session.user?.isSpecial
+                  ? 150
+                  : productPlan(ctx.session.user?.stripeProductId).memories,
+              }),
+              model: "gpt-4o-mini",
+            }),
+          ]);
 
-        if (!newTags) {
-          continue;
-        }
-        if (!generatedPersona) {
-          continue;
-        }
-        const personaObject = JSON.parse(generatedPersona) as Persona;
+          if (!newTags || !generatedPersona) return;
 
-        const tagContents = newTags?.split(",").map((tag) => tag.trim());
+          const personaObject = JSON.parse(generatedPersona) as Persona;
+          const tagIds = newTags
+            .split(",")
+            .map((tag) => tag.trim())
+            .map((content) => TAGS.find((tag) => tag.content === content)?.id)
+            .filter((tagId): tagId is string => tagId !== undefined);
 
-        const tagIds = tagContents
-          ?.map((content) => {
-            const tag = TAGS.find((tag) => tag.content === content);
-            return tag?.id ?? undefined;
-          })
-          .filter((tag): tag is string => tag !== undefined);
-        if (!tagIds?.length) {
-          continue;
-        }
+          if (!tagIds.length) return;
 
-        if (post.mdkJwk) {
-          if (post.summary === null || post.summary === undefined) {
-            post.summary = "";
-          }
-          const mdk = await importKeyFromJWK(post.mdkJwk);
-          const encryptedPost = await encryptPost(
-            { id: post.id, content: post.content, summary: post.summary },
-            mdk,
-          );
-          post.content = encryptedPost.content ?? "";
-          post.summary = encryptedPost.summary;
-        }
-
-        await Promise.all([
-          ctx.db.persona.update({
-            where: { id: userPersona?.id },
-            data: {
-              description: personaObject?.description,
-              relationship: personaObject?.relationship,
-              traits: personaObject?.traits,
-            },
-          }),
-          ctx.db.post.update({
-            where: { id: post.id },
-            data: {
-              tags: {
-                connect: tagIds.slice(0, 3).map((tagId: string) => ({
-                  id: tagId,
-                })),
+          if (input.mdkJwk) {
+            const mdk = await importKeyFromJWK(input.mdkJwk);
+            const encryptedPost = await encryptPost(
+              {
+                id: post.id,
+                content: post.content,
+                summary: post.summary ?? "",
               },
-            },
-          }),
-        ]);
-      }
+              mdk,
+            );
+            post.content = encryptedPost.content ?? "";
+            post.summary = encryptedPost.summary ?? "";
+          }
+
+          await Promise.all([
+            ctx.db.persona.update({
+              where: { id: userPersona?.id },
+              data: {
+                description: personaObject?.description,
+                relationship: personaObject?.relationship,
+                traits: personaObject?.traits,
+              },
+            }),
+            ctx.db.post.update({
+              where: { id: post.id },
+              data: {
+                tags: {
+                  connect: tagIds.slice(0, 3).map((tagId: string) => ({
+                    id: tagId,
+                  })),
+                },
+              },
+            }),
+          ]);
+        });
+
+      await Promise.all(updatePromises);
     }),
 
   addTagsAsCron: publicProcedure

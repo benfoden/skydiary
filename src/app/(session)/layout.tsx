@@ -17,6 +17,8 @@ export default async function SessionLayout({ children }: Props) {
   if (!session) {
     redirect("/auth/signin");
   }
+  await api.user.resetDailyUsage();
+
   const mdkJwk = await useMdkJwk();
   if (
     session.user.passwordSalt &&
@@ -27,7 +29,7 @@ export default async function SessionLayout({ children }: Props) {
     await runBulkEncryption({ mdkJwk });
   }
 
-  await api.user.resetDailyUsage();
+  await api.post.tagAndMemorize({ mdkJwk });
 
   return (
     <div className="container mx-auto min-h-screen">
