@@ -162,6 +162,7 @@
   },
   "new-user": {
     "title": "skydiaryへようこそ",
+    "welcomeBack": "おかえりなさい",
     "yourName": "名前（必須）",
     "your age": "年齢",
     "your identities": "身分",
@@ -284,7 +285,9 @@
     "revokeAccess": "アクセスを取り消す",
     "failedToRevokeAccess": "データアクセスの取り消しに失敗しました",
     "failedToSaveUserKeys": "ユーザーキーの保存に失敗しました",
-    "failedToEnableEncryptionDecryption": "暗号化/復号化の有効化に失敗しました"
+    "failedToEnableEncryptionDecryption": "暗号化/復号化の有効化に失敗しました",
+    "failedToRunBulkEncryption": "データの暗号化を完了できませんでした",
+    "continueHome": "ホームページに移動"
   },
   "encryptionNotice": {
     "title": "データを復号化する",

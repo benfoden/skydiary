@@ -1,16 +1,9 @@
-import { type User } from "@prisma/client";
+"use server";
 import { api } from "~/trpc/server";
 
-export default async function runBulkEncryption({
-  user,
-  mdkJwk,
-}: {
-  user: User;
-  mdkJwk: JsonWebKey;
-}) {
-  if (user?.passwordSalt && user?.sukMdk && mdkJwk) {
+export async function runBulkEncryption({ mdkJwk }: { mdkJwk: JsonWebKey }) {
+  if (mdkJwk) {
     try {
-      console.log("Encrypting bulk data...");
       await api.post.encryptAllPosts({ mdkJwk });
       await api.persona.encryptAllPersonas({ mdkJwk });
     } catch (error) {

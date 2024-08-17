@@ -183,7 +183,9 @@ export default async function Settings() {
           )}
 
           <div id="data-security">
-            {session?.user?.isAdmin && <DataSecurityCard />}
+            {session?.user?.isAdmin && (
+              <DataSecurityCard user={session?.user} />
+            )}
           </div>
           <Card variant="form">
             <h2>{t("settings.language")}</h2>
