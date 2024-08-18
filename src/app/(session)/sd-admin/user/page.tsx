@@ -56,6 +56,7 @@ export default async function Secret({
                 try {
                   await api.user.updateUser({ name });
                   await api.persona.update({
+                    mdkJwk,
                     personaId: userPersona?.id,
                     name,
                     age,
@@ -105,6 +106,7 @@ export default async function Secret({
               name="traits"
               label={t("personas.traits")}
               defaultValue={userPersona?.traits ?? ""}
+              maxLength={280}
             />
             <Input
               type="textarea"
@@ -112,6 +114,7 @@ export default async function Secret({
               name="description"
               label={t("personas.description")}
               defaultValue={userPersona?.description ?? ""}
+              maxLength={1700}
             />
             <Input
               type="textarea"
@@ -119,6 +122,7 @@ export default async function Secret({
               name="relationship"
               label={t("personas.relationship")}
               defaultValue={userPersona?.relationship ?? ""}
+              maxLength={140}
             />
             <Input
               id="occupation"

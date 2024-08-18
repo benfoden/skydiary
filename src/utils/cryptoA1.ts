@@ -1,11 +1,6 @@
 import { type Comment, type Persona, type Post } from "@prisma/client";
 import localforage from "localforage";
-import {
-  type EncryptCommentPartialInput,
-  type EncryptedCommentPartialResult,
-  type EncryptedPostPartialResult,
-  type EncryptPostPartialInput,
-} from "./types";
+import { type PostWithCommentsAndTags } from "./types";
 
 export interface EncryptedData {
   cipherText: string;
@@ -133,6 +128,7 @@ export async function encryptTextWithKey(
   key: CryptoKey,
 ): Promise<{ cipherText: string; iv: Uint8Array }> {
   try {
+    if (!plainText.length) throw new Error("Empty string in encrypt call");
     const encoder = new TextEncoder();
     const encodedData = encoder.encode(plainText);
     const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -169,8 +165,8 @@ export async function decryptTextWithIVAndKey({
   key: CryptoKey;
 }): Promise<string> {
   try {
-    if (!cipherText || !iv || !key) {
-      throw new Error("Missing cipherText, iv or key");
+    if (!cipherText || cipherText.length < 8 || !iv || !key) {
+      throw new Error("Missing cipherText, iv, or key");
     }
     const decoder = new TextDecoder();
     const encryptedBuffer = Buffer.from(cipherText, "base64");
@@ -184,7 +180,7 @@ export async function decryptTextWithIVAndKey({
     );
     return decoder.decode(decryptedData);
   } catch (error) {
-    console.error("Error decrypting text:", error);
+    console.error("Error decrypting text:", cipherText, "error:", error);
     throw new Error("Failed to decrypt text");
   }
 }
@@ -371,12 +367,12 @@ export async function decryptPersona(
 
   const decryptionPromises = fieldsToDecrypt.map(async (field) => {
     const ivField = `${field}IV`;
-    if (persona[field as keyof Persona] && persona[ivField as keyof Persona]) {
+    const fieldValue = persona[field as keyof Persona];
+    const ivFieldValue = persona[ivField as keyof Persona];
+    if (fieldValue && ivFieldValue) {
       const decryptedText = await decryptTextWithIVAndKey({
-        cipherText: persona[field as keyof Persona] as string,
-        iv: Uint8Array.from(
-          Buffer.from(persona[ivField as keyof Persona] as string, "base64"),
-        ),
+        cipherText: fieldValue as string,
+        iv: Uint8Array.from(Buffer.from(ivFieldValue as string, "base64")),
         key: mdk,
       });
       if (typeof decryptedText === "string") {
@@ -390,26 +386,15 @@ export async function decryptPersona(
   return result;
 }
 
-export async function encryptComment(
-  commentData: EncryptCommentPartialInput,
-  mdk: CryptoKey,
-) {
-  const result: EncryptedCommentPartialResult = {
-    content: commentData.content,
-    coachName: commentData.coachName ?? "",
-    coachNameIV: "",
-    contentIV: "",
-  };
+export async function encryptComment(comment: Comment, mdk: CryptoKey) {
+  const result = comment;
 
   const fieldsToEncrypt = ["content", "coachName"] as const;
 
   const encryptionPromises = fieldsToEncrypt.map(async (field) => {
-    const fieldValue = commentData[field];
-    if (typeof fieldValue === "string") {
-      const { cipherText, iv } = await encryptTextWithKey(fieldValue, mdk);
-      result[field] = cipherText;
-      result[`${field}IV`] = Buffer.from(iv).toString("base64");
-    }
+    const { cipherText, iv } = await encryptTextWithKey(field, mdk);
+    result[field] = cipherText;
+    result[`${field}IV`] = Buffer.from(iv).toString("base64");
   });
 
   await Promise.all(encryptionPromises);
@@ -448,36 +433,25 @@ export async function decryptComment(comment: Comment, mdk: CryptoKey) {
 }
 
 export async function encryptPost(
-  postData: EncryptPostPartialInput,
+  post: PostWithCommentsAndTags,
   mdk: CryptoKey,
 ) {
-  const result: EncryptedPostPartialResult = {
-    id: postData.id,
-    content: postData.content,
-    contentIV: "",
-    summary: postData.summary ?? "",
-    summaryIV: "",
-    comments: postData.comments?.map((comment) => ({
-      content: comment.content,
-      contentIV: "",
-      coachName: comment.coachName ?? "",
-      coachNameIV: "",
-    })),
-  };
+  const result = post;
 
-  const fieldsToEncrypt = ["content", "summary"] as const;
+  const fieldsToEncrypt = ["content"] as const;
+  // todo: handle summaries
 
   const encryptionPromises = fieldsToEncrypt.map(async (field) => {
-    if (postData[field]) {
-      const { cipherText, iv } = await encryptTextWithKey(postData[field], mdk);
+    if (post[field]) {
+      const { cipherText, iv } = await encryptTextWithKey(post[field], mdk);
       result[field] = cipherText;
       result[`${field}IV`] = Buffer.from(iv).toString("base64");
     }
   });
 
-  if (postData.comments) {
+  if (post.comments) {
     result.comments = await Promise.all(
-      postData.comments.map(async (comment) => {
+      post.comments.map(async (comment) => {
         return await encryptComment(comment, mdk);
       }),
     );
@@ -488,9 +462,11 @@ export async function encryptPost(
 }
 
 export async function decryptPost(post: Post, mdk: CryptoKey): Promise<Post> {
+  if (!post.content) return post;
   const result: Post = post;
 
-  const fieldsToDecrypt = ["content", "summary"] as const;
+  const fieldsToDecrypt = ["content"] as const;
+  // todo: handle summaries
 
   const decryptionPromises = fieldsToDecrypt.map(async (field) => {
     const ivField = `${field}IV` as keyof Post;

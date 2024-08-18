@@ -49,20 +49,24 @@ export type EncryptedCommentPartialResult = {
 export type EncryptCommentPartialInput = {
   id?: string;
   content: string;
+  contentIV?: string;
   coachName?: string;
+  coachNameIV?: string;
 };
 
 export type EncryptPostPartialInput = {
   id: string;
   content: string;
+  contentIV?: string;
   summary?: string;
+  summaryIV?: string;
   comments?: EncryptCommentPartialInput[];
 };
 
 export type EncryptedPostPartialResult = {
   id: string;
   content: string;
-  contentIV: string;
+  contentIV?: string;
   summary?: string;
   summaryIV?: string;
   comments?: EncryptedCommentPartialResult[];

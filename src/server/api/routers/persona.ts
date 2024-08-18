@@ -20,7 +20,7 @@ export const personaRouter = createTRPCRouter({
       z.object({
         mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
         name: z.string().max(140),
-        traits: z.string().max(140),
+        traits: z.string().max(280),
         description: z.string().max(1700).optional(),
         image: z.string().optional(),
         age: z.number().max(10000).optional(),
@@ -81,13 +81,13 @@ export const personaRouter = createTRPCRouter({
       z.object({
         mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
         personaId: z.string(),
-        name: z.string().max(140),
-        traits: z.string().max(140),
+        name: z.string().max(140).optional(),
+        traits: z.string().max(280).optional(),
         description: z.string().max(1700).optional(),
+        relationship: z.string().max(140).optional(),
         image: z.string().optional(),
         age: z.number().max(10000).optional(),
         gender: z.string().max(140).optional(),
-        relationship: z.string().max(140).optional(),
         occupation: z.string().max(140).optional(),
         communicationStyle: z.string().max(140).optional(),
         communicationSample: z.string().max(1000).optional(),
@@ -96,22 +96,26 @@ export const personaRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      let data: Partial<Persona> = {
-        name: cleanStringForInput(input.name),
-        description: cleanStringForInput(input.description ?? ""),
-        image: input.image,
-        age: input.age,
-        gender: cleanStringForInput(input.gender ?? ""),
-        relationship: cleanStringForInput(input.relationship ?? ""),
-        occupation: cleanStringForInput(input.occupation ?? ""),
-        traits: cleanStringForInput(input.traits ?? ""),
-        communicationStyle: cleanStringForInput(input.communicationStyle ?? ""),
-        communicationSample: cleanStringForInput(
-          input.communicationSample ?? "",
-        ),
-        isUser: input.isUser,
-        isFavorite: input.isFavorite,
-      };
+      let data: Partial<Persona> = {};
+      if (input.name) data.name = cleanStringForInput(input.name);
+      if (input.description)
+        data.description = cleanStringForInput(input.description);
+      if (input.image) data.image = input.image;
+      if (input.age) data.age = input.age;
+      if (input.gender) data.gender = cleanStringForInput(input.gender);
+      if (input.relationship)
+        data.relationship = cleanStringForInput(input.relationship);
+      if (input.occupation)
+        data.occupation = cleanStringForInput(input.occupation);
+      if (input.traits) data.traits = cleanStringForInput(input.traits);
+      if (input.communicationStyle)
+        data.communicationStyle = cleanStringForInput(input.communicationStyle);
+      if (input.communicationSample)
+        data.communicationSample = cleanStringForInput(
+          input.communicationSample,
+        );
+      if (input.isUser) data.isUser = input.isUser;
+      if (input.isFavorite) data.isFavorite = input.isFavorite;
       if (input.mdkJwk) {
         const key = await importKeyFromJWK(input.mdkJwk);
         data = await encryptPersona(data, key);
@@ -132,12 +136,12 @@ export const personaRouter = createTRPCRouter({
           z.object({
             id: z.string(),
             name: z.string().max(140),
-            traits: z.string().max(140),
+            traits: z.string().max(280),
             description: z.string().max(1700).nullable().optional(),
+            relationship: z.string().max(140).nullable().optional(),
             image: z.string().nullable().optional(),
             age: z.number().max(10000).nullable().optional(),
             gender: z.string().max(140).nullable().optional(),
-            relationship: z.string().max(140).nullable().optional(),
             occupation: z.string().max(140).nullable().optional(),
             communicationStyle: z.string().max(140).nullable().optional(),
             communicationSample: z.string().max(1000).nullable().optional(),
@@ -190,8 +194,8 @@ export const personaRouter = createTRPCRouter({
       z.object({
         personaId: z.string(),
         createdById: z.string(),
-        traits: z.string().max(140).optional(),
-        description: z.string().max(700).optional(),
+        traits: z.string().max(280).optional(),
+        description: z.string().max(1700).optional(),
         relationship: z.string().max(140).optional(),
         cronSecret: z.string(),
       }),
