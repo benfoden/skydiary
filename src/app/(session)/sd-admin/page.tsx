@@ -20,7 +20,7 @@ export default async function Secret() {
     authorDetails: userPersona,
     personaDetails: aiPersona,
     commentType: "custom",
-    characters: 280,
+    characters: 420,
   });
 
   return (
