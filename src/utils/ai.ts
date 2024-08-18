@@ -12,15 +12,20 @@ export async function getResponse({
   systemMessageContent?: string;
   model?: string;
 }) {
-  const completion = await openai.chat.completions.create({
-    messages: [
-      { role: "system", content: systemMessageContent },
-      { role: "user", content: messageContent },
-    ],
-    model,
-  });
+  try {
+    const completion = await openai.chat.completions.create({
+      messages: [
+        { role: "system", content: systemMessageContent },
+        { role: "user", content: messageContent },
+      ],
+      model,
+    });
 
-  return completion.choices[0]?.message.content;
+    return completion.choices[0]?.message.content;
+  } catch (error) {
+    console.error("Error getting response from LLM:", error);
+    throw new Error("Error getting response from chat");
+  }
 }
 
 export async function getResponseJSON({
@@ -30,13 +35,18 @@ export async function getResponseJSON({
   messageContent: string;
   model?: string;
 }) {
-  const completion = await openai.chat.completions.create({
-    messages: [{ role: "user", content: messageContent }],
-    model,
-    response_format: { type: "json_object" },
-  });
+  try {
+    const completion = await openai.chat.completions.create({
+      messages: [{ role: "user", content: messageContent }],
+      model,
+      response_format: { type: "json_object" },
+    });
 
-  return completion.choices[0]?.message.content;
+    return completion.choices[0]?.message.content;
+  } catch (error) {
+    console.error("Error getting response from LLM:", error);
+    throw new Error("Error getting response from chat");
+  }
 }
 
 export async function getResponseFromChatMessages({
@@ -50,21 +60,26 @@ export async function getResponseFromChatMessages({
   aiPersonaId: string;
   model?: string;
 }) {
-  const completion = await openai.chat.completions.create({
-    messages: messages.map((message) => ({
-      role:
-        message.personaId === "system"
-          ? "system"
-          : message.personaId === userPersonaId
-            ? "user"
-            : "assistant",
-      content: message.content,
-    })),
-    model,
-  });
+  try {
+    const completion = await openai.chat.completions.create({
+      messages: messages.map((message) => ({
+        role:
+          message.personaId === "system"
+            ? "system"
+            : message.personaId === userPersonaId
+              ? "user"
+              : "assistant",
+        content: message.content,
+      })),
+      model,
+    });
 
-  return {
-    personaId: aiPersonaId,
-    content: completion.choices[0]?.message.content ?? "error",
-  };
+    return {
+      personaId: aiPersonaId,
+      content: completion.choices[0]?.message.content ?? "error",
+    };
+  } catch (error) {
+    console.error("Error getting response from LLM:", error);
+    throw new Error("Error getting response from chat");
+  }
 }

@@ -4,7 +4,7 @@ import { env } from "~/env";
 import { api } from "~/trpc/server";
 import { getResponseJSON } from "~/utils/ai";
 import { getBaseUrl } from "~/utils/clientConstants";
-import { NEWPERSONAUSER, productPlan } from "~/utils/constants";
+import { NEWPERSONAUSER } from "~/utils/constants";
 import { prompts } from "~/utils/prompts";
 
 export async function POST(request: NextRequest) {
@@ -54,9 +54,6 @@ export async function POST(request: NextRequest) {
         messageContent: prompts.userPersona({
           persona: userPersona ?? NEWPERSONAUSER,
           content: latestPostWithContent.content,
-          wordLimit: user?.isSpecial
-            ? 150
-            : productPlan(user?.stripeProductId).memories,
         }),
         model: "gpt-4o-mini",
       });

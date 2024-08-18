@@ -81,12 +81,10 @@ export const prompts = {
   userPersona: ({
     persona,
     content,
-    wordLimit = 10,
     isWorkFocus = false,
   }: {
     persona: Persona | NewPersonaUser;
     content: string;
-    wordLimit?: number;
     isWorkFocus?: boolean;
   }) => {
     const userPersonaObj = Object.fromEntries(
@@ -108,30 +106,34 @@ export const prompts = {
     );
 
     let result =
-      "Update persona object to describe the author of the diary entry below as concisely as possible. " +
-      "Here are examples of information to add, listed in order of priority from high to low. ";
+      "Your task is to respond with an updated character profile (persona object) of author of a diary entry. " +
+      "The current persona object is included below." +
+      "Include as much high priority information from the current persona object as possible in your reponse. " +
+      "Here are examples of information to include for each value in the response, in order of priority to include from high to low. ";
 
     result += isWorkFocus
       ? "description: major goals, major milestones, strategies, tactics, actions, and events. " +
         "relationships: customers, partners, bosses, coworkers, staff, and suppliers " +
         "traits: professional skills, working habits, and preferences "
       : "description: major goals, major events, deep desires, main interests, and hobbies. " +
-        "relationships: significant others, spouses, children, parents, siblings, coworkers, and friends. " +
+        "relationships: relationship status with any significant others, spouses, children, parents, siblings, coworkers, and friends. " +
         "traits: core values, morals, preferences. ";
 
     result +=
-      "Write as concisely as possible. This is for an LLM AI to read, not for humans. " +
-      "Do not repeat any information. " +
-      "Do not add any special characters or emoji. " +
-      "Only add new information or update existing information if it has changed. " +
-      "Do not include any mundane or unmemorable information like regular daily life or minor events.  " +
-      "Return JSON with the same keys. " +
-      "Each value should not exceed" +
-      wordLimit.toFixed(0).toString() +
-      " words, except for the description value which has a maximum of " +
-      (wordLimit * 3).toFixed(0).toString() +
-      " words. " +
-      "Truncated or delete lower priority information when it would exceed the word limit. " +
+      "Write as concisely as possible to convey only the raw facts. This will be used as a prompt for a large language model (LLM), not for humans to read. " +
+      "For example you could write: 'Values family time.' instead of 'The author values family time.'. " +
+      "Do not respond with any details that are mundane, trivial, or insignificant like chores or minor events in daily life.  " +
+      "Do not extrapolate about the author's life from one diary entry. " +
+      "For example, if the author writes that they watched a baseball game, that doesn't mean they love baseball. " +
+      "Do not repeat any information already in the persona object. " +
+      "Do not use any special characters or emoji. " +
+      "description value must be a string of less than 1700 characters. " +
+      "traits value must be a string of less than 280 characters. " +
+      "relationship value must be a string of less than 140 characters. " +
+      "relationship value is format of list of relationship statuses and if known, relevant people. " +
+      "Example relationship value: 'father. husband of Jane. friend of Alice, Bob, and Charlie.' " +
+      "If there will be too many characters for any value, remove lower priority information first to stay under the limit. " +
+      "Return JSON in the same format as the author persona object. " +
       "Begin author persona object: " +
       JSON.stringify(userPersonaObj) +
       " End author persona object. " +

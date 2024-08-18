@@ -4,7 +4,7 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { productPlan } from "~/utils/constants";
 import {
   decryptComment,
-  encryptComment,
+  encryptTextWithKey,
   importKeyFromJWK,
 } from "~/utils/cryptoA1";
 
@@ -41,15 +41,11 @@ export const commentRouter = createTRPCRouter({
         contentIV: "",
       };
       if (input.mdkJwk) {
-        const key = await importKeyFromJWK(input.mdkJwk);
-        const encryptedComment = await encryptComment(
-          {
-            content: input.content,
-          },
-          key,
-        );
-        data.content = encryptedComment.content;
-        data.contentIV = encryptedComment.contentIV;
+        const mdk = await importKeyFromJWK(input.mdkJwk);
+
+        const { cipherText, iv } = await encryptTextWithKey(input.content, mdk);
+        data.content = cipherText;
+        data.contentIV = Buffer.from(iv).toString("base64");
       }
       await ctx.db.user.update({
         where: { id: ctx.session.user.id },

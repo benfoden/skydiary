@@ -8,8 +8,16 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { getResponse, getResponseJSON } from "~/utils/ai";
-import { NEWPERSONAUSER, productPlan, TAGS } from "~/utils/constants";
-import { decryptPost, encryptPost, importKeyFromJWK } from "~/utils/cryptoA1";
+import { NEWPERSONAUSER, TAGS } from "~/utils/constants";
+import {
+  decryptPersona,
+  decryptPost,
+  decryptTextWithIVAndKey,
+  encryptPersona,
+  encryptPost,
+  encryptTextWithKey,
+  importKeyFromJWK,
+} from "~/utils/cryptoA1";
 import { prompts } from "~/utils/prompts";
 
 export const postRouter = createTRPCRouter({
@@ -39,161 +47,40 @@ export const postRouter = createTRPCRouter({
       z.object({
         postId: z.string(),
         content: z.string().max(50000).optional(),
-        summary: z.string().max(5000).optional(),
-        comments: z
-          .array(
-            z.object({
-              id: z.string(),
-              content: z.string().max(10000),
-              coachName: z.string().optional(),
-            }),
-          )
-          .optional(),
         mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      if (!input.content) return;
+
       const data = {
-        id: input.postId,
         content: input.content ?? "",
-        summary: input.summary,
         contentIV: "",
-        summaryIV: "",
-        comments: input.comments?.map((comment) => ({
-          id: comment.id,
-          content: comment.content,
-          coachName: comment.coachName ?? "",
-          contentIV: "",
-          coachNameIV: "",
-        })),
       };
 
-      if (input.mdkJwk) {
-        const key = await importKeyFromJWK(input.mdkJwk);
-        const encryptedData = await encryptPost(data, key);
-        data.content = encryptedData.content ?? data.content;
-        data.summary = encryptedData.summary ?? data.summary;
-        data.summaryIV = encryptedData.summaryIV ?? "";
-        data.contentIV = encryptedData.contentIV ?? "";
-        data.comments = encryptedData.comments?.map((comment) => ({
-          id: comment.id ?? "",
-          content: comment.content,
-          coachName: comment.coachName ?? "",
-          contentIV: comment.contentIV ?? "",
-          coachNameIV: comment.coachNameIV ?? "",
-        }));
-        if (
-          (!data.contentIV || (data.summary && !data.summaryIV)) ??
-          data.comments?.some((comment) => !comment.contentIV)
-        ) {
-          throw new Error("Post / comment encryption failed");
-        }
-      }
-
-      if (data.comments) {
-        const commentUpdatePromises = data.comments.map(async (comment) => {
-          return ctx.db.comment.update({
-            where: { id: comment.id },
-            data: {
-              content: comment.content,
-              coachName: comment.coachName,
-              contentIV: comment.contentIV,
-              coachNameIV: comment.coachNameIV,
-            },
-          });
-        });
-        await Promise.all(commentUpdatePromises);
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { comments: _unused, ...dataWithoutComments } = data;
-      return ctx.db.post.update({
-        where: { id: input.postId, createdBy: { id: ctx.session.user.id } },
-        data: dataWithoutComments,
-      });
-    }),
-  bulkUpdate: protectedProcedure
-    .input(
-      z.object({
-        mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
-        posts: z.array(
-          z.object({
-            id: z.string(),
-            content: z.string().max(50000).optional(),
-            summary: z.string().max(5000).optional(),
-            comments: z
-              .array(
-                z.object({
-                  id: z.string(),
-                  content: z.string().max(10000),
-                  coachName: z.string().optional(),
-                }),
-              )
-              .optional(),
-            mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
-          }),
-        ),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const updatePromises = input.posts.map(async (post) => {
-        const data = {
-          id: post.id,
-          content: post.content ?? "",
-          summary: post.summary,
-          comments: post.comments?.map((comment) => ({
-            id: comment.id,
-            content: comment.content,
-            coachName: comment.coachName ?? "",
-            contentIV: "",
-            coachNameIV: "",
-          })),
-          contentIV: "",
-          summaryIV: "",
-        };
-
+      try {
         if (input.mdkJwk) {
           const key = await importKeyFromJWK(input.mdkJwk);
-          const encryptedData = await encryptPost(data, key);
-          data.content = encryptedData.content ?? data.content;
-          data.contentIV = encryptedData.contentIV ?? "";
-          data.summary = encryptedData.summary ?? data.summary;
-          data.summaryIV = encryptedData.summaryIV ?? "";
-          data.comments = encryptedData.comments?.map((comment) => ({
-            id: comment.id ?? "",
-            content: comment.content,
-            coachName: comment.coachName ?? "",
-            contentIV: comment.contentIV ?? "",
-            coachNameIV: comment.coachNameIV ?? "",
-          }));
-          if (
-            (!data.contentIV || (data.summary && !data.summaryIV)) ??
-            data.comments?.some((comment) => !comment.contentIV)
-          ) {
-            throw new Error("Post / comment encryption failed");
+          const { cipherText, iv } = await encryptTextWithKey(
+            data.content,
+            key,
+          );
+          data.content = cipherText;
+          data.contentIV = Buffer.from(iv).toString("base64");
+
+          if (!iv) {
+            throw new Error("Post encryption failed");
           }
         }
 
-        if (data.comments) {
-          const commentUpdatePromises = data.comments.map(async (comment) => {
-            return ctx.db.comment.update({
-              where: { id: comment.id },
-              data: {
-                content: comment.content,
-                coachName: comment.coachName,
-                contentIV: comment.contentIV,
-                coachNameIV: comment.coachNameIV,
-              },
-            });
-          });
-          await Promise.all(commentUpdatePromises);
-        }
-
-        return ctx.db.post.update({
-          where: { id: post.id, createdBy: { id: ctx.session.user.id } },
-          data: { ...data, comments: undefined },
+        return await ctx.db.post.update({
+          where: { id: input.postId, createdBy: { id: ctx.session.user.id } },
+          data,
         });
-      });
-      await Promise.all(updatePromises);
+      } catch (error) {
+        console.error("Error updating post:", error);
+        throw new Error("Failed to update post");
+      }
     }),
 
   getLatest: protectedProcedure
@@ -311,7 +198,6 @@ export const postRouter = createTRPCRouter({
         orderBy: { createdAt: "desc" },
         include: {
           tags: true,
-          comments: true,
         },
       });
 
@@ -380,7 +266,6 @@ export const postRouter = createTRPCRouter({
         orderBy: { createdAt: "desc" },
         include: {
           tags: true,
-          comments: true,
         },
       });
 
@@ -389,24 +274,11 @@ export const postRouter = createTRPCRouter({
       const updatePostPromises = posts
         .filter((post) => post.content?.length > 5 && !post.contentIV)
         .map(async (post) => {
-          const data = {
-            id: post.id,
-            content: post.content ?? "",
-            summary: post.summary ?? "",
-            contentIV: "",
-            summaryIV: "",
-            comments: post.comments?.map((comment) => ({
-              id: comment.id,
-              content: comment.content,
-              coachName: comment.coachName ?? "",
-              contentIV: "",
-              coachNameIV: "",
-            })),
-          };
+          const data = post;
           const encryptedPost = await encryptPost(data, key);
           if (!encryptedPost.contentIV) return;
 
-          const updatePost = ctx.db.post.update({
+          return await ctx.db.post.update({
             where: { id: encryptedPost.id },
             data: {
               content: encryptedPost.content,
@@ -415,20 +287,6 @@ export const postRouter = createTRPCRouter({
               summaryIV: encryptedPost.summaryIV,
             },
           });
-
-          const updateComments = encryptedPost.comments?.map((comment) =>
-            ctx.db.comment.update({
-              where: { id: comment.id },
-              data: {
-                content: comment.content,
-                coachName: comment.coachName,
-                contentIV: comment.contentIV,
-                coachNameIV: comment.coachNameIV,
-              },
-            }),
-          );
-
-          return Promise.all([updatePost, ...(updateComments ?? [])]);
         });
 
       return await Promise.all(updatePostPromises);
@@ -436,27 +294,58 @@ export const postRouter = createTRPCRouter({
 
   tagAndMemorize: protectedProcedure
     .input(
-      z.array(
-        z.object({
-          id: z.string(),
-          content: z.string(),
-          summary: z.string().nullable().optional(),
-          tags: z.array(z.string()),
-          mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
-        }),
-      ),
+      z.object({
+        mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
+      }),
     )
     .mutation(async ({ ctx, input }) => {
-      const userPersona = await ctx.db.persona.findFirst({
-        where: { createdById: ctx.session.user.id, isUser: true },
-      });
+      const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
 
-      for (const post of input) {
-        if (!post?.id && post.content?.length < 20 && post.tags.length > 0) {
+      let mdk: CryptoKey | undefined;
+
+      if (input.mdkJwk) {
+        mdk = await importKeyFromJWK(input.mdkJwk);
+      }
+
+      const posts = await ctx.db.post.findMany({
+        where: {
+          createdBy: { id: ctx.session.user.id },
+          content: { not: "" },
+          updatedAt: { lte: twelveHoursAgo },
+          tags: { none: {} },
+        },
+        include: {
+          tags: true,
+        },
+        orderBy: { createdAt: "asc" },
+        take: 2,
+      });
+      if (!posts.length) return;
+
+      for (const post of posts.filter((post) => post.content?.length >= 20)) {
+        if (post.contentIV && mdk) {
+          post.content = await decryptTextWithIVAndKey({
+            cipherText: post.content,
+            iv: Uint8Array.from(Buffer.from(post.contentIV, "base64")),
+            key: mdk,
+          });
+        }
+
+        let userPersona = await ctx.db.persona.findFirst({
+          where: { createdById: ctx.session.user.id, isUser: true },
+        });
+        if (!userPersona) continue;
+
+        // todo: uncomment this when we want to update personas more frequently
+        if (userPersona.updatedAt < twelveHoursAgo) {
           continue;
         }
 
-        const [newTags, generatedPersona] = await Promise.all([
+        if (userPersona.descriptionIV && mdk) {
+          userPersona = await decryptPersona(userPersona, mdk);
+        }
+
+        const [newTags, generatedPersonaDetails] = await Promise.all([
           getResponse({
             messageContent: prompts.tag({ content: post?.content }),
             model: "gpt-4o-mini",
@@ -465,21 +354,22 @@ export const postRouter = createTRPCRouter({
             messageContent: prompts.userPersona({
               persona: userPersona ?? NEWPERSONAUSER,
               content: post?.content,
-              wordLimit: ctx.session.user?.isSpecial
-                ? 150
-                : productPlan(ctx.session.user?.stripeProductId).memories,
             }),
             model: "gpt-4o-mini",
           }),
         ]);
 
-        if (!newTags) {
-          continue;
+        if (!newTags) continue;
+        if (!generatedPersonaDetails) continue;
+
+        const updatedPersonaDetails = JSON.parse(
+          generatedPersonaDetails,
+        ) as Partial<Persona>;
+        let updateUserPersona = { ...userPersona, ...updatedPersonaDetails };
+
+        if (mdk) {
+          updateUserPersona = await encryptPersona(updateUserPersona, mdk);
         }
-        if (!generatedPersona) {
-          continue;
-        }
-        const personaObject = JSON.parse(generatedPersona) as Persona;
 
         const tagContents = newTags?.split(",").map((tag) => tag.trim());
 
@@ -493,26 +383,16 @@ export const postRouter = createTRPCRouter({
           continue;
         }
 
-        if (post.mdkJwk) {
-          if (post.summary === null || post.summary === undefined) {
-            post.summary = "";
-          }
-          const mdk = await importKeyFromJWK(post.mdkJwk);
-          const encryptedPost = await encryptPost(
-            { id: post.id, content: post.content, summary: post.summary },
-            mdk,
-          );
-          post.content = encryptedPost.content ?? "";
-          post.summary = encryptedPost.summary;
-        }
-
         await Promise.all([
           ctx.db.persona.update({
             where: { id: userPersona?.id },
             data: {
-              description: personaObject?.description,
-              relationship: personaObject?.relationship,
-              traits: personaObject?.traits,
+              description: updateUserPersona?.description ?? null,
+              descriptionIV: updateUserPersona?.descriptionIV ?? null,
+              relationship: updateUserPersona?.relationship ?? null,
+              relationshipIV: updateUserPersona?.relationshipIV ?? null,
+              traits: updateUserPersona?.traits ?? null,
+              traitsIV: updateUserPersona?.traitsIV ?? null,
             },
           }),
           ctx.db.post.update({
@@ -526,6 +406,7 @@ export const postRouter = createTRPCRouter({
             },
           }),
         ]);
+        console.count("persona update done.");
       }
     }),
 

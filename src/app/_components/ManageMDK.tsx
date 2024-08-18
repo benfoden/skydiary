@@ -12,23 +12,14 @@ export default function ManageMDK({ user }: { user?: User }) {
       if (!mdkJwk) {
         throw new Error("Failed to retrieve local key");
       }
-      document.cookie = `mdkJwk=${JSON.stringify(mdkJwk)}; path=/; secure; samesite=strict`;
+      const expires = new Date();
+      expires.setDate(expires.getDate() + 30);
+      document.cookie = `mdkJwk=${JSON.stringify(mdkJwk)}; path=/; secure; samesite=strict; expires=${expires.toUTCString()}`;
     };
+
     if (user?.sukMdk && user?.passwordSalt) {
       handleMakeMdkCookie().catch(() => void 0);
     }
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState !== "visible") {
-        document.cookie = `mdkJwk=; path=/; secure; samesite=strict`;
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
   }, [mdkJwk, user?.sukMdk, user?.passwordSalt]);
 
   return null;
