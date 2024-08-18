@@ -8,7 +8,7 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { getResponse, getResponseJSON } from "~/utils/ai";
-import { NEWPERSONAUSER } from "~/utils/constants";
+import { NEWPERSONAUSER, TAGS } from "~/utils/constants";
 import {
   decryptPersona,
   decryptPost,
@@ -292,6 +292,74 @@ export const postRouter = createTRPCRouter({
       return await Promise.all(updatePostPromises);
     }),
 
+  //  if (!post?.id && post.content?.length < 20 && post.tags.length > 0) {
+  //       continue;
+  //     }
+
+  //     const [newTags, generatedPersona] = await Promise.all([
+  //       getResponse({
+  //         messageContent: prompts.tag({ content: post?.content }),
+  //         model: "gpt-4o-mini",
+  //       }),
+  //       getResponseJSON({
+  //         messageContent: prompts.userPersona({
+  //           persona: userPersona ?? NEWPERSONAUSER,
+  //           content: post?.content,
+  //           wordLimit: ctx.session.user?.isSpecial
+  //             ? 150
+  //             : productPlan(ctx.session.user?.stripeProductId).memories,
+  //         }),
+  //         model: "gpt-4o-mini",
+  //       }),
+  //     ]);
+
+  //     if (!newTags) {
+  //       continue;
+  //     }
+  //     if (!generatedPersona) {
+  //       continue;
+  //     }
+  //     const personaObject = JSON.parse(generatedPersona) as Persona;
+
+  //     const tagContents = newTags?.split(",").map((tag) => tag.trim());
+
+  //     const tagIds = tagContents
+  //       ?.map((content) => {
+  //         const tag = TAGS.find((tag) => tag.content === content);
+  //         return tag?.id ?? undefined;
+  //       })
+  //       .filter((tag): tag is string => tag !== undefined);
+  //     if (!tagIds?.length) {
+  //       continue;
+  //     }
+
+  //     if (post.mdkJwk) {
+  //       if (post.summary === null || post.summary === undefined) {
+  //         post.summary = "";
+  //       }
+  //       const mdk = await importKeyFromJWK(post.mdkJwk);
+  //       const encryptedPost = await encryptPost(
+  //         { id: post.id, content: post.content, summary: post.summary },
+  //         mdk,
+  //       );
+  //       post.content = encryptedPost.content ?? "";
+  //       post.summary = encryptedPost.summary;
+  //     }
+
+  //     await Promise.all([
+  //       ctx.db.persona.update({
+  //         where: { id: userPersona?.id },
+  //         data: {
+  //           description: personaObject?.description,
+  //           relationship: personaObject?.relationship,
+  //           traits: personaObject?.traits,
+  //         },
+  //       }),
+
+  //     ]);
+  //   }
+  // }),
+
   tagAndMemorize: protectedProcedure
     .input(
       z.object({
@@ -343,15 +411,22 @@ export const postRouter = createTRPCRouter({
           });
         }
 
-        const generatedPersonaDetails = await getResponseJSON({
-          messageContent: prompts.userPersona({
-            persona: userPersona ?? NEWPERSONAUSER,
-            content: post?.content,
+        const [newTags, generatedPersonaDetails] = await Promise.all([
+          getResponse({
+            messageContent: prompts.tag({ content: post?.content }),
+            model: "gpt-4o-mini",
           }),
-          model: "gpt-4o-mini",
-        });
+          getResponseJSON({
+            messageContent: prompts.userPersona({
+              persona: userPersona ?? NEWPERSONAUSER,
+              content: post?.content,
+            }),
+            model: "gpt-4o-mini",
+          }),
+        ]);
 
-        if (!generatedPersonaDetails) return;
+        if (!newTags) continue;
+        if (!generatedPersonaDetails) continue;
 
         const updatedPersonaDetails = JSON.parse(
           generatedPersonaDetails,
@@ -366,17 +441,41 @@ export const postRouter = createTRPCRouter({
           };
         }
 
-        await ctx.db.persona.update({
-          where: { id: userPersona?.id },
-          data: {
-            description: updateUserPersona?.description ?? null,
-            descriptionIV: updateUserPersona?.descriptionIV ?? null,
-            relationship: updateUserPersona?.relationship ?? null,
-            relationshipIV: updateUserPersona?.relationshipIV ?? null,
-            traits: updateUserPersona?.traits ?? null,
-            traitsIV: updateUserPersona?.traitsIV ?? null,
-          },
-        });
+        const tagContents = newTags?.split(",").map((tag) => tag.trim());
+
+        const tagIds = tagContents
+          ?.map((content) => {
+            const tag = TAGS.find((tag) => tag.content === content);
+            return tag?.id ?? undefined;
+          })
+          .filter((tag): tag is string => tag !== undefined);
+        if (!tagIds?.length) {
+          continue;
+        }
+
+        await Promise.all([
+          ctx.db.persona.update({
+            where: { id: userPersona?.id },
+            data: {
+              description: updateUserPersona?.description ?? null,
+              descriptionIV: updateUserPersona?.descriptionIV ?? null,
+              relationship: updateUserPersona?.relationship ?? null,
+              relationshipIV: updateUserPersona?.relationshipIV ?? null,
+              traits: updateUserPersona?.traits ?? null,
+              traitsIV: updateUserPersona?.traitsIV ?? null,
+            },
+          }),
+          ctx.db.post.update({
+            where: { id: post.id },
+            data: {
+              tags: {
+                connect: tagIds.slice(0, 3).map((tagId: string) => ({
+                  id: tagId,
+                })),
+              },
+            },
+          }),
+        ]);
         console.count("persona update done.");
       }
     }),
