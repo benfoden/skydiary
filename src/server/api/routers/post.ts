@@ -299,29 +299,12 @@ export const postRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      let userPersona = await ctx.db.persona.findFirst({
-        where: { createdById: ctx.session.user.id, isUser: true },
-      });
-
       const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
 
       let mdk: CryptoKey | undefined;
-      let encryptedPersona: Persona;
-
-      if (!userPersona) return;
-
-      // todo: uncomment this when we want to update personas more frequently
-      if (userPersona.updatedAt < twelveHoursAgo) {
-        return;
-      }
 
       if (input.mdkJwk) {
         mdk = await importKeyFromJWK(input.mdkJwk);
-      }
-
-      if (userPersona.descriptionIV && mdk) {
-        encryptedPersona = userPersona;
-        userPersona = await decryptPersona(encryptedPersona, mdk);
       }
 
       const posts = await ctx.db.post.findMany({
@@ -347,6 +330,20 @@ export const postRouter = createTRPCRouter({
           });
         }
 
+        let userPersona = await ctx.db.persona.findFirst({
+          where: { createdById: ctx.session.user.id, isUser: true },
+        });
+        if (!userPersona) return;
+
+        // todo: uncomment this when we want to update personas more frequently
+        if (userPersona.updatedAt < twelveHoursAgo) {
+          return;
+        }
+
+        if (userPersona.descriptionIV && mdk) {
+          userPersona = await decryptPersona(userPersona, mdk);
+        }
+
         const [newTags, generatedPersonaDetails] = await Promise.all([
           getResponse({
             messageContent: prompts.tag({ content: post?.content }),
@@ -370,11 +367,7 @@ export const postRouter = createTRPCRouter({
         let updateUserPersona = { ...userPersona, ...updatedPersonaDetails };
 
         if (mdk) {
-          encryptedPersona = await encryptPersona(updateUserPersona, mdk);
-          updateUserPersona = {
-            ...userPersona,
-            ...encryptedPersona,
-          };
+          updateUserPersona = await encryptPersona(updateUserPersona, mdk);
         }
 
         const tagContents = newTags?.split(",").map((tag) => tag.trim());
