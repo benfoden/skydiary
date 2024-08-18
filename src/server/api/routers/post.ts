@@ -8,7 +8,7 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { getResponse, getResponseJSON } from "~/utils/ai";
-import { NEWPERSONAUSER, productPlan } from "~/utils/constants";
+import { NEWPERSONAUSER } from "~/utils/constants";
 import {
   decryptPersona,
   decryptPost,
@@ -324,8 +324,6 @@ export const postRouter = createTRPCRouter({
         userPersona = await decryptPersona(encryptedPersona, mdk);
       }
 
-      // const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000);
-
       const posts = await ctx.db.post.findMany({
         where: {
           createdBy: { id: ctx.session.user.id },
@@ -345,21 +343,20 @@ export const postRouter = createTRPCRouter({
           });
         }
 
-        const generatedPersona = await getResponseJSON({
+        const generatedPersonaDetails = await getResponseJSON({
           messageContent: prompts.userPersona({
             persona: userPersona ?? NEWPERSONAUSER,
             content: post?.content,
-            wordLimit: ctx.session.user?.isSpecial
-              ? 150
-              : productPlan(ctx.session.user?.stripeProductId).memories,
           }),
           model: "gpt-4o-mini",
         });
 
-        if (!generatedPersona) return;
+        if (!generatedPersonaDetails) return;
 
-        const personaObject = JSON.parse(generatedPersona) as Persona;
-        let updateUserPersona = { ...userPersona, ...personaObject };
+        const updatedPersonaDetails = JSON.parse(
+          generatedPersonaDetails,
+        ) as Partial<Persona>;
+        let updateUserPersona = { ...userPersona, ...updatedPersonaDetails };
 
         if (mdk) {
           encryptedPersona = await encryptPersona(updateUserPersona, mdk);

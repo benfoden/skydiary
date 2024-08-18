@@ -31,7 +31,6 @@ export default async function Secret() {
   const userPersonaPrompt = prompts.userPersona({
     persona: currentUserPersona!,
     content,
-    wordLimit: 10,
   });
 
   const chat = prompts.chatStart({

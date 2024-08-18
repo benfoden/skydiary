@@ -81,12 +81,10 @@ export const prompts = {
   userPersona: ({
     persona,
     content,
-    wordLimit = 10,
     isWorkFocus = false,
   }: {
     persona: Persona | NewPersonaUser;
     content: string;
-    wordLimit?: number;
     isWorkFocus?: boolean;
   }) => {
     const userPersonaObj = Object.fromEntries(
