@@ -302,14 +302,28 @@ export const postRouter = createTRPCRouter({
       let userPersona = await ctx.db.persona.findFirst({
         where: { createdById: ctx.session.user.id, isUser: true },
       });
-      if (!userPersona) return;
+
+      const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
 
       let mdk: CryptoKey | undefined;
+      let encryptedPersona: Persona;
+
+      if (!userPersona) return;
+
+      // todo: uncomment this when we want to update personas more frequently
+      if (userPersona.updatedAt < twelveHoursAgo) {
+        return;
+      }
+
       if (input.mdkJwk) {
         mdk = await importKeyFromJWK(input.mdkJwk);
       }
 
-      const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
+      if (userPersona.descriptionIV && mdk) {
+        encryptedPersona = userPersona;
+        userPersona = await decryptPersona(encryptedPersona, mdk);
+      }
+
       // const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000);
 
       const posts = await ctx.db.post.findMany({
@@ -319,11 +333,8 @@ export const postRouter = createTRPCRouter({
           updatedAt: { lte: twelveHoursAgo },
         },
         orderBy: { createdAt: "asc" },
-        take: 3,
+        take: 2,
       });
-      if (userPersona.descriptionIV && mdk) {
-        userPersona = await decryptPersona(userPersona, mdk);
-      }
 
       for (const post of posts.filter((post) => post.content?.length >= 20)) {
         if (post.contentIV && mdk) {
@@ -346,31 +357,27 @@ export const postRouter = createTRPCRouter({
         });
 
         if (!generatedPersona) return;
-        console.log("new genpersona: ", generatedPersona);
 
         const personaObject = JSON.parse(generatedPersona) as Persona;
-        let updatedUserPersona = { ...userPersona, ...personaObject };
+        let updateUserPersona = { ...userPersona, ...personaObject };
 
         if (mdk) {
-          const encryptedPersonaDetails = await encryptPersona(
-            personaObject,
-            mdk,
-          );
-          updatedUserPersona = {
+          encryptedPersona = await encryptPersona(updateUserPersona, mdk);
+          updateUserPersona = {
             ...userPersona,
-            ...encryptedPersonaDetails,
+            ...encryptedPersona,
           };
         }
 
         await ctx.db.persona.update({
           where: { id: userPersona?.id },
           data: {
-            description: userPersona?.description ?? null,
-            descriptionIV: userPersona?.descriptionIV ?? null,
-            relationship: userPersona?.relationship ?? null,
-            relationshipIV: userPersona?.relationshipIV ?? null,
-            traits: userPersona?.traits ?? null,
-            traitsIV: userPersona?.traitsIV ?? null,
+            description: updateUserPersona?.description ?? null,
+            descriptionIV: updateUserPersona?.descriptionIV ?? null,
+            relationship: updateUserPersona?.relationship ?? null,
+            relationshipIV: updateUserPersona?.relationshipIV ?? null,
+            traits: updateUserPersona?.traits ?? null,
+            traitsIV: updateUserPersona?.traitsIV ?? null,
           },
         });
         console.count("persona update done.");

@@ -319,10 +319,10 @@ export async function deleteJWKFromIndexedDB(keyName: string): Promise<void> {
 }
 
 export async function encryptPersona(
-  persona: Partial<Persona>,
+  persona: Persona,
   mdk: CryptoKey,
-): Promise<Partial<Persona>> {
-  const result: Partial<Persona> = persona;
+): Promise<Persona> {
+  const result: Persona = persona;
 
   const fieldsToEncrypt = [
     "name",

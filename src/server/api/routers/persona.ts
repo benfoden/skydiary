@@ -58,10 +58,7 @@ export const personaRouter = createTRPCRouter({
       };
       if (input.mdkJwk) {
         const key = await importKeyFromJWK(input.mdkJwk);
-        data = (await encryptPersona(
-          data as Partial<Persona>,
-          key,
-        )) as typeof data;
+        data = await encryptPersona(data, key);
       }
       const persona = await ctx.db.persona.create({
         data,
