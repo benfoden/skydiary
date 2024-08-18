@@ -1,6 +1,10 @@
 import { type Comment, type Persona, type Post } from "@prisma/client";
 import localforage from "localforage";
-import { type PostWithCommentsAndTags } from "./types";
+import {
+  type PersonaCreateValues,
+  type PersonaUpdateValues,
+  type PostWithCommentsAndTags,
+} from "./types";
 
 export interface EncryptedData {
   cipherText: string;
@@ -165,7 +169,7 @@ export async function decryptTextWithIVAndKey({
   key: CryptoKey;
 }): Promise<string> {
   try {
-    if (!cipherText || cipherText.length < 8 || !iv || !key) {
+    if (!cipherText ?? cipherText.length < 8 ?? !iv ?? !key) {
       throw new Error("Missing cipherText, iv, or key");
     }
     const decoder = new TextDecoder();
@@ -318,12 +322,71 @@ export async function deleteJWKFromIndexedDB(keyName: string): Promise<void> {
   }
 }
 
+export async function encryptPersonaUpdate(
+  persona: PersonaUpdateValues,
+  mdk: CryptoKey,
+): Promise<PersonaUpdateValues> {
+  const result = persona;
+
+  const fieldsToEncrypt = [
+    "name",
+    "gender",
+    "traits",
+    "description",
+    "occupation",
+    "relationship",
+    "communicationStyle",
+    "communicationSample",
+  ] as const;
+
+  const encryptionPromises = fieldsToEncrypt.map(async (field) => {
+    if (persona[field]) {
+      const { cipherText, iv } = await encryptTextWithKey(persona[field], mdk);
+      result[field] = cipherText;
+      result[`${field}IV`] = Buffer.from(iv).toString("base64");
+    }
+  });
+
+  await Promise.all(encryptionPromises);
+
+  return result;
+}
+
+export async function encryptPersonaCreate(
+  persona: PersonaCreateValues,
+  mdk: CryptoKey,
+): Promise<PersonaCreateValues> {
+  const result = persona;
+
+  const fieldsToEncrypt = [
+    "name",
+    "gender",
+    "occupation",
+    "traits",
+    "description",
+    "relationship",
+    "communicationStyle",
+    "communicationSample",
+  ] as const;
+
+  const encryptionPromises = fieldsToEncrypt.map(async (field) => {
+    if (persona[field]) {
+      const { cipherText, iv } = await encryptTextWithKey(persona[field], mdk);
+      result[field] = cipherText;
+      result[`${field}IV`] = Buffer.from(iv).toString("base64");
+    }
+  });
+
+  await Promise.all(encryptionPromises);
+
+  return result;
+}
+
 export async function encryptPersona(
   persona: Persona,
   mdk: CryptoKey,
 ): Promise<Persona> {
-  const result: Persona = persona;
-
+  const result = persona;
   const fieldsToEncrypt = [
     "name",
     "gender",

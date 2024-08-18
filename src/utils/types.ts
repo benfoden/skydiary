@@ -71,3 +71,49 @@ export type EncryptedPostPartialResult = {
   summaryIV?: string;
   comments?: EncryptedCommentPartialResult[];
 };
+
+export type PersonaUpdateValues = {
+  name: string | undefined;
+  nameIV?: string | null;
+  traits: string | undefined;
+  traitsIV?: string | null;
+  image: string | undefined;
+  age: number | undefined;
+  description: string | undefined;
+  descriptionIV?: string | undefined;
+  gender: string | null;
+  genderIV?: string | undefined;
+  relationship: string | undefined;
+  relationshipIV?: string | undefined;
+  occupation: string | undefined;
+  occupationIV?: string | undefined;
+  communicationStyle: string | undefined;
+  communicationStyleIV?: string | undefined;
+  communicationSample: string | undefined;
+  communicationSampleIV?: string | undefined;
+  isFavorite: boolean | undefined;
+  isUser: boolean | undefined;
+};
+
+export type PersonaCreateValues = {
+  name: string;
+  nameIV?: string | null;
+  traits: string;
+  traitsIV?: string | null;
+  image: string | undefined;
+  age: number | undefined;
+  description: string | undefined;
+  descriptionIV?: string | undefined;
+  gender: string | null;
+  genderIV?: string | undefined;
+  relationship: string | undefined;
+  relationshipIV?: string | undefined;
+  occupation: string | undefined;
+  occupationIV?: string | undefined;
+  communicationStyle: string | undefined;
+  communicationStyleIV?: string | undefined;
+  communicationSample: string | undefined;
+  communicationSampleIV?: string | undefined;
+  isFavorite: boolean | undefined;
+  isUser: boolean | undefined;
+};

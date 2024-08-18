@@ -29,7 +29,9 @@ export default async function SessionLayout({ children }: Props) {
     await runBulkEncryption({ mdkJwk });
   }
 
-  await api.post.tagAndMemorize({ mdkJwk });
+  api.post.tagAndMemorize({ mdkJwk }).catch((error) => {
+    console.error("Error on tag and memorize posts", error);
+  });
 
   return (
     <div className="container mx-auto min-h-screen">

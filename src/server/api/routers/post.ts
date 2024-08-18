@@ -397,6 +397,10 @@ export const postRouter = createTRPCRouter({
           createdBy: { id: ctx.session.user.id },
           content: { not: "" },
           updatedAt: { lte: twelveHoursAgo },
+          tags: { none: {} },
+        },
+        include: {
+          tags: true,
         },
         orderBy: { createdAt: "asc" },
         take: 2,

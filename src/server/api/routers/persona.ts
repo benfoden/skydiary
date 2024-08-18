@@ -1,4 +1,3 @@
-import { type Persona } from "@prisma/client";
 import { z } from "zod";
 import { env } from "~/env";
 
@@ -10,9 +9,15 @@ import {
 import {
   decryptPersona,
   encryptPersona,
+  encryptPersonaCreate,
+  encryptPersonaUpdate,
   importKeyFromJWK,
 } from "~/utils/cryptoA1";
 import { cleanStringForInput } from "~/utils/text";
+import {
+  type PersonaCreateValues,
+  type PersonaUpdateValues,
+} from "~/utils/types";
 
 export const personaRouter = createTRPCRouter({
   create: protectedProcedure
@@ -39,29 +44,29 @@ export const personaRouter = createTRPCRouter({
         data: { personasUsed: { increment: 1 } },
       });
 
-      let data = {
+      let data: PersonaCreateValues = {
         name: cleanStringForInput(input.name),
-        description: cleanStringForInput(input.description ?? ""),
-        image: input.image,
-        age: input.age,
-        gender: cleanStringForInput(input.gender ?? ""),
-        relationship: cleanStringForInput(input.relationship ?? ""),
-        occupation: cleanStringForInput(input.occupation ?? ""),
         traits: cleanStringForInput(input.traits ?? ""),
-        communicationStyle: cleanStringForInput(input.communicationStyle ?? ""),
-        communicationSample: cleanStringForInput(
-          input.communicationSample ?? "",
-        ),
-        isUser: input.isUser,
-        createdBy: { connect: { id: ctx.session.user.id } },
-        isFavorite: input.isFavorite,
+        description: cleanStringForInput(input.description ?? "") ?? undefined,
+        image: input.image ?? undefined,
+        age: input.age ?? undefined,
+        gender: cleanStringForInput(input.gender ?? "") ?? undefined,
+        relationship:
+          cleanStringForInput(input.relationship ?? "") ?? undefined,
+        occupation: cleanStringForInput(input.occupation ?? "") ?? undefined,
+        communicationStyle:
+          cleanStringForInput(input.communicationStyle ?? "") ?? undefined,
+        communicationSample:
+          cleanStringForInput(input.communicationSample ?? "") ?? undefined,
+        isUser: input.isUser ?? false,
+        isFavorite: input.isFavorite ?? false,
       };
       if (input.mdkJwk) {
         const key = await importKeyFromJWK(input.mdkJwk);
-        data = await encryptPersona(data, key);
+        data = await encryptPersonaCreate(data, key);
       }
       const persona = await ctx.db.persona.create({
-        data,
+        data: { ...data, createdBy: { connect: { id: ctx.session.user.id } } },
       });
       if (persona) {
         await ctx.db.event.create({
@@ -93,29 +98,38 @@ export const personaRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      let data: Partial<Persona> = {};
-      if (input.name) data.name = cleanStringForInput(input.name);
-      if (input.description)
-        data.description = cleanStringForInput(input.description);
-      if (input.image) data.image = input.image;
-      if (input.age) data.age = input.age;
-      if (input.gender) data.gender = cleanStringForInput(input.gender);
-      if (input.relationship)
-        data.relationship = cleanStringForInput(input.relationship);
-      if (input.occupation)
-        data.occupation = cleanStringForInput(input.occupation);
-      if (input.traits) data.traits = cleanStringForInput(input.traits);
-      if (input.communicationStyle)
-        data.communicationStyle = cleanStringForInput(input.communicationStyle);
-      if (input.communicationSample)
-        data.communicationSample = cleanStringForInput(
-          input.communicationSample,
-        );
-      if (input.isUser) data.isUser = input.isUser;
-      if (input.isFavorite) data.isFavorite = input.isFavorite;
+      let data: PersonaUpdateValues = {
+        name: input.name ? cleanStringForInput(input.name) : undefined,
+        traits: cleanStringForInput(input.traits ?? ""),
+        description: cleanStringForInput(input.description ?? "") ?? undefined,
+        image: input.image ?? undefined,
+        age: input.age ?? undefined,
+        gender: cleanStringForInput(input.gender ?? "") ?? undefined,
+        relationship:
+          cleanStringForInput(input.relationship ?? "") ?? undefined,
+        occupation: cleanStringForInput(input.occupation ?? "") ?? undefined,
+        communicationStyle:
+          cleanStringForInput(input.communicationStyle ?? "") ?? undefined,
+        communicationSample:
+          cleanStringForInput(input.communicationSample ?? "") ?? undefined,
+        isUser: input.isUser ?? false,
+        isFavorite: input.isFavorite ?? false,
+      };
+
+      // Remove falsy optional values (except booleans)
+      Object.keys(data).forEach((key) => {
+        if (
+          data[key as keyof PersonaUpdateValues] === undefined ||
+          data[key as keyof PersonaUpdateValues] === null ||
+          data[key as keyof PersonaUpdateValues] === ""
+        ) {
+          delete data[key as keyof PersonaUpdateValues];
+        }
+      });
+
       if (input.mdkJwk) {
         const key = await importKeyFromJWK(input.mdkJwk);
-        data = await encryptPersona(data, key);
+        data = await encryptPersonaUpdate(data, key);
         if (!data.nameIV) {
           throw new Error("Persona encryption failed");
         }
@@ -124,66 +138,6 @@ export const personaRouter = createTRPCRouter({
         where: { id: input.personaId, createdBy: { id: ctx.session.user.id } },
         data,
       });
-    }),
-  bulkUpdate: protectedProcedure
-    .input(
-      z.object({
-        mdkJwk: z.custom<JsonWebKey>().nullable().optional(),
-        personas: z.array(
-          z.object({
-            id: z.string(),
-            name: z.string().max(140),
-            traits: z.string().max(280),
-            description: z.string().max(1700).nullable().optional(),
-            relationship: z.string().max(140).nullable().optional(),
-            image: z.string().nullable().optional(),
-            age: z.number().max(10000).nullable().optional(),
-            gender: z.string().max(140).nullable().optional(),
-            occupation: z.string().max(140).nullable().optional(),
-            communicationStyle: z.string().max(140).nullable().optional(),
-            communicationSample: z.string().max(1000).nullable().optional(),
-            isUser: z.boolean().optional(),
-            isFavorite: z.boolean().optional(),
-          }),
-        ),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const updatePromises = input.personas.map(async (persona) => {
-        let data: Partial<Persona> = {
-          name: cleanStringForInput(persona.name),
-          description: cleanStringForInput(persona.description ?? ""),
-          image: persona.image,
-          age: persona.age,
-          gender: cleanStringForInput(persona.gender ?? ""),
-          relationship: cleanStringForInput(persona.relationship ?? ""),
-          occupation: cleanStringForInput(persona.occupation ?? ""),
-          traits: cleanStringForInput(persona.traits ?? ""),
-          communicationStyle: cleanStringForInput(
-            persona.communicationStyle ?? "",
-          ),
-          communicationSample: cleanStringForInput(
-            persona.communicationSample ?? "",
-          ),
-          isUser: persona.isUser,
-          isFavorite: persona.isFavorite,
-        };
-        if (input.mdkJwk) {
-          const key = await importKeyFromJWK(input.mdkJwk);
-          data = await encryptPersona(data, key);
-          if (!data.nameIV) {
-            throw new Error("Persona encryption failed");
-          }
-        }
-        return ctx.db.persona.update({
-          where: {
-            id: persona.id,
-            createdBy: { id: ctx.session.user.id },
-          },
-          data,
-        });
-      });
-      await Promise.all(updatePromises);
     }),
 
   updateUserPersonaAsCron: publicProcedure
@@ -227,18 +181,22 @@ export const personaRouter = createTRPCRouter({
         where: { createdBy: { id: ctx.session.user.id }, isUser: false },
         orderBy: { createdAt: "asc" },
       });
-      if (input?.mdkJwk) {
-        const key = await importKeyFromJWK(input?.mdkJwk);
-        await Promise.all(
-          personas.map(async (persona: Persona) => {
-            if (persona.nameIV) {
-              return await decryptPersona(persona, key);
-            }
-            return persona;
-          }),
-        );
+
+      if (!input?.mdkJwk) {
+        return personas;
       }
-      return personas;
+
+      const key = await importKeyFromJWK(input.mdkJwk);
+      const decryptedPersonas = [];
+      for (const persona of personas) {
+        if (persona.nameIV) {
+          decryptedPersonas.push(await decryptPersona(persona, key));
+        } else {
+          decryptedPersonas.push(persona);
+        }
+      }
+
+      return decryptedPersonas;
     }),
 
   getByUserForJobQueue: protectedProcedure.query(({ ctx }) => {
