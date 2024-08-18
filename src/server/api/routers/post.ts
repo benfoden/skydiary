@@ -320,6 +320,7 @@ export const postRouter = createTRPCRouter({
         orderBy: { createdAt: "asc" },
         take: 2,
       });
+      if (!posts.length) return;
 
       for (const post of posts.filter((post) => post.content?.length >= 20)) {
         if (post.contentIV && mdk) {
@@ -333,11 +334,11 @@ export const postRouter = createTRPCRouter({
         let userPersona = await ctx.db.persona.findFirst({
           where: { createdById: ctx.session.user.id, isUser: true },
         });
-        if (!userPersona) return;
+        if (!userPersona) continue;
 
         // todo: uncomment this when we want to update personas more frequently
         if (userPersona.updatedAt < twelveHoursAgo) {
-          return;
+          continue;
         }
 
         if (userPersona.descriptionIV && mdk) {
