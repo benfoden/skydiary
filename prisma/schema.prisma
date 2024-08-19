@@ -13,14 +13,12 @@ model Post {
   title          String?
   content        String
   contentIV      String?
-  contentIVBytes Bytes?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   createdById    String
   sentimentScore String?
   summary        String?
   summaryIV      String?
-  summaryIVBytes Bytes?
   comments       Comment[] @relation("PostComments")
   createdBy      User      @relation(fields: [createdById], references: [id])
   tags           Tag[]     @relation("PostTags")
@@ -43,14 +41,12 @@ model Comment {
   id                 String   @id @default(cuid())
   content            String
   contentIV          String?
-  contentIVBytes     Bytes?
   isAI               Boolean  @default(true)
   createdByPersonaId String?
   createdAt          DateTime @default(now())
   coachVariant       String?
   coachName          String?
   coachNameIV        String?
-  coachNameIVBytes   Bytes?
   postId             String
   post               Post     @relation("PostComments", fields: [postId], references: [id], onDelete: Cascade)
   createdByPersona   Persona? @relation(fields: [createdByPersonaId], references: [id])
@@ -114,28 +110,20 @@ model Persona {
   age                 Int?
   name                String
   nameIV              String?
-  nameIVBytes         Bytes?
   description         String?
   descriptionIV       String?
-  descriptionIVBytes  Bytes?
   gender              String?
   genderIV            String?
-  genderIVBytes       Bytes?
   relationship        String?
   relationshipIV      String?
-  relationshipIVBytes Bytes?
   occupation          String?
   occupationIV        String?
-  occupationIVBytes   Bytes?
   traits              String
   traitsIV            String?
-  traitsIVBytes       Bytes?
   communicationStyle  String?
   communicationStyleIV String?
-  communicationStyleIVBytes Bytes?
   communicationSample String?
   communicationSampleIV String?
-  communicationSampleIVBytes Bytes?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
   createdById         String
