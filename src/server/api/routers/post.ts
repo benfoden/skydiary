@@ -55,8 +55,7 @@ export const postRouter = createTRPCRouter({
 
       const data = {
         content: input.content ?? "",
-        contentIV: "",
-        contentIVBytes: new Uint8Array(),
+        contentIVBytes: Buffer.from([]),
       };
 
       try {
@@ -66,13 +65,11 @@ export const postRouter = createTRPCRouter({
             data.content,
             key,
           );
-          data.content = cipherText;
-          data.contentIV = Buffer.from(iv).toString("base64");
-          data.contentIVBytes = iv;
-
           if (!iv) {
             throw new Error("Post encryption failed");
           }
+          data.content = cipherText;
+          data.contentIVBytes = Buffer.from(iv);
         }
 
         return await ctx.db.post.update({
@@ -274,20 +271,27 @@ export const postRouter = createTRPCRouter({
       const key = await importKeyFromJWK(input.mdkJwk);
 
       const updatePostPromises = posts
-        .filter((post) => post.content?.length > 5 && !post.contentIV)
+        .filter(
+          (post) =>
+            post.content?.length > 5 &&
+            (!post.contentIVBytes || !post.contentIV),
+        )
         .map(async (post) => {
           const data = post;
           const encryptedPost = await encryptPost(data, key);
-          if (!encryptedPost.contentIV) return;
+          if (!encryptedPost.contentIVBytes || !encryptedPost.contentIV) return;
+
+          const updateData: {
+            content: string;
+            contentIVBytes: Buffer;
+          } = {
+            content: encryptedPost.content,
+            contentIVBytes: encryptedPost.contentIVBytes,
+          };
 
           return await ctx.db.post.update({
             where: { id: encryptedPost.id },
-            data: {
-              content: encryptedPost.content,
-              summary: encryptedPost.summary,
-              contentIV: encryptedPost.contentIV,
-              summaryIV: encryptedPost.summaryIV,
-            },
+            data: updateData,
           });
         });
 
@@ -325,10 +329,14 @@ export const postRouter = createTRPCRouter({
       if (!posts.length) return;
 
       for (const post of posts.filter((post) => post.content?.length >= 20)) {
-        if (post.contentIV && mdk) {
+        if ((post.contentIVBytes ?? post.contentIV) && mdk) {
           post.content = await decryptTextWithIVAndKey({
             cipherText: post.content,
-            iv: Uint8Array.from(Buffer.from(post.contentIV, "base64")),
+            iv: post.contentIVBytes
+              ? post.contentIVBytes
+              : post.contentIV
+                ? Uint8Array.from(Buffer.from(post.contentIV, "base64"))
+                : new Uint8Array(),
             key: mdk,
           });
         }
@@ -338,24 +346,24 @@ export const postRouter = createTRPCRouter({
         });
         if (!userPersona) continue;
 
-        // todo: uncomment this when we want to update personas more frequently
         if (userPersona.updatedAt < twelveHoursAgo) {
           continue;
         }
 
         if (userPersona.descriptionIV && mdk) {
           userPersona = await decryptPersona(userPersona, mdk);
+          if (!userPersona) continue;
         }
 
         const [newTags, generatedPersonaDetails] = await Promise.all([
           getResponse({
-            messageContent: prompts.tag({ content: post?.content }),
+            messageContent: prompts.tag({ content: post.content }),
             model: "gpt-4o-mini",
           }),
           getResponseJSON({
             messageContent: prompts.userPersona({
               persona: userPersona ?? NEWPERSONAUSER,
-              content: post?.content,
+              content: post.content,
             }),
             model: "gpt-4o-mini",
           }),

@@ -130,7 +130,7 @@ export const personaRouter = createTRPCRouter({
       if (input.mdkJwk) {
         const key = await importKeyFromJWK(input.mdkJwk);
         data = await encryptPersonaUpdate(data, key);
-        if (!data.nameIV) {
+        if (!data.nameIV || !data.nameIVBytes) {
           throw new Error("Persona encryption failed");
         }
       }
@@ -189,7 +189,7 @@ export const personaRouter = createTRPCRouter({
       const key = await importKeyFromJWK(input.mdkJwk);
       const decryptedPersonas = [];
       for (const persona of personas) {
-        if (persona.nameIV) {
+        if (persona.nameIVBytes ?? persona.nameIV) {
           decryptedPersonas.push(await decryptPersona(persona, key));
         } else {
           decryptedPersonas.push(persona);
@@ -260,7 +260,7 @@ export const personaRouter = createTRPCRouter({
       const persona = await ctx.db.persona.findUnique({
         where: { id: input.personaId },
       });
-      if (input?.mdkJwk && persona?.nameIV) {
+      if (input?.mdkJwk && (persona?.nameIVBytes ?? persona?.nameIV)) {
         const key = await importKeyFromJWK(input.mdkJwk);
         return await decryptPersona(persona, key);
       }
