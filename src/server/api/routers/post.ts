@@ -56,6 +56,7 @@ export const postRouter = createTRPCRouter({
       const data = {
         content: input.content ?? "",
         contentIV: "",
+        contentIVBytes: new Uint8Array(),
       };
 
       try {
@@ -67,6 +68,7 @@ export const postRouter = createTRPCRouter({
           );
           data.content = cipherText;
           data.contentIV = Buffer.from(iv).toString("base64");
+          data.contentIVBytes = iv;
 
           if (!iv) {
             throw new Error("Post encryption failed");
