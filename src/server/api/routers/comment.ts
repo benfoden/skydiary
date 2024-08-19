@@ -39,7 +39,6 @@ export const commentRouter = createTRPCRouter({
         coachVariant: input.coachVariant,
         createdByPersonaId: input.createdByPersonaId ?? undefined,
         contentIV: "",
-        contentIVBytes: Buffer.from([]),
       };
       if (input.mdkJwk) {
         const mdk = await importKeyFromJWK(input.mdkJwk);
@@ -47,7 +46,6 @@ export const commentRouter = createTRPCRouter({
         const { cipherText, iv } = await encryptTextWithKey(input.content, mdk);
         data.content = cipherText;
         data.contentIV = Buffer.from(iv).toString("base64");
-        data.contentIVBytes = Buffer.from(iv);
       }
       await ctx.db.user.update({
         where: { id: ctx.session.user.id },
@@ -70,6 +68,14 @@ export const commentRouter = createTRPCRouter({
       return null;
     }),
 
+  delete: protectedProcedure
+    .input(z.object({ commentId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.comment.delete({
+        where: { id: input.commentId },
+      });
+    }),
+
   getCommentsByPostId: protectedProcedure
     .input(
       z.object({
@@ -89,13 +95,5 @@ export const commentRouter = createTRPCRouter({
         );
       }
       return comments;
-    }),
-
-  delete: protectedProcedure
-    .input(z.object({ commentId: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      return ctx.db.comment.delete({
-        where: { id: input.commentId },
-      });
     }),
 });
