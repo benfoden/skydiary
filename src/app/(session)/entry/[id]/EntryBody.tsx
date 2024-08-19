@@ -54,7 +54,7 @@ export default function EntryBody({ post }: { post: Post }) {
 
     const newTimeout = setTimeout(() => {
       updatePost.mutate({ content: newContent, postId: post?.id, mdkJwk });
-    }, 300);
+    }, 1000);
 
     setDebounceTimeout(newTimeout as unknown as SetStateAction<null>);
 

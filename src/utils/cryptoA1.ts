@@ -432,10 +432,11 @@ export async function decryptPersona(
     const ivField = `${field}IV`;
     const fieldValue = persona[field as keyof Persona];
     const ivFieldValue = persona[ivField as keyof Persona];
+
     if (fieldValue && ivFieldValue) {
       const decryptedText = await decryptTextWithIVAndKey({
         cipherText: fieldValue as string,
-        iv: Uint8Array.from(Buffer.from(ivFieldValue as string, "base64")),
+        iv: Buffer.from(ivFieldValue as string, "base64"),
         key: mdk,
       });
       if (typeof decryptedText === "string") {
@@ -465,28 +466,25 @@ export async function encryptComment(comment: Comment, mdk: CryptoKey) {
   return result;
 }
 
-export async function decryptComment(comment: Comment, mdk: CryptoKey) {
-  const result: Comment = {
-    ...comment,
-    content: "",
-    coachName: "",
-  };
-  if (!comment.contentIV) {
-    return comment;
-  }
+export async function decryptComment(
+  comment: Comment,
+  mdk: CryptoKey,
+): Promise<Comment> {
+  const result: Comment = comment;
 
   const fieldsToDecrypt = ["content", "coachName"] as const;
 
   const decryptionPromises = fieldsToDecrypt.map(async (field) => {
-    const fieldValue = comment[field];
-    const ivFieldValue = comment[`${field}IV`];
-    if (typeof fieldValue === "string" && typeof ivFieldValue === "string") {
+    const ivField = `${field}IV` as keyof Comment;
+    if (comment[field as keyof Comment] && comment[ivField]) {
       const decryptedText = await decryptTextWithIVAndKey({
-        cipherText: fieldValue,
-        iv: Uint8Array.from(Buffer.from(ivFieldValue, "base64")),
+        cipherText: comment[field as keyof Comment] as string,
+        iv: Buffer.from(comment[ivField] as string, "base64"),
         key: mdk,
       });
-      result[field] = decryptedText;
+      if (typeof decryptedText === "string") {
+        result[field] = decryptedText;
+      }
     }
   });
 
@@ -536,7 +534,7 @@ export async function decryptPost(post: Post, mdk: CryptoKey): Promise<Post> {
     if (post[field as keyof Post] && post[ivField]) {
       const decryptedText = await decryptTextWithIVAndKey({
         cipherText: post[field as keyof Post] as string,
-        iv: Uint8Array.from(Buffer.from(post[ivField] as string, "base64")),
+        iv: Buffer.from(post[ivField] as string, "base64"),
         key: mdk,
       });
       if (typeof decryptedText === "string") {
