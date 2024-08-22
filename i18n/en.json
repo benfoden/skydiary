@@ -292,11 +292,11 @@
     "continueHome": "go to homepage"
   },
   "encryptionNotice": {
-    "title": "decrypt your data",
-    "enterPassphrase": "enter passphrase",
-    "or": "or",
+    "title": "your data is encrypted",
     "reload": "reload",
-    "description": "if you entered your passphrase already on this device, reload the page to continue."
+    "or": "or",
+    "enterPassphrase": "enter passphrase",
+    "description": "reload if you already entered your passphrase on this device."
   },
   "form": {
     "save": "save",

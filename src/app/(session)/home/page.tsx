@@ -115,10 +115,10 @@ export default async function Home() {
         <div className="container flex flex-col items-center justify-start px-2 pb-12">
           <Suspense fallback={<Spinner />}>
             {user?.passwordSalt && !mdkJwk ? (
-              <EncryptionNotice user={user} mdkJwk={mdkJwk} />
+              <EncryptionNotice />
             ) : (
               <>
-                <div className="flex w-full flex-col items-start justify-center gap-4 md:max-w-3xl">
+                <div className="items-st art flex w-full flex-col justify-center gap-4 md:max-w-3xl">
                   <div className="ml-4">{t("home.today")}</div>
                   {lastPostDate !== today || userPosts?.length === 0 ? (
                     <Link href="/today" prefetch={true} className="w-full">
