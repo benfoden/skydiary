@@ -7,12 +7,14 @@ import { api } from "~/trpc/server";
 import { runBulkEncryption } from "~/utils/runBulkEncryption";
 import { useMdkJwk } from "~/utils/useMdkJwk";
 import ManageMDK from "../_components/ManageMDK";
+import Announcement from "./Announcement";
 
 type Props = {
   children: ReactNode;
+  announcement?: ReactNode;
 };
 
-export default async function SessionLayout({ children }: Props) {
+export default async function SessionLayout({ announcement, children }: Props) {
   const session = await getServerAuthSession();
   if (!session) {
     redirect("/auth/signin");
@@ -35,6 +37,7 @@ export default async function SessionLayout({ children }: Props) {
 
   return (
     <div className="container mx-auto min-h-screen">
+      <Announcement />
       {children}
       <ManageMDK user={session?.user} />
     </div>
