@@ -27,19 +27,19 @@
   "about": {
     "title": "about skydiary",
     "description 0": "the benefits of journaling are countless but you don't get any feedback.",
-    "description 1": "with skydiary the process of writing is solitary and private.",
-    "description 2": "you get totally private advice and counsel from different personas (powered by AI)",
+    "description 1": "with skydiary you write in solitude and privacy.",
+    "description 2": "you also get private advice and counsel from different personas you can customize (AI)",
     "description 3": "the emphasis is on simplicity. all you need to do is write a daily entry",
     "description 4": "you get automatic tags on your entry, recaps of your week, and advice or feedback when you want it",
     "description 5": "you can create a persona for anyone you want to talk to and learn new things you might not have imagined",
+    "try it": "無料で試してみる",
     "company": {
-      "title": "about the team",
-      "description 0": "skydiary is made by a husband (B) and wife (N). we craved feedback to keep us writing our journals daily because we know it helps in so many ways, so we started this project.",
-      "description 1": "B is a software engineer and startup veteran. N is a writer and creator. ",
-      "description 2": "we're both passionate about technology, learning, and exploring our inner world. we love to share our knowledge and help others learn new things about the world and themselves.",
-      "description 3": "we hope you'll enjoy using skydiary and help us make it better. we're open to feedback and suggestions."
-    },
-    "try it": "try it for free"
+      "title": "私たちについて",
+      "description 0": "skydiaryは夫（B）と妻（N）のチームによって作られました。私たちは日記を毎日書き続けるために何か良い方法があればと思っており、コメントをもらうことが有効だと感じたため、このプロジェクトを始めました。",
+      "description 1": "Bはソフトウェアエンジニアであり、スタートアップのベテランです。Nは作家でありクリエイターです。",
+      "description 2": "私たちはどちらも技術の習得、学習、そして内なる世界の探求に情熱を持っています。私たちは知識を共有し、他の人々が世界や自分自身について新しいことを学ぶのを助けるのが大好きです。",
+      "description 3": "skydiaryを楽しんで使っていただけるように願っています。そして、より良いものにするためにご協力いただければ幸いです。ご意見や使ってみた感想などありましたら、お待ちしています。"
+    }
   },
   "features": {
     "title": "features",
@@ -292,11 +292,11 @@
     "continueHome": "go to homepage"
   },
   "encryptionNotice": {
-    "title": "decrypt your data",
-    "enterPassphrase": "enter passphrase",
-    "or": "or",
+    "title": "your data is encrypted",
     "reload": "reload",
-    "description": "if you entered your passphrase already on this device, reload the page to continue."
+    "or": "or",
+    "enterPassphrase": "enter passphrase",
+    "description": "reload if you already entered your passphrase on this device."
   },
   "form": {
     "save": "save",

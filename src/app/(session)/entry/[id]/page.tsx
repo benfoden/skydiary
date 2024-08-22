@@ -82,7 +82,7 @@ export default async function Entry({
       <div className="flex h-full flex-col items-center px-2 pb-4 sm:px-8">
         <Suspense fallback={<Spinner />}>
           {user?.passwordSalt && !mdkJwk ? (
-            <EncryptionNotice user={user} mdkJwk={mdkJwk} />
+            <EncryptionNotice />
           ) : (
             <>
               <EntryBody post={post} />

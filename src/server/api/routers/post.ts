@@ -307,7 +307,7 @@ export const postRouter = createTRPCRouter({
         mdk = await importKeyFromJWK(input.mdkJwk);
       }
 
-      const posts = await ctx.db.post.findMany({
+      const post = await ctx.db.post.findFirst({
         where: {
           createdBy: { id: ctx.session.user.id },
           content: { not: "" },
@@ -317,97 +317,94 @@ export const postRouter = createTRPCRouter({
         include: {
           tags: true,
         },
-        orderBy: { createdAt: "asc" },
-        take: 2,
+        orderBy: { createdAt: "desc" },
       });
-      if (!posts.length) return;
+      if (!post) return;
 
-      for (const post of posts.filter((post) => post.content?.length >= 20)) {
-        if (post.contentIV && mdk) {
-          post.content = await decryptTextWithIVAndKey({
-            cipherText: post.content,
-            iv: Uint8Array.from(Buffer.from(post.contentIV, "base64")),
-            key: mdk,
-          });
-        }
-
-        let userPersona = await ctx.db.persona.findFirst({
-          where: { createdById: ctx.session.user.id, isUser: true },
+      if (post.content?.length >= 20 && post.contentIV && mdk) {
+        post.content = await decryptTextWithIVAndKey({
+          cipherText: post.content,
+          iv: Uint8Array.from(Buffer.from(post.contentIV, "base64")),
+          key: mdk,
         });
-        if (!userPersona) continue;
-
-        // todo: uncomment this when we want to update personas more frequently
-        if (userPersona.updatedAt < twelveHoursAgo) {
-          continue;
-        }
-
-        if (userPersona.descriptionIV && mdk) {
-          userPersona = await decryptPersona(userPersona, mdk);
-        }
-
-        const [newTags, generatedPersonaDetails] = await Promise.all([
-          getResponse({
-            messageContent: prompts.tag({ content: post?.content }),
-            model: "gpt-4o-mini",
-          }),
-          getResponseJSON({
-            messageContent: prompts.userPersona({
-              persona: userPersona ?? NEWPERSONAUSER,
-              content: post?.content,
-            }),
-            model: "gpt-4o-mini",
-          }),
-        ]);
-
-        if (!newTags) continue;
-        if (!generatedPersonaDetails) continue;
-
-        const updatedPersonaDetails = JSON.parse(
-          generatedPersonaDetails,
-        ) as Partial<Persona>;
-        let updateUserPersona = { ...userPersona, ...updatedPersonaDetails };
-
-        if (mdk) {
-          updateUserPersona = await encryptPersona(updateUserPersona, mdk);
-        }
-
-        const tagContents = newTags?.split(",").map((tag) => tag.trim());
-
-        const tagIds = tagContents
-          ?.map((content) => {
-            const tag = TAGS.find((tag) => tag.content === content);
-            return tag?.id ?? undefined;
-          })
-          .filter((tag): tag is string => tag !== undefined);
-        if (!tagIds?.length) {
-          continue;
-        }
-
-        await Promise.all([
-          ctx.db.persona.update({
-            where: { id: userPersona?.id },
-            data: {
-              description: updateUserPersona?.description ?? null,
-              descriptionIV: updateUserPersona?.descriptionIV ?? null,
-              relationship: updateUserPersona?.relationship ?? null,
-              relationshipIV: updateUserPersona?.relationshipIV ?? null,
-              traits: updateUserPersona?.traits ?? null,
-              traitsIV: updateUserPersona?.traitsIV ?? null,
-            },
-          }),
-          ctx.db.post.update({
-            where: { id: post.id },
-            data: {
-              tags: {
-                connect: tagIds.slice(0, 3).map((tagId: string) => ({
-                  id: tagId,
-                })),
-              },
-            },
-          }),
-        ]);
-        console.count("persona update done.");
       }
+
+      let userPersona = await ctx.db.persona.findFirst({
+        where: { createdById: ctx.session.user.id, isUser: true },
+      });
+      if (!userPersona) return;
+
+      // todo: uncomment this when we want to update personas more frequently
+      if (userPersona.updatedAt < twelveHoursAgo) {
+        return;
+      }
+
+      if (userPersona.descriptionIV && mdk) {
+        userPersona = await decryptPersona(userPersona, mdk);
+      }
+
+      const [newTags, generatedPersonaDetails] = await Promise.all([
+        getResponse({
+          messageContent: prompts.tag({ content: post?.content }),
+          model: "gpt-4o-mini",
+        }),
+        getResponseJSON({
+          messageContent: prompts.userPersona({
+            persona: userPersona ?? NEWPERSONAUSER,
+            content: post?.content,
+          }),
+          model: "gpt-4o-mini",
+        }),
+      ]);
+
+      if (!newTags) return;
+      if (!generatedPersonaDetails) return;
+
+      const updatedPersonaDetails = JSON.parse(
+        generatedPersonaDetails,
+      ) as Partial<Persona>;
+      let updateUserPersona = { ...userPersona, ...updatedPersonaDetails };
+
+      if (mdk) {
+        updateUserPersona = await encryptPersona(updateUserPersona, mdk);
+      }
+
+      const tagContents = newTags?.split(",").map((tag) => tag.trim());
+
+      const tagIds = tagContents
+        ?.map((content) => {
+          const tag = TAGS.find((tag) => tag.content === content);
+          return tag?.id ?? undefined;
+        })
+        .filter((tag): tag is string => tag !== undefined);
+      if (!tagIds?.length) {
+        return;
+      }
+
+      await Promise.all([
+        ctx.db.persona.update({
+          where: { id: userPersona?.id },
+          data: {
+            description: updateUserPersona?.description ?? null,
+            descriptionIV: updateUserPersona?.descriptionIV ?? null,
+            relationship: updateUserPersona?.relationship ?? null,
+            relationshipIV: updateUserPersona?.relationshipIV ?? null,
+            traits: updateUserPersona?.traits ?? null,
+            traitsIV: updateUserPersona?.traitsIV ?? null,
+          },
+        }),
+        ctx.db.post.update({
+          where: { id: post.id },
+          data: {
+            tags: {
+              connect: tagIds.slice(0, 3).map((tagId: string) => ({
+                id: tagId,
+              })),
+            },
+          },
+        }),
+      ]);
+      console.count("persona update done.");
     }),
 
   addTagsAsCron: publicProcedure
@@ -488,7 +485,7 @@ export const postRouter = createTRPCRouter({
         messageContent: prompts.summary({ content: post.content }),
       });
       if (summary) {
-        continue;
+        return;
       }
       await ctx.db.post.update({
         where: { id: post.id },

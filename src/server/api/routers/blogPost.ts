@@ -116,6 +116,16 @@ export const blogPostRouter = createTRPCRouter({
       });
     }),
 
+  getLatestAnnouncement: publicProcedure.query(({ ctx }) => {
+    return ctx.db.blogPost.findFirst({
+      where: {
+        tag: "announcement",
+        isDraft: false,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }),
+
   delete: protectedProcedure
     .input(z.object({ postId: z.string() }))
     .mutation(async ({ ctx, input }) => {

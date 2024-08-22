@@ -7,6 +7,7 @@ import { api } from "~/trpc/server";
 import { runBulkEncryption } from "~/utils/runBulkEncryption";
 import { useMdkJwk } from "~/utils/useMdkJwk";
 import ManageMDK from "../_components/ManageMDK";
+import Announcement from "./Announcement";
 
 type Props = {
   children: ReactNode;
@@ -32,9 +33,11 @@ export default async function SessionLayout({ children }: Props) {
   api.post.tagAndMemorize({ mdkJwk }).catch((error) => {
     console.error("Error on tag and memorize posts", error);
   });
+  const blogPost = await api.blogPost.getLatestAnnouncement();
 
   return (
     <div className="container mx-auto min-h-screen">
+      {blogPost && <Announcement blogPost={blogPost} />}
       {children}
       <ManageMDK user={session?.user} />
     </div>
