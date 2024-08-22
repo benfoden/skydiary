@@ -38,7 +38,7 @@ export default async function TopicPosts({
         <DropDownUser />
       </SessionNav>
       {user?.passwordSalt && !mdkJwk ? (
-        <EncryptionNotice user={user} mdkJwk={mdkJwk} />
+        <EncryptionNotice />
       ) : (
         <main className="flex min-h-screen w-full flex-col items-center justify-start">
           <div className="flex h-full flex-col items-center gap-12 px-4 pb-4">

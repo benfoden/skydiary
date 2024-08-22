@@ -58,7 +58,7 @@ export default async function Persona({ params }: { params: { id: string } }) {
 
       <main className="flex min-h-screen w-full flex-col items-center justify-start">
         {user?.passwordSalt && !mdkJwk ? (
-          <EncryptionNotice user={user} mdkJwk={mdkJwk} />
+          <EncryptionNotice />
         ) : (
           <>
             <div className="container flex w-full flex-col items-center justify-start gap-12 px-2 pb-12">

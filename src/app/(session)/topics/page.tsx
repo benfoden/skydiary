@@ -43,7 +43,7 @@ export default async function Topics() {
       </SessionNav>
 
       {user?.passwordSalt && !mdkJwk ? (
-        <EncryptionNotice user={user} mdkJwk={mdkJwk} />
+        <EncryptionNotice />
       ) : (
         <main className="flex min-h-screen w-full flex-col items-center justify-start">
           <div className="container flex flex-col items-center justify-start gap-12 px-4 md:py-16 ">
