@@ -11,10 +11,9 @@ import Announcement from "./Announcement";
 
 type Props = {
   children: ReactNode;
-  announcement?: ReactNode;
 };
 
-export default async function SessionLayout({ announcement, children }: Props) {
+export default async function SessionLayout({ children }: Props) {
   const session = await getServerAuthSession();
   if (!session) {
     redirect("/auth/signin");
