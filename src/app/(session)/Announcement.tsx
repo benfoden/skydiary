@@ -1,11 +1,18 @@
+import { type BlogPost } from "@prisma/client";
 import Modal from "~/app/_components/Modal";
-import { api } from "~/trpc/server";
+import { formatContent } from "~/utils/blog";
 
-export default async function Announcement() {
-  const blogPosts = await api.blogPost.getAll();
+export default async function Announcement({
+  blogPost,
+}: {
+  blogPost: BlogPost;
+}) {
+  if (!blogPost) return null;
 
-  const latest = blogPosts.filter((post) => !post.isDraft).slice(0, 1);
-  console.log(latest);
-
-  return <Modal>{latest[0]?.content}</Modal>;
+  const content = await formatContent(blogPost?.content ?? "");
+  return (
+    <Modal title={blogPost?.title}>
+      <div dangerouslySetInnerHTML={{ __html: content }} />
+    </Modal>
+  );
 }
