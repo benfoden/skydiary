@@ -50,7 +50,7 @@
     },
     "feature2": {
       "title": "express yourself in privacy",
-      "description": "your data is encrypted in transit and at rest. we don't read, sell, or mine your personal data. you can set your own encryption key we don't control. <privacy>read our privacy pledge</privacy>"
+      "description": "your data is encrypted in transit and at rest. we don't read, sell, or mine your personal data. you can set your own data password only you control. <privacy>read our privacy pledge</privacy>"
     },
     "feature3": {
       "title": "create custom personas",
@@ -273,14 +273,14 @@
   },
   "dataSecurity": {
     "dataAccess": "encrypted data access",
-    "dataAccessDescription": "encrypt your data using a passphrase that's never stored on our servers.",
-    "passphraseTooShort": "passphrases must be at least 16 characters",
-    "passphraseMismatch": "passphrases do not match",
-    "passphraseCaution": "because we never see your passphrase, we can not recover it if you forget it.",
-    "passphraseRecommendation": "we recommend setting a unique, long passphrase. save it securely in a password manager, write it down, or download a .PDF",
-    "setPassphrase": "set passphrase",
+    "dataAccessDescription": "encrypt your data using a password that's never stored on our servers.",
+    "passwordTooShort": "passwords must be at least 16 characters",
+    "passwordMismatch": "passwords do not match",
+    "passwordCaution": "because we never see your password, we can not recover it if you forget it.",
+    "passwordRecommendation": "we recommend setting a unique, long password. save it securely in a password manager, write it down, or download a .PDF",
+    "setPassword": "set password",
     "dataAccessIsEnabledOnThisDevice": "encrypted data is enabled on this device",
-    "dataAccessCaution": "Caution: If you revoke access, you'll need to enter your passphrase again to use skydiary on this device.",
+    "dataAccessCaution": "Caution: If you revoke access, you'll need to enter your password again to use skydiary on this device.",
     "unlockDataOnThisDevice": "decrypt / encrypt your data on this device",
     "revokeAccess": "revoke access",
     "failedToRevokeAccess": "Failed to revoke data access",
@@ -295,8 +295,8 @@
     "title": "your data is encrypted",
     "reload": "reload",
     "or": "or",
-    "enterPassphrase": "enter passphrase",
-    "description": "reload if you already entered your passphrase on this device."
+    "enterPassword": "enter password",
+    "description": "reload if you already entered your password on this device."
   },
   "form": {
     "save": "save",
