@@ -39,19 +39,24 @@ export default function Announcement({ blogPost }: { blogPost?: BlogPost }) {
 
   return (
     <Modal>
-      <div className="flex w-full flex-row items-center justify-between">
-        {blogPost.title && (
-          <h1 className="text-3xl font-light">{blogPost.title}</h1>
-        )}
-        <button
-          onClick={closeModal}
-          className="absolute right-2 top-4 m-2 rounded-full p-2 transition-all hover:bg-white/20"
-        >
-          <Cross1Icon className="h-6 w-6" />
-        </button>
-      </div>
-      <div id="blog">
-        <div dangerouslySetInnerHTML={{ __html: content }} />
+      <div className="flex w-full flex-col items-start gap-8">
+        <div className="flex w-full flex-row items-center justify-between">
+          {blogPost?.tag && (
+            <div className="text-xs opacity-90">{blogPost?.tag}</div>
+          )}
+          {blogPost.title && (
+            <h1 className="text-3xl font-light">{blogPost.title}</h1>
+          )}
+          <button
+            onClick={closeModal}
+            className="absolute right-2 top-4 m-2 rounded-full p-2 transition-all hover:bg-white/20"
+          >
+            <Cross1Icon className="h-6 w-6" />
+          </button>
+        </div>
+        <div id="blog">
+          <div dangerouslySetInnerHTML={{ __html: content }} />
+        </div>
       </div>
     </Modal>
   );
