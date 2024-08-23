@@ -59,23 +59,28 @@ export default async function Post({
 
   return (
     <>
-      <NavChevronLeft targetPathname={"/blog"} label={t("nav.blog")} />
+      <div className="flex w-full flex-row items-start">
+        <NavChevronLeft targetPathname={"/blog"} label={t("nav.blog")} />
+      </div>
 
       <div className="flex w-full max-w-[600px] flex-col">
-        <div className="ml-8 flex flex-col">
-          <h1 className="text-3xl font-light">{blogPost.title}</h1>
-          <div className="font-base opacity-50">
-            {formattedTimeStampToDate(new Date(blogPost.createdAt))}
-          </div>
-        </div>
         <Card isButton={false}>
-          <div id="blog">
-            <div
-              dangerouslySetInnerHTML={{
-                __html: content,
-              }}
-            />
+          <div className="mb-4 flex w-full flex-col justify-start gap-8">
+            {blogPost.tag && (
+              <div className="text-xs opacity-90">{blogPost.tag}</div>
+            )}
+
+            <h1 className="text-3xl font-light">{blogPost.title}</h1>
+            <span className="text-xs opacity-70">
+              {formattedTimeStampToDate(new Date(blogPost.updatedAt))}
+            </span>
           </div>
+          <div
+            id="blog"
+            dangerouslySetInnerHTML={{
+              __html: content,
+            }}
+          />
         </Card>
       </div>
     </>

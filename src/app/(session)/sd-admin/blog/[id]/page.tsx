@@ -3,6 +3,7 @@ import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { Card } from "~/app/_components/Card";
 import CopyTextButton from "~/app/_components/CopyTextButton";
 import DropDownMenu from "~/app/_components/DropDown";
 import FormButton from "~/app/_components/FormButton";
@@ -12,6 +13,7 @@ import LoadingPageBody from "~/app/_components/LoadingPageBody";
 import { type Locale } from "~/config";
 import { api } from "~/trpc/server";
 import { getNewImageUrl } from "~/utils/_uploads";
+import { formatContent } from "~/utils/blog";
 import { BLOGTAGS } from "~/utils/types";
 import BlogEntryBody from "./BlogEntryBody";
 
@@ -38,10 +40,13 @@ export default async function BlogEntry({
     return <LoadingPageBody />;
   }
 
+  const content = await formatContent(blogPost.content);
+
   return (
     <>
-      <div className="flex h-full w-full flex-col items-start pb-4">
-        write a post
+      <div className="flex h-full w-full flex-col items-start gap-4 pb-4">
+        <h2 className="text-2xl font-bold">{blogPost.title}</h2>
+        <span className="text-sm opacity-60">{blogPost.id}</span>
         <BlogEntryBody post={blogPost} />
         <div className="flex w-full max-w-5xl flex-row items-start justify-center gap-4">
           <details className="mb-4 flex w-fit flex-row items-center">
@@ -137,7 +142,6 @@ export default async function BlogEntry({
                   content: blogPost.content + ` ![AltTextHere](${imageUrl})`,
                 });
               }}
-
             >
               <Input
                 label="image"
@@ -230,6 +234,17 @@ export default async function BlogEntry({
               </form>
             </DropDownMenu>
           </details>
+        </div>
+        <span>Preview</span>
+        <div className="flex w-full max-w-[600px] flex-col">
+          <Card isButton={false}>
+            <div
+              id="blog"
+              dangerouslySetInnerHTML={{
+                __html: content,
+              }}
+            />
+          </Card>
         </div>
       </div>
     </>

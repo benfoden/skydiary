@@ -63,6 +63,7 @@ export const authOptions = (emailDetails: EmailDetails): NextAuthOptions => {
           isSpecial: user.isSpecial,
           sukMdk: user.sukMdk,
           passwordSalt: user.passwordSalt,
+          newAnnouncementId: user.newAnnouncementId,
         },
         generateSessionToken: () => {
           return randomUUID?.() ?? randomBytes(32).toString("hex");

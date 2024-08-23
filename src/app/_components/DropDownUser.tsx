@@ -3,6 +3,7 @@ import {
   EnvelopeClosedIcon,
   ExitIcon,
   GearIcon,
+  IdCardIcon,
   LockClosedIcon,
   PersonIcon,
   PlusIcon,
@@ -73,6 +74,11 @@ export default async function DropDownUser() {
       <Link href={"/contact"}>
         <Button type="submit" variant="menuElement">
           {t("nav.contact")} <EnvelopeClosedIcon className="h-4 w-4" />
+        </Button>
+      </Link>
+      <Link href={"/blog"}>
+        <Button type="submit" variant="menuElement">
+          {t("nav.blog")} <IdCardIcon className="h-4 w-4" />
         </Button>
       </Link>
       <Link href={"/"}>

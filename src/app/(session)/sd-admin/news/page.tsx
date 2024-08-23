@@ -8,56 +8,60 @@ import { formatContent } from "~/utils/blog";
 import { sendBroadcastEmail, sendEmail } from "~/utils/email";
 
 export default async function NewsForm() {
-  const users = await api.user.getAllUsersAsAdmin();
-  const announcement = await api.blogPost.getLatestAnnouncement();
+  "use server";
 
   return (
     <div className="container mx-auto flex flex-col gap-4 p-4">
-      <h1 className="mb-4 text-2xl font-bold">Email</h1>
+      <h1 className="mb-4 text-2xl font-bold">Send updates</h1>
       <Card variant="form" isButton={false}>
         <form
           action={async (formData) => {
             "use server";
+            const users = await api.user.getAllUsersAsAdmin();
+            const announcement = await api.blogPost.getLatestAnnouncement();
             if (users && announcement) {
-              await Promise.all(
-                users.map(async (user: User) => {
-                  if (user.newAnnouncementId !== announcement?.id) return;
-                  await api.user.updateUserAsAdmin({
-                    targetUserId: user.id,
-                    newAnnouncementId: formData.get("announcementId") as string,
-                  });
-                  const to = user.email;
-                  const subject = announcement?.title;
-                  const body = await formatContent(announcement?.content ?? "");
-                  if (!to || !subject || !body) return;
+              const isAdminCheck = formData.get("isAdmin") === "on";
+              const newAnnouncementId = announcement?.id;
 
-                  await sendBroadcastEmail({
-                    to,
-                    from: "news@mail.skydiary.app",
-                    subject,
-                    textBody: subject,
-                    htmlBody: `<body style="font-family: sans-serif; background: linear-gradient(to bottom, #cce3f1, #F3F6F6) no-repeat; background-size: cover; color: #000; padding: 32px 16px; text-align: center;">
-                                ${body}
-                                <div style="margin-top: 32px; margin-bottom: 8px;">
-                                  <a href="{{{ pm:unsubscribe }}}" style="font-size: 10px;">unsubscribe from skydiary updates</a>
-                                </div>
-                              </body>`,
-                  }).catch((error) => {
-                    console.error("Email sending failed.", error);
-                    throw new Error(`Email sending failed.`);
-                  });
-                }),
-              );
+              try {
+                await Promise.all(
+                  users.map(async (user: User) => {
+                    if (isAdminCheck && !user.isAdmin) return;
+                    if (
+                      !user.isAdmin &&
+                      user.newAnnouncementId === newAnnouncementId
+                    ) {
+                      return;
+                    }
+                    await api.user.updateUserAsAdmin({
+                      targetUserId: user.id,
+                      newAnnouncementId,
+                    });
+                    const to = user.email;
+                    const subject = announcement?.title;
+                    const body = await formatContent(
+                      announcement?.content ?? "",
+                    );
+                    if (!to || !subject || !body) return;
+
+                    await sendBroadcastEmail({
+                      to,
+                      from: "news@mail.skydiary.app",
+                      subject,
+                      textBody: subject,
+                      htmlBodyString: announcement?.content,
+                    });
+                  }),
+                );
+              } catch (error) {
+                console.error("Error sending announcement and email", error);
+                throw new Error("Error sending announcement and email");
+              }
             }
           }}
           className="flex flex-col gap-4"
         >
-          <Input
-            label="Announcement ID"
-            name="announcementId"
-            type="text"
-            initialValue={announcement?.id}
-          />
+          <Input label="Only send to admins" name="isAdmin" type="checkbox" />
 
           <FormButton variant="submit" isSpecial>
             Publish and email announcement to all users
@@ -105,31 +109,28 @@ export default async function NewsForm() {
         <form
           action={async (formData) => {
             "use server";
+            const users = await api.user.getAllUsersAsAdmin();
+            const announcement = await api.blogPost.getLatestAnnouncement();
 
             const subject: string = formData.get("subject") as string;
-            const body: string = formData.get("body") as string;
             if (!users) return;
-            await Promise.all(
-              users.map(async (user: User) => {
-                if (!user.email) return;
-                const to = user.email;
-                await sendBroadcastEmail({
-                  to,
-                  from: "news@mail.skydiary.app",
-                  subject,
-                  textBody: subject,
-                  htmlBody: `<body style="font-family: sans-serif; background: linear-gradient(to bottom, #cce3f1, #F3F6F6) no-repeat; background-size: cover; color: #000; padding: 32px 16px; text-align: center;">
-                          ${body}
-                          <div style="margin-top: 32px; margin-bottom: 8px;">
-                            <a href="{{{ pm:unsubscribe }}}" style="font-size: 10px;">unsubscribe from skydiary updates</a>
-                          </div>
-                        </body>`,
-                }).catch((error) => {
-                  console.error("Email sending failed.", error);
-                  throw new Error(`Email sending failed.`);
-                });
-              }),
-            );
+            try {
+              await Promise.all(
+                users.map(async (user: User) => {
+                  if (!user.email) return;
+                  const to = user.email;
+                  await sendBroadcastEmail({
+                    to,
+                    from: "news@mail.skydiary.app",
+                    subject,
+                    textBody: subject,
+                    htmlBodyString: announcement?.content ?? "",
+                  });
+                }),
+              );
+            } catch (error) {
+              console.error("Error sending email", error);
+            }
           }}
           className="space-y-4"
         >
