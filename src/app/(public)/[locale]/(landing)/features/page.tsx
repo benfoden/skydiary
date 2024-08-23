@@ -38,7 +38,7 @@ export default async function Features() {
       title: t("features.feature2.title"),
       description: t.rich("features.feature2.description", {
         privacy: (chunks) => (
-          <Link className="text-link" href="/features/privacy">
+          <Link className="text-link" href="/privacy">
             {chunks}
           </Link>
         ),

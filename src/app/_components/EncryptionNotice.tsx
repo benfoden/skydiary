@@ -20,7 +20,7 @@ export default function EncryptionNotice() {
 
           <div>{t("encryptionNotice.or")}</div>
           <Link href="/settings#data-security">
-            <Button>{t("encryptionNotice.enterPassphrase")}</Button>
+            <Button>{t("encryptionNotice.enterPassword")}</Button>
           </Link>
         </div>
       </div>

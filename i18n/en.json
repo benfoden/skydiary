@@ -50,7 +50,7 @@
     },
     "feature2": {
       "title": "express yourself in privacy",
-      "description": "your data is encrypted in transit and at rest. we don't read, sell, or mine your personal data. you can set your own data password only you control. <privacy>read our privacy pledge</privacy>"
+      "description": "your data is encrypted in transit and at rest. we don't read, sell, or mine your personal data. you can set your own data password only you control. <privacy>read our privacy policy</privacy>"
     },
     "feature3": {
       "title": "create custom personas",
@@ -78,7 +78,7 @@
       "description": "your data is transmitted to our servers and stored with the strongest available modern encryption. you can enable your own encryption key you control for next level security."
     },
     "detail2": {
-      "title": "passcode keys",
+      "title": "one time passcodes",
       "description": "passwords are generally not a very secure way to protect your data. we send a new passcode that expires on every login. there's no password to steal and access your account."
     },
     "detail3": {
@@ -90,7 +90,7 @@
       "description": "we don't use third party providers for authentication. we aren't affiliated with large tech companies. our incentive is to help you, not shareholders."
     },
     "detail5": {
-      "title": "minimum legal compliance",
+      "title": "appropriate legal compliance only",
       "description": "we review any law enforcment requests and push back if it is too expansive or intrusive. we require valid legal process before producing information, with one exception: if there is an immediate threat of serious physical injury or worse. in this case, we still only share your email address and device."
     }
   },

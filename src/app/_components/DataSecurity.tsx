@@ -33,11 +33,11 @@ export default function DataSecurityCard({ user }: { user: User }) {
     password2: string,
   ) => {
     if (password !== password2) {
-      setMessage(t("dataSecurity.passphraseMismatch"));
+      setMessage(t("dataSecurity.passwordMismatch"));
       return;
     }
     if (password.length < 16) {
-      setMessage("dataSecurity.passphraseTooShort");
+      setMessage("dataSecurity.passwordTooShort");
       return;
     }
     setIsLoading(true);
@@ -82,7 +82,7 @@ export default function DataSecurityCard({ user }: { user: User }) {
     sukMdk?: string | null,
   ) => {
     if (password.length < 16) {
-      setMessage(t("dataSecurity.passphraseTooShort"));
+      setMessage(t("dataSecurity.passwordTooShort"));
       return;
     }
     if (!passwordSalt || !sukMdk) {
@@ -123,7 +123,7 @@ export default function DataSecurityCard({ user }: { user: User }) {
       setMessage("");
     } else if (password && password2) {
       if (password !== password2) {
-        setMessage(t("dataSecurity.passphraseMismatch"));
+        setMessage(t("dataSecurity.passwordMismatch"));
       } else {
         setMessage("");
       }
@@ -179,12 +179,12 @@ export default function DataSecurityCard({ user }: { user: User }) {
               >
                 <summary className="cursor-pointer font-bold">Caution</summary>
                 <div className="mt-2 flex flex-col gap-2">
-                  <p>{t("dataSecurity.passphraseCaution")}</p>
-                  <p>{t("dataSecurity.passphraseRecommendation")}</p>
+                  <p>{t("dataSecurity.passwordCaution")}</p>
+                  <p>{t("dataSecurity.passwordRecommendation")}</p>
                 </div>
               </details>
               <Input
-                label="data passphrase"
+                label="data password"
                 type="password"
                 value={password}
                 minLength={16}
@@ -192,7 +192,7 @@ export default function DataSecurityCard({ user }: { user: User }) {
                 required
               />
               <Input
-                label="confirm passphrase"
+                label="confirm password"
                 type="password"
                 value={password2}
                 minLength={16}
@@ -204,7 +204,7 @@ export default function DataSecurityCard({ user }: { user: User }) {
                   disabled={password.length < 16}
                   onClick={() => handleNewEncryptedUser(password, password2)}
                 >
-                  {t("dataSecurity.setPassphrase")}
+                  {t("dataSecurity.setPassword")}
                 </Button>
               </div>
             </div>
@@ -217,7 +217,7 @@ export default function DataSecurityCard({ user }: { user: User }) {
               {t("dataSecurity.unlockDataOnThisDevice")}
             </p>
             <Input
-              label="passphrase"
+              label="password"
               type="password"
               value={password}
               minLength={16}
