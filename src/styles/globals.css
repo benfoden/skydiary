@@ -73,6 +73,9 @@
         @apply ml-6 list-decimal;
       }
     }
+    img {
+      @apply w-full rounded-sm md:max-w-[768px];
+    }
   }
 
   .text-link {
