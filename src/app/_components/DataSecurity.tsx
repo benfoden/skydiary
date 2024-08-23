@@ -161,13 +161,17 @@ export default function DataSecurityCard({ user }: { user: User }) {
 
   return (
     <Card variant="form" isButton={false}>
-      <div className="flex w-full flex-col items-center gap-4">
+      <div className="flex w-full flex-col items-center gap-8">
         <h2>{t("dataSecurity.dataAccess")}</h2>
-        <Card isButton={false}>
-          This is a beta Feature. There is a risk of data loss.
-        </Card>
+
         <p className="text-sm opacity-60">
           {t("dataSecurity.dataAccessDescription")}
+        </p>
+        <p className="text-sm opacity-60">
+          <strong>Note:</strong> This is a BETA Feature. There is a risk of your
+          data becoming unrecoverable. <br />
+          <br />
+          Export your data first to be careful.
         </p>
         {message && <p className="text-red-600">{message}</p>}
         {!user?.sukMdk ? (
