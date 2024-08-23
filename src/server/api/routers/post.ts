@@ -301,12 +301,6 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
 
-      let mdk: CryptoKey | undefined;
-
-      if (input.mdkJwk) {
-        mdk = await importKeyFromJWK(input.mdkJwk);
-      }
-
       const post = await ctx.db.post.findFirst({
         where: {
           createdBy: { id: ctx.session.user.id },
@@ -319,7 +313,14 @@ export const postRouter = createTRPCRouter({
         },
         orderBy: { createdAt: "desc" },
       });
+
       if (!post) return;
+
+      let mdk: CryptoKey | undefined;
+
+      if (input.mdkJwk) {
+        mdk = await importKeyFromJWK(input.mdkJwk);
+      }
 
       if (post.content?.length >= 20 && post.contentIV && mdk) {
         post.content = await decryptTextWithIVAndKey({
@@ -371,6 +372,16 @@ export const postRouter = createTRPCRouter({
       const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
       const eightHoursAgo = new Date(Date.now() - 8 * 60 * 60 * 1000);
 
+      let userPersona = await ctx.db.persona.findFirst({
+        where: { createdById: ctx.session.user.id, isUser: true },
+      });
+      if (!userPersona) return;
+
+      // todo: uncomment this when we want to update personas more frequently
+      if (userPersona.updatedAt < eightHoursAgo) {
+        return;
+      }
+
       let mdk: CryptoKey | undefined;
 
       if (input.mdkJwk) {
@@ -397,16 +408,6 @@ export const postRouter = createTRPCRouter({
           iv: Uint8Array.from(Buffer.from(post.contentIV, "base64")),
           key: mdk,
         });
-      }
-
-      let userPersona = await ctx.db.persona.findFirst({
-        where: { createdById: ctx.session.user.id, isUser: true },
-      });
-      if (!userPersona) return;
-
-      // todo: uncomment this when we want to update personas more frequently
-      if (userPersona.updatedAt < eightHoursAgo) {
-        return;
       }
 
       if (userPersona.descriptionIV && mdk) {
