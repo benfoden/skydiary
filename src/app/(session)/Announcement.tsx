@@ -52,7 +52,7 @@ export default function Announcement({ blogPost }: { blogPost?: BlogPost }) {
           )}
           <button
             onClick={closeModal}
-            className="absolute right-2 top-4 m-2 rounded-full p-2 transition-all hover:bg-white/20"
+            className="absolute right-2 top-2 m-2 rounded-full p-2 transition-all hover:bg-white/20"
           >
             <Cross1Icon className="h-6 w-6" />
           </button>
