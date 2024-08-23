@@ -33,13 +33,14 @@ export default async function SessionLayout({ children }: Props) {
   api.post.tagAndMemorize({ mdkJwk }).catch((error) => {
     console.error("Error on tag and memorize posts", error);
   });
-  const newAnnouncement = await api.blogPost.getLatestAnnouncement();
+  const newAnnouncement = await api.blogPost.getLatest();
 
   return (
     <div className="container mx-auto min-h-screen">
-      {newAnnouncement?.id === session?.user.newAnnouncementId && (
-        <Announcement blogPost={newAnnouncement} />
-      )}
+      {newAnnouncement &&
+        newAnnouncement.id === session.user.newAnnouncementId && (
+          <Announcement blogPost={newAnnouncement} />
+        )}
       {children}
       <ManageMDK user={session?.user} />
     </div>

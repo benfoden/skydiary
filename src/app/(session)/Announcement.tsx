@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { type BlogPost } from "@prisma/client";
 import { Cross1Icon } from "@radix-ui/react-icons";
@@ -10,18 +10,27 @@ import { formatContent } from "~/utils/blog";
 export default function Announcement({ blogPost }: { blogPost?: BlogPost }) {
   const updateUser = api.user.updateUser.useMutation();
   const [isOpen, setIsOpen] = useState(true);
-
-  const content = formatContent(blogPost?.content ?? "").catch((error) => {
-    console.error("Error displaying content", error);
-    return "error. please reload or try again later";
-  });
+  const [content, setContent] = useState("");
 
   const closeModal = async () => {
+    setIsOpen(false);
     await updateUser.mutateAsync({
       newAnnouncementId: "",
     });
-    setIsOpen(false);
   };
+
+  useEffect(() => {
+    if (!blogPost) return;
+
+    formatContent(blogPost?.content ?? "")
+      .then((content) => {
+        setContent(content);
+      })
+      .catch((error) => {
+        console.error("Error displaying content", error);
+        setContent("error. please reload or try again later");
+      });
+  }, [blogPost]);
 
   if (!blogPost) return null;
   if (!isOpen) return null;
@@ -39,7 +48,7 @@ export default function Announcement({ blogPost }: { blogPost?: BlogPost }) {
           <Cross1Icon className="h-6 w-6" />
         </button>
       </div>
-      <div dangerouslySetInnerHTML={{ __html: content }} />
+      <div id="blog" dangerouslySetInnerHTML={{ __html: content }} />
     </Modal>
   );
 }
