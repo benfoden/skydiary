@@ -41,33 +41,35 @@ export default async function BlogIndex() {
   );
 
   return (
-    <div className="flex w-full flex-col items-start justify-start gap-2 sm:max-w-[768px]">
+    <div className="flex w-full flex-col items-start justify-start gap-2 md:max-w-[768px]">
       <h1 className="text-3xl font-light">blog</h1>
 
-      <ul className="mt-4 flex w-full flex-col gap-4">
+      <ul className="mt-4 flex w-full flex-col items-start gap-8">
         {blogPosts.map(
           ({ id, updatedAt, title, content, tag, description }) => (
             <li key={id}>
               <Link href={`/blog/${stringToUrlStub(title)}`}>
                 <Card>
-                  <div className="flex w-full flex-col items-start">
+                  <div className="flex w-full flex-col items-start gap-8">
+                    <div className="flex w-full flex-row justify-between">
+                      {tag && <div className="text-xs opacity-90">{tag}</div>}
+                      <span className="text-xs opacity-70">
+                        {formattedTimeStampToDate(new Date(updatedAt))}
+                      </span>
+                    </div>
                     <h2 className="text-4xl font-light">{title}</h2>
-                    <span className="text-xs opacity-70">
-                      {formattedTimeStampToDate(new Date(updatedAt))}
-                    </span>
+                    {description ? (
+                      description
+                    ) : content.length > 140 ? (
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: content.slice(0, 140) + "...",
+                        }}
+                      />
+                    ) : (
+                      <div dangerouslySetInnerHTML={{ __html: content }} />
+                    )}
                   </div>
-                  {description ? (
-                    description
-                  ) : content.length > 140 ? (
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: content.slice(0, 140) + "...",
-                      }}
-                    />
-                  ) : (
-                    <div dangerouslySetInnerHTML={{ __html: content }} />
-                  )}
-                  {tag && <div className="text-xs opacity-70">{tag}</div>}
                 </Card>
               </Link>
             </li>
