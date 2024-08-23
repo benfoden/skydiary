@@ -212,6 +212,13 @@ export default async function Secret({
               label="Stripe Product Id"
               defaultValue={targetUser?.stripeProductId ?? ""}
             />
+            <Input
+              id="newAnnouncementId"
+              name="newAnnouncementId"
+              label="New Announcement Id"
+              defaultValue={targetUser?.newAnnouncementId ?? ""}
+            />
+
             <FormButton variant="submit">Update user</FormButton>
           </form>
         </div>
@@ -243,6 +250,7 @@ export default async function Secret({
               <div>isAdmin: {user.isAdmin ? "true" : "false"}</div>
               <div>isSpecial: {user.isSpecial ? "true" : "false"}</div>
               <div>stripeProductId: {user.stripeProductId}</div>
+              <div>newAnnouncementId: {user.newAnnouncementId}</div>
               <form
                 action={async () => {
                   "use server";

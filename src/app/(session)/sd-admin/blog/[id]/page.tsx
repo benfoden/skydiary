@@ -114,7 +114,7 @@ export default async function BlogEntry({
               </ul>
             </div>
           </details>
-          <details className="flex w-full flex-row items-center">
+          <details open className="flex w-full flex-row items-center">
             <summary className="flex cursor-pointer items-center">
               <span>details</span>
               <svg
@@ -216,24 +216,24 @@ export default async function BlogEntry({
                 Save
               </FormButton>
             </form>
-            <DropDownMenu isEntryMenu>
-              <CopyTextButton text={blogPost.content} />
-              <form
-                action={async () => {
-                  "use server";
-                  try {
-                    await api.blogPost.delete({ postId: blogPost?.id });
-                  } catch (error) {
-                    throw new Error("Error deleting post");
-                  }
-                  revalidatePath("/sd-admin/blog");
-                  redirect("/sd-admin/blog");
-                }}
-              >
-                <FormDeleteButton />
-              </form>
-            </DropDownMenu>
           </details>
+          <DropDownMenu isEntryMenu>
+            <CopyTextButton text={blogPost.content} />
+            <form
+              action={async () => {
+                "use server";
+                try {
+                  await api.blogPost.delete({ postId: blogPost?.id });
+                } catch (error) {
+                  throw new Error("Error deleting post");
+                }
+                revalidatePath("/sd-admin/blog");
+                redirect("/sd-admin/blog");
+              }}
+            >
+              <FormDeleteButton />
+            </form>
+          </DropDownMenu>
         </div>
         <span>Preview</span>
         <div className="flex w-full max-w-[600px] flex-col">
