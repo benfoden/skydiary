@@ -65,11 +65,15 @@ export default async function Post({
 
       <div className="flex w-full max-w-[600px] flex-col">
         <Card isButton={false}>
-          <div className="mb-4 flex w-full flex-col justify-start">
+          <div className="mb-4 flex w-full flex-col justify-start gap-8">
+            {blogPost.tag && (
+              <div className="text-xs opacity-90">{blogPost.tag}</div>
+            )}
+
             <h1 className="text-3xl font-light">{blogPost.title}</h1>
-            <div className="font-base opacity-50">
-              {formattedTimeStampToDate(new Date(blogPost.createdAt))}
-            </div>
+            <span className="text-xs opacity-70">
+              {formattedTimeStampToDate(new Date(blogPost.updatedAt))}
+            </span>
           </div>
           <div
             id="blog"
