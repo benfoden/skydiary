@@ -74,7 +74,7 @@
       }
     }
     img {
-      @apply w-full rounded-sm md:max-w-[768px];
+      @apply w-full rounded-sm md:max-w-[768px] dark:opacity-60;
     }
   }
 
