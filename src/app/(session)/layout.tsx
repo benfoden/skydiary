@@ -22,7 +22,7 @@ const handleJobs = async ({
   mdkJwk?: JsonWebKey;
 }) => {
   try {
-    if (user.passwordSalt && user.sukMdk && mdkJwk && user.isAdmin) {
+    if (user.passwordSalt && user.sukMdk && mdkJwk) {
       await runBulkEncryption({ mdkJwk });
     }
 
