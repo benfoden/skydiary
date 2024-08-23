@@ -20,10 +20,12 @@ export default function Announcement({ blogPost }: { blogPost?: BlogPost }) {
   };
 
   useEffect(() => {
-    if (!blogPost) return;
+    if (!blogPost?.content) return;
+    console.log("blogPost", blogPost);
 
     formatContent(blogPost?.content ?? "")
       .then((content) => {
+        console.log("content", content);
         setContent(content);
       })
       .catch((error) => {
@@ -48,7 +50,9 @@ export default function Announcement({ blogPost }: { blogPost?: BlogPost }) {
           <Cross1Icon className="h-6 w-6" />
         </button>
       </div>
-      <div id="blog" dangerouslySetInnerHTML={{ __html: content }} />
+      <div id="blog">
+        <div dangerouslySetInnerHTML={{ __html: content }} />
+      </div>
     </Modal>
   );
 }

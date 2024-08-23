@@ -69,13 +69,12 @@ export default async function Post({
           </div>
         </div>
         <Card isButton={false}>
-          <div id="blog">
-            <div
-              dangerouslySetInnerHTML={{
-                __html: content,
-              }}
-            />
-          </div>
+          <div
+            id="blog"
+            dangerouslySetInnerHTML={{
+              __html: content,
+            }}
+          />
         </Card>
       </div>
     </>
