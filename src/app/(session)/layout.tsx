@@ -38,9 +38,8 @@ export default async function SessionLayout({ children }: Props) {
   return (
     <div className="container mx-auto min-h-screen">
       {newAnnouncement &&
-        newAnnouncement.id === session.user.newAnnouncementId && (
-          <Announcement blogPost={newAnnouncement} />
-        )}
+        newAnnouncement.id === session.user.newAnnouncementId &&
+        session.user.isAdmin && <Announcement blogPost={newAnnouncement} />}
       {children}
       <ManageMDK user={session?.user} />
     </div>
