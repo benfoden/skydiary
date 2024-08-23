@@ -61,8 +61,10 @@ export default async function PrivacyPledged() {
           <Card isButton={false} key={index}>
             <div className="flex w-full flex-col items-start justify-start gap-4">
               <li className="ml-8 list-decimal text-3xl font-extralight">
-                <h3 className="text-4xl font-extralight">{detail.title}</h3>
-                <p className="text-sm">{detail.description}</p>
+                <div className="flex w-full flex-col gap-4">
+                  <h3 className="text-4xl font-extralight">{detail.title}</h3>
+                  <p className="text-sm font-normal">{detail.description}</p>
+                </div>
               </li>
             </div>
           </Card>
