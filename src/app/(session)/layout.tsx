@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import { type User } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { type ReactNode } from "react";
 import { getServerAuthSession } from "~/server/auth";
@@ -13,6 +14,25 @@ type Props = {
   children: ReactNode;
 };
 
+const handleJobs = async ({
+  user,
+  mdkJwk,
+}: {
+  user: User;
+  mdkJwk?: JsonWebKey;
+}) => {
+  try {
+    if (user.passwordSalt && user.sukMdk && mdkJwk && user.isAdmin) {
+      await runBulkEncryption({ mdkJwk });
+    }
+
+    await api.post.tag({ mdkJwk });
+    await api.post.memorize({ mdkJwk });
+  } catch (error) {
+    console.error("Error on tag and memorize posts", error);
+  }
+};
+
 export default async function SessionLayout({ children }: Props) {
   const session = await getServerAuthSession();
   if (!session) {
@@ -21,26 +41,16 @@ export default async function SessionLayout({ children }: Props) {
   await api.user.resetDailyUsage();
 
   const mdkJwk = await useMdkJwk();
-  if (
-    session.user.passwordSalt &&
-    session.user.sukMdk &&
-    mdkJwk &&
-    session.user.isAdmin
-  ) {
-    await runBulkEncryption({ mdkJwk });
-  }
 
-  api.post.tagAndMemorize({ mdkJwk }).catch((error) => {
-    console.error("Error on tag and memorize posts", error);
-  });
+  await handleJobs({ user: session.user, mdkJwk });
+
   const newAnnouncement = await api.blogPost.getLatest();
 
   return (
     <div className="container mx-auto min-h-screen">
       {newAnnouncement &&
-        newAnnouncement.id === session.user.newAnnouncementId && (
-          <Announcement blogPost={newAnnouncement} />
-        )}
+        newAnnouncement.id === session.user.newAnnouncementId &&
+        session.user.isAdmin && <Announcement blogPost={newAnnouncement} />}
       {children}
       <ManageMDK user={session?.user} />
     </div>
