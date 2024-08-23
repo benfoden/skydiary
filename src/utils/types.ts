@@ -133,3 +133,6 @@ export type PersonaCreateValues = {
   isFavorite: boolean | undefined;
   isUser: boolean | undefined;
 };
+
+export type BlogTag = "announcement" | "how-to" | "incident" | "interesting";
+export const BLOGTAGS = ["announcement", "how-to", "incident", "interesting"];

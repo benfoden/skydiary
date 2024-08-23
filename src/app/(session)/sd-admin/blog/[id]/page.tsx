@@ -12,6 +12,7 @@ import LoadingPageBody from "~/app/_components/LoadingPageBody";
 import { type Locale } from "~/config";
 import { api } from "~/trpc/server";
 import { getNewImageUrl } from "~/utils/_uploads";
+import { BLOGTAGS } from "~/utils/types";
 import BlogEntryBody from "./BlogEntryBody";
 
 export async function generateMetadata({
@@ -136,6 +137,7 @@ export default async function BlogEntry({
                   content: blogPost.content + ` ![AltTextHere](${imageUrl})`,
                 });
               }}
+
             >
               <Input
                 label="image"
@@ -153,6 +155,7 @@ export default async function BlogEntry({
                 "use server";
                 try {
                   const tag = (formData.get("tag") as string) ?? "";
+                  if (!BLOGTAGS.includes(tag)) throw new Error("invalid tag");
                   const title = (formData.get("title") as string) ?? "";
                   const description =
                     (formData.get("description") as string) ?? "";
@@ -193,6 +196,12 @@ export default async function BlogEntry({
                 name="tag"
                 defaultValue={blogPost?.tag}
               />
+              <div className="flex flex-row gap-4 text-sm">
+                valid tags:
+                {BLOGTAGS.map((tag) => (
+                  <span key={tag}>{tag}</span>
+                ))}
+              </div>
               <Input
                 label="published"
                 name="publish"

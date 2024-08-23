@@ -20,20 +20,28 @@ export const userRouter = createTRPCRouter({
         stripeProductId: z.string().optional(),
         passwordSalt: z.string().optional(),
         sukMdk: z.string().optional(),
+        newAnnouncementId: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const updateData: Record<string, string | boolean | undefined> = {};
+      if (input.name !== undefined)
+        updateData.name = cleanStringForInput(input.name);
+      if (input.email !== undefined) updateData.email = input.email;
+      if (input.image !== undefined) updateData.image = input.image;
+      if (input.isWorkFocused !== undefined)
+        updateData.isWorkFocused = input.isWorkFocused;
+      if (input.stripeProductId !== undefined)
+        updateData.stripeProductId = input.stripeProductId;
+      if (input.passwordSalt !== undefined)
+        updateData.passwordSalt = input.passwordSalt;
+      if (input.sukMdk !== undefined) updateData.sukMdk = input.sukMdk;
+      if (input.newAnnouncementId !== undefined)
+        updateData.newAnnouncementId = input.newAnnouncementId;
+
       return ctx.db.user.update({
         where: { id: ctx?.session?.user?.id },
-        data: {
-          name: cleanStringForInput(input.name ?? ""),
-          email: input.email,
-          image: input.image,
-          isWorkFocused: input.isWorkFocused,
-          stripeProductId: input.stripeProductId,
-          passwordSalt: input.passwordSalt,
-          sukMdk: input.sukMdk,
-        },
+        data: updateData,
       });
     }),
   updateUserAsAdmin: protectedProcedure
@@ -44,20 +52,26 @@ export const userRouter = createTRPCRouter({
         isAdmin: z.boolean().optional(),
         isSpecial: z.boolean().optional(),
         stripeProductId: z.string().optional(),
+        newAnnouncementId: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       if (!ctx.session.user.isAdmin) {
         return error("Not authorized");
       }
+
+      const updateData: Record<string, string | boolean> = {};
+      if (input.email) updateData.email = input.email;
+      if (input.isAdmin !== undefined) updateData.isAdmin = input.isAdmin;
+      if (input.isSpecial !== undefined) updateData.isSpecial = input.isSpecial;
+      if (input.stripeProductId)
+        updateData.stripeProductId = input.stripeProductId;
+      if (input.newAnnouncementId)
+        updateData.newAnnouncementId = input.newAnnouncementId;
+
       return ctx.db.user.update({
         where: { id: input.targetUserId },
-        data: {
-          email: input.email,
-          isAdmin: input.isAdmin,
-          isSpecial: input.isSpecial,
-          stripeProductId: input.stripeProductId,
-        },
+        data: updateData,
       });
     }),
 
