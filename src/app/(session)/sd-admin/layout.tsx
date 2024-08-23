@@ -56,8 +56,8 @@ export default async function AdminLayout({
             <Link href={"/sd-admin/subscriptions"}>
               <Button variant="menuElement">subs</Button>
             </Link>
-            <Link href={"/sd-admin/email"}>
-              <Button variant="menuElement">email</Button>
+            <Link href={"/sd-admin/news"}>
+              <Button variant="menuElement">news</Button>
             </Link>
             <Link href={"/sd-admin/cron"}>
               <Button variant="menuElement">cron</Button>
@@ -95,8 +95,8 @@ export default async function AdminLayout({
               <Link href={"/sd-admin/subscriptions"}>
                 <Button variant="menuElement">subs</Button>
               </Link>
-              <Link href={"/sd-admin/email"}>
-                <Button variant="menuElement">email</Button>
+              <Link href={"/sd-admin/news"}>
+                <Button variant="menuElement">news</Button>
               </Link>
               <Link href={"/sd-admin/cron"}>
                 <Button variant="menuElement">cron</Button>

@@ -29,3 +29,31 @@ export const sendEmail = async ({
 
   return result;
 };
+
+export const sendBroadcastEmail = async ({
+  from,
+  to,
+  subject,
+  textBody,
+  htmlBody,
+  MessageStream = "broadcast",
+}: {
+  from: string;
+  to: string;
+  subject: string;
+  textBody: string;
+  htmlBody: string;
+  MessageStream?: string;
+}) => {
+  "use server";
+  const result = await postmarkClient.sendEmail({
+    From: from,
+    To: to,
+    Subject: subject,
+    TextBody: textBody,
+    HtmlBody: htmlBody,
+    MessageStream: MessageStream,
+  });
+
+  return result;
+};

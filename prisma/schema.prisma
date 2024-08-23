@@ -89,6 +89,7 @@ model User {
   passwordSalt             String?
   sukMdk                   String?
   isNoPeekingMode          Boolean        @default(false)
+  newAnnouncementId        String?
 }
 
 model Device {

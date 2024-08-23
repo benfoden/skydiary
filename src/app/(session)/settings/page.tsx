@@ -1,4 +1,3 @@
-
 import { type Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
@@ -184,9 +183,7 @@ export default async function Settings() {
           )}
 
           <div id="data-security">
-            {session?.user?.isAdmin && (
-              <DataSecurityCard user={session?.user} />
-            )}
+            <DataSecurityCard user={session?.user} />
           </div>
           <Card variant="form">
             <h2>{t("settings.language")}</h2>
