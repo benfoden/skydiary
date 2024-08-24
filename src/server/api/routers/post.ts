@@ -262,7 +262,7 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       if (!input?.mdkJwk) return;
       const posts = await ctx.db.post.findMany({
-        where: { createdBy: { id: ctx.session.user.id } },
+        where: { createdBy: { id: ctx.session.user.id }, contentIV: null },
         orderBy: { createdAt: "desc" },
         include: {
           tags: true,
