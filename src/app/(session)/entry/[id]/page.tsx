@@ -248,9 +248,7 @@ export default async function Entry({
                                           )?.name
                                         }
                                       </span>
-                                      <span style={{ wordBreak: "break-all" }}>
-                                        {comment.content}
-                                      </span>
+                                      <span>{comment.content}</span>
                                     </p>
                                     <div className="flex w-full flex-row items-center justify-between text-xs">
                                       {formattedTimeStampToDate(
