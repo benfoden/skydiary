@@ -290,7 +290,11 @@ export const personaRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       if (!input?.mdkJwk) return;
       const personas = await ctx.db.persona.findMany({
-        where: { createdBy: { id: ctx.session.user.id }, isUser: false },
+        where: {
+          createdBy: { id: ctx.session.user.id },
+          isUser: false,
+          nameIV: null,
+        },
         orderBy: { createdAt: "asc" },
       });
 
