@@ -7,6 +7,7 @@ import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
 import EncryptionNotice from "~/app/_components/EncryptionNotice";
+import Invite from "~/app/_components/Invite";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { SessionNav } from "~/app/_components/SessionNav";
 import Spinner from "~/app/_components/Spinner";
@@ -109,7 +110,10 @@ export default async function Home() {
       <SessionNav>
         <NavChevronLeft targetPathname={"/topics"} label={t("nav.topics")} />
         <h1>{t("nav.home")}</h1>
-        <DropDownUser />
+        <div className="flex flex-row items-center gap-2">
+          <Invite />
+          <DropDownUser />
+        </div>
       </SessionNav>
       <main className="flex min-h-screen flex-col items-start">
         <div className="container flex flex-col items-center justify-start px-2 pb-12">

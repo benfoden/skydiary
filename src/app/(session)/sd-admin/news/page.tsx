@@ -1,5 +1,6 @@
 "use server";
 import { type User } from "@prisma/client";
+import { redirect } from "next/navigation";
 import { Card } from "~/app/_components/Card";
 import FormButton from "~/app/_components/FormButton";
 import Input from "~/app/_components/Input";
@@ -82,12 +83,13 @@ export default async function NewsForm() {
               subject,
               textBody: "test",
               htmlBody: `<body style="font-family: sans-serif; background: linear-gradient(to bottom, #cce3f1, #F3F6F6) no-repeat; background-size: cover; color: #000; padding: 32px 16px; text-align: center;">
-                 ${body}
-                </body>`,
+                           ${body}
+                         </body>`,
             }).catch((error) => {
               console.error("Email sending failed.", error);
               throw new Error(`Email sending failed.`);
             });
+            return redirect("/sd-admin/news");
           }}
           className="space-y-4"
         >
@@ -96,12 +98,9 @@ export default async function NewsForm() {
             <Input label="To" name="to" type="email" required />
             <Input label="Subject" name="subject" type="text" required />
             <Input label="Body" name="body" type="text" required />
-            <button
-              type="submit"
-              className="rounded-md bg-blue-500 px-4 py-2 text-white"
-            >
+            <FormButton variant="submit" isSpecial>
               Send Email
-            </button>
+            </FormButton>
           </div>
         </form>
       </Card>
