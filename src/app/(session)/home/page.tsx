@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
+import EmailReferralForm from "~/app/_components/EmailReferralForm";
 import EncryptionNotice from "~/app/_components/EncryptionNotice";
 import Invite from "~/app/_components/Invite";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
@@ -87,7 +88,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams: URLSearchParams }) {
   const { user } = await getServerAuthSession();
   const mdkJwk = await useMdkJwk();
 
@@ -111,7 +112,9 @@ export default async function Home() {
         <NavChevronLeft targetPathname={"/topics"} label={t("nav.topics")} />
         <h1>{t("nav.home")}</h1>
         <div className="flex flex-row items-center gap-2">
-          <Invite />
+          <Invite status={searchParams.get("st") ?? ""}>
+            <EmailReferralForm />
+          </Invite>
           <DropDownUser />
         </div>
       </SessionNav>
