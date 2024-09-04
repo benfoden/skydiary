@@ -26,7 +26,7 @@ export default function DataSecurityCard({ user }: { user: User }) {
   const [message, setMessage] = useState("");
   const [isLocalMdk, setIsLocalMdk] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const updateUser = api.user.updateUser.useMutation();
+  const updateUser = api.user.update.useMutation();
 
   const handleNewEncryptedUser = async (
     password: string,

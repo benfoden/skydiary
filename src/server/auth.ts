@@ -31,9 +31,7 @@ declare module "next-auth" {
   }
   //who cares
   interface User extends PrismaUser {
-    stripeCustomerId?: string;
-    stripeSubscriptionId?: string;
-    stripeProductId?: string;
+    referredToEmails?: string;
   }
 }
 
@@ -64,6 +62,7 @@ export const authOptions = (emailDetails: EmailDetails): NextAuthOptions => {
           sukMdk: user.sukMdk,
           passwordSalt: user.passwordSalt,
           newAnnouncementId: user.newAnnouncementId,
+          referredToEmails: user.referredToEmails,
         },
         generateSessionToken: () => {
           return randomUUID?.() ?? randomBytes(32).toString("hex");

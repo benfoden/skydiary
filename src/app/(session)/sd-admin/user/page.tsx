@@ -54,7 +54,7 @@ export default async function Secret({
 
               if (name && userPersona) {
                 try {
-                  await api.user.updateUser({ name });
+                  await api.user.update({ name });
                   await api.persona.update({
                     mdkJwk,
                     personaId: userPersona?.id,

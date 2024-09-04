@@ -10,7 +10,7 @@ import {
 import { cleanStringForInput } from "~/utils/text";
 
 export const userRouter = createTRPCRouter({
-  updateUser: protectedProcedure
+  update: protectedProcedure
     .input(
       z.object({
         name: z.string().optional(),
@@ -21,6 +21,7 @@ export const userRouter = createTRPCRouter({
         passwordSalt: z.string().optional(),
         sukMdk: z.string().optional(),
         newAnnouncementId: z.string().optional(),
+        referredToEmails: z.array(z.string().optional()).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -38,6 +39,8 @@ export const userRouter = createTRPCRouter({
       if (input.sukMdk !== undefined) updateData.sukMdk = input.sukMdk;
       if (input.newAnnouncementId !== undefined)
         updateData.newAnnouncementId = input.newAnnouncementId;
+      if (input.referredToEmails !== undefined)
+        updateData.referredToEmails = JSON.stringify(input.referredToEmails);
 
       return ctx.db.user.update({
         where: { id: ctx?.session?.user?.id },
@@ -53,6 +56,7 @@ export const userRouter = createTRPCRouter({
         isSpecial: z.boolean().optional(),
         stripeProductId: z.string().optional(),
         newAnnouncementId: z.string().optional(),
+        referredToEmails: z.array(z.string().optional()).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -68,6 +72,8 @@ export const userRouter = createTRPCRouter({
         updateData.stripeProductId = input.stripeProductId;
       if (input.newAnnouncementId)
         updateData.newAnnouncementId = input.newAnnouncementId;
+      if (input.referredToEmails !== undefined)
+        updateData.referredToEmails = JSON.stringify(input.referredToEmails);
 
       return ctx.db.user.update({
         where: { id: input.targetUserId },

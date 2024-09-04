@@ -6,7 +6,9 @@ import { Suspense } from "react";
 import Button from "~/app/_components/Button";
 import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
+import EmailReferralForm from "~/app/_components/EmailReferralForm";
 import EncryptionNotice from "~/app/_components/EncryptionNotice";
+import Invite from "~/app/_components/Invite";
 import { NavChevronLeft } from "~/app/_components/NavChevronLeft";
 import { SessionNav } from "~/app/_components/SessionNav";
 import Spinner from "~/app/_components/Spinner";
@@ -89,11 +91,14 @@ export async function generateMetadata({
 export default async function Home() {
   const { user } = await getServerAuthSession();
   const mdkJwk = await useMdkJwk();
-
   const t = await getTranslations();
   const locale = (await getUserLocale()) as Locale;
   const userPosts = await api.post.getByUser({ mdkJwk });
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const userCanReferFriends =
+    !user?.referredToEmails ||
+    (JSON.parse(user.referredToEmails) as string[])?.length < 2;
+
   const today = new Date().toLocaleDateString("en-US", {
     timeZone: userTimezone,
   });
@@ -103,13 +108,19 @@ export default async function Home() {
   ).toLocaleDateString("en-US", {
     timeZone: userTimezone,
   });
-
   return (
     <>
       <SessionNav>
         <NavChevronLeft targetPathname={"/topics"} label={t("nav.topics")} />
         <h1>{t("nav.home")}</h1>
-        <DropDownUser />
+        <div className="flex flex-row items-center gap-2">
+          {userCanReferFriends && (
+            <Invite>
+              <EmailReferralForm />
+            </Invite>
+          )}
+          <DropDownUser />
+        </div>
       </SessionNav>
       <main className="flex min-h-screen flex-col items-start">
         <div className="container flex flex-col items-center justify-start px-2 pb-12">

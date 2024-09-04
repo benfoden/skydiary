@@ -90,7 +90,9 @@ model User {
   sukMdk                   String?
   isNoPeekingMode          Boolean        @default(false)
   newAnnouncementId        String?
+  referredToEmails         String?
 }
+
 
 model Device {
   id         String   @id @default(cuid())
