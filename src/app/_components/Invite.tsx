@@ -5,16 +5,14 @@ import Button from "./Button";
 import Modal from "./Modal";
 
 export default function InviteModal({
-  status,
   children,
 }: {
-  status?: string;
   children: React.ReactNode;
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
   //todo: show done message if st = 1 or 2
-  return !isOpen && status !== "2" ? (
+  return !isOpen ? (
     <Button variant="chip" isSpecial onClick={() => setIsOpen(true)}>
       tell up to 2 friends
     </Button>

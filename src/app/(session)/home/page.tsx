@@ -88,18 +88,17 @@ export async function generateMetadata({
   };
 }
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: { st?: string };
-}) {
+export default async function Home() {
   const { user } = await getServerAuthSession();
   const mdkJwk = await useMdkJwk();
-  const inviteStatus = searchParams?.st;
   const t = await getTranslations();
   const locale = (await getUserLocale()) as Locale;
   const userPosts = await api.post.getByUser({ mdkJwk });
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const userCanReferFriends =
+    !user?.referredToEmails ||
+    (JSON.parse(user.referredToEmails) as string[])?.length < 2;
+
   const today = new Date().toLocaleDateString("en-US", {
     timeZone: userTimezone,
   });
@@ -115,9 +114,11 @@ export default async function Home({
         <NavChevronLeft targetPathname={"/topics"} label={t("nav.topics")} />
         <h1>{t("nav.home")}</h1>
         <div className="flex flex-row items-center gap-2">
-          <Invite status={inviteStatus ?? ""}>
-            <EmailReferralForm />
-          </Invite>
+          {userCanReferFriends && (
+            <Invite>
+              <EmailReferralForm />
+            </Invite>
+          )}
           <DropDownUser />
         </div>
       </SessionNav>
