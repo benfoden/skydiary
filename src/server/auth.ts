@@ -31,9 +31,7 @@ declare module "next-auth" {
   }
   //who cares
   interface User extends PrismaUser {
-    stripeCustomerId?: string;
-    stripeSubscriptionId?: string;
-    stripeProductId?: string;
+    referredToEmails?: string;
   }
 }
 

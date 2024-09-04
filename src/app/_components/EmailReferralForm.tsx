@@ -11,8 +11,9 @@ export default async function EmailReferralForm() {
   const userName = session?.user?.name ?? "a friend";
   const referredToEmails = session?.user?.referredToEmails ?? "";
 
-  const referredEmailsArray: string[] =
-    (JSON.parse(referredToEmails) as string[]) ?? [];
+  const referredEmailsArray: string[] = referredToEmails
+    ? (JSON.parse(referredToEmails) as string[])
+    : [];
 
   return (
     <form
@@ -54,8 +55,15 @@ export default async function EmailReferralForm() {
       }}
       className="space-y-4"
     >
-      <div className="flex w-full flex-col gap-8 md:max-w-96">
+      <div className="flex w-full flex-col gap-8 md:max-w-72">
         <h2 className="text-2xl font-light">invite up to two friends</h2>
+        <div className="flex flex-col gap-4 text-xs opacity-70">
+          <p>
+            we&apos;ll send a simple and short email inviting your friends to
+            try skydiary for free.{" "}
+          </p>
+          <p>in the future you&apos;ll both get a gift. thank you!</p>
+        </div>
         <Input
           label="your first name"
           name="firstName"
@@ -65,20 +73,14 @@ export default async function EmailReferralForm() {
         />
         {(!referredEmailsArray ||
           (referredEmailsArray && referredEmailsArray.length < 2)) && (
-          <Input label="friend's email #1" name="to" type="email" required />
+          <Input label="your friend's email" name="to" type="email" required />
         )}
-        {!referredEmailsArray && (
-          <Input label="friend's email #2" name="to2" type="email" />
+        {!referredEmailsArray?.length && (
+          <Input label="another friend's email" name="to2" type="email" />
         )}
         <FormButton variant="submit" isSpecial>
-          Invite
+          send invite
         </FormButton>
-        <div className="flex flex-col gap-2 text-xs opacity-70">
-          <p>we&apos;ll send your friends a link to try skydiary.</p>
-          <p className="font-medium">
-            in the future you&apos;ll both get a gift from us as a thank you!
-          </p>
-        </div>
       </div>
     </form>
   );

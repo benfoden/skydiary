@@ -20,8 +20,8 @@ export default function InviteModal({
     </Button>
   ) : (
     <Modal>
-      <div className="flex w-full flex-row items-end justify-end">
-        <Button variant="chip" onClick={() => setIsOpen(false)}>
+      <div className="mr-[-24px] flex w-full flex-row items-end justify-end">
+        <Button variant="text" onClick={() => setIsOpen(false)}>
           <Cross1Icon className="h-4 w-4" />
         </Button>
       </div>
