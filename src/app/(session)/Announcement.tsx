@@ -22,11 +22,9 @@ export default function Announcement({ blogPost }: { blogPost?: BlogPost }) {
 
   useEffect(() => {
     if (!blogPost?.content) return;
-    console.log("blogPost", blogPost);
 
     formatContent(blogPost?.content ?? "")
       .then((content) => {
-        console.log("content", content);
         setContent(content);
       })
       .catch((error) => {
