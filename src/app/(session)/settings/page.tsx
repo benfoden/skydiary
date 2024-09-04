@@ -76,7 +76,7 @@ export default async function Settings() {
 
                 try {
                   if (name) {
-                    await api.user.updateUser({ name, image });
+                    await api.user.update({ name, image });
                     if (!userPersona) {
                       await api.persona.create({
                         name,

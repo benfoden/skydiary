@@ -51,7 +51,7 @@ const NewUserPage: React.FC = async () => {
 
               if (name) {
                 try {
-                  await api.user.updateUser({
+                  await api.user.update({
                     name,
                     isWorkFocused,
                     stripeProductId: env.PRODUCT_ID_LITE,

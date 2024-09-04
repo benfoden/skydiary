@@ -9,7 +9,7 @@ import { formatContent } from "~/utils/blog";
 import { formattedTimeStampToDate } from "~/utils/text";
 
 export default function Announcement({ blogPost }: { blogPost?: BlogPost }) {
-  const updateUser = api.user.updateUser.useMutation();
+  const updateUser = api.user.update.useMutation();
   const [isOpen, setIsOpen] = useState(true);
   const [content, setContent] = useState("");
 

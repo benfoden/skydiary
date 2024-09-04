@@ -88,10 +88,14 @@ export async function generateMetadata({
   };
 }
 
-export default async function Home({ searchParams }: { searchParams: URLSearchParams }) {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: { st?: string };
+}) {
   const { user } = await getServerAuthSession();
   const mdkJwk = await useMdkJwk();
-
+  const inviteStatus = searchParams?.st;
   const t = await getTranslations();
   const locale = (await getUserLocale()) as Locale;
   const userPosts = await api.post.getByUser({ mdkJwk });
@@ -105,14 +109,13 @@ export default async function Home({ searchParams }: { searchParams: URLSearchPa
   ).toLocaleDateString("en-US", {
     timeZone: userTimezone,
   });
-
   return (
     <>
       <SessionNav>
         <NavChevronLeft targetPathname={"/topics"} label={t("nav.topics")} />
         <h1>{t("nav.home")}</h1>
         <div className="flex flex-row items-center gap-2">
-          <Invite status={searchParams.get("st") ?? ""}>
+          <Invite status={inviteStatus ?? ""}>
             <EmailReferralForm />
           </Invite>
           <DropDownUser />

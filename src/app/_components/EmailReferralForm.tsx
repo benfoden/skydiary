@@ -1,6 +1,7 @@
 "use server";
 import { redirect } from "next/navigation";
 import { getServerAuthSession } from "~/server/auth";
+import { api } from "~/trpc/server";
 import { sendEmail } from "~/utils/email";
 import FormButton from "./FormButton";
 import Input from "./Input";
@@ -8,6 +9,11 @@ import Input from "./Input";
 export default async function EmailReferralForm() {
   const session = await getServerAuthSession();
   const userName = session?.user?.name ?? "a friend";
+  const referredToEmails = session?.user?.referredToEmails ?? "";
+
+  const referredEmailsArray: string[] =
+    (JSON.parse(referredToEmails) as string[]) ?? [];
+
   return (
     <form
       action={async (formData) => {
@@ -17,6 +23,7 @@ export default async function EmailReferralForm() {
 
         const firstName: string = formData.get("firstName") as string;
         const sendTos = [to, to2].filter((email) => email !== "");
+
         if (sendTos.length === 0) return;
         await Promise.all(
           sendTos.map(async (email) => {
@@ -41,10 +48,9 @@ export default async function EmailReferralForm() {
             });
           }),
         );
-        if (sendTos.length === 1) {
-          return redirect("/home?st=1");
-        }
-        return redirect("/home?st=2");
+        await api.user.update({ referredToEmails: sendTos });
+
+        return redirect("/home");
       }}
       className="space-y-4"
     >
@@ -57,15 +63,20 @@ export default async function EmailReferralForm() {
           initialValue={userName ?? ""}
           required
         />
-        <Input label="friend's email #1" name="to" type="email" required />
-        <Input label="friend's email #2" name="to2" type="email" />
+        {(!referredEmailsArray ||
+          (referredEmailsArray && referredEmailsArray.length < 2)) && (
+          <Input label="friend's email #1" name="to" type="email" required />
+        )}
+        {!referredEmailsArray && (
+          <Input label="friend's email #2" name="to2" type="email" />
+        )}
         <FormButton variant="submit" isSpecial>
           Invite
         </FormButton>
         <div className="flex flex-col gap-2 text-xs opacity-70">
           <p>we&apos;ll send your friends a link to try skydiary.</p>
           <p className="font-medium">
-            in the future you&apos;ll both get a gift as a thank you from us!
+            in the future you&apos;ll both get a gift from us as a thank you!
           </p>
         </div>
       </div>
