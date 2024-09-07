@@ -91,6 +91,7 @@ model User {
   isNoPeekingMode          Boolean        @default(false)
   newAnnouncementId        String?
   referredToEmails         String?
+  prompts                  Prompt[]
 }
 
 
@@ -219,20 +220,12 @@ model BlogPost {
 }
 
 
-// model Account {
-//   id                String  @id @default(cuid())
-//   userId            String
-//   type              String
-//   provider          String
-//   providerAccountId String
-//   refresh_token     String?
-//   access_token      String?
-//   expires_at        Int?
-//   token_type        String?
-//   scope             String?
-//   id_token          String?
-//   session_state     String?
-//   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-//   @@unique([provider, providerAccountId])
-// }
+model Prompt {
+  id          String   @id @default(cuid())
+  content     String
+  tag         String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById String?
+  createdBy   User?     @relation(fields: [createdById], references: [id])
+}
