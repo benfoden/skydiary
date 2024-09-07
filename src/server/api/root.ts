@@ -7,6 +7,7 @@ import { eventRouter } from "./routers/event";
 import { personaRouter } from "./routers/persona";
 import { stripeRouter } from "./routers/stripe";
 import { userRouter } from "./routers/user";
+import { userPromptRouter } from "./routers/userPrompt";
 
 /**
  * This is the primary router for your server.
@@ -22,6 +23,7 @@ export const appRouter = createTRPCRouter({
   stripe: stripeRouter,
   blogPost: blogPostRouter,
   event: eventRouter,
+  userPrompt: userPromptRouter,
 });
 
 // export type definition of API

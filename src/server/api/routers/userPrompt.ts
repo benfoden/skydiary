@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
-export const promptRouter = createTRPCRouter({
+export const userPromptRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
@@ -26,27 +26,31 @@ export const promptRouter = createTRPCRouter({
       orderBy: { createdAt: "desc" },
     });
   }),
-
   getByUserId: protectedProcedure.query(({ ctx }) => {
     return ctx.db.prompt.findMany({
-      where: { user: { some: { id: ctx.session.user.id } } },
+      where: { createdById: ctx.session.user.id },
       orderBy: { createdAt: "desc" },
     });
   }),
 
   getByTag: protectedProcedure
-    .input(z.object({ postId: z.string() }))
+    .input(z.object({ tagId: z.string() }))
     .query(({ ctx, input }) => {
       return ctx.db.prompt.findMany({
-        where: { post: { some: { id: input.postId } } },
+        where: { tagId: { some: { id: input.postId } } },
       });
     }),
 
   delete: protectedProcedure
-    .input(z.object({ tagId: z.string() }))
+    .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      const prompt = await ctx.db.prompt.findFirst({ where: { id: input.id } });
+
+      if (ctx.session.user.id !== prompt?.createdById) {
+        throw new Error("You are not the owner of this prompt");
+      }
       return ctx.db.prompt.delete({
-        where: { id: input.tagId },
+        where: { id: input.id },
       });
     }),
 });
