@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { type User as PrismaUser } from "@prisma/client";
+import { type User as PrismaUser, type Prompt } from "@prisma/client";
 import { randomBytes, randomInt, randomUUID } from "crypto";
 import {
   getServerSession,
@@ -32,6 +32,7 @@ declare module "next-auth" {
   //who cares
   interface User extends PrismaUser {
     referredToEmails?: string;
+    prompts?: Prompt[];
   }
 }
 
@@ -63,6 +64,7 @@ export const authOptions = (emailDetails: EmailDetails): NextAuthOptions => {
           passwordSalt: user.passwordSalt,
           newAnnouncementId: user.newAnnouncementId,
           referredToEmails: user.referredToEmails,
+          prompts: user.prompts,
         },
         generateSessionToken: () => {
           return randomUUID?.() ?? randomBytes(32).toString("hex");

@@ -228,3 +228,4 @@ model Prompt {
   createdById String?
   createdBy   User?    @relation(fields: [createdById], references: [id])
 }
+
