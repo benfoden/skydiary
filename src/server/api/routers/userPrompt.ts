@@ -7,7 +7,7 @@ export const userPromptRouter = createTRPCRouter({
     .input(
       z.object({
         content: z.string(),
-        tag: z.string().optional(),
+        tagId: z.string().optional(),
         createdById: z.string().optional(),
       }),
     )
@@ -15,7 +15,7 @@ export const userPromptRouter = createTRPCRouter({
       return ctx.db.prompt.create({
         data: {
           content: input.content,
-          tag: input.tag,
+          tagId: input.tagId,
           createdById: input.createdById,
         },
       });
@@ -33,11 +33,35 @@ export const userPromptRouter = createTRPCRouter({
     });
   }),
 
-  getByTag: protectedProcedure
+  getByTagId: protectedProcedure
     .input(z.object({ tagId: z.string() }))
     .query(({ ctx, input }) => {
       return ctx.db.prompt.findMany({
-        where: { tagId: { some: { id: input.postId } } },
+        where: { tagId: input.tagId },
+      });
+    }),
+
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        content: z.string(),
+        tagId: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const prompt = await ctx.db.prompt.findFirst({ where: { id: input.id } });
+
+      if (ctx.session.user.id !== prompt?.createdById) {
+        throw new Error("You are not the owner of this prompt");
+      }
+
+      return ctx.db.prompt.update({
+        where: { id: input.id },
+        data: {
+          content: input.content,
+          tagId: input.tagId,
+        },
       });
     }),
 
