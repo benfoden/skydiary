@@ -158,7 +158,8 @@
     "premium": "premium",
     "topPage": "top page",
     "userHome": "your homepage",
-    "blog": "blog"
+    "blog": "blog",
+    "prompts": "prompts"
   },
   "new-user": {
     "title": "welcome to skydiary",

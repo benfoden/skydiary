@@ -70,7 +70,10 @@ export const userPromptRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const prompt = await ctx.db.prompt.findFirst({ where: { id: input.id } });
 
-      if (ctx.session.user.id !== prompt?.createdById) {
+      if (
+        !ctx.session.user.isAdmin &&
+        ctx.session.user.id !== prompt?.createdById
+      ) {
         throw new Error("You are not the owner of this prompt");
       }
       return ctx.db.prompt.delete({
