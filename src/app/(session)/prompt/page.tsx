@@ -13,10 +13,10 @@ import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 
 export default async function Prompts() {
-  const userGenPrompts = await api.userPrompt.getByUserId();
-  const adminPrompts = await api.userPrompt.getAll();
   const session = await getServerAuthSession();
   const { user } = session;
+  const userGenPrompts = await api.userPrompt.getByUserId();
+  const globalPrompts = await api.userPrompt.getAllGlobal();
 
   const t = await getTranslations();
   return (
@@ -41,16 +41,10 @@ export default async function Prompts() {
               }
 
               try {
-                if (user?.isAdmin) {
-                  await api.userPrompt.create({
-                    content,
-                  });
-                } else {
-                  await api.userPrompt.create({
-                    content,
-                    createdById: user?.id,
-                  });
-                }
+                await api.userPrompt.create({
+                  content,
+                  createdById: user?.id,
+                });
                 revalidatePath("/prompt");
                 redirect("/prompt");
               } catch (error) {
@@ -64,6 +58,36 @@ export default async function Prompts() {
               Save
             </FormButton>
           </form>
+          {user?.isAdmin && (
+            <form
+              action={async (formData) => {
+                "use server";
+                const content = formData.get("content") as string;
+
+                if (!content) {
+                  return;
+                }
+
+                try {
+                  await api.userPrompt.create({
+                    content,
+                    isGlobal: true,
+                  });
+
+                  revalidatePath("/prompt");
+                  redirect("/prompt");
+                } catch (error) {
+                  throw new Error("Error creating prompt");
+                }
+              }}
+              method="post"
+            >
+              <Input label="Webmaster: Write a new prompt" name="content" />
+              <FormButton variant="submit" isSpecial>
+                Save
+              </FormButton>
+            </form>
+          )}
           {userGenPrompts?.length > 0 && (
             <div className="flex flex-col gap-4">
               all your prompts
@@ -94,7 +118,7 @@ export default async function Prompts() {
           )}
           <div className="flex flex-col gap-4">
             all skydiary prompts
-            {adminPrompts?.map((prompt) => (
+            {globalPrompts?.map((prompt) => (
               <div
                 key={prompt.id}
                 className="flex w-full flex-row items-center justify-between gap-2"
@@ -103,7 +127,33 @@ export default async function Prompts() {
                   <div className="flex w-full flex-row items-center justify-between gap-2">
                     <p className="w-full">{prompt.content}</p>
 
-                    {user?.isAdmin && (
+                    <form
+                      action={async () => {
+                        "use server";
+
+                        try {
+                          await api.userPrompt.create({
+                            content: prompt.content,
+                            createdById: user?.id,
+                            isGlobal: false,
+                          });
+                          revalidatePath(`/prompt`);
+                          redirect("/prompt");
+                        } catch (error) {
+                          throw new Error("Error creating prompt");
+                        }
+                      }}
+                    >
+                      <FormButton>
+                        <PlusIcon className="h-6 w-6" />
+                      </FormButton>
+                    </form>
+                  </div>
+                </Card>
+                {user?.isAdmin && (
+                  <Card variant="comment" isButton={false}>
+                    <div className="flex w-full flex-row items-center justify-between gap-2">
+                      Webmaster
                       <form
                         action={async () => {
                           "use server";
@@ -121,28 +171,9 @@ export default async function Prompts() {
                       >
                         <FormDeleteButton hasText={false} />
                       </form>
-                    )}
-                  </div>
-                </Card>
-                <form
-                  action={async () => {
-                    "use server";
-
-                    try {
-                      await api.userPrompt.create({
-                        content: prompt.content,
-                      });
-                      revalidatePath(`/prompt`);
-                      redirect("/prompt");
-                    } catch (error) {
-                      throw new Error("Error creating prompt");
-                    }
-                  }}
-                >
-                  <FormButton>
-                    <PlusIcon className="h-6 w-6" /> <p>add to your prompts</p>
-                  </FormButton>
-                </form>
+                    </div>
+                  </Card>
+                )}
               </div>
             ))}
           </div>

@@ -9,20 +9,27 @@ export const userPromptRouter = createTRPCRouter({
         content: z.string(),
         tagId: z.string().optional(),
         createdById: z.string().optional(),
+        isGlobal: z.boolean().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      if (!ctx.session.user.isAdmin && input.isGlobal) {
+        throw new Error("You are not an admin");
+      }
+
       return ctx.db.prompt.create({
         data: {
           content: input.content,
           tagId: input.tagId,
           createdById: input.createdById,
+          isGlobal: input.isGlobal,
         },
       });
     }),
 
-  getAll: protectedProcedure.query(({ ctx }) => {
+  getAllGlobal: protectedProcedure.query(({ ctx }) => {
     return ctx.db.prompt.findMany({
+      where: { isGlobal: true },
       orderBy: { createdAt: "desc" },
     });
   }),
