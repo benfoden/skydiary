@@ -89,6 +89,25 @@ export default async function Entry({
           ) : (
             <>
               <UserPrompt prompts={prompts} />
+              <div className="flex w-full max-w-5xl flex-row items-center justify-end gap-2">
+                <DropDownMenu isEntryMenu>
+                  <CopyTextButton text={post.content} />
+                  <form
+                    action={async () => {
+                      "use server";
+                      try {
+                        await api.post.delete({ postId: post?.id });
+                      } catch (error) {
+                        throw new Error("Error deleting post");
+                      }
+                      revalidatePath("/home");
+                      redirect("/home");
+                    }}
+                  >
+                    <FormDeleteButton />
+                  </form>
+                </DropDownMenu>
+              </div>
               <EntryBody post={post} />
               <div className="flex w-full max-w-5xl flex-col items-center gap-4">
                 <div className="flex w-full flex-row items-center justify-center gap-4">
@@ -107,25 +126,6 @@ export default async function Entry({
                       ))}
                     </ul>
                   )}
-                  <div className="flex w-fit flex-row items-center justify-end gap-2">
-                    <DropDownMenu isEntryMenu>
-                      <CopyTextButton text={post.content} />
-                      <form
-                        action={async () => {
-                          "use server";
-                          try {
-                            await api.post.delete({ postId: post?.id });
-                          } catch (error) {
-                            throw new Error("Error deleting post");
-                          }
-                          revalidatePath("/home");
-                          redirect("/home");
-                        }}
-                      >
-                        <FormDeleteButton />
-                      </form>
-                    </DropDownMenu>
-                  </div>
                 </div>
                 <div className="flex h-full w-full flex-col items-center gap-4 pb-4">
                   <div className="flex w-full flex-row items-start justify-center">

@@ -1,6 +1,5 @@
 import { PlusIcon } from "@radix-ui/react-icons";
 import { getTranslations } from "next-intl/server";
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
@@ -45,7 +44,6 @@ export default async function Prompts() {
                   content,
                   createdById: user?.id,
                 });
-                revalidatePath("/prompt");
                 redirect("/prompt");
               } catch (error) {
                 throw new Error("Error creating prompt");
@@ -74,7 +72,6 @@ export default async function Prompts() {
                     isGlobal: true,
                   });
 
-                  revalidatePath("/prompt");
                   redirect("/prompt");
                 } catch (error) {
                   throw new Error("Error creating prompt");
@@ -102,7 +99,6 @@ export default async function Prompts() {
                           await api.userPrompt.delete({
                             id: prompt.id,
                           });
-                          revalidatePath("/prompt");
                           redirect(`/prompt`);
                         } catch (error) {
                           throw new Error("Error deleting prompt");
@@ -137,7 +133,6 @@ export default async function Prompts() {
                             createdById: user?.id,
                             isGlobal: false,
                           });
-                          revalidatePath(`/prompt`);
                           redirect("/prompt");
                         } catch (error) {
                           throw new Error("Error creating prompt");
@@ -162,7 +157,6 @@ export default async function Prompts() {
                             await api.userPrompt.delete({
                               id: prompt.id,
                             });
-                            revalidatePath(`/prompt`);
                             redirect("/prompt");
                           } catch (error) {
                             throw new Error("Error deleting prompt");

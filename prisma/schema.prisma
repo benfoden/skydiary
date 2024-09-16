@@ -93,6 +93,7 @@ model User {
   newAnnouncementId        String?
   referredToEmails         String?
   prompts                  Prompt[]
+  isPromptShown            Boolean       @default(true)
 }
 
 model Device {
@@ -228,5 +229,6 @@ model Prompt {
   createdById String?
   createdBy   User?    @relation(fields: [createdById], references: [id])
   isGlobal    Boolean  @default(false)
+  isWorkFocused Boolean @default(false)
 }
 

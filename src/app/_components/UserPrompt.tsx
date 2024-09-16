@@ -18,22 +18,21 @@ export default function UserPrompt({ prompts }: { prompts: Prompt[] }) {
               <p
                 className={`${i === activeIndex + 1 && "bg-gradient-to-r from-white to-transparent bg-clip-text text-transparent"} text-sm font-light`}
               >
-                {i === activeIndex
-                  ? prompt.content
-                  : prompt.content.slice(0, 10)}
+                {i === activeIndex && prompt.content}
+                {i === activeIndex + 1 && prompt.content.slice(0, 10)}
               </p>
-              {i === activeIndex && (
-                <Button
-                  variant="chip"
-                  onClick={() =>
-                    setActiveIndex(i < prompts.length - 1 ? i + 1 : 0)
-                  }
-                >
-                  <CaretRightIcon className="h-4 w-4" />
-                </Button>
-              )}
             </div>
           ))}
+          <Button
+            variant="chip"
+            onClick={() =>
+              setActiveIndex(
+                activeIndex < prompts.length - 1 ? activeIndex + 1 : 0,
+              )
+            }
+          >
+            <CaretRightIcon className="h-4 w-4" />
+          </Button>
           <Button variant="chip" onClick={() => setActiveIndex(-1)}>
             <Cross2Icon className="h-4 w-4" />
           </Button>
