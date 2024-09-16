@@ -21,6 +21,7 @@ import { PersonaIcon } from "~/app/_components/PersonaIcon";
 import { SessionNav } from "~/app/_components/SessionNav";
 import Spinner from "~/app/_components/Spinner";
 import UpgradeBanner from "~/app/_components/UpgradeBanner";
+import UserPrompt from "~/app/_components/UserPrompt";
 import { type Locale } from "~/config";
 import { getUserLocale } from "~/i18n";
 import { getServerAuthSession } from "~/server/auth";
@@ -53,14 +54,16 @@ export default async function Entry({
   const session = await getServerAuthSession();
   const { user } = session;
   const mdkJwk = await useMdkJwk();
-  const [t, locale, post, comments, tags, personas] = await Promise.all([
-    getTranslations(),
-    getUserLocale(),
-    api.post.getByPostId({ postId: params.id, mdkJwk }),
-    api.comment.getCommentsByPostId({ postId: params.id, mdkJwk }),
-    api.tag.getByPostId({ postId: params.id }),
-    api.persona.getAllByUserId({ mdkJwk }),
-  ]);
+  const [t, locale, post, comments, tags, personas, prompts] =
+    await Promise.all([
+      getTranslations(),
+      getUserLocale(),
+      api.post.getByPostId({ postId: params.id, mdkJwk }),
+      api.comment.getCommentsByPostId({ postId: params.id, mdkJwk }),
+      api.tag.getByPostId({ postId: params.id }),
+      api.persona.getAllByUserId({ mdkJwk }),
+      api.userPrompt.getByUserId(),
+    ]);
 
   const hasComment = isCommentAvailable(user, comments);
 
@@ -85,6 +88,7 @@ export default async function Entry({
             <EncryptionNotice />
           ) : (
             <>
+              <UserPrompt prompts={prompts} />
               <EntryBody post={post} />
               <div className="flex w-full max-w-5xl flex-col items-center gap-4">
                 <div className="flex w-full flex-row items-center justify-center gap-4">

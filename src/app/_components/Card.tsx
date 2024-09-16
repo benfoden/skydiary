@@ -7,7 +7,8 @@ export const cardColors = (
     | "textBlock"
     | "hero"
     | "comment"
-    | "transparent",
+    | "transparent"
+    | "prompt",
 ) =>
   ` bg-white/30 dark:bg-white/10 ${variant === "form" ? "shadow-xl dark:shadow-black" : ""}`;
 export function Card({
@@ -25,7 +26,8 @@ export function Card({
     | "textBlock"
     | "hero"
     | "comment"
-    | "transparent";
+    | "transparent"
+    | "prompt";
 }) {
   if (variant === "form") isButton = false;
 
@@ -123,6 +125,15 @@ export function Card({
       return (
         <div
           className={`flex w-fit flex-col items-start justify-between gap-2 rounded-xl bg-white/30 px-6 py-4 dark:bg-white/10 ${isButton && sharedHover} `}
+        >
+          {children}
+        </div>
+      );
+
+    case "prompt":
+      return (
+        <div
+          className={`flex w-full flex-col items-start justify-between gap-2 rounded-full bg-white/30 px-3 py-1 dark:bg-white/10 ${isButton && sharedHover} `}
         >
           {children}
         </div>

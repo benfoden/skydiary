@@ -13,15 +13,16 @@ export function middleware(request: NextRequest) {
   }
   const pathname = request.nextUrl.pathname;
   const appRoutes = [
-    "/home",
-    "/topics",
-    "/today",
-    "/persona",
-    "/entry",
-    "/settings",
-    "/auth",
     "/api/auth",
+    "/auth",
+    "/entry",
+    "/home",
+    "/prompt",
+    "/persona",
     "/sd-admin",
+    "/settings",
+    "/today",
+    "/topics",
   ];
 
   const unTranslatedAPIRoutes = [

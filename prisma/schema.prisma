@@ -33,6 +33,7 @@ model Tag {
   createdAt   DateTime @default(now())
   post        Post[]   @relation("PostTags")
   user        User[]   @relation("UserTags")
+  prompt      Prompt[]
 
   @@index([content])
 }
@@ -91,8 +92,8 @@ model User {
   isNoPeekingMode          Boolean        @default(false)
   newAnnouncementId        String?
   referredToEmails         String?
+  prompts                  Prompt[]
 }
-
 
 model Device {
   id         String   @id @default(cuid())
@@ -106,34 +107,33 @@ model Device {
   user User @relation("UserDevices", fields: [userId], references: [id])
 }
 
-
 model Persona {
-  id                  String    @id @default(cuid())
-  image               String?
-  age                 Int?
-  name                String
-  nameIV              String?
-  description         String?
-  descriptionIV       String?
-  gender              String?
-  genderIV            String?
-  relationship        String?
-  relationshipIV      String?
-  occupation          String?
-  occupationIV        String?
-  traits              String
-  traitsIV            String?
-  communicationStyle  String?
-  communicationStyleIV String?
-  communicationSample String?
+  id                    String    @id @default(cuid())
+  image                 String?
+  age                   Int?
+  name                  String
+  nameIV                String?
+  description           String?
+  descriptionIV         String?
+  gender                String?
+  genderIV              String?
+  relationship          String?
+  relationshipIV        String?
+  occupation            String?
+  occupationIV          String?
+  traits                String
+  traitsIV              String?
+  communicationStyle    String?
+  communicationStyleIV  String?
+  communicationSample   String?
   communicationSampleIV String?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  createdById         String
-  comments            Comment[]
-  isFavorite          Boolean   @default(false)
-  isUser              Boolean   @default(false)
-  createdBy           User      @relation(fields: [createdById], references: [id])
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  createdById           String
+  comments              Comment[]
+  isFavorite            Boolean   @default(false)
+  isUser                Boolean   @default(false)
+  createdBy             User      @relation(fields: [createdById], references: [id])
 
   @@index([createdById])
 }
@@ -218,21 +218,15 @@ model BlogPost {
   @@unique([urlStub])
 }
 
+model Prompt {
+  id          String   @id @default(cuid())
+  content     String
+  tagId       String?
+  taggedBy    Tag?     @relation(fields: [tagId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById String?
+  createdBy   User?    @relation(fields: [createdById], references: [id])
+  isGlobal    Boolean  @default(false)
+}
 
-// model Account {
-//   id                String  @id @default(cuid())
-//   userId            String
-//   type              String
-//   provider          String
-//   providerAccountId String
-//   refresh_token     String?
-//   access_token      String?
-//   expires_at        Int?
-//   token_type        String?
-//   scope             String?
-//   id_token          String?
-//   session_state     String?
-//   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-//   @@unique([provider, providerAccountId])
-// }
