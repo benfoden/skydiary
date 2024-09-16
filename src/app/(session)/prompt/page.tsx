@@ -1,6 +1,5 @@
 import { PlusIcon } from "@radix-ui/react-icons";
 import { getTranslations } from "next-intl/server";
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Card } from "~/app/_components/Card";
 import DropDownUser from "~/app/_components/DropDownUser";
@@ -30,7 +29,7 @@ export default async function Prompts() {
       </SessionNav>
 
       <main className="flex min-h-screen w-full flex-col items-center justify-start">
-        <div className="flex w-full flex-col gap-8 md:max-w-3xl">
+        <div className="container flex w-full flex-col items-center justify-start gap-8 px-2 pb-12 md:max-w-3xl">
           <form
             action={async (formData) => {
               "use server";
@@ -45,7 +44,6 @@ export default async function Prompts() {
                   content,
                   createdById: user?.id,
                 });
-                revalidatePath("/prompt");
                 redirect("/prompt");
               } catch (error) {
                 throw new Error("Error creating prompt");
@@ -74,7 +72,6 @@ export default async function Prompts() {
                     isGlobal: true,
                   });
 
-                  revalidatePath("/prompt");
                   redirect("/prompt");
                 } catch (error) {
                   throw new Error("Error creating prompt");
@@ -102,7 +99,6 @@ export default async function Prompts() {
                           await api.userPrompt.delete({
                             id: prompt.id,
                           });
-                          revalidatePath("/prompt");
                           redirect(`/prompt`);
                         } catch (error) {
                           throw new Error("Error deleting prompt");
@@ -119,62 +115,50 @@ export default async function Prompts() {
           <div className="flex flex-col gap-4">
             all skydiary prompts
             {globalPrompts?.map((prompt) => (
-              <div
-                key={prompt.id}
-                className="flex w-full flex-row items-center justify-between gap-2"
-              >
-                <Card isButton={false}>
-                  <div className="flex w-full flex-row items-center justify-between gap-2">
-                    <p className="w-full">{prompt.content}</p>
+              <Card isButton={false} key={prompt.id}>
+                <div className="flex w-full flex-row items-center justify-between gap-2">
+                  <p>{prompt.content}</p>
 
-                    <form
-                      action={async () => {
-                        "use server";
+                  <form
+                    action={async () => {
+                      "use server";
 
-                        try {
-                          await api.userPrompt.create({
-                            content: prompt.content,
-                            createdById: user?.id,
-                            isGlobal: false,
-                          });
-                          revalidatePath(`/prompt`);
-                          redirect("/prompt");
-                        } catch (error) {
-                          throw new Error("Error creating prompt");
-                        }
-                      }}
-                    >
-                      <FormButton>
-                        <PlusIcon className="h-6 w-6" />
-                      </FormButton>
-                    </form>
-                  </div>
-                </Card>
+                      try {
+                        await api.userPrompt.create({
+                          content: prompt.content,
+                          createdById: user?.id,
+                          isGlobal: false,
+                        });
+                        redirect("/prompt");
+                      } catch (error) {
+                        throw new Error("Error creating prompt");
+                      }
+                    }}
+                  >
+                    <FormButton>
+                      <PlusIcon className="h-6 w-6" />
+                    </FormButton>
+                  </form>
+                </div>
                 {user?.isAdmin && (
-                  <Card variant="comment" isButton={false}>
-                    <div className="flex w-full flex-row items-center justify-between gap-2">
-                      Webmaster
-                      <form
-                        action={async () => {
-                          "use server";
+                  <form
+                    action={async () => {
+                      "use server";
 
-                          try {
-                            await api.userPrompt.delete({
-                              id: prompt.id,
-                            });
-                            revalidatePath(`/prompt`);
-                            redirect("/prompt");
-                          } catch (error) {
-                            throw new Error("Error deleting prompt");
-                          }
-                        }}
-                      >
-                        <FormDeleteButton hasText={false} />
-                      </form>
-                    </div>
-                  </Card>
+                      try {
+                        await api.userPrompt.delete({
+                          id: prompt.id,
+                        });
+                        redirect("/prompt");
+                      } catch (error) {
+                        throw new Error("Error deleting prompt");
+                      }
+                    }}
+                  >
+                    <FormDeleteButton hasText={false} />
+                  </form>
                 )}
-              </div>
+              </Card>
             ))}
           </div>
         </div>

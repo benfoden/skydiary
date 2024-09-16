@@ -65,6 +65,7 @@ export default async function Entry({
       api.userPrompt.getByUserId(),
     ]);
 
+  console.log("the user", user);
   const hasComment = isCommentAvailable(user, comments);
 
   if (!post) {
@@ -88,7 +89,49 @@ export default async function Entry({
             <EncryptionNotice />
           ) : (
             <>
-              <UserPrompt prompts={prompts} />
+              <div className="mr-4 flex w-full max-w-5xl flex-row items-center justify-end gap-2 pr-1 md:mr-0 md:pr-0">
+                <UserPrompt
+                  prompts={prompts}
+                  isPromptShown={user?.isPromptShown}
+                />
+                <DropDownMenu isEntryMenu>
+                  <form
+                    method="post"
+                    action={async () => {
+                      "use server";
+                      try {
+                        await api.user.update({
+                          isPromptShown: !user?.isPromptShown ? true : false,
+                        });
+                        revalidatePath(`/entry/${params.id}`);
+                        redirect(`/entry/${params.id}`);
+                      } catch (error) {
+                        throw new Error("Error toggling prompt");
+                      }
+                    }}
+                  >
+                    <FormButton variant="menuElement">
+                      <div className="ml-1 text-base">?</div>
+                      {user?.isPromptShown ? "Hide" : "Show"} Prompt
+                    </FormButton>
+                  </form>
+                  <CopyTextButton text={post.content} />
+                  <form
+                    action={async () => {
+                      "use server";
+                      try {
+                        await api.post.delete({ postId: post?.id });
+                      } catch (error) {
+                        throw new Error("Error deleting post");
+                      }
+                      revalidatePath("/home");
+                      redirect("/home");
+                    }}
+                  >
+                    <FormDeleteButton />
+                  </form>
+                </DropDownMenu>
+              </div>
               <EntryBody post={post} />
               <div className="flex w-full max-w-5xl flex-col items-center gap-4">
                 <div className="flex w-full flex-row items-center justify-center gap-4">
@@ -107,25 +150,6 @@ export default async function Entry({
                       ))}
                     </ul>
                   )}
-                  <div className="flex w-fit flex-row items-center justify-end gap-2">
-                    <DropDownMenu isEntryMenu>
-                      <CopyTextButton text={post.content} />
-                      <form
-                        action={async () => {
-                          "use server";
-                          try {
-                            await api.post.delete({ postId: post?.id });
-                          } catch (error) {
-                            throw new Error("Error deleting post");
-                          }
-                          revalidatePath("/home");
-                          redirect("/home");
-                        }}
-                      >
-                        <FormDeleteButton />
-                      </form>
-                    </DropDownMenu>
-                  </div>
                 </div>
                 <div className="flex h-full w-full flex-col items-center gap-4 pb-4">
                   <div className="flex w-full flex-row items-start justify-center">

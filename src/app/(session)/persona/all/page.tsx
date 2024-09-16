@@ -53,7 +53,7 @@ export default async function Persona() {
           <EncryptionNotice />
         ) : (
           <>
-            <div className="container flex flex-col items-center justify-start gap-12 px-2 pb-12 ">
+            <div className="container flex flex-col items-center justify-start gap-12 px-2 pb-12">
               {!isFavoritePersonaAvailable(session?.user, personas) && (
                 <UpgradeBanner variant="persona" />
               )}
