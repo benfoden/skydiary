@@ -4,9 +4,16 @@ import { CaretRightIcon, Cross2Icon } from "@radix-ui/react-icons";
 import { useState } from "react";
 import Button from "./Button";
 
-export default function UserPrompt({ prompts }: { prompts: Prompt[] }) {
+export default function UserPrompt({
+  prompts,
+  isPromptShown,
+}: {
+  prompts: Prompt[];
+  isPromptShown: boolean;
+}) {
   const [activeIndex, setActiveIndex] = useState(0);
   return (
+    isPromptShown &&
     activeIndex > -1 && (
       <div className="flex w-full max-w-5xl flex-col items-center justify-center gap-4 pb-4">
         <div className="flex w-full flex-row items-center justify-start gap-4 py-4">

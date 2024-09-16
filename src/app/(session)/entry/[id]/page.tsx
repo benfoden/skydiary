@@ -65,6 +65,7 @@ export default async function Entry({
       api.userPrompt.getByUserId(),
     ]);
 
+  console.log("the user", user);
   const hasComment = isCommentAvailable(user, comments);
 
   if (!post) {
@@ -88,10 +89,30 @@ export default async function Entry({
             <EncryptionNotice />
           ) : (
             <>
-              <UserPrompt prompts={prompts} />
               <div className="flex w-full max-w-5xl flex-row items-center justify-end gap-2">
+                <UserPrompt
+                  prompts={prompts}
+                  isPromptShown={user?.isPromptShown}
+                />
                 <DropDownMenu isEntryMenu>
                   <CopyTextButton text={post.content} />
+                  <form
+                    method="post"
+                    action={async () => {
+                      "use server";
+                      try {
+                        await api.user.update({
+                          isPromptShown: !user?.isPromptShown ? true : false,
+                        });
+                      } catch (error) {
+                        throw new Error("Error toggling prompt");
+                      }
+                    }}
+                  >
+                    <FormButton variant="menuElement">
+                      <div className="ml-1 text-base">?</div>Show/Hide Prompt
+                    </FormButton>
+                  </form>
                   <form
                     action={async () => {
                       "use server";

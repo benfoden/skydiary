@@ -22,6 +22,7 @@ export const userRouter = createTRPCRouter({
         sukMdk: z.string().optional(),
         newAnnouncementId: z.string().optional(),
         referredToEmails: z.array(z.string().optional()).optional(),
+        isPromptShown: z.boolean().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -41,6 +42,8 @@ export const userRouter = createTRPCRouter({
         updateData.newAnnouncementId = input.newAnnouncementId;
       if (input.referredToEmails !== undefined)
         updateData.referredToEmails = JSON.stringify(input.referredToEmails);
+      if (input.isPromptShown !== undefined)
+        updateData.isPromptShown = input.isPromptShown;
 
       return ctx.db.user.update({
         where: { id: ctx?.session?.user?.id },
