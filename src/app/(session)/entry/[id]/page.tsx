@@ -89,13 +89,12 @@ export default async function Entry({
             <EncryptionNotice />
           ) : (
             <>
-              <div className="flex w-full max-w-5xl flex-row items-center justify-end gap-2">
+              <div className="mr-4 flex w-full max-w-5xl flex-row items-center justify-end gap-2 pr-1 md:mr-0 md:pr-0">
                 <UserPrompt
                   prompts={prompts}
                   isPromptShown={user?.isPromptShown}
                 />
                 <DropDownMenu isEntryMenu>
-                  <CopyTextButton text={post.content} />
                   <form
                     method="post"
                     action={async () => {
@@ -104,15 +103,19 @@ export default async function Entry({
                         await api.user.update({
                           isPromptShown: !user?.isPromptShown ? true : false,
                         });
+                        revalidatePath(`/entry/${params.id}`);
+                        redirect(`/entry/${params.id}`);
                       } catch (error) {
                         throw new Error("Error toggling prompt");
                       }
                     }}
                   >
                     <FormButton variant="menuElement">
-                      <div className="ml-1 text-base">?</div>Show/Hide Prompt
+                      <div className="ml-1 text-base">?</div>
+                      {user?.isPromptShown ? "Hide" : "Show"} Prompt
                     </FormButton>
                   </form>
+                  <CopyTextButton text={post.content} />
                   <form
                     action={async () => {
                       "use server";

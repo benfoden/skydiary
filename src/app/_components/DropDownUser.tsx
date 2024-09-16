@@ -66,6 +66,11 @@ export default async function DropDownUser() {
           {t("nav.personas")} <PersonIcon className="h-4 w-4" />
         </Button>
       </Link>
+      <Link href={"/prompt"}>
+        <Button variant="menuElement">
+          {t("nav.prompts")} <div className="mr-1">?</div>
+        </Button>
+      </Link>
       <Link href={"/settings"}>
         <Button variant="menuElement">
           {t("nav.settings")} <GearIcon className="h-4 w-4" />
