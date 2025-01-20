@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { getBaseUrl } from "~/utils/clientConstants";
 
 // Route segment config
 export const runtime = "edge";
@@ -16,7 +17,7 @@ export const contentType = "image/png";
 export default async function Image() {
   // Font
   const interExtraLight = fetch(
-    new URL("/Inter-ExtraLight.ttf", import.meta.url),
+    new URL(`${getBaseUrl()}/Inter-ExtraLight.ttf`, import.meta.url),
   ).then((res) => res.arrayBuffer());
 
   return new ImageResponse(
