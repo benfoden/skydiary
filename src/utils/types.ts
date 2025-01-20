@@ -14,7 +14,7 @@ export interface EmailDetails {
   safelyIgnore: string;
 }
 
-export type CommentType = "custom" | "criticism" | "insight" | "boost";
+export type CommentType = "chat" | "custom" | "criticism" | "insight" | "boost";
 
 export type JobType =
   | "encryptAndSave"
