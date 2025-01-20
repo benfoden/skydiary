@@ -1,23 +1,11 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { useState } from "react";
-import Button from "~/app/_components/Button";
 import Input from "~/app/_components/Input";
-import {
-  decryptTextWithKey,
-  encryptTextWithKey,
-  getLocalMdkForUser,
-} from "~/utils/cryptoA1";
 
 export default function CryptoPage() {
   const [plainText, setPlainText] = useState("");
-  const [cipherText, setCipherText] = useState<string>();
-  const [iv, setIv] = useState<Uint8Array>();
-  const [decryptedText, setDecryptedText] = useState<string>();
 
-  const { data: sessionData } = useSession();
-  const user = sessionData?.user;
   /*
 todo: 
 generate user-held user key
@@ -41,37 +29,6 @@ encrypt data encryption key with secret user key
             onChange={(e) => setPlainText(e.target.value)}
           />
         </div>
-
-        <Button
-          onClick={async () => {
-            const encryptedText = await encryptTextWithKey({
-              plainText,
-              key: await getLocalMdkForUser(user!),
-            });
-            setCipherText(encryptedText.cipherText);
-            setIv(encryptedText.iv);
-          }}
-        >
-          Encrypt Data
-        </Button>
-        {cipherText && <p>cipherText: {cipherText}</p>}
-        <Button
-          onClick={async () => {
-            const decryptedData = await decryptTextWithKey({
-              cipherText: cipherText!,
-              iv: iv!,
-              key: await getLocalMdkForUser(user!),
-            });
-            if (decryptedData) {
-              setDecryptedText(decryptedData);
-            } else {
-              setDecryptedText("failed to decrypt");
-            }
-          }}
-        >
-          Decrypt Data
-        </Button>
-        {decryptedText && <p>decryptedText: {decryptedText}</p>}
       </div>
     </div>
   );
