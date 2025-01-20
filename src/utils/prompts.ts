@@ -227,8 +227,7 @@ const basePromptComment = ({
           `Persona Occupation: ${personaDetails.occupation} ` +
           `Persona Relationship to author: ${personaDetails.relationship} ` +
           `Persona Personality Traits: ${personaDetails.traits} ` +
-          `Persona Communication style: ${personaDetails.communicationStyle} ` +
-          `Persona Communication sample: ${personaDetails.communicationSample} `
+          `Persona Communication style: ${personaDetails.communicationStyle} `
         : " ";
       break;
     case "custom":
@@ -247,8 +246,7 @@ const basePromptComment = ({
           `Persona Occupation: ${personaDetails.occupation} ` +
           `Persona Relationship to author: ${personaDetails.relationship} ` +
           `Persona Personality Traits: ${personaDetails.traits} ` +
-          `Persona Communication style: ${personaDetails.communicationStyle} ` +
-          `Persona Communication sample: ${personaDetails.communicationSample} `
+          `Persona Communication style: ${personaDetails.communicationStyle} `
         : " ";
       break;
     case "criticism":
