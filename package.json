@@ -29,6 +29,7 @@
     "@trpc/server": "next",
     "@uploadthing/react": "^6.8.0",
     "@vercel/analytics": "^1.4.1",
+    "@vercel/og": "^0.6.4",
     "@vercel/speed-insights": "^1.1.0",
     "date-fns": "^3.6.0",
     "hash-wasm": "^4.12.0",
