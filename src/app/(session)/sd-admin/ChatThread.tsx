@@ -1,10 +1,8 @@
 "use client";
 import { type Persona, type User } from "@prisma/client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Avatar } from "~/app/_components/Avatar";
-import { Card } from "~/app/_components/Card";
 import FormButton from "~/app/_components/FormButton";
-import Input from "~/app/_components/Input";
 import Spinner from "~/app/_components/Spinner";
 
 export default function ChatThread({
@@ -22,6 +20,7 @@ export default function ChatThread({
   const [messages, setMessages] = useState<
     { personaId: string | undefined | null; content: string }[]
   >([{ personaId: "system", content: firstMessage }]);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const handleCommand = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -30,12 +29,15 @@ export default function ChatThread({
       e.currentTarget.querySelector<HTMLInputElement>("#chatInput");
     const currentContent = chatInput?.value ?? "";
 
-    if (!currentContent || currentContent.length === 0) return;
+    if (!currentContent || currentContent.length === 0) {
+      if (chatInput) chatInput.value = ""; // Clear the input even if no content
+      return;
+    }
 
     const newCommand = {
       personaId: currentUserPersona?.id,
       content: currentContent,
-    };
+    }; // Clear the input after processing
 
     setIsLoading(true);
 
@@ -66,6 +68,10 @@ export default function ChatThread({
         newCommand,
         reply.newMessage,
       ]);
+
+      if (formRef.current) {
+        formRef.current.reset();
+      }
     } catch (error) {
       console.error("Failed to fetch new messages:", error);
     }
@@ -74,10 +80,10 @@ export default function ChatThread({
   };
 
   return (
-    <div className="w-full md:max-w-2xl">
-      <div className="w-full">
+    <div className="w-full gap-1 md:max-w-2xl">
+      <div className="w-full gap-1">
         {messages.slice(1).map((message, index) => (
-          <Card key={index} isButton={false}>
+          <div key={index} className="rounded bg-white/10 px-2 py-1">
             <div key={index} className="flex w-full flex-row items-start gap-2">
               {message.personaId === currentUserPersona?.id && (
                 <Avatar src={user?.image ?? ""} alt="me" size="medium" />
@@ -89,7 +95,7 @@ export default function ChatThread({
 
               <p>{message.content}</p>
             </div>
-          </Card>
+          </div>
         ))}
         {isLoading && (
           <div className="my-2 flex w-full flex-row items-center justify-center">
@@ -100,8 +106,21 @@ export default function ChatThread({
         <form
           onSubmit={(event) => handleCommand(event)}
           className="flex w-full flex-col"
+          ref={formRef}
         >
-          <Input id="chatInput" initialValue={""} />
+          <textarea
+            id="chatInput"
+            className={`bg-primary w-full rounded-md py-4 pl-5 pr-10 outline-none transition placeholder:text-sm placeholder:font-light`}
+            rows={5}
+            onKeyDown={(e) => {
+              if (e.ctrlKey && e.key === "Enter") {
+                e.preventDefault();
+                formRef.current?.dispatchEvent(
+                  new Event("submit", { cancelable: true, bubbles: true }),
+                );
+              }
+            }}
+          />
           <FormButton isDisabled={isLoading} variant="submit">
             command
           </FormButton>
