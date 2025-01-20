@@ -101,7 +101,7 @@ export default function ChatThread({
           onSubmit={(event) => handleCommand(event)}
           className="flex w-full flex-col"
         >
-          <Input type="textarea" id="chatInput" initialValue={""} />
+          <Input id="chatInput" initialValue={""} />
           <FormButton isDisabled={isLoading} variant="submit">
             command
           </FormButton>
