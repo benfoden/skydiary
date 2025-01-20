@@ -74,48 +74,39 @@ export default function ChatThread({
   };
 
   return (
-    <div className="my-2 w-full md:max-w-2xl">
-      <Card isButton={false}>
-        <div className="w-full">
-          {messages.slice(1).map((message, index) => (
-            <Card key={index} isButton={false}>
-              <div
-                key={index}
-                className="flex w-full flex-row items-start gap-2"
-              >
-                {message.personaId === currentUserPersona?.id && (
-                  <Avatar src={user?.image ?? ""} alt="me" size="medium" />
-                )}
+    <div className="w-full md:max-w-2xl">
+      <div className="w-full">
+        {messages.slice(1).map((message, index) => (
+          <Card key={index} isButton={false}>
+            <div key={index} className="flex w-full flex-row items-start gap-2">
+              {message.personaId === currentUserPersona?.id && (
+                <Avatar src={user?.image ?? ""} alt="me" size="medium" />
+              )}
 
-                {message.personaId === aiPersona.id && (
-                  <Avatar
-                    src={aiPersona.image ?? ""}
-                    alt="them"
-                    size="medium"
-                  />
-                )}
+              {message.personaId === aiPersona.id && (
+                <Avatar src={aiPersona.image ?? ""} alt="them" size="large" />
+              )}
 
-                <p>{message.content}</p>
-              </div>
-            </Card>
-          ))}
-          {isLoading && (
-            <div className="my-2 flex w-full flex-row items-center justify-center">
-              <Spinner />
+              <p>{message.content}</p>
             </div>
-          )}
+          </Card>
+        ))}
+        {isLoading && (
+          <div className="my-2 flex w-full flex-row items-center justify-center">
+            <Spinner />
+          </div>
+        )}
 
-          <form
-            onSubmit={(event) => handleCommand(event)}
-            className="flex w-full flex-col"
-          >
-            <Input id="chatInput" initialValue={""} />
-            <FormButton isDisabled={isLoading} variant="submit">
-              command
-            </FormButton>
-          </form>
-        </div>
-      </Card>
+        <form
+          onSubmit={(event) => handleCommand(event)}
+          className="flex w-full flex-col"
+        >
+          <Input type="textarea" id="chatInput" initialValue={""} />
+          <FormButton isDisabled={isLoading} variant="submit">
+            command
+          </FormButton>
+        </form>
+      </div>
     </div>
   );
 }
