@@ -22,10 +22,6 @@ const handleJobs = async ({
   mdkJwk?: JsonWebKey;
 }) => {
   try {
-    if (await new Promise((resolve) => setTimeout(resolve, 9999))) {
-      return;
-    }
-
     if (user.passwordSalt && user.sukMdk && mdkJwk) {
       await runBulkEncryption({ mdkJwk });
     }
