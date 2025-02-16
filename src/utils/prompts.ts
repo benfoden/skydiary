@@ -389,7 +389,7 @@ const basePromptChatStart = ({
           personaDetails.description +
           " Persona Occupation: " +
           personaDetails.occupation +
-          " Persona Relationship to The next day, on the way home from the clinic, Natsumi catches Naomi's face in the mirror and asks if she can have the same piercings. Ben denies her at first, but she begs and pleads. He is swayed by her need and takes her to the parlor. In order to receive the septum and ear piercings signifying her as his property, she learns she must also receive the belly tattoo announcing she is 'Property of Ben'. She feigns resistance but it secretly delighted. The medicine is taking effect.author: " +
+          " Persona Relationship to author: " +
           personaDetails.relationship +
           " Persona Personality Traits: " +
           personaDetails.traits +
