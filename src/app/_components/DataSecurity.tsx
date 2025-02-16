@@ -56,7 +56,10 @@ export default function DataSecurityCard({ user }: { user: User }) {
           await runBulkEncryption({ mdkJwk });
           setMessage(t("dataSecurity.bulkEncryptionComplete"));
         } catch (error) {
-          console.error("Error encrypting your data:", error);
+          console.error(
+            "Error encrypting your data. Please try again. Error message:",
+            error,
+          );
           setMessage(t("dataSecurity.failedToRunBulkEncryption"));
           setIsLoading(false);
 
