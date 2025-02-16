@@ -145,12 +145,10 @@ export const prompts = {
     authorDetails,
     personaDetails,
     commentType = "custom",
-    characters = 5000,
   }: {
     authorDetails: PersonaForPrompt;
     commentType?: "chat" | "custom" | "criticism" | "insight" | "boost";
     personaDetails?: PersonaForPrompt;
-    characters?: number;
   }): string =>
     Object.values(
       basePromptChatStart({
@@ -183,7 +181,6 @@ export const prompts = {
               ),
             )
           : undefined,
-        characters,
       }),
     ).join(" "),
 };
@@ -328,11 +325,9 @@ const basePromptChatStart = ({
   commentType,
   authorDetails,
   personaDetails,
-  characters,
 }: {
   commentType: CommentType;
   authorDetails: PersonaForPrompt;
-  characters: number;
   personaDetails?: PersonaForPrompt;
   // authorMemories?: string,
 }): ChatPrompt => {
@@ -427,14 +422,7 @@ const basePromptChatStart = ({
       "Do not use excessive vocabulary. " +
       "Do not express platitudes. " +
       "The persona details are very important to use." +
-      "The persona replies should express the persona's true thoughts, feelings, and opinions overall. " +
-      "Maximum reply length is " +
-      Math.floor(characters / 4.5)
-        .toFixed(0)
-        .toString() +
-      " words and minimum is " +
-      (Math.floor(characters / 4.5) * 0.33333).toFixed(0).toString() +
-      " words. ",
+      "The persona replies should express the persona's true thoughts, feelings, and opinions overall. ",
     persona: persona + " ",
     exemplars: personaDetails?.communicationSample
       ? " Persona writing sample: " +

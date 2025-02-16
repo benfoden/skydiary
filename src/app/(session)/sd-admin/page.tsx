@@ -26,7 +26,6 @@ export default async function Secret({
     authorDetails: userPersona,
     personaDetails: aiPersona,
     commentType: "chat",
-    characters: 1000,
   });
 
   const { persona } = searchParams;

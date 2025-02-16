@@ -1,11 +1,9 @@
 export const dynamic = "force-dynamic";
 
-import { type User } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { type ReactNode } from "react";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
-import { runBulkEncryption } from "~/utils/runBulkEncryption";
 import { useMdkJwk } from "~/utils/useMdkJwk";
 import ManageMDK from "../_components/ManageMDK";
 import Announcement from "./Announcement";
@@ -14,18 +12,8 @@ type Props = {
   children: ReactNode;
 };
 
-const handleJobs = async ({
-  user,
-  mdkJwk,
-}: {
-  user: User;
-  mdkJwk?: JsonWebKey;
-}) => {
+const handleJobs = async ({ mdkJwk }: { mdkJwk?: JsonWebKey }) => {
   try {
-    if (user.passwordSalt && user.sukMdk && mdkJwk) {
-      await runBulkEncryption({ mdkJwk });
-    }
-
     await api.post.tag({ mdkJwk });
     await api.post.memorize({ mdkJwk });
   } catch (error) {
@@ -42,7 +30,7 @@ export default async function SessionLayout({ children }: Props) {
 
   const mdkJwk = await useMdkJwk();
 
-  await handleJobs({ user: session.user, mdkJwk });
+  await handleJobs({ mdkJwk });
 
   const newAnnouncement = await api.blogPost.getLatest();
 

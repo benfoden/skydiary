@@ -19,7 +19,7 @@ export default function ChatThread({
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<
     { personaId: string | undefined | null; content: string }[]
-  >([{ personaId: "system", content: firstMessage }]);
+  >([{ personaId: "user", content: firstMessage }]);
   const formRef = useRef<HTMLFormElement>(null);
 
   const handleCommand = async (e: React.FormEvent<HTMLFormElement>) => {

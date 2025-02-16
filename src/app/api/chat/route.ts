@@ -18,7 +18,6 @@ export async function POST(req: NextRequest) {
       messages,
       userPersonaId: userPersona.id,
       aiPersonaId: aiPersona.id,
-      model: "gpt-4o",
     }),
   });
 }
