@@ -36,6 +36,7 @@ export default async function Secret() {
   const chat = prompts.chatStart({
     authorDetails: currentUserPersona!,
     personaDetails: persona!,
+    characters: 5000,
   });
 
   const summary = prompts.summary({

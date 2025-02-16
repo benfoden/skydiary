@@ -19,7 +19,7 @@ export default function ChatThread({
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<
     { personaId: string | undefined | null; content: string }[]
-  >([{ personaId: "system", content: firstMessage }]);
+  >([{ personaId: "user", content: firstMessage }]);
   const formRef = useRef<HTMLFormElement>(null);
 
   const handleCommand = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -55,6 +55,7 @@ export default function ChatThread({
       });
 
       if (!response.ok) {
+        console.error("Network response was not ok", response);
         throw new Error("Network response was not ok");
       }
       const reply = (await response.json()) as {

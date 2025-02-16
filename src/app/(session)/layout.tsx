@@ -27,7 +27,7 @@ const handleJobs = async ({
     }
 
     await api.post.tag({ mdkJwk });
-    await api.post.memorize({ mdkJwk });
+    // await api.post.memorize({ mdkJwk });
   } catch (error) {
     console.error("Error on tag and memorize posts", error);
   }

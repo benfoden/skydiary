@@ -63,12 +63,7 @@ export async function getResponseFromChatMessages({
   try {
     const completion = await openai.chat.completions.create({
       messages: messages.map((message) => ({
-        role:
-          message.personaId === "system"
-            ? "system"
-            : message.personaId === userPersonaId
-              ? "user"
-              : "assistant",
+        role: message.personaId === userPersonaId ? "user" : "assistant",
         content: message.content,
       })),
       model,
@@ -76,7 +71,9 @@ export async function getResponseFromChatMessages({
 
     return {
       personaId: aiPersonaId,
-      content: completion.choices[0]?.message.content ?? "error",
+      content:
+        completion.choices[0]?.message.content ??
+        `error: ${JSON.stringify(completion)}`,
     };
   } catch (error) {
     console.error("Error getting response from LLM:", error);
